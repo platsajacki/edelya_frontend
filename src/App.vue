@@ -11,6 +11,8 @@ const auth = useAuthStore()
 const loading = ref(true)
 
 onMounted(async () => {
+  window.addEventListener("auth:expired", () => auth.logout())
+
   try {
     await auth.init()
   } catch (err) {

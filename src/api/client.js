@@ -1,4 +1,4 @@
-import { getAccess, getRefresh, getAccessExp, saveTokens, clearTokens } from "../storage/tokenStorage"
+import { getAccess, getRefresh, getAccessExp, saveTokens } from "../storage/tokenStorage"
 
 const API = import.meta.env.VITE_API
 
@@ -22,7 +22,7 @@ async function refreshTokens() {
   })
 
   if (!response.ok) {
-    clearTokens()
+    window.dispatchEvent(new CustomEvent("auth:expired"))
     throw new Error("Token refresh failed")
   }
 
