@@ -16,6 +16,7 @@
       v-for="day in days"
       :key="day.date"
       :day="day.label"
+      :date="day.date"
       :meals="day.meals"
       :cooking-events="day.cookingEvents"
     />
@@ -42,7 +43,7 @@ const days = computed(() => {
   for (let i = 0; i < 7; i++) {
     const d = new Date(start)
     d.setDate(start.getDate() + i)
-    const dateStr = d.toISOString().slice(0, 10)
+    const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
 
     const meals = props.weekData.meal_plan_items
       .filter((m) => m.date === dateStr)

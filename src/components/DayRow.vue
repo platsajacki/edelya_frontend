@@ -32,6 +32,10 @@ defineProps({
     type: String,
     required: true,
   },
+  date: {
+    type: String,
+    required: true,
+  },
   meals: {
     type: Array,
     default: () => [],
