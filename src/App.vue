@@ -1,21 +1,23 @@
 <template>
-  <main style="padding: 16px; font-family: system-ui;">
-    <h1>Еделя</h1>
-    <p v-if="name">Привет, {{ name }}!</p>
-    <p v-else>Заходите в Telegram <a href="https://t.me/edelya_planing_bot" target="_blank">@edelya_bot</a>, чтобы начать работу с приложением.</p>
-  </main>
+  <div v-if="loading" style="padding:16px">Загрузка...</div>
+  <RouterView v-else />
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted } from "vue"
+import { useAuthStore } from "./store/auth"
 
-const name = ref("");
+const auth = useAuthStore()
+const loading = ref(true)
 
-onMounted(() => {
-  const tg = window.Telegram?.WebApp;
-  if (!tg) return;
-  tg.ready();
-  tg.expand();
-  name.value = tg.initDataUnsafe?.user?.first_name ?? "";
-});
+onMounted(async () => {
+  try {
+    await auth.init()
+  } catch (err) {
+    console.error("Auth failed:", err)
+    auth.logout()
+  } finally {
+    loading.value = false
+  }
+})
 </script>
