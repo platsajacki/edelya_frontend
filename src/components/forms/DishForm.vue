@@ -48,7 +48,7 @@
               @click="selectIngredient(ing)"
             >
               {{ ing.name }}
-              <span class="ingredient-search__unit">{{ ing.base_unit }}</span>
+              <span class="ingredient-search__unit">{{ UNIT_LABELS[ing.base_unit] || ing.base_unit }}</span>
             </li>
           </ul>
           <button type="button" class="dish-search__create" @click="showIngredientForm = true">
@@ -59,15 +59,18 @@
         <!-- Amount input after selecting ingredient -->
         <div v-if="pendingIngredient" class="ingredient-amount">
           <span class="ingredient-amount__name">{{ pendingIngredient.name }}</span>
-          <input
-            v-model="pendingAmount"
-            type="number"
-            step="0.001"
-            min="0"
-            class="form__input ingredient-amount__input"
-            placeholder="Количество"
-            @keydown.enter.prevent="confirmIngredient"
-          />
+          <div class="ingredient-amount__row">
+            <input
+              v-model="pendingAmount"
+              type="number"
+              step="0.001"
+              min="0"
+              class="form__input ingredient-amount__input"
+              placeholder="Количество"
+              @keydown.enter.prevent="confirmIngredient"
+            />
+            <span class="ingredient-amount__unit">{{ UNIT_LABELS[pendingIngredient.base_unit] || pendingIngredient.base_unit }}</span>
+          </div>
           <label class="ingredient-amount__optional">
             <input v-model="pendingOptional" type="checkbox" />
             Опционально
@@ -109,6 +112,25 @@ import ModalWrapper from "./ModalWrapper.vue"
 import IngredientForm from "./IngredientForm.vue"
 import { createDish, fetchDishCategories } from "../../services/dishService"
 import { fetchIngredients } from "../../services/ingredientService"
+
+const UNIT_LABELS = {
+  gram: "г",
+  kilogram: "кг",
+  milligram: "мг",
+  liter: "л",
+  milliliter: "мл",
+  piece: "шт",
+  slice: "ломт.",
+  teaspoon: "ч.л.",
+  tablespoon: "ст.л.",
+  glass: "стак.",
+  cup: "чашка",
+  bunch: "пучок",
+  can: "банка",
+  pinch: "щеп.",
+  clove: "зубч.",
+  to_taste: "по вкусу",
+}
 
 const props = defineProps({
   modelValue: { type: Boolean, required: true },
@@ -418,8 +440,20 @@ async function submit() {
   font-weight: 500;
 }
 
+.ingredient-amount__row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .ingredient-amount__input {
   width: 120px;
+}
+
+.ingredient-amount__unit {
+  font-size: 14px;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
 }
 
 .ingredient-amount__optional {
