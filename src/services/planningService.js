@@ -19,3 +19,31 @@ export function createMealPlanItem(payload) {
     body: JSON.stringify(payload),
   })
 }
+
+export function updateCookingEvent(id, payload) {
+  return api(`/api/v1/planning/cooking-events/${id}/`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  })
+}
+
+export function deleteCookingEvent(id) {
+  return api(`/api/v1/planning/cooking-events/${id}/`, {
+    method: "DELETE",
+  })
+}
+
+export function updateMealPlanItem(id, payload) {
+  return api(`/api/v1/planning/meal-plan-items/${id}/`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  })
+}
+
+export function deleteMealPlanItem(id) {
+  return api(`/api/v1/planning/meal-plan-items/${id}/`, {
+    method: "DELETE",
+  })
+}

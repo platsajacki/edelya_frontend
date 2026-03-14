@@ -1,26 +1,32 @@
 <template>
-  <div class="meal-card">
-    <span class="meal-card__name">{{ dish.name }}</span>
-  </div>
+  <button class="meal-card" type="button" @click="$emit('tap', item)">
+    <span class="meal-card__name">{{ item.dish.name }}</span>
+  </button>
 </template>
 
 <script setup>
 defineProps({
-  dish: {
+  item: {
     type: Object,
     required: true,
   },
 })
+
+defineEmits(["tap"])
 </script>
 
 <style scoped>
 .meal-card {
+  display: block;
+  width: 100%;
   padding: 10px 14px;
   border-radius: var(--radius-sm);
   background: var(--card-bg, var(--color-empty));
+  border: none;
   border-left: 3px solid var(--card-accent, var(--color-mint));
   font-size: 14px;
   text-align: left;
+  cursor: pointer;
   transition: box-shadow 0.15s, transform 0.15s;
 }
 

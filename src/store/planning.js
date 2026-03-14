@@ -1,5 +1,13 @@
 import { defineStore } from "pinia"
-import { fetchWeek, createCookingEvent, createMealPlanItem } from "../services/planningService"
+import {
+  fetchWeek,
+  createCookingEvent,
+  createMealPlanItem,
+  updateCookingEvent,
+  deleteCookingEvent,
+  updateMealPlanItem,
+  deleteMealPlanItem,
+} from "../services/planningService"
 
 function getISOWeek(date) {
   const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()))
@@ -114,6 +122,50 @@ export const usePlanningStore = defineStore("planning", {
         await this.loadWeek()
       } catch (err) {
         this.showToast("Не удалось добавить приём пищи")
+        throw err
+      }
+    },
+
+    async editCookingEvent(id, payload) {
+      try {
+        await updateCookingEvent(id, payload)
+        this.showToast("Готовка обновлена")
+        await this.loadWeek()
+      } catch (err) {
+        this.showToast("Не удалось обновить готовку")
+        throw err
+      }
+    },
+
+    async removeCookingEvent(id) {
+      try {
+        await deleteCookingEvent(id)
+        this.showToast("Готовка удалена")
+        await this.loadWeek()
+      } catch (err) {
+        this.showToast("Не удалось удалить готовку")
+        throw err
+      }
+    },
+
+    async editMealPlanItem(id, payload) {
+      try {
+        await updateMealPlanItem(id, payload)
+        this.showToast("Приём пищи обновлён")
+        await this.loadWeek()
+      } catch (err) {
+        this.showToast("Не удалось обновить приём пищи")
+        throw err
+      }
+    },
+
+    async removeMealPlanItem(id) {
+      try {
+        await deleteMealPlanItem(id)
+        this.showToast("Приём пищи удалён")
+        await this.loadWeek()
+      } catch (err) {
+        this.showToast("Не удалось удалить приём пищи")
         throw err
       }
     },

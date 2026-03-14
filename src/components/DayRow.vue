@@ -6,12 +6,18 @@
         <MealCard
             v-for="event in cookingEvents"
             :key="event.id"
-            :dish="event.dish"
+            :item="event"
+            @tap="$emit('tap-cooking', $event)"
         />
         </div>
 
         <div class="day-row__eat">
-            <MealCard v-for="item in meals" :key="item.id" :dish="item.dish" />
+            <MealCard
+              v-for="item in meals"
+              :key="item.id"
+              :item="item"
+              @tap="$emit('tap-meal', $event)"
+            />
         </div>
     </div>
 </template>
@@ -19,12 +25,14 @@
 <script setup>
 import MealCard from './MealCard.vue'
 
-const props = defineProps({
+defineProps({
   day: { type: String, required: true },
   date: { type: String, required: true },
   meals: { type: Array, default: () => [] },
   cookingEvents: { type: Array, default: () => [] },
 })
+
+defineEmits(["tap-cooking", "tap-meal"])
 </script>
 
 <style scoped>

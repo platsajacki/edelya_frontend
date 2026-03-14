@@ -11,16 +11,38 @@
       :class="{ 'planner__grid--loading': planning.loading }"
       @add-cooking="openCookingForm"
       @add-meal="openMealForm"
+      @tap-cooking="openCookingDetail"
+      @tap-meal="openMealDetail"
     />
 
+    <!-- Create / Edit forms -->
     <CookingEventForm
       v-model="showCookingForm"
       :date="formDate"
+      :edit-item="editCookingItem"
     />
 
     <MealPlanItemForm
       v-model="showMealForm"
       :date="formDate"
+      :edit-item="editMealItem"
+    />
+
+    <!-- Detail sheets -->
+    <CardDetailSheet
+      v-model="showCookingDetail"
+      :item="detailItem"
+      type="cooking"
+      @edit="onEditCooking"
+      @delete="onDeleteCooking"
+    />
+
+    <CardDetailSheet
+      v-model="showMealDetail"
+      :item="detailItem"
+      type="meal"
+      @edit="onEditMeal"
+      @delete="onDeleteMeal"
     />
 
     <Transition name="toast">
@@ -37,6 +59,7 @@ import WeekNav from "./WeekNav.vue"
 import WeekGrid from "./WeekGrid.vue"
 import CookingEventForm from "./forms/CookingEventForm.vue"
 import MealPlanItemForm from "./forms/MealPlanItemForm.vue"
+import CardDetailSheet from "./CardDetailSheet.vue"
 import { usePlanningStore } from "../store/planning"
 
 defineProps({
@@ -48,18 +71,76 @@ defineProps({
 
 const planning = usePlanningStore()
 
+// --- Create flow ---
 const showCookingForm = ref(false)
 const showMealForm = ref(false)
 const formDate = ref("")
+const editCookingItem = ref(null)
+const editMealItem = ref(null)
 
 function openCookingForm(date) {
+  editCookingItem.value = null
   formDate.value = date
   showCookingForm.value = true
 }
 
 function openMealForm(date) {
+  editMealItem.value = null
   formDate.value = date
   showMealForm.value = true
+}
+
+// --- Detail flow ---
+const showCookingDetail = ref(false)
+const showMealDetail = ref(false)
+const detailItem = ref(null)
+
+function openCookingDetail(item) {
+  detailItem.value = item
+  showCookingDetail.value = true
+}
+
+function openMealDetail(item) {
+  detailItem.value = item
+  showMealDetail.value = true
+}
+
+// --- Edit from detail ---
+function onEditCooking() {
+  const item = detailItem.value
+  showCookingDetail.value = false
+  editCookingItem.value = item
+  formDate.value = item.cooking_date
+  showCookingForm.value = true
+}
+
+function onEditMeal() {
+  const item = detailItem.value
+  showMealDetail.value = false
+  editMealItem.value = item
+  formDate.value = item.date
+  showMealForm.value = true
+}
+
+// --- Delete from detail ---
+async function onDeleteCooking() {
+  const item = detailItem.value
+  showCookingDetail.value = false
+  try {
+    await planning.removeCookingEvent(item.id)
+  } catch {
+    // toast shown by store
+  }
+}
+
+async function onDeleteMeal() {
+  const item = detailItem.value
+  showMealDetail.value = false
+  try {
+    await planning.removeMealPlanItem(item.id)
+  } catch {
+    // toast shown by store
+  }
 }
 
 onMounted(() => {

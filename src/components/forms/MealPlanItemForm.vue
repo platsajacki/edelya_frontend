@@ -1,5 +1,5 @@
 <template>
-  <ModalWrapper v-model="open" title="Добавить приём пищи" :z-index="1000">
+  <ModalWrapper v-model="open" :title="isEdit ? 'Редактировать приём пищи' : 'Добавить приём пищи'" :z-index="1000">
     <form class="form" @submit.prevent="submit">
       <!-- Dish selection -->
       <div class="form__field">
@@ -19,7 +19,7 @@
       <div v-if="error" class="form__error">{{ error }}</div>
 
       <button type="submit" class="form__submit" :disabled="saving || !selectedDish">
-        {{ saving ? "Сохранение..." : "Добавить" }}
+        {{ saving ? "Сохранение..." : (isEdit ? "Сохранить" : "Добавить") }}
       </button>
     </form>
 
@@ -32,7 +32,7 @@
 </template>
 
 <script setup>
-import { ref, watch } from "vue"
+import { ref, computed, watch } from "vue"
 import ModalWrapper from "./ModalWrapper.vue"
 import DishSearch from "./DishSearch.vue"
 import DishForm from "./DishForm.vue"
@@ -42,11 +42,14 @@ import { usePlanningStore } from "../../store/planning"
 const props = defineProps({
   modelValue: { type: Boolean, required: true },
   date: { type: String, default: "" },
+  editItem: { type: Object, default: null },
 })
 
 const emit = defineEmits(["update:modelValue"])
 
 const planning = usePlanningStore()
+
+const isEdit = computed(() => !!props.editItem)
 
 const open = ref(props.modelValue)
 watch(() => props.modelValue, (v) => { open.value = v })
@@ -59,7 +62,11 @@ const error = ref("")
 const showDishForm = ref(false)
 
 watch(() => props.modelValue, (v) => {
-  if (v) {
+  if (v && props.editItem) {
+    selectedDish.value = props.editItem.dish
+    mealDate.value = props.editItem.date
+    error.value = ""
+  } else if (v) {
     selectedDish.value = null
     mealDate.value = props.date
     error.value = ""
@@ -85,13 +92,18 @@ async function submit() {
   if (error.value) return
   saving.value = true
   try {
-    await planning.addMealPlanItem({
+    const payload = {
       dish: selectedDish.value.id,
       date: mealDate.value,
-    })
+    }
+    if (isEdit.value) {
+      await planning.editMealPlanItem(props.editItem.id, payload)
+    } else {
+      await planning.addMealPlanItem(payload)
+    }
     open.value = false
   } catch (err) {
-    error.value = err.message || "Не удалось добавить приём пищи"
+    error.value = err.message || "Не удалось сохранить приём пищи"
   } finally {
     saving.value = false
   }

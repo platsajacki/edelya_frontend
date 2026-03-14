@@ -1,5 +1,5 @@
 <template>
-  <ModalWrapper v-model="open" title="Новая готовка" :z-index="1000">
+  <ModalWrapper v-model="open" :title="isEdit ? 'Редактировать готовку' : 'Новая готовка'" :z-index="1000">
     <form class="form" @submit.prevent="submit">
       <!-- Dish selection -->
       <div class="form__field">
@@ -34,7 +34,7 @@
       <div v-if="error" class="form__error">{{ error }}</div>
 
       <button type="submit" class="form__submit" :disabled="saving || !selectedDish">
-        {{ saving ? "Сохранение..." : "Создать готовку" }}
+        {{ saving ? "Сохранение..." : (isEdit ? "Сохранить" : "Создать готовку") }}
       </button>
     </form>
 
@@ -47,7 +47,7 @@
 </template>
 
 <script setup>
-import { ref, watch } from "vue"
+import { ref, computed, watch } from "vue"
 import ModalWrapper from "./ModalWrapper.vue"
 import DishSearch from "./DishSearch.vue"
 import DishForm from "./DishForm.vue"
@@ -57,11 +57,14 @@ import { usePlanningStore } from "../../store/planning"
 const props = defineProps({
   modelValue: { type: Boolean, required: true },
   date: { type: String, default: "" },
+  editItem: { type: Object, default: null },
 })
 
 const emit = defineEmits(["update:modelValue"])
 
 const planning = usePlanningStore()
+
+const isEdit = computed(() => !!props.editItem)
 
 const open = ref(props.modelValue)
 watch(() => props.modelValue, (v) => { open.value = v })
@@ -77,7 +80,14 @@ const error = ref("")
 const showDishForm = ref(false)
 
 watch(() => props.modelValue, (v) => {
-  if (v) {
+  if (v && props.editItem) {
+    selectedDish.value = props.editItem.dish
+    cookingDate.value = props.editItem.cooking_date
+    durationDays.value = props.editItem.duration_days
+    startEatingDate.value = props.editItem.start_eating_date
+    notes.value = props.editItem.notes || ""
+    error.value = ""
+  } else if (v) {
     selectedDish.value = null
     cookingDate.value = props.date
     durationDays.value = 1
@@ -109,16 +119,21 @@ async function submit() {
   if (error.value) return
   saving.value = true
   try {
-    await planning.addCookingEvent({
+    const payload = {
       dish: selectedDish.value.id,
       cooking_date: cookingDate.value,
       duration_days: durationDays.value,
       start_eating_date: startEatingDate.value,
       notes: notes.value.trim() || undefined,
-    })
+    }
+    if (isEdit.value) {
+      await planning.editCookingEvent(props.editItem.id, payload)
+    } else {
+      await planning.addCookingEvent(payload)
+    }
     open.value = false
   } catch (err) {
-    error.value = err.message || "Не удалось создать готовку"
+    error.value = err.message || "Не удалось сохранить готовку"
   } finally {
     saving.value = false
   }

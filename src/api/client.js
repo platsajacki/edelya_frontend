@@ -177,5 +177,8 @@ export async function api(url, options = {}) {
     throw await parseError(response)
   }
 
+  // Some endpoints (DELETE) return 204 No Content — avoid calling json() in that case
+  if (response.status === 204) return null
+
   return response.json()
 }

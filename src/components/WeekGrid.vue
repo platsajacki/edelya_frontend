@@ -63,6 +63,8 @@
       :date="day.date"
       :meals="day.meals"
       :cooking-events="day.cookingEvents"
+      @tap-cooking="$emit('tap-cooking', $event)"
+      @tap-meal="$emit('tap-meal', $event)"
     />
   </div>
 </template>
@@ -81,7 +83,7 @@ const props = defineProps({
   },
 })
 
-const emit = defineEmits(['add-cooking', 'add-meal'])
+const emit = defineEmits(['add-cooking', 'add-meal', 'tap-cooking', 'tap-meal'])
 
 const picker = ref(null)
 
