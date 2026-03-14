@@ -9,6 +9,18 @@
     <WeekGrid
       :week-data="planning.weekData"
       :class="{ 'planner__grid--loading': planning.loading }"
+      @add-cooking="openCookingForm"
+      @add-meal="openMealForm"
+    />
+
+    <CookingEventForm
+      v-model="showCookingForm"
+      :date="formDate"
+    />
+
+    <MealPlanItemForm
+      v-model="showMealForm"
+      :date="formDate"
     />
 
     <Transition name="toast">
@@ -20,9 +32,11 @@
 </template>
 
 <script setup>
-import { onMounted } from "vue"
+import { onMounted, ref } from "vue"
 import WeekNav from "./WeekNav.vue"
 import WeekGrid from "./WeekGrid.vue"
+import CookingEventForm from "./forms/CookingEventForm.vue"
+import MealPlanItemForm from "./forms/MealPlanItemForm.vue"
 import { usePlanningStore } from "../store/planning"
 
 defineProps({
@@ -33,6 +47,20 @@ defineProps({
 })
 
 const planning = usePlanningStore()
+
+const showCookingForm = ref(false)
+const showMealForm = ref(false)
+const formDate = ref("")
+
+function openCookingForm(date) {
+  formDate.value = date
+  showCookingForm.value = true
+}
+
+function openMealForm(date) {
+  formDate.value = date
+  showMealForm.value = true
+}
 
 onMounted(() => {
   planning.loadWeek()
@@ -69,7 +97,7 @@ onMounted(() => {
   font-size: 14px;
   box-shadow: var(--shadow-elevated);
   cursor: pointer;
-  z-index: 100;
+  z-index: 99999;
   max-width: calc(100vw - 32px);
   text-align: center;
 }

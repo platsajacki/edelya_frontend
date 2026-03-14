@@ -1,0 +1,225 @@
+<template>
+  <ModalWrapper v-model="open" title="Новая готовка" :z-index="1000">
+    <form class="form" @submit.prevent="submit">
+      <!-- Dish selection -->
+      <div class="form__field">
+        <span class="form__label">Блюдо</span>
+        <div v-if="selectedDish" class="selected-dish">
+          <span class="selected-dish__name">{{ selectedDish.name }}</span>
+          <button type="button" class="selected-dish__clear" @click="selectedDish = null">&times;</button>
+        </div>
+        <DishSearch v-else @select="onDishSelect" @create="showDishForm = true" />
+      </div>
+
+      <label class="form__field">
+        <span class="form__label">Дата готовки</span>
+        <DateInput v-model="cookingDate" required />
+      </label>
+
+      <label class="form__field">
+        <span class="form__label">На сколько дней хватит</span>
+        <input v-model.number="durationDays" type="number" min="1" max="30" class="form__input" required />
+      </label>
+
+      <label class="form__field">
+        <span class="form__label">Когда начнём есть</span>
+        <DateInput v-model="startEatingDate" required />
+      </label>
+
+      <label class="form__field">
+        <span class="form__label">Комментарий</span>
+        <textarea v-model="notes" class="form__textarea" rows="2" />
+      </label>
+
+      <div v-if="error" class="form__error">{{ error }}</div>
+
+      <button type="submit" class="form__submit" :disabled="saving || !selectedDish">
+        {{ saving ? "Сохранение..." : "Создать готовку" }}
+      </button>
+    </form>
+
+    <DishForm
+      v-model="showDishForm"
+      :z-index="1010"
+      @created="onDishCreated"
+    />
+  </ModalWrapper>
+</template>
+
+<script setup>
+import { ref, watch } from "vue"
+import ModalWrapper from "./ModalWrapper.vue"
+import DishSearch from "./DishSearch.vue"
+import DishForm from "./DishForm.vue"
+import DateInput from "./DateInput.vue"
+import { usePlanningStore } from "../../store/planning"
+
+const props = defineProps({
+  modelValue: { type: Boolean, required: true },
+  date: { type: String, default: "" },
+})
+
+const emit = defineEmits(["update:modelValue"])
+
+const planning = usePlanningStore()
+
+const open = ref(props.modelValue)
+watch(() => props.modelValue, (v) => { open.value = v })
+watch(open, (v) => { emit("update:modelValue", v) })
+
+const selectedDish = ref(null)
+const cookingDate = ref("")
+const durationDays = ref(1)
+const startEatingDate = ref("")
+const notes = ref("")
+const saving = ref(false)
+const error = ref("")
+const showDishForm = ref(false)
+
+watch(() => props.modelValue, (v) => {
+  if (v) {
+    selectedDish.value = null
+    cookingDate.value = props.date
+    durationDays.value = 1
+    startEatingDate.value = props.date
+    notes.value = ""
+    error.value = ""
+  }
+})
+
+function onDishSelect(dish) {
+  selectedDish.value = dish
+}
+
+function onDishCreated(dish) {
+  selectedDish.value = dish
+}
+
+function validate() {
+  if (!selectedDish.value) return "Выберите блюдо."
+  if (!cookingDate.value) return "Укажите дату готовки."
+  if (!startEatingDate.value) return "Укажите дату начала еды."
+  if (!durationDays.value || durationDays.value < 1 || durationDays.value > 30) return "Количество дней должно быть от 1 до 30."
+  if (startEatingDate.value < cookingDate.value) return "Дата начала еды не может быть раньше даты готовки."
+  return null
+}
+
+async function submit() {
+  error.value = validate()
+  if (error.value) return
+  saving.value = true
+  try {
+    await planning.addCookingEvent({
+      dish: selectedDish.value.id,
+      cooking_date: cookingDate.value,
+      duration_days: durationDays.value,
+      start_eating_date: startEatingDate.value,
+      notes: notes.value.trim() || undefined,
+    })
+    open.value = false
+  } catch (err) {
+    error.value = err.message || "Не удалось создать готовку"
+  } finally {
+    saving.value = false
+  }
+}
+</script>
+
+<style scoped>
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.form__field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.form__label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+.form__input,
+.form__textarea {
+  padding: 10px 12px;
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: 15px;
+  font-family: inherit;
+  background: var(--color-surface);
+  color: var(--color-text);
+  outline: none;
+  transition: border-color 0.15s;
+  resize: vertical;
+}
+
+.form__input:focus,
+.form__textarea:focus {
+  border-color: var(--color-mint);
+}
+
+.form__error {
+  font-size: 13px;
+  color: #e53e3e;
+  padding: 4px 0;
+}
+
+.form__submit {
+  padding: 12px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: var(--color-mint);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 600;
+  transition: background 0.15s;
+}
+
+.form__submit:hover:not(:disabled) {
+  background: var(--color-mint-hover);
+}
+
+.form__submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.selected-dish {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  background: var(--color-empty);
+  border-radius: var(--radius-sm);
+  border: 1.5px solid var(--color-mint);
+}
+
+.selected-dish__name {
+  flex: 1;
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.selected-dish__clear {
+  width: 24px;
+  height: 24px;
+  border: none;
+  background: none;
+  font-size: 18px;
+  color: var(--color-text-secondary);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.selected-dish__clear:hover {
+  background: var(--color-border);
+  color: #e53e3e;
+}
+</style>

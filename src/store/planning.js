@@ -1,5 +1,5 @@
 import { defineStore } from "pinia"
-import { fetchWeek } from "../services/planningService"
+import { fetchWeek, createCookingEvent, createMealPlanItem } from "../services/planningService"
 
 function getISOWeek(date) {
   const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()))
@@ -91,6 +91,31 @@ export const usePlanningStore = defineStore("planning", {
         this.week = 1
       }
       await this.loadWeek()
+    },
+
+    async addCookingEvent(payload) {
+      try {
+        await createCookingEvent(payload)
+        this.showToast("Готовка создана")
+        await this.loadWeek()
+      } catch (err) {
+        this.showToast("Не удалось создать готовку")
+        throw err
+      }
+    },
+
+    async addMealPlanItem(payload) {
+      try {
+        const existing = this.weekData.meal_plan_items
+          .filter((m) => m.date === payload.date)
+        const maxPos = existing.reduce((max, m) => Math.max(max, m.position ?? 0), 0)
+        await createMealPlanItem({ ...payload, position: maxPos + 100 })
+        this.showToast("Приём пищи добавлен")
+        await this.loadWeek()
+      } catch (err) {
+        this.showToast("Не удалось добавить приём пищи")
+        throw err
+      }
     },
   },
 })
