@@ -224,7 +224,7 @@ const days = computed(() => {
 }
 
 .week-grid__add--cook:hover {
-  background: rgba(245, 158, 11, 0.18);
+  background: var(--color-cook-bg-strong);
 }
 
 .week-grid__add--eat {
@@ -233,7 +233,7 @@ const days = computed(() => {
 }
 
 .week-grid__add--eat:hover {
-  background: rgba(79, 134, 247, 0.18);
+  background: var(--color-eat-bg-strong);
 }
 
 .week-grid__add-icon {

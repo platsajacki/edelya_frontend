@@ -144,18 +144,18 @@ async function submit() {
   border-color: var(--color-mint);
 }
 
-.form__error {
+  .form__error {
   font-size: 13px;
-  color: #e53e3e;
+  color: var(--color-danger);
   padding: 4px 0;
 }
 
-.form__submit {
+  .form__submit {
   padding: 12px;
   border: none;
   border-radius: var(--radius-sm);
   background: var(--color-mint);
-  color: #fff;
+  color: var(--on-primary);
   font-size: 15px;
   font-weight: 600;
   transition: background 0.15s;
@@ -199,8 +199,8 @@ async function submit() {
   justify-content: center;
 }
 
-.selected-dish__clear:hover {
+  .selected-dish__clear:hover {
   background: var(--color-border);
-  color: #e53e3e;
+  color: var(--color-danger);
 }
 </style>

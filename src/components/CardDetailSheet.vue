@@ -73,10 +73,10 @@
       <!-- Delete confirmation -->
       <Transition name="confirm">
         <div v-if="confirming" class="detail__confirm">
-          <p class="detail__confirm-text">Точно удалить?</p>
+          <p class="detail__confirm-text">Удаляем?</p>
           <div class="detail__confirm-actions">
             <button class="detail__btn detail__btn--delete" @click="$emit('delete')">
-              Да, удалить
+              Да, удаляем
             </button>
             <button class="detail__btn detail__btn--cancel" @click="confirming = false">
               Нет
@@ -253,22 +253,22 @@ function confirmDelete() {
   transition: background 0.15s, opacity 0.15s;
 }
 
-.detail__btn--edit {
+  .detail__btn--edit {
   background: var(--color-mint);
-  color: #fff;
+  color: var(--on-primary);
 }
 
 .detail__btn--edit:hover {
   background: var(--color-mint-hover);
 }
 
-.detail__btn--delete {
-  background: #FEE2E2;
-  color: #DC2626;
+  .detail__btn--delete {
+  background: var(--color-danger-bg);
+  color: var(--color-danger-muted);
 }
 
-.detail__btn--delete:hover {
-  background: #FECACA;
+  .detail__btn--delete:hover {
+  background: var(--color-danger-soft);
 }
 
 .detail__btn--cancel {
@@ -280,18 +280,18 @@ function confirmDelete() {
   background: var(--color-border);
 }
 
-.detail__confirm {
+  .detail__confirm {
   margin-top: 12px;
   padding: 14px;
-  background: #FEF2F2;
+  background: var(--color-danger-pale);
   border-radius: var(--radius-sm);
-  border: 1px solid #FECACA;
+  border: 1px solid var(--color-danger-soft);
 }
 
-.detail__confirm-text {
+  .detail__confirm-text {
   font-size: 15px;
   font-weight: 600;
-  color: #DC2626;
+  color: var(--color-danger-muted);
   text-align: center;
   margin: 0 0 10px;
 }

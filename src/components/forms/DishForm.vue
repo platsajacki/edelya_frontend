@@ -324,7 +324,7 @@ async function submit() {
 
 .form__error {
   font-size: 13px;
-  color: #e53e3e;
+  color: var(--color-danger);
   padding: 4px 0;
 }
 
@@ -333,7 +333,7 @@ async function submit() {
   border: none;
   border-radius: var(--radius-sm);
   background: var(--color-mint);
-  color: #fff;
+  color: var(--on-primary);
   font-size: 15px;
   font-weight: 600;
   transition: background 0.15s;
@@ -385,7 +385,7 @@ async function submit() {
 
 .ingredient-row__remove:hover {
   background: var(--color-border);
-  color: #e53e3e;
+  color: var(--color-danger);
 }
 
 /* Ingredient search */
@@ -482,7 +482,7 @@ async function submit() {
 
 .btn--sm {
   background: var(--color-mint);
-  color: #fff;
+  color: var(--on-primary);
 }
 
 .btn--sm:hover {

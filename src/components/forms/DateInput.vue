@@ -121,7 +121,7 @@ function onPickerInput(e) {
   border: none;
   background: none;
   cursor: pointer;
-  color: var(--color-text-secondary, #999);
+  color: var(--color-text-secondary);
 }
 
 .date-input__btn svg {

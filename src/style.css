@@ -1,16 +1,27 @@
 :root {
-  --color-bg: #F4F6F8;
+  --color-bg: #F5F5F0;
   --color-surface: #FFFFFF;
-  --color-text: #1F2937;
-  --color-text-secondary: #6B7280;
-  --color-border: #E5E7EB;
-  --color-empty: #F9FAFB;
-  --color-mint: #A8DCD2;
-  --color-mint-hover: #8CCFC2;
-  --color-eat: #4F86F7;
-  --color-eat-bg: rgba(79, 134, 247, 0.10);
-  --color-cook: #F59E0B;
-  --color-cook-bg: rgba(245, 158, 11, 0.10);
+  --color-text: #252520;
+  --color-text-secondary: #6B6B62;
+  --color-border: #E3E9D0;
+  --color-empty: #F2F2EE;
+  --color-mint: #B99AD9;
+  --color-mint-hover: #A082CC;
+  --color-eat: #7EA840;
+  --color-eat-bg: rgba(126, 168, 64, 0.12);
+  --color-cook: #B8D42A;
+  --color-cook-bg: rgba(184, 212, 42, 0.14);
+  --color-eat-bg-strong: rgba(126, 168, 64, 0.22);
+  --color-cook-bg-strong: rgba(184, 212, 42, 0.22);
+
+  --color-danger: #D64545;
+  --color-danger-muted: #B91C1C;
+  --color-danger-bg: #FEE2E2;
+  --color-danger-soft: #FECACA;
+  --color-danger-pale: #FEF2F2;
+
+  --overlay-bg: rgba(30, 20, 45, 0.45);
+  --on-primary: #ffffff;
   --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02);
   --shadow-day: 0 2px 8px rgba(0, 0, 0, 0.06), 0 0 0 1px var(--color-border);
   --shadow-elevated: 0 4px 16px rgba(0, 0, 0, 0.10);
