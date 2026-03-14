@@ -6,9 +6,12 @@
         <span class="form__label">Блюдо</span>
         <div v-if="selectedDish" class="selected-dish">
           <span class="selected-dish__name">{{ selectedDish.name }}</span>
+          <button type="button" class="selected-dish__edit" title="Редактировать блюдо" @click="editDish = selectedDish; showDishForm = true">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M11.5 2.5a1.414 1.414 0 012 2L5.5 12.5l-3 1 1-3 8-8z" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
           <button type="button" class="selected-dish__clear" @click="selectedDish = null">&times;</button>
         </div>
-        <DishSearch v-else @select="onDishSelect" @create="showDishForm = true" />
+        <DishSearch v-else @select="onDishSelect" @create="editDish = null; showDishForm = true" />
       </div>
 
       <label class="form__field">
@@ -41,7 +44,9 @@
     <DishForm
       v-model="showDishForm"
       :z-index="1010"
+      :edit-dish="editDish"
       @created="onDishCreated"
+      @updated="onDishUpdated"
     />
   </ModalWrapper>
 </template>
@@ -78,6 +83,7 @@ const notes = ref("")
 const saving = ref(false)
 const error = ref("")
 const showDishForm = ref(false)
+const editDish = ref(null)
 
 watch(() => props.modelValue, (v) => {
   if (v && props.editItem) {
@@ -102,6 +108,10 @@ function onDishSelect(dish) {
 }
 
 function onDishCreated(dish) {
+  selectedDish.value = dish
+}
+
+function onDishUpdated(dish) {
   selectedDish.value = dish
 }
 
@@ -231,6 +241,23 @@ async function submit() {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.selected-dish__edit {
+  width: 24px;
+  height: 24px;
+  border: none;
+  background: none;
+  color: var(--color-text-secondary);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.15s;
+}
+
+.selected-dish__edit:hover {
+  color: var(--color-mint);
 }
 
 .selected-dish__clear:hover {

@@ -1,5 +1,5 @@
 <template>
-  <ModalWrapper v-model="open" title="Новое блюдо" :z-index="zIndex">
+  <ModalWrapper v-model="open" :title="isEdit ? 'Редактировать блюдо' : 'Новое блюдо'" :z-index="zIndex">
     <form class="form" @submit.prevent="submit">
       <label class="form__field">
         <span class="form__label">Название</span>
@@ -94,7 +94,7 @@
       <div v-if="error" class="form__error">{{ error }}</div>
 
       <button type="submit" class="form__submit" :disabled="saving">
-        {{ saving ? "Сохранение..." : "Создать блюдо" }}
+        {{ saving ? "Сохранение..." : (isEdit ? "Сохранить" : "Создать блюдо") }}
       </button>
     </form>
 
@@ -107,10 +107,10 @@
 </template>
 
 <script setup>
-import { ref, watch } from "vue"
+import { ref, computed, watch } from "vue"
 import ModalWrapper from "./ModalWrapper.vue"
 import IngredientForm from "./IngredientForm.vue"
-import { createDish, fetchDishCategories } from "../../services/dishService"
+import { createDish, updateDish, fetchDishCategories } from "../../services/dishService"
 import { fetchIngredients } from "../../services/ingredientService"
 
 const UNIT_LABELS = {
@@ -135,9 +135,12 @@ const UNIT_LABELS = {
 const props = defineProps({
   modelValue: { type: Boolean, required: true },
   zIndex: { type: Number, default: 1010 },
+  editDish: { type: Object, default: null },
 })
 
-const emit = defineEmits(["update:modelValue", "created"])
+const emit = defineEmits(["update:modelValue", "created", "updated"])
+
+const isEdit = computed(() => !!props.editDish)
 
 const open = ref(props.modelValue)
 watch(() => props.modelValue, (v) => { open.value = v })
@@ -167,16 +170,28 @@ let ingredientSearchTimer = null
 watch(() => props.modelValue, async (v) => {
   if (v) {
     error.value = ""
-    name.value = ""
-    categoryId.value = ""
-    description.value = ""
-    ingredients.value = []
     resetIngredientSearch()
     try {
       const data = await fetchDishCategories()
       categories.value = data.results ?? []
     } catch {
       categories.value = []
+    }
+    if (props.editDish) {
+      name.value = props.editDish.name || ""
+      categoryId.value = props.editDish.category?.id || ""
+      description.value = props.editDish.description || ""
+      ingredients.value = (props.editDish.dish_ingredients || []).map((di) => ({
+        ingredient: di.ingredient?.id ?? di.ingredient,
+        ingredientName: di.ingredient?.name ?? di.name ?? "",
+        amount: String(di.amount),
+        is_optional: di.is_optional ?? false,
+      }))
+    } else {
+      name.value = ""
+      categoryId.value = ""
+      description.value = ""
+      ingredients.value = []
     }
   }
 })
@@ -265,8 +280,13 @@ async function submit() {
         is_optional: i.is_optional,
       }))
     }
-    const dish = await createDish(payload)
-    emit("created", dish)
+    if (isEdit.value) {
+      const dish = await updateDish(props.editDish.id, payload)
+      emit("updated", dish)
+    } else {
+      const dish = await createDish(payload)
+      emit("created", dish)
+    }
     open.value = false
   } catch (err) {
     error.value = err.message || "Не удалось создать блюдо"

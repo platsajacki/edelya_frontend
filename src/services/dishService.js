@@ -14,6 +14,14 @@ export function createDish(payload) {
   })
 }
 
+export function updateDish(id, payload) {
+  return api(`/api/v1/dishes/${id}/`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  })
+}
+
 export function fetchDishCategories() {
   return api(`/api/v1/dish-categories/`)
 }

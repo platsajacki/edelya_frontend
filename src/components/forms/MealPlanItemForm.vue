@@ -6,9 +6,12 @@
         <span class="form__label">Блюдо</span>
         <div v-if="selectedDish" class="selected-dish">
           <span class="selected-dish__name">{{ selectedDish.name }}</span>
+          <button type="button" class="selected-dish__edit" @click="editDish = selectedDish; showDishForm = true" title="Редактировать блюдо">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M11.5 1.5l3 3L5 14H2v-3L11.5 1.5z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>
+          </button>
           <button type="button" class="selected-dish__clear" @click="selectedDish = null">&times;</button>
         </div>
-        <DishSearch v-else @select="onDishSelect" @create="showDishForm = true" />
+        <DishSearch v-else @select="onDishSelect" @create="editDish = null; showDishForm = true" />
       </div>
 
       <label class="form__field">
@@ -25,8 +28,10 @@
 
     <DishForm
       v-model="showDishForm"
+      :edit-dish="editDish"
       :z-index="1010"
       @created="onDishCreated"
+      @updated="onDishUpdated"
     />
   </ModalWrapper>
 </template>
@@ -60,6 +65,7 @@ const mealDate = ref("")
 const saving = ref(false)
 const error = ref("")
 const showDishForm = ref(false)
+const editDish = ref(null)
 
 watch(() => props.modelValue, (v) => {
   if (v && props.editItem) {
@@ -78,6 +84,10 @@ function onDishSelect(dish) {
 }
 
 function onDishCreated(dish) {
+  selectedDish.value = dish
+}
+
+function onDishUpdated(dish) {
   selectedDish.value = dish
 }
 
@@ -184,6 +194,24 @@ async function submit() {
   flex: 1;
   font-size: 15px;
   font-weight: 500;
+}
+
+.selected-dish__edit {
+  width: 24px;
+  height: 24px;
+  border: none;
+  background: none;
+  color: var(--color-text-secondary);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: color 0.15s;
+}
+
+.selected-dish__edit:hover {
+  color: var(--color-mint);
 }
 
 .selected-dish__clear {

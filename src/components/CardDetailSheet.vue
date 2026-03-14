@@ -3,7 +3,12 @@
     <div class="detail">
       <!-- Dish info -->
       <div class="detail__section">
-        <h4 class="detail__dish-name">{{ dish.name }}</h4>
+        <div class="detail__dish-header">
+          <h4 class="detail__dish-name">{{ dish.name }}</h4>
+          <button type="button" class="detail__dish-edit" title="Редактировать блюдо" @click="showDishForm = true">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M11.5 2.5a1.414 1.414 0 012 2L5.5 12.5l-3 1 1-3 8-8z" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+        </div>
         <p v-if="dish.category?.name" class="detail__meta">
           {{ dish.category.name }}
         </p>
@@ -86,12 +91,21 @@
       </Transition>
     </template>
   </ModalWrapper>
+
+  <DishForm
+    v-model="showDishForm"
+    :z-index="1020"
+    :edit-dish="dish"
+    @updated="onDishUpdated"
+  />
 </template>
 
 <script setup>
 import { ref, computed, watch } from "vue"
 import ModalWrapper from "./forms/ModalWrapper.vue"
+import DishForm from "./forms/DishForm.vue"
 import { formatYMDtoDDMMYYYY } from "../utils/formatDate"
+import { usePlanningStore } from "../store/planning"
 
 const UNIT_LABELS = {
   gram: "г",
@@ -111,11 +125,14 @@ const props = defineProps({
 
 const emit = defineEmits(["update:modelValue", "edit", "delete"])
 
+const planning = usePlanningStore()
+
 const open = ref(props.modelValue)
 watch(() => props.modelValue, (v) => { open.value = v })
 watch(open, (v) => { emit("update:modelValue", v) })
 
 const confirming = ref(false)
+const showDishForm = ref(false)
 
 watch(() => props.modelValue, (v) => {
   if (v) confirming.value = false
@@ -138,6 +155,12 @@ function unitLabel(unit) {
 
 function confirmDelete() {
   confirming.value = true
+}
+
+async function onDishUpdated() {
+  showDishForm.value = false
+  await planning.loadWeek()
+  open.value = false
 }
 </script>
 
@@ -164,6 +187,32 @@ function confirmDelete() {
   font-weight: 700;
   color: var(--color-text);
   margin: 0;
+}
+
+.detail__dish-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.detail__dish-edit {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: none;
+  color: var(--color-text-secondary);
+  border-radius: 8px;
+  flex-shrink: 0;
+  transition: background 0.15s, color 0.15s;
+}
+
+.detail__dish-edit:hover {
+  background: var(--color-empty);
+  color: var(--color-mint);
 }
 
 .detail__meta {
