@@ -2,12 +2,12 @@
   <ModalWrapper v-model="open" :title="isEdit ? 'Редактировать блюдо' : 'Новое блюдо'" :z-index="zIndex">
     <form class="form" @submit.prevent="submit">
       <label class="form__field">
-        <span class="form__label">Название</span>
+        <span class="form__label">Название <span class="form__required">*</span></span>
         <input v-model="name" type="text" class="form__input" required />
       </label>
 
       <label class="form__field">
-        <span class="form__label">Категория</span>
+        <span class="form__label">Категория <span class="form__required">*</span></span>
         <select v-model="categoryId" class="form__select" required>
           <option value="" disabled>Выберите категорию</option>
           <option v-for="cat in categories" :key="cat.id" :value="cat.id">
@@ -23,37 +23,12 @@
 
       <!-- Ingredients -->
       <div class="form__section">
-        <span class="form__label">Ингредиенты</span>
+        <span class="form__label">Ингредиенты <span class="form__required">*</span></span>
 
         <div v-for="(ing, idx) in ingredients" :key="idx" class="ingredient-row">
           <span class="ingredient-row__name">{{ ing.ingredientName }}</span>
           <span class="ingredient-row__amount">{{ ing.amount }}</span>
           <button type="button" class="ingredient-row__remove" @click="ingredients.splice(idx, 1)">&times;</button>
-        </div>
-
-        <!-- Ingredient search -->
-        <div v-if="showIngredientSearch" class="ingredient-search">
-          <input
-            v-model="ingredientQuery"
-            type="text"
-            class="form__input"
-            placeholder="Поиск ингредиента..."
-            @input="searchIngredients"
-          />
-          <ul v-if="ingredientResults.length" class="ingredient-search__list">
-            <li
-              v-for="ing in ingredientResults"
-              :key="ing.id"
-              class="ingredient-search__item"
-              @click="selectIngredient(ing)"
-            >
-              {{ ing.name }}
-              <span class="ingredient-search__unit">{{ UNIT_LABELS[ing.base_unit] || ing.base_unit }}</span>
-            </li>
-          </ul>
-          <button type="button" class="dish-search__create" @click="showIngredientForm = true">
-            + Создать ингредиент
-          </button>
         </div>
 
         <!-- Amount input after selecting ingredient -->
@@ -81,14 +56,30 @@
           </div>
         </div>
 
-        <button
-          v-if="!showIngredientSearch && !pendingIngredient"
-          type="button"
-          class="dish-search__create"
-          @click="showIngredientSearch = true"
-        >
-          + Добавить ингредиент
-        </button>
+        <!-- Ingredient search (always visible when no pending ingredient) -->
+        <div v-else class="ingredient-search">
+          <input
+            v-model="ingredientQuery"
+            type="text"
+            class="form__input"
+            placeholder="Поиск ингредиента..."
+            @input="searchIngredients"
+          />
+          <ul v-if="ingredientResults.length" class="ingredient-search__list">
+            <li
+              v-for="ing in ingredientResults"
+              :key="ing.id"
+              class="ingredient-search__item"
+              @click="selectIngredient(ing)"
+            >
+              {{ ing.name }}
+              <span class="ingredient-search__unit">{{ UNIT_LABELS[ing.base_unit] || ing.base_unit }}</span>
+            </li>
+          </ul>
+          <button type="button" class="dish-search__create" @click="showIngredientForm = true">
+            + Создать ингредиент
+          </button>
+        </div>
       </div>
 
       <div v-if="error" class="form__error">{{ error }}</div>
@@ -155,7 +146,6 @@ const saving = ref(false)
 const error = ref("")
 
 // Ingredient search state
-const showIngredientSearch = ref(false)
 const ingredientQuery = ref("")
 const ingredientResults = ref([])
 const showIngredientForm = ref(false)
@@ -197,7 +187,6 @@ watch(() => props.modelValue, async (v) => {
 })
 
 function resetIngredientSearch() {
-  showIngredientSearch.value = false
   ingredientQuery.value = ""
   ingredientResults.value = []
   pendingIngredient.value = null
@@ -226,7 +215,6 @@ function selectIngredient(ing) {
   pendingIngredient.value = ing
   ingredientQuery.value = ""
   ingredientResults.value = []
-  showIngredientSearch.value = false
 }
 
 function confirmIngredient() {

@@ -1,5 +1,5 @@
 :root {
-  --color-bg: #F5F5F0;
+  --color-bg: #ffffff;
   --color-surface: #FFFFFF;
   --color-text: #252520;
   --color-text-secondary: #6B6B62;
@@ -49,4 +49,9 @@ body {
 button {
   font-family: inherit;
   cursor: pointer;
+}
+
+.form__required {
+  color: var(--color-danger);
+  font-weight: 400;
 }

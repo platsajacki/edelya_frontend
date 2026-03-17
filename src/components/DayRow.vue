@@ -3,21 +3,27 @@
         <div class="day-row__label">{{ day }}<br>{{ date.slice(0, 2) }}</div>
 
         <div class="day-row__cook">
-        <MealCard
+          <MealCard
             v-for="event in cookingEvents"
             :key="event.id"
             :item="event"
             @tap="$emit('tap-cooking', $event)"
-        />
+          />
+          <button type="button" class="day-row__add day-row__add--cook" @click="$emit('add-cooking', rawDate)">
+            +
+          </button>
         </div>
 
         <div class="day-row__eat">
-            <MealCard
-              v-for="item in meals"
-              :key="item.id"
-              :item="item"
-              @tap="$emit('tap-meal', $event)"
-            />
+          <MealCard
+            v-for="item in meals"
+            :key="item.id"
+            :item="item"
+            @tap="$emit('tap-meal', $event)"
+          />
+          <button type="button" class="day-row__add day-row__add--eat" @click="$emit('add-meal', rawDate)">
+            +
+          </button>
         </div>
     </div>
 </template>
@@ -28,11 +34,12 @@ import MealCard from './MealCard.vue'
 defineProps({
   day: { type: String, required: true },
   date: { type: String, required: true },
+  rawDate: { type: String, required: true },
   meals: { type: Array, default: () => [] },
   cookingEvents: { type: Array, default: () => [] },
 })
 
-defineEmits(["tap-cooking", "tap-meal"])
+defineEmits(["tap-cooking", "tap-meal", "add-cooking", "add-meal"])
 </script>
 
 <style scoped>
@@ -71,5 +78,33 @@ defineEmits(["tap-cooking", "tap-meal"])
   display: flex;
   flex-direction: column;
   gap: 6px;
+}
+
+.day-row__add {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 4px 0;
+  border: 1.5px dashed var(--color-border);
+  border-radius: var(--radius-sm);
+  background: none;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+  color: var(--color-text-secondary);
+}
+
+.day-row__add--cook:hover {
+  border-color: var(--color-cook);
+  color: var(--color-cook);
+  background: var(--color-cook-bg);
+}
+
+.day-row__add--eat:hover {
+  border-color: var(--color-eat);
+  color: var(--color-eat);
+  background: var(--color-eat-bg);
 }
 </style>

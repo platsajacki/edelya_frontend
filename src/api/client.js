@@ -50,6 +50,8 @@ const ERROR_MESSAGES = {
   "Dish must have at least one ingredient": "У блюда должен быть хотя бы один ингредиент.",
   "An ingredient with this name already exists for this user.": "Ингредиент с таким названием уже существует.",
   "Date when eating starts cannot be earlier than cooking date": "Дата начала еды не может быть раньше даты готовки.",
+  "All eat dates must be on or after the cooking date.": "Все дни еды должны быть не раньше дня готовки.",
+  "All eat_dates must be on or after cooking_date.": "Все дни еды должны быть не раньше дня готовки.",
   "Invalid Telegram data": "Неверные данные Telegram.",
   "User must be authenticated to get week dishes.": "Необходимо войти в аккаунт.",
   "No active account found with the given credentials.": "Неверный логин или пароль.",
@@ -69,8 +71,7 @@ const FIELD_NAMES = {
   amount: "Количество",
   base_unit: "Единица измерения",
   cooking_date: "Дата готовки",
-  start_eating_date: "Дата начала еды",
-  duration_days: "Количество дней",
+  eat_dates: "Дни еды",
   date: "Дата",
   position: "Позиция",
   notes: "Комментарий",
@@ -177,7 +178,6 @@ export async function api(url, options = {}) {
     throw await parseError(response)
   }
 
-  // Some endpoints (DELETE) return 204 No Content — avoid calling json() in that case
   if (response.status === 204) return null
 
   return response.json()

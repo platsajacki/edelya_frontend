@@ -36,13 +36,12 @@
           <span class="detail__label">Дата готовки</span>
           <span class="detail__value">{{ formatDate(item.cooking_date) }}</span>
         </div>
-        <div class="detail__row">
-          <span class="detail__label">На сколько дней</span>
-          <span class="detail__value">{{ item.duration_days }}</span>
-        </div>
-        <div class="detail__row">
-          <span class="detail__label">Начало еды</span>
-          <span class="detail__value">{{ formatDate(item.start_eating_date) }}</span>
+        <div class="detail__row detail__row--col">
+          <span class="detail__label">Дни еды</span>
+          <div v-if="eatDates.length" class="detail__eat-dates">
+            <span v-for="d in eatDates" :key="d" class="detail__eat-date">{{ formatDate(d) }}</span>
+          </div>
+          <span v-else class="detail__value detail__value--muted">Нет запланированных дней</span>
         </div>
         <div v-if="item.notes" class="detail__row detail__row--col">
           <span class="detail__label">Комментарий</span>
@@ -55,9 +54,17 @@
           <span class="detail__label">Дата</span>
           <span class="detail__value">{{ formatDate(item.date) }}</span>
         </div>
-        <div v-if="item.cooking_event" class="detail__row">
+        <div class="detail__row">
           <span class="detail__label">Источник</span>
-          <span class="detail__value detail__value--muted">Из готовки</span>
+          <button
+            v-if="item.cooking_event"
+            type="button"
+            class="detail__link"
+            @click="$emit('view-cooking', item.cooking_event)"
+          >
+            Из готовки →
+          </button>
+          <span v-else class="detail__value detail__value--muted">Ручной ввод</span>
         </div>
       </div>
     </div>
@@ -67,29 +74,27 @@
         <button class="detail__btn detail__btn--edit" @click="$emit('edit')">
           Редактировать
         </button>
-        <button class="detail__btn detail__btn--delete" @click="confirmDelete">
+        <button class="detail__btn detail__btn--delete" @click="confirming = true">
           Удалить
         </button>
         <button class="detail__btn detail__btn--cancel" @click="open = false">
           Отмена
         </button>
       </div>
-
-      <!-- Delete confirmation -->
-      <Transition name="confirm">
-        <div v-if="confirming" class="detail__confirm">
-          <p class="detail__confirm-text">Удаляем?</p>
-          <div class="detail__confirm-actions">
-            <button class="detail__btn detail__btn--delete" @click="$emit('delete')">
-              Да, удаляем
-            </button>
-            <button class="detail__btn detail__btn--cancel" @click="confirming = false">
-              Нет
-            </button>
-          </div>
-        </div>
-      </Transition>
     </template>
+  </ModalWrapper>
+
+  <!-- Delete confirmation modal -->
+  <ModalWrapper v-model="confirming" title="Подтверждение" :z-index="1050">
+    <p class="detail__confirm-text">Удалить этот элемент?</p>
+    <div class="detail__confirm-actions">
+      <button class="detail__btn detail__btn--delete" @click="confirming = false; open = false; $emit('delete')">
+        Да, удаляем
+      </button>
+      <button class="detail__btn detail__btn--cancel" @click="confirming = false">
+        Нет
+      </button>
+    </div>
   </ModalWrapper>
 
   <DishForm
@@ -123,7 +128,7 @@ const props = defineProps({
   type: { type: String, default: "cooking" }, // 'cooking' | 'meal'
 })
 
-const emit = defineEmits(["update:modelValue", "edit", "delete"])
+const emit = defineEmits(["update:modelValue", "edit", "delete", "view-cooking"])
 
 const planning = usePlanningStore()
 
@@ -140,6 +145,11 @@ watch(() => props.modelValue, (v) => {
 
 const dish = computed(() => props.item?.dish ?? {})
 
+const eatDates = computed(() => {
+  const items = props.item?.meal_plan_items || []
+  return items.map((m) => m.date).sort()
+})
+
 const title = computed(() => {
   if (props.type === "cooking") return "Готовка"
   return "Приём пищи"
@@ -151,10 +161,6 @@ function formatDate(iso) {
 
 function unitLabel(unit) {
   return UNIT_LABELS[unit] || unit || ""
-}
-
-function confirmDelete() {
-  confirming.value = true
 }
 
 async function onDishUpdated() {
@@ -274,6 +280,36 @@ async function onDishUpdated() {
   align-items: flex-start;
 }
 
+.detail__eat-dates {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.detail__eat-date {
+  padding: 4px 10px;
+  background: var(--color-empty);
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-text);
+}
+
+.detail__link {
+  border: none;
+  background: none;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-mint);
+  cursor: pointer;
+  padding: 0;
+  transition: color 0.15s;
+}
+
+.detail__link:hover {
+  color: var(--color-mint-hover);
+}
+
 .detail__value {
   font-size: 15px;
   font-weight: 500;
@@ -329,15 +365,7 @@ async function onDishUpdated() {
   background: var(--color-border);
 }
 
-  .detail__confirm {
-  margin-top: 12px;
-  padding: 14px;
-  background: var(--color-danger-pale);
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--color-danger-soft);
-}
-
-  .detail__confirm-text {
+.detail__confirm-text {
   font-size: 15px;
   font-weight: 600;
   color: var(--color-danger-muted);
@@ -352,17 +380,5 @@ async function onDishUpdated() {
 
 .detail__confirm-actions .detail__btn {
   flex: 1;
-}
-
-/* Confirm transition */
-.confirm-enter-active,
-.confirm-leave-active {
-  transition: opacity 0.15s ease, transform 0.15s ease;
-}
-
-.confirm-enter-from,
-.confirm-leave-to {
-  opacity: 0;
-  transform: translateY(4px);
 }
 </style>

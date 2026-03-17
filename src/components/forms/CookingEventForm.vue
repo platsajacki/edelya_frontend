@@ -3,7 +3,7 @@
     <form class="form" @submit.prevent="submit">
       <!-- Dish selection -->
       <div class="form__field">
-        <span class="form__label">Блюдо</span>
+        <span class="form__label">Блюдо <span class="form__required">*</span></span>
         <div v-if="selectedDish" class="selected-dish">
           <span class="selected-dish__name">{{ selectedDish.name }}</span>
           <button type="button" class="selected-dish__edit" title="Редактировать блюдо" @click="editDish = selectedDish; showDishForm = true">
@@ -15,19 +15,14 @@
       </div>
 
       <label class="form__field">
-        <span class="form__label">Дата готовки</span>
+        <span class="form__label">Дата готовки <span class="form__required">*</span></span>
         <DateInput v-model="cookingDate" required />
       </label>
 
-      <label class="form__field">
-        <span class="form__label">На сколько дней хватит</span>
-        <input v-model.number="durationDays" type="number" min="1" max="30" class="form__input" required />
-      </label>
-
-      <label class="form__field">
-        <span class="form__label">Когда начнём есть</span>
-        <DateInput v-model="startEatingDate" required />
-      </label>
+      <div class="form__field">
+        <span class="form__label">Дни еды <span class="form__required">*</span></span>
+        <MultiDayPicker v-model="eatDates" :start-date="cookingDate" />
+      </div>
 
       <label class="form__field">
         <span class="form__label">Комментарий</span>
@@ -57,12 +52,13 @@ import ModalWrapper from "./ModalWrapper.vue"
 import DishSearch from "./DishSearch.vue"
 import DishForm from "./DishForm.vue"
 import DateInput from "./DateInput.vue"
+import MultiDayPicker from "./MultiDayPicker.vue"
 import { usePlanningStore } from "../../store/planning"
 
 const props = defineProps({
   modelValue: { type: Boolean, required: true },
-  date: { type: String, default: "" },
   editItem: { type: Object, default: null },
+  initialDate: { type: String, default: "" },
 })
 
 const emit = defineEmits(["update:modelValue"])
@@ -77,8 +73,7 @@ watch(open, (v) => { emit("update:modelValue", v) })
 
 const selectedDish = ref(null)
 const cookingDate = ref("")
-const durationDays = ref(1)
-const startEatingDate = ref("")
+const eatDates = ref([])
 const notes = ref("")
 const saving = ref(false)
 const error = ref("")
@@ -89,18 +84,31 @@ watch(() => props.modelValue, (v) => {
   if (v && props.editItem) {
     selectedDish.value = props.editItem.dish
     cookingDate.value = props.editItem.cooking_date
-    durationDays.value = props.editItem.duration_days
-    startEatingDate.value = props.editItem.start_eating_date
+    eatDates.value = (props.editItem.meal_plan_items || []).map((m) => m.date)
     notes.value = props.editItem.notes || ""
     error.value = ""
   } else if (v) {
     selectedDish.value = null
-    cookingDate.value = props.date
-    durationDays.value = 1
-    startEatingDate.value = props.date
+    cookingDate.value = props.initialDate || ""
+    eatDates.value = []
     notes.value = ""
     error.value = ""
   }
+})
+
+watch(cookingDate, (newVal, oldVal) => {
+  if (!oldVal || !newVal) return
+  if (!eatDates.value.length) return
+  const oldMs = new Date(oldVal + "T00:00:00").getTime()
+  const newMs = new Date(newVal + "T00:00:00").getTime()
+  const deltaMs = newMs - oldMs
+  if (!deltaMs) return
+  eatDates.value = eatDates.value
+    .map((iso) => {
+      const d = new Date(new Date(iso + "T00:00:00").getTime() + deltaMs)
+      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`
+    })
+    .filter((iso) => iso >= newVal)
 })
 
 function onDishSelect(dish) {
@@ -118,9 +126,7 @@ function onDishUpdated(dish) {
 function validate() {
   if (!selectedDish.value) return "Выберите блюдо."
   if (!cookingDate.value) return "Укажите дату готовки."
-  if (!startEatingDate.value) return "Укажите дату начала еды."
-  if (!durationDays.value || durationDays.value < 1 || durationDays.value > 30) return "Количество дней должно быть от 1 до 30."
-  if (startEatingDate.value < cookingDate.value) return "Дата начала еды не может быть раньше даты готовки."
+  if (!eatDates.value.length) return "Выберите хотя бы один день еды."
   return null
 }
 
@@ -132,8 +138,7 @@ async function submit() {
     const payload = {
       dish: selectedDish.value.id,
       cooking_date: cookingDate.value,
-      duration_days: durationDays.value,
-      start_eating_date: startEatingDate.value,
+      eat_dates: [...eatDates.value].sort(),
       notes: notes.value.trim() || undefined,
     }
     if (isEdit.value) {

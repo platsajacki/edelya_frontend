@@ -18,14 +18,14 @@
     <!-- Create / Edit forms -->
     <CookingEventForm
       v-model="showCookingForm"
-      :date="formDate"
       :edit-item="editCookingItem"
+      :initial-date="initialCookingDate"
     />
 
     <MealPlanItemForm
       v-model="showMealForm"
-      :date="formDate"
       :edit-item="editMealItem"
+      :initial-date="initialMealDate"
     />
 
     <!-- Detail sheets -->
@@ -43,6 +43,7 @@
       type="meal"
       @edit="onEditMeal"
       @delete="onDeleteMeal"
+      @view-cooking="onViewCookingFromMeal"
     />
 
     <Transition name="toast">
@@ -61,6 +62,7 @@ import CookingEventForm from "./forms/CookingEventForm.vue"
 import MealPlanItemForm from "./forms/MealPlanItemForm.vue"
 import CardDetailSheet from "./CardDetailSheet.vue"
 import { usePlanningStore } from "../store/planning"
+import { fetchCookingEvent } from "../services/planningService"
 
 defineProps({
   user: {
@@ -74,19 +76,21 @@ const planning = usePlanningStore()
 // --- Create flow ---
 const showCookingForm = ref(false)
 const showMealForm = ref(false)
-const formDate = ref("")
 const editCookingItem = ref(null)
 const editMealItem = ref(null)
 
+const initialCookingDate = ref("")
+const initialMealDate = ref("")
+
 function openCookingForm(date) {
   editCookingItem.value = null
-  formDate.value = date
+  initialCookingDate.value = date || ""
   showCookingForm.value = true
 }
 
 function openMealForm(date) {
   editMealItem.value = null
-  formDate.value = date
+  initialMealDate.value = date || ""
   showMealForm.value = true
 }
 
@@ -105,12 +109,26 @@ function openMealDetail(item) {
   showMealDetail.value = true
 }
 
+async function onViewCookingFromMeal(cookingEventId) {
+    showMealDetail.value = false
+    let event = planning.weekData.cooking_events.find((e) => e.id === cookingEventId)
+    if (!event) {
+      try {
+        event = await fetchCookingEvent(cookingEventId)
+      } catch {
+        planning.showToast("Не удалось загрузить готовку")
+        return
+      }
+    }
+    detailItem.value = event
+    showCookingDetail.value = true
+}
+
 // --- Edit from detail ---
 function onEditCooking() {
   const item = detailItem.value
   showCookingDetail.value = false
   editCookingItem.value = item
-  formDate.value = item.cooking_date
   showCookingForm.value = true
 }
 
@@ -118,7 +136,6 @@ function onEditMeal() {
   const item = detailItem.value
   showMealDetail.value = false
   editMealItem.value = item
-  formDate.value = item.date
   showMealForm.value = true
 }
 

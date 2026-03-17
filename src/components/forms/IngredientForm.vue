@@ -2,12 +2,12 @@
   <ModalWrapper v-model="open" title="Новый ингредиент" :z-index="zIndex">
     <form class="form" @submit.prevent="submit">
       <label class="form__field">
-        <span class="form__label">Название</span>
+        <span class="form__label">Название <span class="form__required">*</span></span>
         <input v-model="name" type="text" class="form__input" required />
       </label>
 
       <label class="form__field">
-        <span class="form__label">Категория</span>
+        <span class="form__label">Категория <span class="form__required">*</span></span>
         <select v-model="categoryId" class="form__select" required>
           <option value="" disabled>Выберите категорию</option>
           <option v-for="cat in categories" :key="cat.id" :value="cat.id">
@@ -17,7 +17,7 @@
       </label>
 
       <label class="form__field">
-        <span class="form__label">Единица измерения</span>
+        <span class="form__label">Единица измерения <span class="form__required">*</span></span>
         <select v-model="baseUnit" class="form__select" required>
           <option value="" disabled>Выберите единицу</option>
           <option v-for="u in UNITS" :key="u.value" :value="u.value">

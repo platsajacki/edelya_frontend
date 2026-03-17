@@ -3,7 +3,7 @@
     <form class="form" @submit.prevent="submit">
       <!-- Dish selection -->
       <div class="form__field">
-        <span class="form__label">Блюдо</span>
+        <span class="form__label">Блюдо <span class="form__required">*</span></span>
         <div v-if="selectedDish" class="selected-dish">
           <span class="selected-dish__name">{{ selectedDish.name }}</span>
           <button type="button" class="selected-dish__edit" @click="editDish = selectedDish; showDishForm = true" title="Редактировать блюдо">
@@ -14,10 +14,15 @@
         <DishSearch v-else @select="onDishSelect" @create="editDish = null; showDishForm = true" />
       </div>
 
-      <label class="form__field">
-        <span class="form__label">Дата</span>
+      <label v-if="isEdit" class="form__field">
+        <span class="form__label">Дата <span class="form__required">*</span></span>
         <DateInput v-model="mealDate" required />
       </label>
+
+      <div v-else class="form__field">
+        <span class="form__label">Дни еды <span class="form__required">*</span></span>
+        <MultiDayPicker v-model="eatDates" :start-date="initialDate" />
+      </div>
 
       <div v-if="error" class="form__error">{{ error }}</div>
 
@@ -42,12 +47,13 @@ import ModalWrapper from "./ModalWrapper.vue"
 import DishSearch from "./DishSearch.vue"
 import DishForm from "./DishForm.vue"
 import DateInput from "./DateInput.vue"
+import MultiDayPicker from "./MultiDayPicker.vue"
 import { usePlanningStore } from "../../store/planning"
 
 const props = defineProps({
   modelValue: { type: Boolean, required: true },
-  date: { type: String, default: "" },
   editItem: { type: Object, default: null },
+  initialDate: { type: String, default: "" },
 })
 
 const emit = defineEmits(["update:modelValue"])
@@ -62,6 +68,7 @@ watch(open, (v) => { emit("update:modelValue", v) })
 
 const selectedDish = ref(null)
 const mealDate = ref("")
+const eatDates = ref([])
 const saving = ref(false)
 const error = ref("")
 const showDishForm = ref(false)
@@ -71,10 +78,12 @@ watch(() => props.modelValue, (v) => {
   if (v && props.editItem) {
     selectedDish.value = props.editItem.dish
     mealDate.value = props.editItem.date
+    eatDates.value = []
     error.value = ""
   } else if (v) {
     selectedDish.value = null
-    mealDate.value = props.date
+    mealDate.value = ""
+    eatDates.value = props.initialDate ? [props.initialDate] : []
     error.value = ""
   }
 })
@@ -93,7 +102,8 @@ function onDishUpdated(dish) {
 
 function validate() {
   if (!selectedDish.value) return "Выберите блюдо."
-  if (!mealDate.value) return "Укажите дату."
+  if (isEdit.value && !mealDate.value) return "Укажите дату."
+  if (!isEdit.value && !eatDates.value.length) return "Выберите хотя бы один день."
   return null
 }
 
@@ -102,14 +112,16 @@ async function submit() {
   if (error.value) return
   saving.value = true
   try {
-    const payload = {
-      dish: selectedDish.value.id,
-      date: mealDate.value,
-    }
     if (isEdit.value) {
-      await planning.editMealPlanItem(props.editItem.id, payload)
+      await planning.editMealPlanItem(props.editItem.id, {
+        dish: selectedDish.value.id,
+        date: mealDate.value,
+      })
     } else {
-      await planning.addMealPlanItem(payload)
+      await planning.addMealPlanItem({
+        dish: selectedDish.value.id,
+        eat_dates: [...eatDates.value].sort(),
+      })
     }
     open.value = false
   } catch (err) {

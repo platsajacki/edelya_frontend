@@ -114,10 +114,7 @@ export const usePlanningStore = defineStore("planning", {
 
     async addMealPlanItem(payload) {
       try {
-        const existing = this.weekData.meal_plan_items
-          .filter((m) => m.date === payload.date)
-        const maxPos = existing.reduce((max, m) => Math.max(max, m.position ?? 0), 0)
-        await createMealPlanItem({ ...payload, position: maxPos + 100 })
+        await createMealPlanItem(payload)
         this.showToast("Приём пищи добавлен")
         await this.loadWeek()
       } catch (err) {

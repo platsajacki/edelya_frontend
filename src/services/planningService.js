@@ -4,6 +4,10 @@ export function fetchWeek(year, week) {
   return api(`/api/v1/planning/year/${year}/week/${week}/`)
 }
 
+export function fetchCookingEvent(id) {
+  return api(`/api/v1/planning/cooking-events/${id}/`)
+}
+
 export function createCookingEvent(payload) {
   return api(`/api/v1/planning/cooking-events/`, {
     method: "POST",
