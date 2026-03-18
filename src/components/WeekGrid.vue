@@ -24,6 +24,7 @@
       @tap-meal="$emit('tap-meal', $event)"
       @add-cooking="$emit('add-cooking', $event)"
       @add-meal="$emit('add-meal', $event)"
+      @drag-end="$emit('drag-end', $event)"
     />
   </div>
 </template>
@@ -42,7 +43,7 @@ const props = defineProps({
   },
 })
 
-defineEmits(['add-cooking', 'add-meal', 'tap-cooking', 'tap-meal'])
+defineEmits(['add-cooking', 'add-meal', 'tap-cooking', 'tap-meal', 'drag-end'])
 
 const days = computed(() => {
   const start = new Date(props.weekData.start_week + "T00:00:00")

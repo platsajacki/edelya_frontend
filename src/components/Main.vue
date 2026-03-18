@@ -13,6 +13,7 @@
       @add-meal="openMealForm"
       @tap-cooking="openCookingDetail"
       @tap-meal="openMealDetail"
+      @drag-end="onDragEnd"
     />
 
     <!-- Create / Edit forms -->
@@ -158,6 +159,10 @@ async function onDeleteMeal() {
   } catch {
     // toast shown by store
   }
+}
+
+function onDragEnd(data) {
+  planning.handleDragEnd(data)
 }
 
 onMounted(() => {

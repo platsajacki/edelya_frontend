@@ -1,5 +1,5 @@
 <template>
-  <button class="meal-card" type="button" @click="$emit('tap', item)">
+  <button class="meal-card" type="button" :data-id="item.id" @click="$emit('tap', item)">
     <span class="meal-card__name">{{ item.dish.name }}</span>
   </button>
 </template>
@@ -38,6 +38,24 @@ defineEmits(["tap"])
 .meal-card:active {
   transform: scale(0.97);
   box-shadow: var(--shadow-elevated);
+}
+
+.meal-card--ghost {
+  opacity: 0.3;
+  border: 2px dashed var(--card-accent, var(--color-mint));
+  background: var(--card-bg, var(--color-empty));
+}
+
+.meal-card--chosen {
+  box-shadow: var(--shadow-elevated);
+  transform: scale(1.02);
+  cursor: grabbing;
+}
+
+.meal-card--drag {
+  opacity: 0.9;
+  transform: rotate(2deg);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
 }
 
 .meal-card__name {

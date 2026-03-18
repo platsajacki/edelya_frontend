@@ -5,7 +5,7 @@
           <span class="day-row__date">{{ date.slice(0, 2) }}</span>
         </div>
 
-        <div class="day-row__cook">
+        <div ref="cookRef" class="day-row__cook" :data-date="rawDate">
           <MealCard
             v-for="event in cookingEvents"
             :key="event.id"
@@ -18,7 +18,7 @@
           </button>
         </div>
 
-        <div class="day-row__eat">
+        <div ref="eatRef" class="day-row__eat" :data-date="rawDate">
           <MealCard
             v-for="item in meals"
             :key="item.id"
@@ -34,9 +34,11 @@
 </template>
 
 <script setup>
+import { ref } from 'vue'
 import MealCard from './MealCard.vue'
+import { useSortable } from '../composables/useSortable'
 
-defineProps({
+const props = defineProps({
   day: { type: String, required: true },
   date: { type: String, required: true },
   rawDate: { type: String, required: true },
@@ -44,7 +46,50 @@ defineProps({
   cookingEvents: { type: Array, default: () => [] },
 })
 
-defineEmits(["tap-cooking", "tap-meal", "add-cooking", "add-meal"])
+const emit = defineEmits(["tap-cooking", "tap-meal", "add-cooking", "add-meal", "drag-end"])
+
+const cookRef = ref(null)
+const eatRef = ref(null)
+
+function makeSortableOptions(type) {
+  return {
+    group: type,
+    draggable: '.meal-card',
+    filter: '.day-row__add',
+    ghostClass: 'meal-card--ghost',
+    chosenClass: 'meal-card--chosen',
+    dragClass: 'meal-card--drag',
+    animation: 150,
+    delay: 150,
+    delayOnTouchOnly: true,
+    touchStartThreshold: 3,
+    onEnd(evt) {
+      const itemId = evt.item.dataset.id
+      const fromDate = evt.from.dataset.date
+      const toDate = evt.to.dataset.date
+      const { oldIndex, oldDraggableIndex, newDraggableIndex } = evt
+
+      // Revert DOM so Vue stays in control of rendering
+      // Use raw oldIndex for DOM (includes non-draggable children like "+" button)
+      const { from, to, item } = evt
+      if (from !== to) {
+        to.removeChild(item)
+        from.insertBefore(item, from.children[oldIndex] || null)
+      } else {
+        from.removeChild(item)
+        from.insertBefore(item, from.children[oldIndex] || null)
+      }
+
+      // Use draggable indices for store logic (excludes "+" buttons)
+      if (fromDate === toDate && oldDraggableIndex === newDraggableIndex) return
+
+      emit('drag-end', { itemId, fromDate, toDate, oldIndex: oldDraggableIndex, newIndex: newDraggableIndex, type })
+    },
+  }
+}
+
+useSortable(cookRef, makeSortableOptions('cooking'))
+useSortable(eatRef, makeSortableOptions('meals'))
 </script>
 
 <style scoped>

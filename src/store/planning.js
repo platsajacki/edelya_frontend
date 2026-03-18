@@ -7,7 +7,9 @@ import {
   deleteCookingEvent,
   updateMealPlanItem,
   deleteMealPlanItem,
+  batchUpdateMealPositions,
 } from "../services/planningService"
+import { recalcPositions } from "../utils/recalcPositions"
 
 function getISOWeek(date) {
   const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()))
@@ -165,6 +167,104 @@ export const usePlanningStore = defineStore("planning", {
         this.showToast("Не удалось удалить приём пищи")
         throw err
       }
+    },
+
+    async handleDragEnd({ itemId, fromDate, toDate, oldIndex, newIndex, type }) {
+      const snapshot = JSON.parse(JSON.stringify(this.weekData))
+
+      try {
+        if (type === 'meals') {
+          await this._handleMealDrag(itemId, fromDate, toDate, oldIndex, newIndex)
+        } else if (type === 'cooking') {
+          await this._handleCookingDrag(itemId, fromDate, toDate)
+          // Backend moves related objects — need fresh data
+          await this.loadWeek()
+        }
+      } catch {
+        this.weekData = snapshot
+        this.showToast("Не удалось переместить")
+      }
+    },
+
+    _positionBetween(dayItems, newIndex) {
+      const prev = newIndex > 0 ? dayItems[newIndex - 1].position : 0
+      const next = newIndex < dayItems.length ? dayItems[newIndex].position : prev + 200
+
+      const mid = Math.floor((prev + next) / 2)
+      if (mid > prev && mid < next) return { position: mid, needsRecalc: false }
+
+      // No integer space between neighbors — full recalc needed
+      return { position: null, needsRecalc: true }
+    },
+
+    async _handleMealDrag(itemId, fromDate, toDate, oldIndex, newIndex) {
+      const items = this.weekData.meal_plan_items
+      const movedItem = items.find((m) => m.id === itemId)
+      if (!movedItem) return
+
+      if (fromDate === toDate) {
+        // Within same day — reorder
+        const dayItems = items
+          .filter((m) => m.date === fromDate)
+          .sort((a, b) => a.position - b.position)
+
+        const fromIdx = dayItems.indexOf(movedItem)
+        if (fromIdx !== -1) dayItems.splice(fromIdx, 1)
+
+        const { position, needsRecalc } = this._positionBetween(dayItems, newIndex)
+
+        if (!needsRecalc) {
+          movedItem.position = position
+          await updateMealPlanItem(movedItem.id, { date: movedItem.date, position })
+        } else {
+          dayItems.splice(newIndex, 0, movedItem)
+          await this._recalcAndPatch(dayItems, items)
+        }
+      } else {
+        // Cross-day move — source day is not touched
+        movedItem.date = toDate
+
+        const targetItems = items
+          .filter((m) => m.date === toDate && m.id !== itemId)
+          .sort((a, b) => a.position - b.position)
+
+        const { position, needsRecalc } = this._positionBetween(targetItems, newIndex)
+
+        if (!needsRecalc) {
+          movedItem.position = position
+          await updateMealPlanItem(movedItem.id, { date: toDate, position })
+        } else {
+          targetItems.splice(newIndex, 0, movedItem)
+          await this._recalcAndPatch(targetItems, items)
+        }
+      }
+    },
+
+    async _recalcAndPatch(dayItems, allItems) {
+      const oldPositions = new Map(dayItems.map((m) => [m.id, m.position]))
+      const updated = recalcPositions(dayItems)
+
+      for (const u of updated) {
+        const orig = allItems.find((m) => m.id === u.id)
+        if (orig) orig.position = u.position
+      }
+
+      const changed = updated.filter((m) => m.position !== oldPositions.get(m.id))
+      if (changed.length) {
+        await batchUpdateMealPositions(
+          changed.map((m) => ({ id: m.id, date: m.date, position: m.position }))
+        )
+      }
+    },
+
+    async _handleCookingDrag(itemId, fromDate, toDate) {
+      if (fromDate === toDate) return
+
+      const event = this.weekData.cooking_events.find((e) => e.id === itemId)
+      if (!event) return
+
+      event.cooking_date = toDate
+      await updateCookingEvent(itemId, { cooking_date: toDate })
     },
   },
 })
