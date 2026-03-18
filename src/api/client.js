@@ -103,7 +103,8 @@ function translateMessage(msg) {
   if (/^This field may not be blank/.test(msg)) return "Поле не может быть пустым."
   if (/^This field may not be null/.test(msg)) return "Поле не может быть пустым."
 
-  return msg
+  console.warn("Untranslated API message:", msg)
+  return "Произошла ошибка. Попробуйте ещё раз."
 }
 
 async function parseError(response) {
@@ -114,7 +115,7 @@ async function parseError(response) {
   err.body = body
 
   if (!body) {
-    err.message = `Ошибка сервера (${response.status})`
+    err.message = "Ошибка сервера. Попробуйте позже."
     return err
   }
 
@@ -144,12 +145,12 @@ async function parseError(response) {
     if (key === "non_field_errors") {
       parts.push(translated.join("; "))
     } else {
-      const label = FIELD_NAMES[key] || key
-      parts.push(`${label}: ${translated.join("; ")}`)
+      const label = FIELD_NAMES[key]
+      parts.push(label ? `${label}: ${translated.join("; ")}` : translated.join("; "))
     }
   }
 
-  err.message = parts.length ? parts.join("\n") : `Ошибка сервера (${response.status})`
+  err.message = parts.length ? parts.join("\n") : "Ошибка сервера. Попробуйте позже."
   return err
 }
 
