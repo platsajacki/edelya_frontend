@@ -97,8 +97,8 @@ const days = computed(() => {
   align-items: center;
   justify-content: center;
   gap: 6px;
-  font-size: 12px;
-  font-weight: 600;
+  font-size: 13px;
+  font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   padding: 8px 0;
@@ -107,11 +107,11 @@ const days = computed(() => {
 
 .week-grid__header-col--eat {
   color: var(--color-eat);
-  background: var(--color-eat-bg);
+  background: var(--color-eat-bg-strong);
 }
 
 .week-grid__header-col--cook {
   color: var(--color-cook);
-  background: var(--color-cook-bg);
+  background: var(--color-cook-bg-strong);
 }
 </style>

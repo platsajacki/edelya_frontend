@@ -146,9 +146,9 @@ async function submit() {
 }
 
 .form__label {
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
-  color: var(--color-text-secondary);
+  color: var(--color-text);
 }
 
 .form__input {
@@ -164,6 +164,7 @@ async function submit() {
 
 .form__input:focus {
   border-color: var(--color-mint);
+  outline: none;
 }
 
   .form__error {
@@ -188,7 +189,7 @@ async function submit() {
 }
 
 .form__submit:disabled {
-  opacity: 0.6;
+  opacity: 0.45;
   cursor: not-allowed;
 }
 

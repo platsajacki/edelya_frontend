@@ -30,6 +30,11 @@ defineEmits(["tap"])
   transition: box-shadow 0.15s, transform 0.15s;
 }
 
+.meal-card:hover {
+  box-shadow: var(--shadow-card);
+  transform: translateY(-1px);
+}
+
 .meal-card:active {
   transform: scale(0.97);
   box-shadow: var(--shadow-elevated);

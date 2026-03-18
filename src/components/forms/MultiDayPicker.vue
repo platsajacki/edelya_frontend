@@ -84,11 +84,11 @@ function toggle(iso) {
   border-radius: var(--radius-sm);
   background: var(--color-surface);
   cursor: pointer;
-  transition: background 0.15s, border-color 0.15s, color 0.15s;
+  transition: background 0.15s, border-color 0.15s, color 0.15s, transform 0.15s, box-shadow 0.15s;
 }
 
 .multi-day-picker__chip:hover:not(:disabled) {
-  background: var(--color-empty);
+  background: rgba(138, 99, 181, 0.06);
   border-color: var(--color-mint);
 }
 
@@ -96,12 +96,16 @@ function toggle(iso) {
   background: var(--color-mint);
   border-color: var(--color-mint);
   color: var(--on-primary);
+  transform: scale(1.05);
+  box-shadow: 0 2px 8px rgba(138, 99, 181, 0.25);
 }
 
 .multi-day-picker__chip--selected:hover:not(:disabled) {
   background: var(--color-mint-hover);
   border-color: var(--color-mint-hover);
   color: var(--on-primary);
+  transform: scale(1.05);
+  box-shadow: 0 2px 8px rgba(138, 99, 181, 0.25);
 }
 
 

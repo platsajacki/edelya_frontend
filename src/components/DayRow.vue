@@ -1,6 +1,9 @@
 <template>
     <div class="day-row">
-        <div class="day-row__label">{{ day }}<br>{{ date.slice(0, 2) }}</div>
+        <div class="day-row__label">
+          <span class="day-row__day">{{ day }}</span>
+          <span class="day-row__date">{{ date.slice(0, 2) }}</span>
+        </div>
 
         <div class="day-row__cook">
           <MealCard
@@ -10,7 +13,8 @@
             @tap="$emit('tap-cooking', $event)"
           />
           <button type="button" class="day-row__add day-row__add--cook" @click="$emit('add-cooking', rawDate)">
-            +
+            <span class="day-row__add-icon">+</span>
+            <span class="day-row__add-text">Добавить</span>
           </button>
         </div>
 
@@ -22,7 +26,8 @@
             @tap="$emit('tap-meal', $event)"
           />
           <button type="button" class="day-row__add day-row__add--eat" @click="$emit('add-meal', rawDate)">
-            +
+            <span class="day-row__add-icon">+</span>
+            <span class="day-row__add-text">Добавить</span>
           </button>
         </div>
     </div>
@@ -46,9 +51,10 @@ defineEmits(["tap-cooking", "tap-meal", "add-cooking", "add-meal"])
 .day-row {
   display: grid;
   grid-template-columns: 36px 1fr 1fr;
-  gap: 10px;
+  column-gap: 12px;
+  row-gap: 10px;
   align-items: start;
-  padding: 14px 12px;
+  padding: 14px 14px;
   min-height: 56px;
   background: var(--color-surface);
   border-radius: var(--radius-lg);
@@ -56,12 +62,27 @@ defineEmits(["tap-cooking", "tap-meal", "add-cooking", "add-meal"])
 }
 
 .day-row__label {
-  font-weight: 700;
-  font-size: 13px;
-  color: var(--color-text-secondary);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
   padding-top: 7px;
   text-align: center;
   line-height: 1;
+}
+
+.day-row__day {
+  font-weight: 600;
+  font-size: 15px;
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.day-row__date {
+  font-weight: 600;
+  font-size: 15px;
+  color: var(--color-text-secondary);
 }
 
 .day-row__eat {
@@ -69,7 +90,9 @@ defineEmits(["tap-cooking", "tap-meal", "add-cooking", "add-meal"])
   --card-accent: var(--color-eat);
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
+  border-left: 1px solid var(--color-border);
+  padding-left: 12px;
 }
 
 .day-row__cook {
@@ -77,34 +100,54 @@ defineEmits(["tap-cooking", "tap-meal", "add-cooking", "add-meal"])
   --card-accent: var(--color-cook);
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
 }
 
 .day-row__add {
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 4px;
   width: 100%;
   padding: 4px 0;
-  border: 1.5px dashed var(--color-border);
+  border: 2px dashed var(--color-border);
   border-radius: var(--radius-sm);
   background: none;
-  font-size: 16px;
   font-weight: 500;
   cursor: pointer;
-  transition: background 0.15s, border-color 0.15s, color 0.15s;
+  transition: background 0.15s, border-color 0.15s, color 0.15s, transform 0.15s, box-shadow 0.15s;
   color: var(--color-text-secondary);
+}
+
+.day-row__add-icon {
+  font-size: 20px;
+  line-height: 1;
+}
+
+.day-row__add-text {
+  display: none;
+  font-size: 13px;
+}
+
+@media (min-width: 480px) {
+  .day-row__add-text {
+    display: inline;
+  }
 }
 
 .day-row__add--cook:hover {
   border-color: var(--color-cook);
   color: var(--color-cook);
   background: var(--color-cook-bg);
+  transform: scale(1.02);
+  box-shadow: var(--shadow-card);
 }
 
 .day-row__add--eat:hover {
   border-color: var(--color-eat);
   color: var(--color-eat);
   background: var(--color-eat-bg);
+  transform: scale(1.02);
+  box-shadow: var(--shadow-card);
 }
 </style>

@@ -2,17 +2,17 @@
   --color-bg: #ffffff;
   --color-surface: #FFFFFF;
   --color-text: #252520;
-  --color-text-secondary: #6B6B62;
-  --color-border: #E3E9D0;
+  --color-text-secondary: #5F5F56;
+  --color-border: #D6DEC0;
   --color-empty: #F2F2EE;
-  --color-mint: #B99AD9;
-  --color-mint-hover: #A082CC;
-  --color-eat: #7EA840;
-  --color-eat-bg: rgba(126, 168, 64, 0.12);
-  --color-cook: #B8D42A;
-  --color-cook-bg: rgba(184, 212, 42, 0.14);
-  --color-eat-bg-strong: rgba(126, 168, 64, 0.22);
-  --color-cook-bg-strong: rgba(184, 212, 42, 0.22);
+  --color-mint: #8A63B5;
+  --color-mint-hover: #7D56A9;
+  --color-eat: #6F9737;
+  --color-eat-bg: rgba(111, 151, 55, 0.12);
+  --color-cook: #8AAA25;
+  --color-cook-bg: rgba(138, 170, 37, 0.14);
+  --color-eat-bg-strong: rgba(111, 151, 55, 0.22);
+  --color-cook-bg-strong: rgba(138, 170, 37, 0.22);
 
   --color-danger: #D64545;
   --color-danger-muted: #B91C1C;
@@ -20,7 +20,7 @@
   --color-danger-soft: #FECACA;
   --color-danger-pale: #FEF2F2;
 
-  --overlay-bg: rgba(30, 20, 45, 0.45);
+  --overlay-bg: rgba(30, 20, 45, 0.48);
   --on-primary: #ffffff;
   --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02);
   --shadow-day: 0 2px 8px rgba(0, 0, 0, 0.06), 0 0 0 1px var(--color-border);
@@ -49,6 +49,11 @@ body {
 button {
   font-family: inherit;
   cursor: pointer;
+}
+
+*:focus-visible {
+  outline: 2px solid var(--color-mint);
+  outline-offset: 2px;
 }
 
 .form__required {

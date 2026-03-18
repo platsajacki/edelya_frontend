@@ -27,8 +27,10 @@
 
         <div v-for="(ing, idx) in ingredients" :key="idx" class="ingredient-row">
           <span class="ingredient-row__name">{{ ing.ingredientName }}</span>
-          <span class="ingredient-row__amount">{{ ing.amount }}</span>
-          <button type="button" class="ingredient-row__remove" @click="ingredients.splice(idx, 1)">&times;</button>
+          <span class="ingredient-row__amount">{{ ing.amount }} {{ ing.unitLabel || '' }}</span>
+          <button type="button" class="ingredient-row__remove" @click="ingredients.splice(idx, 1)" title="Удалить">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 4h10M5.5 4V3a1 1 0 011-1h3a1 1 0 011 1v1M6.5 7v4M9.5 7v4M4.5 4l.5 9a1 1 0 001 1h4a1 1 0 001-1l.5-9" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
         </div>
 
         <!-- Amount input after selecting ingredient -->
@@ -175,6 +177,7 @@ watch(() => props.modelValue, async (v) => {
         ingredient: di.ingredient?.id ?? di.ingredient,
         ingredientName: di.ingredient?.name ?? di.name ?? "",
         amount: String(di.amount),
+        unitLabel: UNIT_LABELS[di.ingredient?.base_unit] || di.ingredient?.base_unit || '',
         is_optional: di.is_optional ?? false,
       }))
     } else {
@@ -223,6 +226,7 @@ function confirmIngredient() {
     ingredient: pendingIngredient.value.id,
     ingredientName: pendingIngredient.value.name,
     amount: String(pendingAmount.value),
+    unitLabel: UNIT_LABELS[pendingIngredient.value.base_unit] || pendingIngredient.value.base_unit || '',
     is_optional: pendingOptional.value,
   })
   pendingIngredient.value = null
@@ -301,12 +305,14 @@ async function submit() {
   display: flex;
   flex-direction: column;
   gap: 8px;
+  border-top: 1px solid var(--color-border);
+  padding-top: 14px;
 }
 
 .form__label {
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
-  color: var(--color-text-secondary);
+  color: var(--color-text);
 }
 
 .form__input,
@@ -328,6 +334,7 @@ async function submit() {
 .form__select:focus,
 .form__textarea:focus {
   border-color: var(--color-mint);
+  outline: none;
 }
 
 .form__error {
@@ -352,7 +359,7 @@ async function submit() {
 }
 
 .form__submit:disabled {
-  opacity: 0.6;
+  opacity: 0.45;
   cursor: not-allowed;
 }
 
@@ -382,13 +389,13 @@ async function submit() {
   height: 24px;
   border: none;
   background: none;
-  font-size: 18px;
   color: var(--color-text-secondary);
   border-radius: 6px;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  transition: background 0.15s, color 0.15s;
 }
 
 .ingredient-row__remove:hover {

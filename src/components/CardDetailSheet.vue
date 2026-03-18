@@ -19,7 +19,7 @@
 
       <!-- Ingredients -->
       <div v-if="dish.dish_ingredients?.length" class="detail__section">
-        <span class="detail__label">Ингредиенты</span>
+        <span class="detail__label">Состав</span>
         <ul class="detail__ingredients">
           <li v-for="di in dish.dish_ingredients" :key="di.id" class="detail__ingredient">
             <span class="detail__ingredient-name">{{ di.ingredient?.name ?? di.name }}</span>
@@ -32,6 +32,7 @@
 
       <!-- Type-specific info -->
       <div v-if="type === 'cooking'" class="detail__section">
+        <span class="detail__label">Планирование</span>
         <div class="detail__row">
           <span class="detail__label">Дата готовки</span>
           <span class="detail__value">{{ formatDate(item.cooking_date) }}</span>
@@ -50,6 +51,7 @@
       </div>
 
       <div v-if="type === 'meal'" class="detail__section">
+        <span class="detail__label">Планирование</span>
         <div class="detail__row">
           <span class="detail__label">Дата</span>
           <span class="detail__value">{{ formatDate(item.date) }}</span>
@@ -180,11 +182,11 @@ async function onDishUpdated() {
 .detail__section {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
 }
 
 .detail__section + .detail__section {
-  padding-top: 12px;
+  padding-top: 16px;
   border-top: 1px solid var(--color-border);
 }
 
@@ -251,9 +253,9 @@ async function onDishUpdated() {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 6px 10px;
-  background: var(--color-empty);
-  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+  background: var(--color-border);
+  border-radius: 8px;
   font-size: 14px;
 }
 
@@ -299,15 +301,18 @@ async function onDishUpdated() {
   border: none;
   background: none;
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 600;
   color: var(--color-mint);
   cursor: pointer;
   padding: 0;
-  transition: color 0.15s;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  transition: color 0.15s, text-decoration-thickness 0.15s;
 }
 
 .detail__link:hover {
   color: var(--color-mint-hover);
+  text-decoration-thickness: 2px;
 }
 
 .detail__value {
@@ -348,12 +353,12 @@ async function onDishUpdated() {
 }
 
   .detail__btn--delete {
-  background: var(--color-danger-bg);
+  background: var(--color-danger-pale);
   color: var(--color-danger-muted);
 }
 
   .detail__btn--delete:hover {
-  background: var(--color-danger-soft);
+  background: var(--color-danger-bg);
 }
 
 .detail__btn--cancel {
