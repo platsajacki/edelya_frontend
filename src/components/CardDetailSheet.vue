@@ -241,7 +241,7 @@ async function onCloneCreated() {
 .detail__section {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
 }
 
 .detail__section + .detail__section {
@@ -316,7 +316,7 @@ async function onCloneCreated() {
 }
 
 .detail__description {
-  font-size: 14px;
+  font-size: 15px;
   color: var(--color-text);
   line-height: 1.5;
   margin: 0;
@@ -342,7 +342,7 @@ async function onCloneCreated() {
   padding: 8px 12px;
   background: var(--color-border);
   border-radius: 8px;
-  font-size: 14px;
+  font-size: 13px;
 }
 
 .detail__ingredient-name {
@@ -371,11 +371,11 @@ async function onCloneCreated() {
 .detail__eat-dates {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: 8px;
 }
 
 .detail__eat-date {
-  padding: 4px 10px;
+  padding: 4px 12px;
   background: var(--color-empty);
   border-radius: var(--radius-sm);
   font-size: 13px;
@@ -386,7 +386,7 @@ async function onCloneCreated() {
 .detail__link {
   border: none;
   background: none;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
   color: var(--color-mint);
   cursor: pointer;
@@ -461,7 +461,7 @@ async function onCloneCreated() {
   font-weight: 600;
   color: var(--color-danger-muted);
   text-align: center;
-  margin: 0 0 10px;
+  margin: 0 0 12px;
 }
 
 .detail__confirm-actions {
@@ -474,7 +474,7 @@ async function onCloneCreated() {
 }
 
 .detail__clone-text {
-  font-size: 14px;
+  font-size: 13px;
   color: var(--color-text);
   line-height: 1.5;
   text-align: center;

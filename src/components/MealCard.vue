@@ -32,7 +32,7 @@ const isOwn = computed(() => isDishOwn(props.item.dish))
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 6px;
+  gap: 8px;
   width: 100%;
   padding: 8px 12px;
   border-radius: var(--radius-sm);
@@ -50,7 +50,7 @@ const isOwn = computed(() => isDishOwn(props.item.dish))
 }
 
 .meal-card__owner-icon {
-  font-size: 12px;
+  font-size: 11px;
   flex-shrink: 0;
   line-height: 1;
 }

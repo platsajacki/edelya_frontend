@@ -5,26 +5,30 @@
           <span class="day-row__date">{{ date.slice(0, 2) }}</span>
         </div>
 
-        <div ref="cookRef" class="day-row__cook" :data-date="rawDate">
-          <MealCard
-            v-for="event in cookingEvents"
-            :key="event.id"
-            :item="event"
-            @tap="$emit('tap-cooking', $event)"
-          />
+        <div class="day-row__cook">
+          <div ref="cookRef" class="day-row__items" :data-date="rawDate">
+            <MealCard
+              v-for="event in cookingEvents"
+              :key="event.id"
+              :item="event"
+              @tap="$emit('tap-cooking', $event)"
+            />
+          </div>
           <button type="button" class="day-row__add day-row__add--cook" @click="$emit('add-cooking', rawDate)">
             <span class="day-row__add-icon">+</span>
             <span class="day-row__add-text">Добавить</span>
           </button>
         </div>
 
-        <div ref="eatRef" class="day-row__eat" :data-date="rawDate">
-          <MealCard
-            v-for="item in meals"
-            :key="item.id"
-            :item="item"
-            @tap="$emit('tap-meal', $event)"
-          />
+        <div class="day-row__eat">
+          <div ref="eatRef" class="day-row__items" :data-date="rawDate">
+            <MealCard
+              v-for="item in meals"
+              :key="item.id"
+              :item="item"
+              @tap="$emit('tap-meal', $event)"
+            />
+          </div>
           <button type="button" class="day-row__add day-row__add--eat" @click="$emit('add-meal', rawDate)">
             <span class="day-row__add-icon">+</span>
             <span class="day-row__add-text">Добавить</span>
@@ -55,7 +59,6 @@ function makeSortableOptions(type) {
   return {
     group: type,
     draggable: '.meal-card',
-    filter: '.day-row__add',
     ghostClass: 'meal-card--ghost',
     chosenClass: 'meal-card--chosen',
     dragClass: 'meal-card--drag',
@@ -70,7 +73,6 @@ function makeSortableOptions(type) {
       const { oldIndex, oldDraggableIndex, newDraggableIndex } = evt
 
       // Revert DOM so Vue stays in control of rendering
-      // Use raw oldIndex for DOM (includes non-draggable children like "+" button)
       const { from, to, item } = evt
       if (from !== to) {
         to.removeChild(item)
@@ -80,7 +82,6 @@ function makeSortableOptions(type) {
         from.insertBefore(item, from.children[oldIndex] || null)
       }
 
-      // Use draggable indices for store logic (excludes "+" buttons)
       if (fromDate === toDate && oldDraggableIndex === newDraggableIndex) return
 
       emit('drag-end', { itemId, fromDate, toDate, oldIndex: oldDraggableIndex, newIndex: newDraggableIndex, type })
@@ -97,9 +98,9 @@ useSortable(eatRef, makeSortableOptions('meals'))
   display: grid;
   grid-template-columns: 36px 1fr 1fr;
   column-gap: 12px;
-  row-gap: 10px;
+  row-gap: 12px;
   align-items: start;
-  padding: 12px 14px;
+  padding: 12px 16px;
   min-height: 56px;
   background: var(--color-surface);
   border-radius: var(--radius-lg);
@@ -112,8 +113,10 @@ useSortable(eatRef, makeSortableOptions('meals'))
   align-items: center;
   gap: 2px;
   padding-top: 1px;
+  padding-right: 8px;
   text-align: center;
   line-height: 1;
+  border-right: 1px solid var(--color-border);
 }
 
 .day-row__day {
@@ -135,9 +138,18 @@ useSortable(eatRef, makeSortableOptions('meals'))
   --card-accent: var(--color-eat);
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  border-left: 1px solid var(--color-border);
-  padding-left: 12px;
+  position: relative;
+  padding-left: 8px;
+}
+
+.day-row__eat::before {
+  content: '';
+  position: absolute;
+  left: -6px;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: var(--color-border);
 }
 
 .day-row__cook {
@@ -145,7 +157,21 @@ useSortable(eatRef, makeSortableOptions('meals'))
   --card-accent: var(--color-cook);
   display: flex;
   flex-direction: column;
+}
+
+.day-row__items {
+  display: flex;
+  flex-direction: column;
   gap: 8px;
+  min-height: 1px;
+}
+
+.day-row__items:not(:empty) {
+  margin-bottom: 8px;
+}
+
+.day-row__items:empty + .day-row__add {
+  margin-top: 0;
 }
 
 .day-row__add {
@@ -154,7 +180,7 @@ useSortable(eatRef, makeSortableOptions('meals'))
   justify-content: center;
   gap: 4px;
   width: 100%;
-  padding: 6px 0;
+  padding: 8px 0;
   border: 1.5px dashed var(--color-border);
   border-radius: var(--radius-sm);
   background: none;
@@ -165,12 +191,12 @@ useSortable(eatRef, makeSortableOptions('meals'))
 }
 
 .day-row__add-icon {
-  font-size: 16px;
+  font-size: 15px;
   line-height: 1;
 }
 
 .day-row__add-text {
-  font-size: 12px;
+  font-size: 11px;
 }
 
 .day-row__add--cook:hover {

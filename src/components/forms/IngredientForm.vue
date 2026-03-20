@@ -123,7 +123,7 @@ async function submit() {
 .form {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 16px;
 }
 
 .form__field {
@@ -133,7 +133,7 @@ async function submit() {
 }
 
 .form__label {
-  font-size: 15px;
+  font-size: 13px;
   font-weight: 600;
   color: var(--color-text);
 }

@@ -70,7 +70,7 @@ function toggle(iso) {
 .multi-day-picker__chips {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: 8px;
 }
 
 .multi-day-picker__chip {
@@ -78,7 +78,7 @@ function toggle(iso) {
   flex-direction: column;
   align-items: center;
   gap: 2px;
-  padding: 8px 10px;
+  padding: 8px 12px;
   min-width: 48px;
   border: 1.5px solid var(--color-border);
   border-radius: var(--radius-sm);

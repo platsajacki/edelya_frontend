@@ -197,7 +197,7 @@ onMounted(() => {
   background: var(--color-text);
   color: var(--color-surface);
   border-radius: var(--radius-sm);
-  font-size: 14px;
+  font-size: 13px;
   box-shadow: var(--shadow-elevated);
   cursor: pointer;
   z-index: 99999;
@@ -214,5 +214,12 @@ onMounted(() => {
 .toast-leave-to {
   opacity: 0;
   transform: translateX(-50%) translateY(12px);
+}
+
+@media (min-width: 600px) {
+  .planner {
+    max-width: 540px;
+    padding: 16px 24px 40px;
+  }
 }
 </style>

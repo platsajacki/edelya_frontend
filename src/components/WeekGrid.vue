@@ -78,25 +78,25 @@ const days = computed(() => {
 .week-grid {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
 }
 
 .week-grid__header {
   display: grid;
   grid-template-columns: 36px 1fr 1fr;
   column-gap: 12px;
-  padding: 0 14px;
+  padding: 0 16px;
 }
 
 .week-grid__header-spacer {
-  
+  /* Spacer to align with day label column */
 }
 
 .week-grid__header-col {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
+  gap: 8px;
   font-size: 13px;
   font-weight: 700;
   text-transform: uppercase;

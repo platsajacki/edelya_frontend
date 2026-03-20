@@ -159,12 +159,12 @@ onMounted(() => {
 }
 
 .dish-search__name {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 500;
 }
 
 .dish-search__category {
-  font-size: 12px;
+  font-size: 11px;
   color: var(--color-text-secondary);
 }
 
@@ -176,7 +176,7 @@ onMounted(() => {
 
 .dish-search__create {
   align-self: flex-start;
-  padding: 8px 14px;
+  padding: 8px 16px;
   border: 1.5px dashed var(--color-border);
   border-radius: var(--radius-sm);
   background: transparent;

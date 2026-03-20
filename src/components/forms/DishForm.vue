@@ -305,7 +305,7 @@ async function submit() {
 .form {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 16px;
 }
 
 .form__field {
@@ -319,11 +319,11 @@ async function submit() {
   flex-direction: column;
   gap: 8px;
   border-top: 1px solid var(--color-border);
-  padding-top: 14px;
+  padding-top: 16px;
 }
 
 .form__label {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
   color: var(--color-text);
 }
@@ -381,10 +381,10 @@ async function submit() {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 8px 10px;
+  padding: 8px 12px;
   background: var(--color-empty);
   border-radius: 8px;
-  font-size: 14px;
+  font-size: 13px;
 }
 
 .ingredient-row__name {
@@ -420,7 +420,7 @@ async function submit() {
 .ingredient-search {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
 }
 
 .ingredient-search__list {
@@ -436,7 +436,7 @@ async function submit() {
   justify-content: space-between;
   padding: 8px 12px;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 13px;
   transition: background 0.1s;
 }
 
@@ -449,7 +449,7 @@ async function submit() {
 }
 
 .ingredient-search__unit {
-  font-size: 12px;
+  font-size: 11px;
   color: var(--color-text-secondary);
 }
 
@@ -457,14 +457,14 @@ async function submit() {
 .ingredient-amount {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  padding: 10px;
+  gap: 8px;
+  padding: 12px;
   background: var(--color-empty);
   border-radius: 8px;
 }
 
 .ingredient-amount__name {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 500;
 }
 
@@ -479,7 +479,7 @@ async function submit() {
 }
 
 .ingredient-amount__unit {
-  font-size: 14px;
+  font-size: 13px;
   color: var(--color-text-secondary);
   white-space: nowrap;
 }
@@ -487,7 +487,7 @@ async function submit() {
 .ingredient-amount__optional {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   font-size: 13px;
   color: var(--color-text-secondary);
 }
@@ -499,7 +499,7 @@ async function submit() {
 
 /* Buttons */
 .btn {
-  padding: 6px 14px;
+  padding: 8px 16px;
   border: none;
   border-radius: 8px;
   font-size: 13px;
@@ -528,7 +528,7 @@ async function submit() {
 
 .dish-search__create {
   align-self: flex-start;
-  padding: 8px 14px;
+  padding: 8px 16px;
   border: 1.5px dashed var(--color-border);
   border-radius: var(--radius-sm);
   background: transparent;
