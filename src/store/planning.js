@@ -175,6 +175,7 @@ export const usePlanningStore = defineStore("planning", {
       try {
         if (type === 'meals') {
           await this._handleMealDrag(itemId, fromDate, toDate, oldIndex, newIndex)
+          await this.loadWeek()
         } else if (type === 'cooking') {
           await this._handleCookingDrag(itemId, fromDate, toDate)
           // Backend moves related objects — need fresh data

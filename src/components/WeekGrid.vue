@@ -84,9 +84,8 @@ const days = computed(() => {
 .week-grid__header {
   display: grid;
   grid-template-columns: 36px 1fr 1fr;
-  gap: 8px;
-  padding: 0 4px;
-  margin-bottom: -6px;
+  column-gap: 12px;
+  padding: 0 14px;
 }
 
 .week-grid__header-spacer {

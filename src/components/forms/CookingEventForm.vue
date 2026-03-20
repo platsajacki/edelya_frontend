@@ -113,14 +113,17 @@ watch(cookingDate, (newVal, oldVal) => {
 
 function onDishSelect(dish) {
   selectedDish.value = dish
+  error.value = ""
 }
 
 function onDishCreated(dish) {
   selectedDish.value = dish
+  error.value = ""
 }
 
 function onDishUpdated(dish) {
   selectedDish.value = dish
+  error.value = ""
 }
 
 function validate() {

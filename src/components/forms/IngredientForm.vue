@@ -133,9 +133,9 @@ async function submit() {
 }
 
 .form__label {
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 600;
-  color: var(--color-text-secondary);
+  color: var(--color-text);
 }
 
 .form__input,
@@ -144,6 +144,7 @@ async function submit() {
   border: 1.5px solid var(--color-border);
   border-radius: var(--radius-sm);
   font-size: 15px;
+  font-family: inherit;
   background: var(--color-surface);
   color: var(--color-text);
   outline: none;
@@ -177,7 +178,7 @@ async function submit() {
 }
 
 .form__submit:disabled {
-  opacity: 0.6;
+  opacity: 0.45;
   cursor: not-allowed;
 }
 </style>

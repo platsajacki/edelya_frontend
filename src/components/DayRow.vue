@@ -99,7 +99,7 @@ useSortable(eatRef, makeSortableOptions('meals'))
   column-gap: 12px;
   row-gap: 10px;
   align-items: start;
-  padding: 14px 14px;
+  padding: 12px 14px;
   min-height: 56px;
   background: var(--color-surface);
   border-radius: var(--radius-lg);
@@ -111,17 +111,17 @@ useSortable(eatRef, makeSortableOptions('meals'))
   flex-direction: column;
   align-items: center;
   gap: 2px;
-  padding-top: 7px;
+  padding-top: 1px;
   text-align: center;
   line-height: 1;
 }
 
 .day-row__day {
-  font-weight: 600;
-  font-size: 15px;
+  font-weight: 700;
+  font-size: 13px;
   color: var(--color-text-secondary);
   text-transform: uppercase;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.04em;
 }
 
 .day-row__date {
@@ -154,45 +154,34 @@ useSortable(eatRef, makeSortableOptions('meals'))
   justify-content: center;
   gap: 4px;
   width: 100%;
-  padding: 4px 0;
-  border: 2px dashed var(--color-border);
+  padding: 6px 0;
+  border: 1.5px dashed var(--color-border);
   border-radius: var(--radius-sm);
   background: none;
   font-weight: 500;
   cursor: pointer;
-  transition: background 0.15s, border-color 0.15s, color 0.15s, transform 0.15s, box-shadow 0.15s;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
   color: var(--color-text-secondary);
 }
 
 .day-row__add-icon {
-  font-size: 20px;
+  font-size: 16px;
   line-height: 1;
 }
 
 .day-row__add-text {
-  display: none;
-  font-size: 13px;
-}
-
-@media (min-width: 480px) {
-  .day-row__add-text {
-    display: inline;
-  }
+  font-size: 12px;
 }
 
 .day-row__add--cook:hover {
   border-color: var(--color-cook);
   color: var(--color-cook);
   background: var(--color-cook-bg);
-  transform: scale(1.02);
-  box-shadow: var(--shadow-card);
 }
 
 .day-row__add--eat:hover {
   border-color: var(--color-eat);
   color: var(--color-eat);
   background: var(--color-eat-bg);
-  transform: scale(1.02);
-  box-shadow: var(--shadow-card);
 }
 </style>

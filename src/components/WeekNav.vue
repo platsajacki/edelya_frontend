@@ -30,11 +30,11 @@ defineEmits(["prev", "next"])
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 14px 16px;
+  padding: 12px 14px;
   background: var(--color-surface);
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-card);
-  min-height: 56px;
+  min-height: 52px;
 }
 
 .week-nav__btn {

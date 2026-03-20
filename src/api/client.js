@@ -52,6 +52,8 @@ const ERROR_MESSAGES = {
   "Date when eating starts cannot be earlier than cooking date": "Дата начала еды не может быть раньше даты готовки.",
   "All eat dates must be on or after the cooking date.": "Все дни еды должны быть не раньше дня готовки.",
   "All eat_dates must be on or after cooking_date.": "Все дни еды должны быть не раньше дня готовки.",
+  "All eat_dates must be greater than or equal to the current date of the meal plan item.": "Все дни еды должны быть не раньше текущей даты для этого приёма пищи.",
+  "Date must be on or after the cooking date of the associated cooking event.": "Дата должна быть не раньше даты готовки.",
   "Invalid Telegram data": "Неверные данные Telegram.",
   "User must be authenticated to get week dishes.": "Необходимо войти в аккаунт.",
   "No active account found with the given credentials.": "Неверный логин или пароль.",

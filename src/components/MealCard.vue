@@ -34,12 +34,12 @@ const isOwn = computed(() => isDishOwn(props.item.dish))
   justify-content: space-between;
   gap: 6px;
   width: 100%;
-  padding: 10px 14px;
+  padding: 8px 12px;
   border-radius: var(--radius-sm);
   background: var(--card-bg, var(--color-empty));
   border: none;
   border-left: 3px solid var(--card-accent, var(--color-mint));
-  font-size: 14px;
+  font-size: 13px;
   text-align: left;
   cursor: pointer;
   transition: box-shadow 0.15s, transform 0.15s;

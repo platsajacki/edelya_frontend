@@ -90,14 +90,17 @@ watch(() => props.modelValue, (v) => {
 
 function onDishSelect(dish) {
   selectedDish.value = dish
+  error.value = ""
 }
 
 function onDishCreated(dish) {
   selectedDish.value = dish
+  error.value = ""
 }
 
 function onDishUpdated(dish) {
   selectedDish.value = dish
+  error.value = ""
 }
 
 function validate() {
@@ -156,6 +159,7 @@ async function submit() {
   border: 1.5px solid var(--color-border);
   border-radius: var(--radius-sm);
   font-size: 15px;
+  font-family: inherit;
   background: var(--color-surface);
   color: var(--color-text);
   outline: none;
@@ -167,13 +171,13 @@ async function submit() {
   outline: none;
 }
 
-  .form__error {
+.form__error {
   font-size: 13px;
   color: var(--color-danger);
   padding: 4px 0;
 }
 
-  .form__submit {
+.form__submit {
   padding: 12px;
   border: none;
   border-radius: var(--radius-sm);
@@ -240,7 +244,7 @@ async function submit() {
   justify-content: center;
 }
 
-  .selected-dish__clear:hover {
+.selected-dish__clear:hover {
   background: var(--color-border);
   color: var(--color-danger);
 }

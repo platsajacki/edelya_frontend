@@ -250,7 +250,7 @@ async function onCloneCreated() {
 }
 
 .detail__dish-name {
-  font-size: 18px;
+  font-size: 17px;
   font-weight: 700;
   color: var(--color-text);
   margin: 0;
@@ -429,7 +429,7 @@ async function onCloneCreated() {
   transition: background 0.15s, opacity 0.15s;
 }
 
-  .detail__btn--edit {
+.detail__btn--edit {
   background: var(--color-mint);
   color: var(--on-primary);
 }
@@ -438,12 +438,12 @@ async function onCloneCreated() {
   background: var(--color-mint-hover);
 }
 
-  .detail__btn--delete {
+.detail__btn--delete {
   background: var(--color-danger-pale);
   color: var(--color-danger-muted);
 }
 
-  .detail__btn--delete:hover {
+.detail__btn--delete:hover {
   background: var(--color-danger-bg);
 }
 
