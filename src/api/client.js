@@ -1,6 +1,6 @@
 import { getAccess, getRefresh, getAccessExp, saveTokens } from "../storage/tokenStorage"
 
-const API = import.meta.env.VITE_API
+const API = window.__APP_CONFIG__?.apiUrl ?? import.meta.env.VITE_API
 
 const EXPIRY_BUFFER_SEC = 10
 
