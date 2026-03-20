@@ -1,5 +1,5 @@
 <template>
-  <ModalWrapper v-model="open" :title="isEdit ? 'Редактировать блюдо' : 'Новое блюдо'" :z-index="zIndex">
+  <ModalWrapper v-model="open" :title="isEdit ? 'Редактировать блюдо' : isClone ? 'Создать личную копию' : 'Новое блюдо'" :z-index="zIndex">
     <form class="form" @submit.prevent="submit">
       <label class="form__field">
         <span class="form__label">Название <span class="form__required">*</span></span>
@@ -129,11 +129,13 @@ const props = defineProps({
   modelValue: { type: Boolean, required: true },
   zIndex: { type: Number, default: 1010 },
   editDish: { type: Object, default: null },
+  cloneDish: { type: Object, default: null },
 })
 
 const emit = defineEmits(["update:modelValue", "created", "updated"])
 
 const isEdit = computed(() => !!props.editDish)
+const isClone = computed(() => !props.editDish && !!props.cloneDish)
 
 const open = ref(props.modelValue)
 watch(() => props.modelValue, (v) => { open.value = v })
@@ -174,6 +176,17 @@ watch(() => props.modelValue, async (v) => {
       categoryId.value = props.editDish.category?.id || ""
       description.value = props.editDish.description || ""
       ingredients.value = (props.editDish.dish_ingredients || []).map((di) => ({
+        ingredient: di.ingredient?.id ?? di.ingredient,
+        ingredientName: di.ingredient?.name ?? di.name ?? "",
+        amount: String(di.amount),
+        unitLabel: UNIT_LABELS[di.ingredient?.base_unit] || di.ingredient?.base_unit || '',
+        is_optional: di.is_optional ?? false,
+      }))
+    } else if (props.cloneDish) {
+      name.value = props.cloneDish.name || ""
+      categoryId.value = props.cloneDish.category?.id || ""
+      description.value = props.cloneDish.description || ""
+      ingredients.value = (props.cloneDish.dish_ingredients || []).map((di) => ({
         ingredient: di.ingredient?.id ?? di.ingredient,
         ingredientName: di.ingredient?.name ?? di.name ?? "",
         amount: String(di.amount),

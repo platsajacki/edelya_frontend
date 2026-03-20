@@ -4,8 +4,16 @@
       <!-- Dish info -->
       <div class="detail__section">
         <div class="detail__dish-header">
-          <h4 class="detail__dish-name">{{ dish.name }}</h4>
-          <button type="button" class="detail__dish-edit" title="Редактировать блюдо" @click="showDishForm = true">
+          <div class="detail__dish-title-row">
+            <h4 class="detail__dish-name">{{ dish.name }}</h4>
+            <span
+              class="detail__ownership-badge"
+              :class="isOwn ? 'detail__ownership-badge--own' : 'detail__ownership-badge--shared'"
+            >
+              {{ isOwn ? '👤 Личный рецепт' : '🌐 Общий рецепт' }}
+            </span>
+          </div>
+          <button type="button" class="detail__dish-edit" :title="isOwn ? 'Редактировать блюдо' : 'Создать копию'" @click="handleDishEdit">
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M11.5 2.5a1.414 1.414 0 012 2L5.5 12.5l-3 1 1-3 8-8z" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
           </button>
         </div>
@@ -105,6 +113,30 @@
     :edit-dish="dish"
     @updated="onDishUpdated"
   />
+
+  <!-- Clone confirmation modal -->
+  <ModalWrapper v-model="showCloneConfirm" title="Общее блюдо" :z-index="1050">
+    <p class="detail__clone-text">
+      Это общее блюдо, его нельзя редактировать.
+      Вы можете создать личную копию и настроить её под себя.
+    </p>
+    <div class="detail__confirm-actions">
+      <button class="detail__btn detail__btn--edit" @click="startClone">
+        Создать копию
+      </button>
+      <button class="detail__btn detail__btn--cancel" @click="showCloneConfirm = false">
+        Отмена
+      </button>
+    </div>
+  </ModalWrapper>
+
+  <!-- Clone DishForm -->
+  <DishForm
+    v-model="showCloneForm"
+    :z-index="1020"
+    :clone-dish="dish"
+    @created="onCloneCreated"
+  />
 </template>
 
 <script setup>
@@ -113,6 +145,7 @@ import ModalWrapper from "./forms/ModalWrapper.vue"
 import DishForm from "./forms/DishForm.vue"
 import { formatYMDtoDDMMYYYY } from "../utils/formatDate"
 import { usePlanningStore } from "../store/planning"
+import { isDishOwn } from "../utils/dishOwnership"
 
 const UNIT_LABELS = {
   gram: "г",
@@ -140,9 +173,16 @@ watch(open, (v) => { emit("update:modelValue", v) })
 
 const confirming = ref(false)
 const showDishForm = ref(false)
+const showCloneConfirm = ref(false)
+const showCloneForm = ref(false)
+
+const isOwn = computed(() => isDishOwn(dish.value))
 
 watch(() => props.modelValue, (v) => {
-  if (v) confirming.value = false
+  if (v) {
+    confirming.value = false
+    showCloneConfirm.value = false
+  }
 })
 
 const dish = computed(() => props.item?.dish ?? {})
@@ -167,6 +207,25 @@ function unitLabel(unit) {
 
 async function onDishUpdated() {
   showDishForm.value = false
+  await planning.loadWeek()
+  open.value = false
+}
+
+function handleDishEdit() {
+  if (isOwn.value) {
+    showDishForm.value = true
+  } else {
+    showCloneConfirm.value = true
+  }
+}
+
+function startClone() {
+  showCloneConfirm.value = false
+  showCloneForm.value = true
+}
+
+async function onCloneCreated() {
+  showCloneForm.value = false
   await planning.loadWeek()
   open.value = false
 }
@@ -202,6 +261,33 @@ async function onDishUpdated() {
   align-items: center;
   justify-content: space-between;
   gap: 8px;
+}
+
+.detail__dish-title-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.detail__ownership-badge {
+  display: inline-flex;
+  align-items: center;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 10px;
+  width: fit-content;
+}
+
+.detail__ownership-badge--own {
+  background: rgba(138, 99, 181, 0.12);
+  color: var(--color-mint);
+}
+
+.detail__ownership-badge--shared {
+  background: var(--color-shared-bg);
+  color: var(--color-shared);
 }
 
 .detail__dish-edit {
@@ -385,5 +471,13 @@ async function onDishUpdated() {
 
 .detail__confirm-actions .detail__btn {
   flex: 1;
+}
+
+.detail__clone-text {
+  font-size: 14px;
+  color: var(--color-text);
+  line-height: 1.5;
+  text-align: center;
+  margin: 0 0 12px;
 }
 </style>

@@ -14,6 +14,10 @@
   --color-eat-bg-strong: rgba(111, 151, 55, 0.22);
   --color-cook-bg-strong: rgba(138, 170, 37, 0.22);
 
+  --color-shared: #6B7280;
+  --color-shared-bg: rgba(107, 114, 128, 0.10);
+  --color-shared-accent: #9CA3AF;
+
   --color-danger: #D64545;
   --color-danger-muted: #B91C1C;
   --color-danger-bg: #FEE2E2;

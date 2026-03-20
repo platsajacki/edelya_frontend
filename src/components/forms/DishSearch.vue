@@ -18,8 +18,16 @@
         class="dish-search__item"
         @click="$emit('select', dish)"
       >
-        <span class="dish-search__name">{{ dish.name }}</span>
-        <span class="dish-search__category">{{ dish.category?.name }}</span>
+        <div class="dish-search__info">
+          <span class="dish-search__name">{{ dish.name }}</span>
+          <span class="dish-search__category">{{ dish.category?.name }}</span>
+        </div>
+        <span
+          class="dish-search__badge"
+          :class="isDishOwn(dish) ? 'dish-search__badge--own' : 'dish-search__badge--shared'"
+        >
+          {{ isDishOwn(dish) ? '👤 Личное' : '🌐 Общее' }}
+        </span>
       </li>
     </ul>
 
@@ -34,6 +42,7 @@
 <script setup>
 import { ref, onMounted } from "vue"
 import { fetchDishes } from "../../services/dishService"
+import { isDishOwn } from "../../utils/dishOwnership"
 
 defineEmits(["select", "create"])
 
@@ -109,6 +118,7 @@ onMounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 8px;
   padding: 10px 12px;
   cursor: pointer;
   transition: background 0.1s;
@@ -116,6 +126,32 @@ onMounted(() => {
 
 .dish-search__item:hover {
   background: var(--color-empty);
+}
+
+.dish-search__info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.dish-search__badge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 10px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.dish-search__badge--own {
+  background: rgba(138, 99, 181, 0.12);
+  color: var(--color-mint);
+}
+
+.dish-search__badge--shared {
+  background: var(--color-shared-bg);
+  color: var(--color-shared);
 }
 
 .dish-search__item + .dish-search__item {

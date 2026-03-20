@@ -1,11 +1,21 @@
 <template>
-  <button class="meal-card" type="button" :data-id="item.id" @click="$emit('tap', item)">
+  <button
+    class="meal-card"
+    :class="{ 'meal-card--shared': !isOwn }"
+    type="button"
+    :data-id="item.id"
+    @click="$emit('tap', item)"
+  >
     <span class="meal-card__name">{{ item.dish.name }}</span>
+    <span class="meal-card__owner-icon" :title="isOwn ? 'Личное блюдо' : 'Общее блюдо'">{{ isOwn ? '👤' : '🌐' }}</span>
   </button>
 </template>
 
 <script setup>
-defineProps({
+import { computed } from "vue"
+import { isDishOwn } from "../utils/dishOwnership"
+
+const props = defineProps({
   item: {
     type: Object,
     required: true,
@@ -13,11 +23,16 @@ defineProps({
 })
 
 defineEmits(["tap"])
+
+const isOwn = computed(() => isDishOwn(props.item.dish))
 </script>
 
 <style scoped>
 .meal-card {
-  display: block;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
   width: 100%;
   padding: 10px 14px;
   border-radius: var(--radius-sm);
@@ -28,6 +43,16 @@ defineEmits(["tap"])
   text-align: left;
   cursor: pointer;
   transition: box-shadow 0.15s, transform 0.15s;
+}
+
+.meal-card--shared {
+  border-left-color: var(--color-shared-accent);
+}
+
+.meal-card__owner-icon {
+  font-size: 12px;
+  flex-shrink: 0;
+  line-height: 1;
 }
 
 .meal-card:hover {
