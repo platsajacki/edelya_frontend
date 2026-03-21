@@ -6,6 +6,10 @@ export function fetchDishes(params = {}) {
   return api(url)
 }
 
+export function fetchDish(id) {
+  return api(`/api/v1/dishes/${id}/`)
+}
+
 export function createDish(payload) {
   return api(`/api/v1/dishes/`, {
     method: "POST",
@@ -16,10 +20,14 @@ export function createDish(payload) {
 
 export function updateDish(id, payload) {
   return api(`/api/v1/dishes/${id}/`, {
-    method: "PATCH",
+    method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
   })
+}
+
+export function deleteDish(id) {
+  return api(`/api/v1/dishes/${id}/`, { method: "DELETE" })
 }
 
 export function fetchDishCategories() {

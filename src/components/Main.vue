@@ -174,7 +174,7 @@ onMounted(() => {
 .planner {
   max-width: 480px;
   margin: 0 auto;
-  padding: 12px 16px 32px;
+  padding: 12px 16px 80px;
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -190,7 +190,7 @@ onMounted(() => {
 
 .planner__toast {
   position: fixed;
-  bottom: 32px;
+  bottom: 80px;
   left: 50%;
   transform: translateX(-50%);
   padding: 12px 20px;
@@ -219,7 +219,7 @@ onMounted(() => {
 @media (min-width: 600px) {
   .planner {
     max-width: 540px;
-    padding: 16px 24px 40px;
+    padding: 16px 24px 88px;
   }
 }
 </style>

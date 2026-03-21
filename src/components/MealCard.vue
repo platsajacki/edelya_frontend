@@ -7,7 +7,6 @@
     @click="$emit('tap', item)"
   >
     <span class="meal-card__name">{{ item.dish.name }}</span>
-    <span class="meal-card__owner-icon" :title="isOwn ? 'Личное блюдо' : 'Общее блюдо'">{{ isOwn ? '👤' : '🌐' }}</span>
   </button>
 </template>
 
@@ -47,12 +46,6 @@ const isOwn = computed(() => isDishOwn(props.item.dish))
 
 .meal-card--shared {
   border-left-color: var(--color-shared-accent);
-}
-
-.meal-card__owner-icon {
-  font-size: 11px;
-  flex-shrink: 0;
-  line-height: 1;
 }
 
 .meal-card:hover {
