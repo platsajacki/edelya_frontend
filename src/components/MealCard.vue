@@ -42,6 +42,10 @@ const isOwn = computed(() => isDishOwn(props.item.dish))
   text-align: left;
   cursor: pointer;
   transition: box-shadow 0.15s, transform 0.15s;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  touch-action: manipulation;
 }
 
 .meal-card--shared {
