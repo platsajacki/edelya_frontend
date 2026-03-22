@@ -51,6 +51,7 @@ export const usePlanningStore = defineStore("planning", {
       week,
       weekData: emptyWeek(year, week),
       loading: false,
+      loadError: false,
       toast: null,
     }
   },
@@ -65,12 +66,13 @@ export const usePlanningStore = defineStore("planning", {
   actions: {
     async loadWeek() {
       this.loading = true
+      this.loadError = false
       this.toast = null
       try {
         this.weekData = await fetchWeek(this.year, this.week)
       } catch {
         this.weekData = emptyWeek(this.year, this.week)
-        this.showToast("Не удалось загрузить неделю")
+        this.loadError = true
       } finally {
         this.loading = false
       }

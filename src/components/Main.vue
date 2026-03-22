@@ -16,6 +16,13 @@
       @drag-end="onDragEnd"
     />
 
+    <div v-if="planning.loadError" class="planner__error">
+      <span>Не удалось загрузить неделю</span>
+      <button class="planner__error-retry" @click="planning.loadWeek()">
+        Повторить
+      </button>
+    </div>
+
     <!-- Create / Edit forms -->
     <CookingEventForm
       v-model="showCookingForm"
@@ -186,6 +193,29 @@ onMounted(() => {
   opacity: 0.5;
   transition: opacity 0.2s ease;
   pointer-events: none;
+}
+
+.planner__error {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 14px 16px;
+  background: var(--color-danger-pale);
+  border: 1px solid var(--color-danger-soft);
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  color: var(--color-danger-muted);
+}
+
+.planner__error-retry {
+  padding: 6px 16px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: var(--color-danger);
+  color: var(--on-primary);
+  font-size: 13px;
+  font-weight: 600;
 }
 
 .planner__toast {

@@ -94,7 +94,7 @@ function onPickerInput(e) {
   padding: 10px 36px 10px 12px;
   border: 1.5px solid var(--color-border);
   border-radius: var(--radius-sm);
-  font-size: 15px;
+  font-size: 16px;
   font-family: inherit;
   background: var(--color-surface);
   color: var(--color-text);

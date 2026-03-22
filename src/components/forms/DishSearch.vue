@@ -95,7 +95,7 @@ onMounted(() => {
   padding: 10px 12px;
   border: 1.5px solid var(--color-border);
   border-radius: var(--radius-sm);
-  font-size: 15px;
+  font-size: 16px;
   background: var(--color-surface);
   color: var(--color-text);
   outline: none;

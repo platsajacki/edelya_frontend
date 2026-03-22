@@ -33,7 +33,7 @@
           <li v-for="di in dish.dish_ingredients" :key="di.id" class="detail__ingredient">
             <span class="detail__ingredient-name">{{ di.ingredient?.name ?? di.name }}</span>
             <span class="detail__ingredient-amount">
-              {{ di.amount }} {{ unitLabel(di.ingredient?.base_unit ?? di.base_unit) }}
+              {{ formatAmount(di.amount) }} {{ unitLabel(di.ingredient?.base_unit ?? di.base_unit) }}
             </span>
           </li>
         </ul>
@@ -109,6 +109,7 @@ import { ref, computed, watch } from "vue"
 import ModalWrapper from "./forms/ModalWrapper.vue"
 import DishForm from "./forms/DishForm.vue"
 import { fetchDish } from "../services/dishService"
+import { formatAmount } from "../utils/formatAmount"
 import { isDishOwn } from "../utils/dishOwnership"
 
 const UNIT_LABELS = {

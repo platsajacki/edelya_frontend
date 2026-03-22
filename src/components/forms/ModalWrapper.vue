@@ -1,8 +1,8 @@
 <template>
   <Teleport to="body">
     <Transition name="modal">
-      <div v-if="modelValue" class="modal-overlay" :style="{ zIndex }" @mousedown.self="close">
-        <div class="modal-panel">
+      <div v-if="modelValue" class="modal-overlay" :style="{ zIndex }" @click.self="close">
+        <div class="modal-panel" @mousedown.stop>
           <div class="modal-header">
             <h3 class="modal-title">{{ title }}</h3>
             <button class="modal-close" @click="close" aria-label="Закрыть">&times;</button>
@@ -62,6 +62,7 @@ onUnmounted(() => {
   align-items: center;
   justify-content: center;
   padding: 16px;
+  overflow-x: hidden;
 }
 
 .modal-panel {

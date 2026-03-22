@@ -27,7 +27,7 @@
 
         <div v-for="(ing, idx) in ingredients" :key="idx" class="ingredient-row">
           <span class="ingredient-row__name">{{ ing.ingredientName }}</span>
-          <span class="ingredient-row__amount">{{ ing.amount }} {{ ing.unitLabel || '' }}</span>
+          <span class="ingredient-row__amount">{{ formatAmount(ing.amount) }} {{ ing.unitLabel || '' }}</span>
           <button type="button" class="ingredient-row__remove" @click="ingredients.splice(idx, 1)" title="Удалить">
             <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 4h10M5.5 4V3a1 1 0 011-1h3a1 1 0 011 1v1M6.5 7v4M9.5 7v4M4.5 4l.5 9a1 1 0 001 1h4a1 1 0 001-1l.5-9" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
           </button>
@@ -105,6 +105,7 @@ import ModalWrapper from "./ModalWrapper.vue"
 import IngredientForm from "./IngredientForm.vue"
 import { createDish, updateDish, fetchDishCategories } from "../../services/dishService"
 import { fetchIngredients } from "../../services/ingredientService"
+import { formatAmount } from "../../utils/formatAmount"
 
 const UNIT_LABELS = {
   gram: "г",
@@ -178,7 +179,7 @@ watch(() => props.modelValue, async (v) => {
       ingredients.value = (props.editDish.dish_ingredients || []).map((di) => ({
         ingredient: di.ingredient?.id ?? di.ingredient,
         ingredientName: di.ingredient?.name ?? di.name ?? "",
-        amount: String(di.amount),
+        amount: formatAmount(di.amount),
         unitLabel: UNIT_LABELS[di.ingredient?.base_unit] || di.ingredient?.base_unit || '',
         is_optional: di.is_optional ?? false,
       }))
@@ -189,7 +190,7 @@ watch(() => props.modelValue, async (v) => {
       ingredients.value = (props.cloneDish.dish_ingredients || []).map((di) => ({
         ingredient: di.ingredient?.id ?? di.ingredient,
         ingredientName: di.ingredient?.name ?? di.name ?? "",
-        amount: String(di.amount),
+        amount: formatAmount(di.amount),
         unitLabel: UNIT_LABELS[di.ingredient?.base_unit] || di.ingredient?.base_unit || '',
         is_optional: di.is_optional ?? false,
       }))
@@ -334,7 +335,7 @@ async function submit() {
   padding: 10px 12px;
   border: 1.5px solid var(--color-border);
   border-radius: var(--radius-sm);
-  font-size: 15px;
+  font-size: 16px;
   font-family: inherit;
   background: var(--color-surface);
   color: var(--color-text);
