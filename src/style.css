@@ -65,6 +65,12 @@ button {
   outline-offset: 2px;
 }
 
+input,
+textarea,
+select {
+  caret-color: var(--color-text);
+}
+
 .form__required {
   color: var(--color-danger);
   font-weight: 400;

@@ -61,6 +61,7 @@ const ERROR_MESSAGES = {
   "You do not have permission to perform this action.": "У вас нет прав для этого действия.",
   "Not found.": "Не найдено.",
   "Token is invalid or expired.": "Сессия истекла, войдите снова.",
+  "At least one ingredient must be required.": "Нужен хотя бы один обязательный ингредиент.",
 }
 
 const FIELD_NAMES = {

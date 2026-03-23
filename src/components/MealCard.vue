@@ -57,11 +57,6 @@ const isOwn = computed(() => isDishOwn(props.item.dish))
   transform: translateY(-1px);
 }
 
-.meal-card:active {
-  transform: scale(0.97);
-  box-shadow: var(--shadow-elevated);
-}
-
 .meal-card--ghost {
   opacity: 0.3;
   border: 2px dashed var(--card-accent, var(--color-mint));
@@ -72,12 +67,19 @@ const isOwn = computed(() => isDishOwn(props.item.dish))
   box-shadow: var(--shadow-elevated);
   transform: scale(1.02);
   cursor: grabbing;
+  transition: none;
 }
 
 .meal-card--drag {
   opacity: 0.9;
   transform: rotate(2deg);
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  transition: none;
+}
+
+.sortable-fallback {
+  touch-action: none;
+  transition: none;
 }
 
 .meal-card__name {

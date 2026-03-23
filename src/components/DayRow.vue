@@ -65,8 +65,10 @@ function makeSortableOptions(type) {
     animation: 150,
     delay: 150,
     delayOnTouchOnly: true,
-    touchStartThreshold: 3,
+    touchStartThreshold: 8,
     forceFallback: true,
+    fallbackOnBody: true,
+    fallbackTolerance: 3,
     onEnd(evt) {
       const itemId = evt.item.dataset.id
       const fromDate = evt.from.dataset.date
