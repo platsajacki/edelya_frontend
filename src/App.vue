@@ -1,5 +1,7 @@
 <template>
-  <div v-if="loading" style="padding:16px">Загрузка...</div>
+  <div v-if="loading" class="app-loading">
+    <div class="spinner" />
+  </div>
   <template v-else>
     <RouterView />
     <BottomNav v-if="auth.user" />
@@ -15,6 +17,7 @@ const auth = useAuthStore()
 const loading = ref(true)
 
 onMounted(async () => {
+  window.Telegram?.WebApp?.expand()
   window.addEventListener("auth:expired", () => auth.logout())
 
   try {
@@ -27,3 +30,12 @@ onMounted(async () => {
   }
 })
 </script>
+
+<style scoped>
+.app-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100dvh;
+}
+</style>

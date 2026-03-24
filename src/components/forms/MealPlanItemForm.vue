@@ -11,7 +11,7 @@
           </button>
           <button type="button" class="selected-dish__clear" @click="selectedDish = null">&times;</button>
         </div>
-        <DishSearch v-else @select="onDishSelect" @create="editDish = null; showDishForm = true" />
+        <DishSearch v-else @select="onDishSelect" @create="onCreateDish" />
       </div>
 
       <label v-if="isEdit" class="form__field">
@@ -34,6 +34,7 @@
     <DishForm
       v-model="showDishForm"
       :edit-dish="editDish"
+      :initial-name="initialDishName"
       :z-index="1010"
       @created="onDishCreated"
       @updated="onDishUpdated"
@@ -73,6 +74,7 @@ const saving = ref(false)
 const error = ref("")
 const showDishForm = ref(false)
 const editDish = ref(null)
+const initialDishName = ref("")
 
 watch(() => props.modelValue, (v) => {
   if (v && props.editItem) {
@@ -101,6 +103,12 @@ function onDishCreated(dish) {
 function onDishUpdated(dish) {
   selectedDish.value = dish
   error.value = ""
+}
+
+function onCreateDish(searchQuery) {
+  editDish.value = null
+  initialDishName.value = searchQuery || ""
+  showDishForm.value = true
 }
 
 function validate() {

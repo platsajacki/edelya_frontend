@@ -2,7 +2,7 @@
   <Teleport to="body">
     <Transition name="modal">
       <div v-if="modelValue" class="modal-overlay" :style="{ zIndex }" @click.self="close">
-        <div class="modal-panel" @mousedown.stop>
+        <div class="modal-panel" @mousedown.stop @focusin="onFocusIn">
           <div class="modal-header">
             <h3 class="modal-title">{{ title }}</h3>
             <button class="modal-close" @click="close" aria-label="Закрыть">&times;</button>
@@ -32,6 +32,15 @@ const emit = defineEmits(["update:modelValue"])
 
 function close() {
   emit("update:modelValue", false)
+}
+
+function onFocusIn(e) {
+  const el = e.target
+  if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.tagName === 'SELECT') {
+    requestAnimationFrame(() => {
+      el.scrollIntoView({ block: 'nearest', behavior: 'instant' })
+    })
+  }
 }
 
 let savedOverflow = ""

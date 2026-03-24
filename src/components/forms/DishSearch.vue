@@ -9,7 +9,7 @@
       @input="onInput"
     />
 
-    <div v-if="loading" class="dish-search__status">Загрузка...</div>
+    <div v-if="loading" class="dish-search__status"><div class="spinner spinner--sm" /></div>
 
     <ul v-if="results.length" class="dish-search__list">
       <li
@@ -33,7 +33,7 @@
 
     <div v-else-if="searched && !loading" class="dish-search__status">Ничего не найдено</div>
 
-    <button class="dish-search__create" @click="$emit('create')">
+    <button type="button" class="dish-search__create" @click="$emit('create', query.trim())">
       + Создать новое блюдо
     </button>
   </div>

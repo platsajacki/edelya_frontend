@@ -41,7 +41,7 @@
               v-model="pendingAmount"
               type="number"
               step="0.001"
-              min="0"
+              min="0.001"
               class="form__input ingredient-amount__input"
               placeholder="Количество"
               @keydown.enter.prevent="confirmIngredient"
@@ -52,6 +52,7 @@
             <input v-model="pendingOptional" type="checkbox" />
             Опционально
           </label>
+          <div v-if="amountError" class="form__error">{{ amountError }}</div>
           <div class="ingredient-amount__actions">
             <button type="button" class="btn btn--sm" @click="confirmIngredient">Добавить</button>
             <button type="button" class="btn btn--sm btn--ghost" @click="cancelIngredient">Отмена</button>
@@ -131,6 +132,7 @@ const props = defineProps({
   zIndex: { type: Number, default: 1010 },
   editDish: { type: Object, default: null },
   cloneDish: { type: Object, default: null },
+  initialName: { type: String, default: "" },
 })
 
 const emit = defineEmits(["update:modelValue", "created", "updated"])
@@ -159,6 +161,7 @@ const showIngredientForm = ref(false)
 const pendingIngredient = ref(null)
 const pendingAmount = ref("")
 const pendingOptional = ref(false)
+const amountError = ref("")
 
 let ingredientSearchTimer = null
 
@@ -195,7 +198,7 @@ watch(() => props.modelValue, async (v) => {
         is_optional: di.is_optional ?? false,
       }))
     } else {
-      name.value = ""
+      name.value = props.initialName || ""
       categoryId.value = ""
       description.value = ""
       ingredients.value = []
@@ -236,6 +239,12 @@ function selectIngredient(ing) {
 
 function confirmIngredient() {
   if (!pendingIngredient.value || !pendingAmount.value) return
+  const num = Number(pendingAmount.value)
+  if (!num || num <= 0) {
+    amountError.value = "Количество должно быть больше 0."
+    return
+  }
+  amountError.value = ""
   ingredients.value.push({
     ingredient: pendingIngredient.value.id,
     ingredientName: pendingIngredient.value.name,
@@ -252,6 +261,7 @@ function cancelIngredient() {
   pendingIngredient.value = null
   pendingAmount.value = ""
   pendingOptional.value = false
+  amountError.value = ""
 }
 
 function onIngredientCreated(ingredient) {

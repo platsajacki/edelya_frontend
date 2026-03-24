@@ -62,8 +62,7 @@
 
     <!-- Loading -->
     <div v-if="store.loading" class="recipes-loading">
-      <div class="recipes-spinner" />
-      <span>Загрузка...</span>
+      <div class="spinner" />
     </div>
 
     <!-- Empty state -->
@@ -90,7 +89,7 @@
 
       <!-- Infinite scroll sentinel -->
       <div ref="sentinelRef" class="recipes-sentinel">
-        <div v-if="store.loadingMore" class="recipes-spinner recipes-spinner--sm" />
+        <div v-if="store.loadingMore" class="spinner spinner--sm" />
       </div>
     </div>
 
@@ -397,25 +396,6 @@ onUnmounted(() => {
   padding: 40px 0;
   font-size: var(--font-sm);
   color: var(--color-text-secondary);
-}
-
-.recipes-spinner {
-  width: 28px;
-  height: 28px;
-  border: 3px solid var(--color-border);
-  border-top-color: var(--color-mint);
-  border-radius: 50%;
-  animation: spin 0.7s linear infinite;
-}
-
-.recipes-spinner--sm {
-  width: 20px;
-  height: 20px;
-  border-width: 2px;
-}
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
 }
 
 /* Empty */

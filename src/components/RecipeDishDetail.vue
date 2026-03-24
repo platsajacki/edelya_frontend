@@ -40,7 +40,7 @@
       </div>
 
       <!-- Loading state for full dish data -->
-      <div v-if="loadingFull" class="detail__loading">Загрузка...</div>
+      <div v-if="loadingFull" class="detail__loading"><div class="spinner spinner--sm" /></div>
     </div>
 
     <template #footer>
