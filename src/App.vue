@@ -10,10 +10,12 @@
 
 <script setup>
 import { ref, onMounted } from "vue"
+import { useRouter } from "vue-router"
 import { useAuthStore } from "./store/auth"
 import BottomNav from "./components/BottomNav.vue"
 
 const auth = useAuthStore()
+const router = useRouter()
 const loading = ref(true)
 
 onMounted(async () => {
@@ -22,6 +24,7 @@ onMounted(async () => {
 
   try {
     await auth.init()
+    if (auth.user) router.push("/")
   } catch (err) {
     console.error("Auth failed:", err)
     auth.logout()
