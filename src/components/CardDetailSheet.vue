@@ -20,8 +20,8 @@
         <p v-if="dish.category?.name" class="detail__meta">
           {{ dish.category.name }}
         </p>
-        <p v-if="dish.description" class="detail__description">
-          {{ dish.description }}
+        <p v-if="dish.recipe" class="detail__recipe">
+          {{ dish.recipe }}
         </p>
       </div>
 
@@ -316,11 +316,12 @@ async function onCloneCreated() {
   margin: 0;
 }
 
-.detail__description {
+.detail__recipe {
   font-size: 15px;
   color: var(--color-text);
   line-height: 1.5;
   margin: 0;
+  white-space: pre-line;
 }
 
 .detail__label {

@@ -67,7 +67,7 @@ const ERROR_MESSAGES = {
 const FIELD_NAMES = {
   name: "Название",
   category: "Категория",
-  description: "Описание",
+  recipe: "Рецепт",
   dish: "Блюдо",
   dish_ingredients: "Ингредиенты",
   ingredient: "Ингредиент",

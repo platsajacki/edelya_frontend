@@ -17,8 +17,8 @@
       </label>
 
       <label class="form__field">
-        <span class="form__label">Описание</span>
-        <textarea v-model="description" class="form__textarea" rows="2" />
+        <span class="form__label">Рецепт</span>
+        <textarea v-model="recipe" class="form__textarea" rows="2" />
       </label>
 
       <!-- Ingredients -->
@@ -146,7 +146,7 @@ watch(open, (v) => { emit("update:modelValue", v) })
 
 const name = ref("")
 const categoryId = ref("")
-const description = ref("")
+const recipe = ref("")
 const categories = ref([])
 const ingredients = ref([])
 const saving = ref(false)
@@ -178,7 +178,7 @@ watch(() => props.modelValue, async (v) => {
     if (props.editDish) {
       name.value = props.editDish.name || ""
       categoryId.value = props.editDish.category?.id || ""
-      description.value = props.editDish.description || ""
+      recipe.value = props.editDish.recipe || ""
       ingredients.value = (props.editDish.dish_ingredients || []).map((di) => ({
         ingredient: di.ingredient?.id ?? di.ingredient,
         ingredientName: di.ingredient?.name ?? di.name ?? "",
@@ -189,7 +189,7 @@ watch(() => props.modelValue, async (v) => {
     } else if (props.cloneDish) {
       name.value = props.cloneDish.name || ""
       categoryId.value = props.cloneDish.category?.id || ""
-      description.value = props.cloneDish.description || ""
+      recipe.value = props.cloneDish.recipe || ""
       ingredients.value = (props.cloneDish.dish_ingredients || []).map((di) => ({
         ingredient: di.ingredient?.id ?? di.ingredient,
         ingredientName: di.ingredient?.name ?? di.name ?? "",
@@ -200,7 +200,7 @@ watch(() => props.modelValue, async (v) => {
     } else {
       name.value = props.initialName || ""
       categoryId.value = ""
-      description.value = ""
+      recipe.value = ""
       ingredients.value = []
     }
   }
@@ -286,8 +286,8 @@ async function submit() {
       name: name.value.trim(),
       category: categoryId.value,
     }
-    if (description.value.trim()) {
-      payload.description = description.value.trim()
+    if (recipe.value.trim()) {
+      payload.recipe = recipe.value.trim()
     }
     if (ingredients.value.length) {
       payload.dish_ingredients = ingredients.value.map((i) => ({
