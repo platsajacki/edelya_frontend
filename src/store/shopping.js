@@ -1,0 +1,195 @@
+import { defineStore } from "pinia"
+import {
+  fetchShoppingLists,
+  fetchShoppingList,
+  createShoppingList,
+  updateShoppingList,
+  deleteShoppingList,
+  recalculateShoppingList,
+  fetchShoppingListItems,
+  createShoppingListItem,
+  updateShoppingListItem,
+  deleteShoppingListItem,
+} from "../services/shoppingService"
+
+export const useShoppingStore = defineStore("shopping", {
+  state: () => ({
+    lists: [],
+    currentList: null,
+    items: [],
+    loading: false,
+    loadingItems: false,
+    toast: null,
+  }),
+
+  getters: {
+    groupedItems(state) {
+      const groups = {}
+      const uncategorized = []
+
+      for (const item of state.items) {
+        const catName = item.ingredient?.category?.name
+        if (catName) {
+          if (!groups[catName]) groups[catName] = []
+          groups[catName].push(item)
+        } else {
+          uncategorized.push(item)
+        }
+      }
+
+      const sorted = Object.keys(groups)
+        .sort((a, b) => a.localeCompare(b, "ru"))
+        .map((name) => ({
+          name,
+          items: groups[name].sort((a, b) => a.position - b.position),
+        }))
+
+      if (uncategorized.length) {
+        sorted.push({
+          name: "Без категории",
+          items: uncategorized.sort((a, b) => a.position - b.position),
+        })
+      }
+
+      return sorted
+    },
+
+    uncheckedCount(state) {
+      return state.items.filter((i) => !i.is_checked).length
+    },
+
+    checkedCount(state) {
+      return state.items.filter((i) => i.is_checked).length
+    },
+  },
+
+  actions: {
+    async loadLists() {
+      this.loading = true
+      try {
+        const data = await fetchShoppingLists({ ordering: "-created_at" })
+        this.lists = data.results ?? []
+      } catch {
+        this.lists = []
+        this.showToast("Не удалось загрузить списки покупок")
+      } finally {
+        this.loading = false
+      }
+    },
+
+    async loadList(id) {
+      this.loading = true
+      try {
+        this.currentList = await fetchShoppingList(id)
+      } catch {
+        this.currentList = null
+        this.showToast("Не удалось загрузить список покупок")
+      } finally {
+        this.loading = false
+      }
+    },
+
+    async loadItems(listId) {
+      this.loadingItems = true
+      try {
+        const data = await fetchShoppingListItems(listId)
+        this.items = data.results ?? []
+      } catch {
+        this.items = []
+        this.showToast("Не удалось загрузить позиции")
+      } finally {
+        this.loadingItems = false
+      }
+    },
+
+    async createList(payload) {
+      const data = await createShoppingList(payload)
+      this.lists.unshift(data)
+      this.showToast("Список создан")
+      return data
+    },
+
+    async updateList(id, payload) {
+      const data = await updateShoppingList(id, payload)
+      const idx = this.lists.findIndex((l) => l.id === id)
+      if (idx !== -1) this.lists[idx] = data
+      if (this.currentList?.id === id) this.currentList = data
+      this.showToast("Список обновлён")
+      return data
+    },
+
+    async removeList(id) {
+      await deleteShoppingList(id)
+      this.lists = this.lists.filter((l) => l.id !== id)
+      if (this.currentList?.id === id) this.currentList = null
+      this.showToast("Список удалён")
+    },
+
+    async recalculateList(id) {
+      await recalculateShoppingList(id)
+      await this.loadItems(id)
+      this.showToast("Список пересчитан")
+    },
+
+    async addItem(listId, payload) {
+      const data = await createShoppingListItem(listId, payload)
+      this.items.push(data)
+      this.showToast("Позиция добавлена")
+      return data
+    },
+
+    async toggleItemChecked(listId, item) {
+      const wasChecked = item.is_checked
+      const wasCheckedAt = item.checked_at
+
+      // Optimistic update
+      item.is_checked = !wasChecked
+      item.checked_at = item.is_checked ? new Date().toISOString() : null
+
+      try {
+        const updated = await updateShoppingListItem(listId, item.id, {
+          is_checked: item.is_checked,
+          checked_at: item.checked_at,
+        })
+        Object.assign(item, updated)
+      } catch {
+        // Rollback
+        item.is_checked = wasChecked
+        item.checked_at = wasCheckedAt
+        this.showToast("Не удалось обновить статус")
+      }
+    },
+
+    async adjustItemAmount(listId, item, delta) {
+      const oldAmount = parseFloat(item.amount)
+      const newAmount = Math.max(0, oldAmount + delta)
+      if (newAmount === oldAmount) return
+
+      const oldVal = item.amount
+      item.amount = String(newAmount)
+
+      try {
+        const updated = await updateShoppingListItem(listId, item.id, {
+          amount: String(newAmount),
+        })
+        Object.assign(item, updated)
+      } catch {
+        item.amount = oldVal
+        this.showToast("Не удалось изменить количество")
+      }
+    },
+
+    async removeItem(listId, itemId) {
+      await deleteShoppingListItem(listId, itemId)
+      this.items = this.items.filter((i) => i.id !== itemId)
+      this.showToast("Позиция удалена")
+    },
+
+    showToast(message) {
+      this.toast = message
+      setTimeout(() => {
+        if (this.toast === message) this.toast = null
+      }, 3000)
+    },
+  },
+})
