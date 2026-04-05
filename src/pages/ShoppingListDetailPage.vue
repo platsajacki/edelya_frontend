@@ -44,10 +44,7 @@
           <span v-if="tab.count != null" class="detail-tabs__count">{{ tab.count }}</span>
         </button>
       </div>
-      <label class="detail-filters__manual">
-        <input v-model="showOnlyManual" type="checkbox" class="detail-filters__checkbox" />
-        <span class="detail-filters__manual-label">Только ручные</span>
-      </label>
+
     </div>
 
     <!-- Loading items -->
@@ -153,7 +150,7 @@ const router = useRouter()
 const store = useShoppingStore()
 
 const activeFilter = ref("all") // 'all' | 'unchecked' | 'checked'
-const showOnlyManual = ref(false)
+
 const showEditForm = ref(false)
 const showAddItem = ref(false)
 const confirmDialog = ref(null)
@@ -183,7 +180,6 @@ const filteredGroups = computed(() => {
       items: group.items.filter((item) => {
         if (activeFilter.value === "checked" && !item.is_checked) return false
         if (activeFilter.value === "unchecked" && item.is_checked) return false
-        if (showOnlyManual.value && !item.is_manual) return false
         return true
       }),
     }))
@@ -194,7 +190,6 @@ const emptyText = computed(() => {
   if (store.items.length === 0) return "В этом списке пока нет позиций. Добавьте вручную или выполните пересчёт."
   if (activeFilter.value === "checked") return "Нет купленных позиций"
   if (activeFilter.value === "unchecked") return "Все позиции уже куплены!"
-  if (showOnlyManual.value) return "Нет позиций, добавленных вручную"
   return "Нет позиций"
 })
 
@@ -432,26 +427,7 @@ async function doDeleteList() {
   opacity: 0.6;
 }
 
-.detail-filters__manual {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  cursor: pointer;
-  padding: 2px 0;
-  -webkit-tap-highlight-color: transparent;
-}
 
-.detail-filters__checkbox {
-  width: 16px;
-  height: 16px;
-  accent-color: var(--color-mint);
-  cursor: pointer;
-}
-
-.detail-filters__manual-label {
-  font-size: var(--font-sm);
-  color: var(--color-text-secondary);
-}
 
 /* ---- Loading ---- */
 .detail-loading {

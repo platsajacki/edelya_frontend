@@ -25,26 +25,57 @@
       <div class="form__section">
         <span class="form__label">Ингредиенты <span class="form__required">*</span></span>
 
-        <div v-for="(ing, idx) in ingredients" :key="idx" class="ingredient-row" :class="{ 'ingredient-row--optional': ing.is_optional }">
-          <span class="ingredient-row__name">{{ ing.ingredientName }}</span>
-          <span class="ingredient-row__amount">
-            <span v-if="ing.is_optional" class="ingredient-row__opt-label">опц. · </span>{{ formatShoppingAmount(ing.amount, ing.base_unit).display }}
-          </span>
-          <button type="button" class="ingredient-row__edit" @click="startEditIngredient(idx)" title="Редактировать">
-            <svg width="12" height="12" viewBox="0 0 14 14" fill="none"><path d="M8.5 2.5a1 1 0 011.415 0l1.585 1.585a1 1 0 010 1.415L4.5 12.5l-3 .5.5-3z" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          </button>
-          <button type="button" class="ingredient-row__remove" @click="removeIngredient(idx)" title="Удалить">
-            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="1" y1="1" x2="11" y2="11"/><line x1="11" y1="1" x2="1" y2="11"/></svg>
-          </button>
-        </div>
+        <template v-for="(ing, idx) in ingredients" :key="idx">
+          <!-- Edit form appears in place of the row -->
+          <div v-if="editingIdx === idx && pendingIngredient" class="ingredient-amount">
+            <div class="ingredient-amount__header">
+              <span class="ingredient-amount__name">{{ pendingIngredient.name }}</span>
+              <span class="ingredient-amount__mode">Редактирование</span>
+            </div>
+            <div v-if="pendingIngredient.base_unit !== 'to_taste'" class="ingredient-amount__row">
+              <input
+                v-model="pendingAmount"
+                type="text"
+                inputmode="decimal"
+                autocomplete="off"
+                class="form__input ingredient-amount__input"
+                placeholder="Например: 200"
+                @focus="$event.target.select()"
+                @keydown.enter.prevent="confirmIngredient"
+              />
+              <span class="ingredient-amount__unit">{{ UNIT_LABELS[pendingIngredient.base_unit] || pendingIngredient.base_unit }}</span>
+            </div>
+            <p v-else class="ingredient-amount__taste-hint">Количество не указывается — добавится как «по вкусу»</p>
+            <label class="ingredient-amount__optional">
+              <input v-model="pendingOptional" type="checkbox" />
+              Опционально
+            </label>
+            <div v-if="amountError" class="form__error">{{ amountError }}</div>
+            <div class="ingredient-amount__actions">
+              <button type="button" class="btn btn--sm" @click="confirmIngredient">Сохранить</button>
+              <button type="button" class="btn btn--sm btn--ghost" @click="cancelIngredient">Отмена</button>
+            </div>
+          </div>
+          <!-- Normal row -->
+          <div v-else class="ingredient-row" :class="{ 'ingredient-row--optional': ing.is_optional }">
+            <span class="ingredient-row__name">{{ ing.ingredientName }}</span>
+            <span class="ingredient-row__amount">
+              <span v-if="ing.is_optional" class="ingredient-row__opt-label">опц. · </span>{{ formatShoppingAmount(ing.amount, ing.base_unit).display }}
+            </span>
+            <button type="button" class="ingredient-row__edit" @click="startEditIngredient(idx)" title="Редактировать">
+              <svg width="12" height="12" viewBox="0 0 14 14" fill="none"><path d="M8.5 2.5a1 1 0 011.415 0l1.585 1.585a1 1 0 010 1.415L4.5 12.5l-3 .5.5-3z" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <button type="button" class="ingredient-row__remove" @click="removeIngredient(idx)" title="Удалить">
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="1" y1="1" x2="11" y2="11"/><line x1="11" y1="1" x2="1" y2="11"/></svg>
+            </button>
+          </div>
+        </template>
 
-        <!-- Amount input after selecting ingredient / editing existing -->
-        <div v-if="pendingIngredient" class="ingredient-amount">
+        <!-- Amount input when adding a new ingredient -->
+        <div v-if="pendingIngredient && editingIdx === null" class="ingredient-amount">
           <div class="ingredient-amount__header">
             <span class="ingredient-amount__name">{{ pendingIngredient.name }}</span>
-            <span class="ingredient-amount__mode">
-              {{ editingIdx !== null ? 'Редактирование' : 'Добавление' }}
-            </span>
+            <span class="ingredient-amount__mode">Добавление</span>
           </div>
           <div v-if="pendingIngredient.base_unit !== 'to_taste'" class="ingredient-amount__row">
             <input
@@ -66,9 +97,7 @@
           </label>
           <div v-if="amountError" class="form__error">{{ amountError }}</div>
           <div class="ingredient-amount__actions">
-            <button type="button" class="btn btn--sm" @click="confirmIngredient">
-              {{ editingIdx !== null ? 'Сохранить' : 'Добавить' }}
-            </button>
+            <button type="button" class="btn btn--sm" @click="confirmIngredient">Добавить</button>
             <button type="button" class="btn btn--sm btn--ghost" @click="cancelIngredient">Отмена</button>
           </div>
         </div>

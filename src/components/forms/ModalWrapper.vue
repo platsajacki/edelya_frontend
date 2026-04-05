@@ -37,9 +37,9 @@ function close() {
 function onFocusIn(e) {
   const el = e.target
   if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.tagName === 'SELECT') {
-    requestAnimationFrame(() => {
-      el.scrollIntoView({ block: 'nearest', behavior: 'instant' })
-    })
+    setTimeout(() => {
+      el.scrollIntoView({ block: 'center', behavior: 'smooth' })
+    }, 300)
   }
 }
 
@@ -68,10 +68,14 @@ onUnmounted(() => {
   inset: 0;
   background: var(--overlay-bg);
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
   padding: 16px;
+  padding-top: max(16px, env(safe-area-inset-top, 16px));
+  padding-bottom: max(16px, env(safe-area-inset-bottom, 16px));
+  overflow-y: auto;
   overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
 }
 
 .modal-panel {
@@ -81,9 +85,11 @@ onUnmounted(() => {
   width: 100%;
   max-width: 420px;
   max-height: calc(100dvh - 32px);
+  margin: auto 0;
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  flex-shrink: 0;
 }
 
 .modal-header {

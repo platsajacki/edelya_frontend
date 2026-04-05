@@ -24,6 +24,9 @@
           </li>
         </ul>
         <div v-else-if="searched && !searching" class="add-item-form__status">Ничего не найдено</div>
+        <button type="button" class="add-item-form__create" @click="showIngredientForm = true">
+          + Создать ингредиент
+        </button>
       </div>
 
       <!-- Step 2: Enter amount -->
@@ -66,12 +69,19 @@
         </button>
       </div>
     </div>
+
+    <IngredientForm
+      v-model="showIngredientForm"
+      :z-index="zIndex + 10"
+      @created="onIngredientCreated"
+    />
   </ModalWrapper>
 </template>
 
 <script setup>
 import { ref, watch, nextTick } from "vue"
 import ModalWrapper from "./ModalWrapper.vue"
+import IngredientForm from "./IngredientForm.vue"
 import { fetchIngredients } from "../../services/ingredientService"
 import { getUnitLabel } from "../../utils/unitSteps"
 import { useShoppingStore } from "../../store/shopping"
@@ -99,6 +109,7 @@ const selectedIngredient = ref(null)
 const amount = ref("")
 const saving = ref(false)
 const error = ref("")
+const showIngredientForm = ref(false)
 
 let debounceTimer = null
 
@@ -121,6 +132,11 @@ function reset() {
   selectedIngredient.value = null
   amount.value = ""
   error.value = ""
+}
+
+function onIngredientCreated(ing) {
+  showIngredientForm.value = false
+  selectIngredient(ing)
 }
 
 function onSearch() {
@@ -214,6 +230,23 @@ async function submit() {
   display: flex;
   flex-direction: column;
   gap: 8px;
+}
+
+.add-item-form__create {
+  align-self: flex-start;
+  padding: 8px 16px;
+  border: 1.5px dashed var(--color-border);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-mint-hover);
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.add-item-form__create:hover {
+  background: var(--color-empty);
+  border-color: var(--color-mint);
 }
 
 .ingredient-search__list {

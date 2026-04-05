@@ -20,7 +20,7 @@
     <div class="item-row__info">
       <div class="item-row__name-row">
         <span class="item-row__name">{{ item.ingredient?.name ?? "—" }}</span>
-        <span v-if="item.is_manual" class="item-row__manual-badge" title="Добавлено вручную">ручная</span>
+        <span v-if="item.is_manual" class="item-row__manual-badge" title="Добавлено вручную">✏️</span>
       </div>
       <span v-if="isToTaste" class="item-row__taste">по вкусу</span>
     </div>
@@ -200,9 +200,6 @@ function cancelEdit() {
   font-size: 15px;
   font-weight: 500;
   color: var(--color-text);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 .item-row--checked .item-row__name {
@@ -212,13 +209,8 @@ function cancelEdit() {
 
 .item-row__manual-badge {
   flex-shrink: 0;
-  font-size: 11px;
-  color: var(--color-text-secondary);
-  background: color-mix(in srgb, var(--color-text-secondary) 6%, transparent);
-  padding: 2px 6px;
-  border-radius: 8px;
-  font-weight: 600;
-  white-space: nowrap;
+  font-size: 13px;
+  line-height: 1;
 }
 
 .item-row__taste {
