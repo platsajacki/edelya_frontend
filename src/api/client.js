@@ -61,6 +61,7 @@ const ERROR_MESSAGES = {
   "You do not have permission to perform this action.": "У вас нет прав для этого действия.",
   "Not found.": "Не найдено.",
   "Token is invalid or expired.": "Сессия истекла, войдите снова.",
+  "date_from must be before or equal to date_to.": "Дата начала должна быть раньше или равна дате окончания.",
   "At least one ingredient must be required.": "Нужен хотя бы один обязательный ингредиент.",
 }
 
@@ -91,6 +92,11 @@ function translateMessage(msg) {
   if (/^Maximum \d+ ingredients are allowed/.test(msg)) {
     const n = msg.match(/\d+/)?.[0]
     return `Максимум ${n} ингредиентов.`
+  }
+  // "The shopping list cannot span more than N days."
+  if (/^The shopping list cannot span more than \d+ days\./.test(msg)) {
+    const n = msg.match(/\d+/)?.[0]
+    return `Список покупок не может охватывать более ${n} дней.`
   }
   // DRF standard validators
   if (/^Ensure this value is less than or equal to/.test(msg)) {
