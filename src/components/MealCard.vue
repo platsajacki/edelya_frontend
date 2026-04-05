@@ -1,7 +1,7 @@
 <template>
   <button
     class="meal-card"
-    :class="{ 'meal-card--shared': !isOwn }"
+    :class="{ 'meal-card--shared': !isOwn && !isManual, 'meal-card--manual': isManual }"
     type="button"
     :data-id="item.id"
     @click="$emit('tap', item)"
@@ -24,6 +24,7 @@ const props = defineProps({
 defineEmits(["tap"])
 
 const isOwn = computed(() => isDishOwn(props.item.dish))
+const isManual = computed(() => props.item.is_manual === true)
 </script>
 
 <style scoped>
@@ -50,6 +51,11 @@ const isOwn = computed(() => isDishOwn(props.item.dish))
 
 .meal-card--shared {
   border-left-color: var(--color-shared-accent);
+}
+
+.meal-card--manual {
+  border-left-color: var(--color-manual-meal);
+  background: var(--color-manual-meal-bg);
 }
 
 .meal-card:hover {

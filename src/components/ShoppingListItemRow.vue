@@ -20,7 +20,7 @@
     <div class="item-row__info">
       <div class="item-row__name-row">
         <span class="item-row__name">{{ item.ingredient?.name ?? "—" }}</span>
-        <span v-if="item.is_manual" class="item-row__manual-badge" title="Добавлено вручную">вруч.</span>
+        <span v-if="item.is_manual" class="item-row__manual-badge" title="Добавлено вручную">ручная</span>
       </div>
       <span v-if="isToTaste" class="item-row__taste">по вкусу</span>
     </div>

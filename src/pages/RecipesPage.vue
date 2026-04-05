@@ -250,7 +250,7 @@ onUnmounted(() => {
 .recipes-page {
   max-width: 480px;
   margin: 0 auto;
-  padding: 12px 16px 80px;
+  padding: 12px 16px calc(var(--nav-height) + 72px);
   min-height: 100dvh;
   display: flex;
   flex-direction: column;
@@ -495,7 +495,7 @@ onUnmounted(() => {
 /* FAB */
 .recipes-fab {
   position: fixed;
-  bottom: calc(64px + env(safe-area-inset-bottom, 0px));
+  bottom: var(--nav-height);
   right: max(16px, calc((100vw - 480px) / 2 + 16px));
   width: 52px;
   height: 52px;

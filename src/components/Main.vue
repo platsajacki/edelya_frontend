@@ -181,7 +181,7 @@ onMounted(() => {
 .planner {
   max-width: 480px;
   margin: 0 auto;
-  padding: 12px 16px 80px;
+  padding: 12px 16px var(--nav-height);
   display: flex;
   flex-direction: column;
   gap: 12px;
