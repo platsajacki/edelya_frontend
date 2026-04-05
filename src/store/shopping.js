@@ -162,21 +162,35 @@ export const useShoppingStore = defineStore("shopping", {
 
     async adjustItemAmount(listId, item, delta) {
       const oldAmount = parseFloat(item.amount)
-      const newAmount = Math.max(0, oldAmount + delta)
+      const newAmount = parseFloat(Math.max(0, oldAmount + delta).toFixed(4))
       if (newAmount === oldAmount) return
 
-      const oldVal = item.amount
       item.amount = String(newAmount)
 
-      try {
-        const updated = await updateShoppingListItem(listId, item.id, {
-          amount: String(newAmount),
-        })
-        Object.assign(item, updated)
-      } catch {
-        item.amount = oldVal
-        this.showToast("Не удалось изменить количество")
+      if (!this._adjustTimers) this._adjustTimers = {}
+      if (!this._adjustPrev) this._adjustPrev = {}
+
+      clearTimeout(this._adjustTimers[item.id])
+
+      if (this._adjustPrev[item.id] === undefined) {
+        this._adjustPrev[item.id] = String(oldAmount)
       }
+
+      this._adjustTimers[item.id] = setTimeout(async () => {
+        const prevVal = this._adjustPrev[item.id]
+        delete this._adjustTimers[item.id]
+        delete this._adjustPrev[item.id]
+
+        try {
+          const updated = await updateShoppingListItem(listId, item.id, {
+            amount: item.amount,
+          })
+          Object.assign(item, updated)
+        } catch {
+          item.amount = prevVal
+          this.showToast("Не удалось изменить количество")
+        }
+      }, 600)
     },
 
     async removeItem(listId, itemId) {

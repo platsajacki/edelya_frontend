@@ -25,20 +25,27 @@
       <div class="form__section">
         <span class="form__label">Ингредиенты <span class="form__required">*</span></span>
 
-        <div v-for="(ing, idx) in ingredients" :key="idx" class="ingredient-row">
+        <div v-for="(ing, idx) in ingredients" :key="idx" class="ingredient-row" :class="{ 'ingredient-row--optional': ing.is_optional }">
           <span class="ingredient-row__name">{{ ing.ingredientName }}</span>
           <span class="ingredient-row__amount">
-            {{ formatShoppingAmount(ing.amount, ing.base_unit).display }}
+            <span v-if="ing.is_optional" class="ingredient-row__opt-label">опц. · </span>{{ formatShoppingAmount(ing.amount, ing.base_unit).display }}
           </span>
-          <span v-if="ing.is_optional" class="ingredient-row__optional">опц.</span>
-          <button type="button" class="ingredient-row__remove" @click="ingredients.splice(idx, 1)" title="Удалить">
-            <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 4h10M5.5 4V3a1 1 0 011-1h3a1 1 0 011 1v1M6.5 7v4M9.5 7v4M4.5 4l.5 9a1 1 0 001 1h4a1 1 0 001-1l.5-9" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <button type="button" class="ingredient-row__edit" @click="startEditIngredient(idx)" title="Редактировать">
+            <svg width="12" height="12" viewBox="0 0 14 14" fill="none"><path d="M8.5 2.5a1 1 0 011.415 0l1.585 1.585a1 1 0 010 1.415L4.5 12.5l-3 .5.5-3z" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+          <button type="button" class="ingredient-row__remove" @click="removeIngredient(idx)" title="Удалить">
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="1" y1="1" x2="11" y2="11"/><line x1="11" y1="1" x2="1" y2="11"/></svg>
           </button>
         </div>
 
-        <!-- Amount input after selecting ingredient -->
+        <!-- Amount input after selecting ingredient / editing existing -->
         <div v-if="pendingIngredient" class="ingredient-amount">
-          <span class="ingredient-amount__name">{{ pendingIngredient.name }}</span>
+          <div class="ingredient-amount__header">
+            <span class="ingredient-amount__name">{{ pendingIngredient.name }}</span>
+            <span class="ingredient-amount__mode">
+              {{ editingIdx !== null ? 'Редактирование' : 'Добавление' }}
+            </span>
+          </div>
           <div v-if="pendingIngredient.base_unit !== 'to_taste'" class="ingredient-amount__row">
             <input
               v-model="pendingAmount"
@@ -59,7 +66,9 @@
           </label>
           <div v-if="amountError" class="form__error">{{ amountError }}</div>
           <div class="ingredient-amount__actions">
-            <button type="button" class="btn btn--sm" @click="confirmIngredient">Добавить</button>
+            <button type="button" class="btn btn--sm" @click="confirmIngredient">
+              {{ editingIdx !== null ? 'Сохранить' : 'Добавить' }}
+            </button>
             <button type="button" class="btn btn--sm btn--ghost" @click="cancelIngredient">Отмена</button>
           </div>
         </div>
@@ -168,6 +177,7 @@ const pendingIngredient = ref(null)
 const pendingAmount = ref("")
 const pendingOptional = ref(false)
 const amountError = ref("")
+const editingIdx = ref(null)
 
 let ingredientSearchTimer = null
 
@@ -220,6 +230,7 @@ function resetIngredientSearch() {
   pendingIngredient.value = null
   pendingAmount.value = ""
   pendingOptional.value = false
+  editingIdx.value = null
 }
 
 function searchIngredients() {
@@ -249,6 +260,31 @@ function selectIngredient(ing) {
   ingredientQuery.value = ""
   ingredientResults.value = []
   amountError.value = ""
+  editingIdx.value = null
+}
+
+function startEditIngredient(idx) {
+  const ing = ingredients.value[idx]
+  pendingIngredient.value = {
+    id: ing.ingredient,
+    name: ing.ingredientName,
+    base_unit: ing.base_unit,
+  }
+  pendingAmount.value = ing.base_unit === 'to_taste' ? '' : formatAmount(ing.amount)
+  pendingOptional.value = ing.is_optional
+  editingIdx.value = idx
+  amountError.value = ""
+  ingredientQuery.value = ""
+  ingredientResults.value = []
+}
+
+function removeIngredient(idx) {
+  ingredients.value.splice(idx, 1)
+  if (editingIdx.value === idx) {
+    resetIngredientSearch()
+  } else if (editingIdx.value !== null && editingIdx.value > idx) {
+    editingIdx.value--
+  }
 }
 
 function confirmIngredient() {
@@ -265,17 +301,23 @@ function confirmIngredient() {
     finalAmount = String(num)
   }
   amountError.value = ""
-  ingredients.value.push({
+  const row = {
     ingredient: pendingIngredient.value.id,
     ingredientName: pendingIngredient.value.name,
     amount: finalAmount,
     base_unit: pendingIngredient.value.base_unit,
     unitLabel: UNIT_LABELS[pendingIngredient.value.base_unit] || pendingIngredient.value.base_unit || '',
     is_optional: pendingOptional.value,
-  })
+  }
+  if (editingIdx.value !== null) {
+    ingredients.value[editingIdx.value] = row
+  } else {
+    ingredients.value.push(row)
+  }
   pendingIngredient.value = null
   pendingAmount.value = ""
   pendingOptional.value = false
+  editingIdx.value = null
 }
 
 function cancelIngredient() {
@@ -283,6 +325,7 @@ function cancelIngredient() {
   pendingAmount.value = ""
   pendingOptional.value = false
   amountError.value = ""
+  editingIdx.value = null
 }
 
 function onIngredientCreated(ingredient) {
@@ -412,51 +455,83 @@ async function submit() {
 .ingredient-row {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   padding: 8px 12px;
   background: var(--color-empty);
   border-radius: 8px;
   font-size: 13px;
 }
 
+.ingredient-row--optional {
+  opacity: 0.75;
+}
+
 .ingredient-row__name {
   flex: 1;
   font-weight: 500;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .ingredient-row__amount {
-  color: var(--color-text-secondary);
-  font-size: 13px;
-}
-
-.ingredient-row__optional {
-  font-size: 11px;
-  color: var(--color-mint);
-  background: color-mix(in srgb, var(--color-mint) 12%, transparent);
-  border-radius: 4px;
-  padding: 1px 5px;
-  font-weight: 500;
-  white-space: nowrap;
   flex-shrink: 0;
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
 }
 
-.ingredient-row__remove {
-  width: 24px;
-  height: 24px;
+.ingredient-row__opt-label {
+  font-size: 11px;
+  color: var(--color-text-secondary);
+  font-style: italic;
+  font-weight: 400;
+}
+
+.ingredient-row__edit {
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
   border: none;
   background: none;
   color: var(--color-text-secondary);
-  border-radius: 6px;
+  border-radius: 5px;
   display: flex;
   align-items: center;
   justify-content: center;
+  opacity: 0.4;
+  transition: opacity 0.15s, color 0.15s, background 0.15s;
+  padding: 0;
+}
+
+.ingredient-row__edit:hover,
+.ingredient-row:hover .ingredient-row__edit {
+  opacity: 1;
+  color: var(--color-mint);
+  background: color-mix(in srgb, var(--color-mint) 10%, transparent);
+}
+
+.ingredient-row__remove {
   flex-shrink: 0;
-  transition: background 0.15s, color 0.15s;
+  width: 22px;
+  height: 22px;
+  border: none;
+  background: none;
+  color: var(--color-text-secondary);
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.4;
+  transition: opacity 0.15s, color 0.15s, background 0.15s;
+  padding: 0;
 }
 
 .ingredient-row__remove:hover {
-  background: var(--color-border);
+  opacity: 1;
   color: var(--color-danger);
+  background: var(--color-danger-pale);
 }
 
 /* Ingredient search */
@@ -504,11 +579,24 @@ async function submit() {
   padding: 12px;
   background: var(--color-empty);
   border-radius: 8px;
+  border: 1.5px solid var(--color-border);
+}
+
+.ingredient-amount__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .ingredient-amount__name {
   font-size: 13px;
-  font-weight: 500;
+  font-weight: 600;
+}
+
+.ingredient-amount__mode {
+  font-size: 11px;
+  color: var(--color-text-secondary);
+  font-style: italic;
 }
 
 .ingredient-amount__row {
