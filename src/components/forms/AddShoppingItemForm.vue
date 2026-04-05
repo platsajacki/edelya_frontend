@@ -36,37 +36,70 @@
           <button type="button" class="amount-step__change" @click="clearSelection">Изменить</button>
         </div>
 
-        <p v-if="selectedIngredient.base_unit === 'to_taste'" class="amount-step__taste-hint">
-          Количество не указывается — добавится как «по вкусу»
-        </p>
-        <label v-else class="form__field">
-          <span class="form__label">Количество <span class="form__required">*</span></span>
-          <div class="amount-step__row">
-            <input
-              ref="amountInput"
-              v-model="amount"
-              type="text"
-              inputmode="decimal"
-              autocomplete="off"
-              class="form__input amount-step__input"
-              :placeholder="'Например: 100'"
-              @focus="$event.target.select()"
-              @keydown.enter.prevent="submit"
-            />
-            <span class="amount-step__unit">{{ unitLabel(selectedIngredient.base_unit) }}</span>
+        <template v-if="!confirmDuplicate">
+          <p v-if="selectedIngredient.base_unit === 'to_taste'" class="amount-step__taste-hint">
+            Количество не указывается — добавится как «по вкусу»
+          </p>
+          <label v-else class="form__field">
+            <span class="form__label">Количество <span class="form__required">*</span></span>
+            <div class="amount-step__row">
+              <input
+                ref="amountInput"
+                v-model="amount"
+                type="text"
+                inputmode="decimal"
+                autocomplete="off"
+                class="form__input amount-step__input"
+                :placeholder="'Например: 100'"
+                @focus="$event.target.select()"
+                @keydown.enter.prevent="submit"
+              />
+              <span class="amount-step__unit">{{ unitLabel(selectedIngredient.base_unit) }}</span>
+            </div>
+          </label>
+
+          <div v-if="error" class="form__error">{{ error }}</div>
+
+          <button
+            type="button"
+            class="form__submit"
+            :disabled="saving"
+            @click="submit"
+          >
+            {{ saving ? "Добавление..." : "Добавить" }}
+          </button>
+        </template>
+
+        <!-- Duplicate confirmation -->
+        <div v-else class="amount-step__confirm">
+          <p class="amount-step__confirm-text">
+            В списке уже есть
+            <strong>{{ selectedIngredient.name }}</strong>
+            <template v-if="existingItem && selectedIngredient.base_unit !== 'to_taste'">
+              ({{ existingItem.amount }} {{ unitLabel(selectedIngredient.base_unit) }})
+            </template>.
+            <template v-if="selectedIngredient.base_unit !== 'to_taste'">
+              Добавить ещё {{ amount }} {{ unitLabel(selectedIngredient.base_unit) }}?
+            </template>
+          </p>
+          <div class="amount-step__confirm-actions">
+            <button
+              type="button"
+              class="amount-step__confirm-cancel"
+              @click="confirmDuplicate = false"
+            >
+              Нет
+            </button>
+            <button
+              type="button"
+              class="form__submit"
+              :disabled="saving"
+              @click="confirmAdd"
+            >
+              {{ saving ? "Добавление..." : "Да, добавить" }}
+            </button>
           </div>
-        </label>
-
-        <div v-if="error" class="form__error">{{ error }}</div>
-
-        <button
-          type="button"
-          class="form__submit"
-          :disabled="saving"
-          @click="submit"
-        >
-          {{ saving ? "Добавление..." : "Добавить" }}
-        </button>
+        </div>
       </div>
     </div>
 
@@ -110,6 +143,13 @@ const amount = ref("")
 const saving = ref(false)
 const error = ref("")
 const showIngredientForm = ref(false)
+const confirmDuplicate = ref(false)
+const existingItem = ref(null)
+
+const DUPLICATE_MESSAGES = new Set([
+  "Такая запись уже существует.",
+  "Этот ингредиент уже в списке покупок.",
+])
 
 let debounceTimer = null
 
@@ -132,6 +172,8 @@ function reset() {
   selectedIngredient.value = null
   amount.value = ""
   error.value = ""
+  confirmDuplicate.value = false
+  existingItem.value = null
 }
 
 function onIngredientCreated(ing) {
@@ -170,6 +212,8 @@ function clearSelection() {
   selectedIngredient.value = null
   amount.value = ""
   error.value = ""
+  confirmDuplicate.value = false
+  existingItem.value = null
   nextTick(() => searchInput.value?.focus())
 }
 
@@ -198,7 +242,34 @@ async function submit() {
     emit("created", data)
     open.value = false
   } catch (err) {
-    error.value = err.message || "Не удалось добавить позицию"
+    if (DUPLICATE_MESSAGES.has(err.message) && selectedIngredient.value?.base_unit !== 'to_taste') {
+      const store = useShoppingStore()
+      existingItem.value = store.items.find((i) => i.ingredient?.id === selectedIngredient.value?.id) ?? null
+      confirmDuplicate.value = true
+    } else {
+      error.value = err.message || "Не удалось добавить позицию"
+    }
+  } finally {
+    saving.value = false
+  }
+}
+
+async function confirmAdd() {
+  const store = useShoppingStore()
+  const item = existingItem.value
+  if (!item) return
+
+  const raw = amount.value.trim().replace(',', '.')
+  const newAmount = String(Number(item.amount) + Number(raw))
+
+  saving.value = true
+  try {
+    const data = await store.updateItemAmount(props.listId, item.id, newAmount)
+    emit("created", data)
+    open.value = false
+  } catch (err) {
+    confirmDuplicate.value = false
+    error.value = err.message || "Не удалось обновить позицию"
   } finally {
     saving.value = false
   }
@@ -384,5 +455,40 @@ async function submit() {
 .form__submit:disabled {
   opacity: 0.45;
   cursor: not-allowed;
+}
+
+.amount-step__confirm {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.amount-step__confirm-text {
+  font-size: var(--font-sm);
+  color: var(--color-text);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.amount-step__confirm-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.amount-step__confirm-cancel {
+  padding: 12px;
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-text);
+  font-size: 15px;
+  font-weight: 600;
+  width: 100%;
+  transition: background 0.15s;
+}
+
+.amount-step__confirm-cancel:hover {
+  background: var(--color-empty);
 }
 </style>

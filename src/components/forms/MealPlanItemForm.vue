@@ -7,7 +7,7 @@
         <div v-if="selectedDish" class="selected-dish">
           <span class="selected-dish__name">{{ selectedDish.name }}</span>
           <button type="button" class="selected-dish__edit" @click="editDish = selectedDish; showDishForm = true" title="Редактировать блюдо">
-            <IconPencilFill />
+            <IconPencil variant="filled" />
           </button>
           <button type="button" class="selected-dish__clear" @click="selectedDish = null">&times;</button>
         </div>
@@ -50,7 +50,7 @@ import DishForm from "./DishForm.vue"
 import DateInput from "./DateInput.vue"
 import MultiDayPicker from "./MultiDayPicker.vue"
 import { usePlanningStore } from "../../store/planning"
-import IconPencilFill from "../icons/IconPencilFill.vue"
+import IconPencil from "../icons/IconPencil.vue"
 
 const props = defineProps({
   modelValue: { type: Boolean, required: true },

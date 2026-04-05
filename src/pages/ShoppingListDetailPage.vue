@@ -11,7 +11,7 @@
       </div>
       <div class="detail-header__actions">
         <button class="detail-header__btn" @click="showEditForm = true" aria-label="Редактировать" title="Редактировать">
-          <IconEdit />
+          <IconPencil width="18" height="18" />
         </button>
         <button class="detail-header__btn" @click="confirmRecalculate" aria-label="Пересчитать" title="Пересчитать">
           <IconRefresh />
@@ -134,7 +134,7 @@ import ShoppingListItemRow from "../components/ShoppingListItemRow.vue"
 import ShoppingListForm from "../components/forms/ShoppingListForm.vue"
 import AddShoppingItemForm from "../components/forms/AddShoppingItemForm.vue"
 import IconChevronLeft from "../components/icons/IconChevronLeft.vue"
-import IconEdit from "../components/icons/IconEdit.vue"
+import IconPencil from "../components/icons/IconPencil.vue"
 import IconRefresh from "../components/icons/IconRefresh.vue"
 import IconTrash from "../components/icons/IconTrash.vue"
 import IconPlus from "../components/icons/IconPlus.vue"

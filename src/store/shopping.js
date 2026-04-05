@@ -138,6 +138,14 @@ export const useShoppingStore = defineStore("shopping", {
       return data
     },
 
+    async updateItemAmount(listId, itemId, amount) {
+      const data = await updateShoppingListItem(listId, itemId, { amount })
+      const idx = this.items.findIndex((i) => i.id === itemId)
+      if (idx !== -1) Object.assign(this.items[idx], data)
+      this.showToast("Количество обновлено")
+      return data
+    },
+
     async toggleItemChecked(listId, item) {
       const wasChecked = item.is_checked
       const wasCheckedAt = item.checked_at

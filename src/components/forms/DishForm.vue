@@ -63,7 +63,7 @@
               <span v-if="ing.is_optional" class="ingredient-row__opt-label">опц. · </span>{{ formatShoppingAmount(ing.amount, ing.base_unit).display }}
             </span>
             <button type="button" class="ingredient-row__edit" @click="startEditIngredient(idx)" title="Редактировать">
-              <IconPencilSm />
+              <IconPencil width="14" height="14" />
             </button>
             <button type="button" class="ingredient-row__remove" @click="removeIngredient(idx)" title="Удалить">
               <IconClose />
@@ -147,7 +147,7 @@
 import { ref, computed, watch } from "vue"
 import ModalWrapper from "./ModalWrapper.vue"
 import IngredientForm from "./IngredientForm.vue"
-import IconPencilSm from "../icons/IconPencilSm.vue"
+import IconPencil from "../icons/IconPencil.vue"
 import IconClose from "../icons/IconClose.vue"
 import { createDish, updateDish, fetchDishCategories } from "../../services/dishService"
 import { fetchIngredients } from "../../services/ingredientService"
