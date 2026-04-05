@@ -1,16 +1,19 @@
 <template>
   <nav class="week-nav">
     <button class="week-nav__btn" :disabled="disabled" @click="$emit('prev')">
-      <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M12.5 15L7.5 10L12.5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <IconChevronLeft />
     </button>
     <span class="week-nav__label">{{ label }}</span>
     <button class="week-nav__btn" :disabled="disabled" @click="$emit('next')">
-      <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M7.5 5L12.5 10L7.5 15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <IconChevronRight />
     </button>
   </nav>
 </template>
 
 <script setup>
+import IconChevronLeft from "./icons/IconChevronLeft.vue"
+import IconChevronRight from "./icons/IconChevronRight.vue"
+
 defineProps({
   label: {
     type: String,

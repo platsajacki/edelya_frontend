@@ -4,15 +4,14 @@
       <span class="shopping-card__name">{{ list.name }}</span>
       <span class="shopping-card__dates">{{ dateRange }}</span>
     </div>
-    <svg class="shopping-card__chevron" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-      <polyline points="7 5 12 10 7 15" />
-    </svg>
+    <IconChevronRight class="shopping-card__chevron" />
   </button>
 </template>
 
 <script setup>
 import { computed } from "vue"
 import { formatYMDtoDDMMYYYY } from "../utils/formatDate"
+import IconChevronRight from "./icons/IconChevronRight.vue"
 
 const props = defineProps({
   list: { type: Object, required: true },

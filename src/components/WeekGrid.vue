@@ -3,11 +3,11 @@
     <div class="week-grid__header">
       <div class="week-grid__header-spacer"></div>
       <div class="week-grid__header-col week-grid__header-col--cook">
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 6h12M3 6l1 8h8l1-8M6 6V4a2 2 0 014 0v2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <IconPot />
         Готовлю
       </div>
       <div class="week-grid__header-col week-grid__header-col--eat">
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M5 2v5a2 2 0 002 2h0a2 2 0 002-2V2M6 2v3M8 2v3M7 9v5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <IconFork />
         Ем
       </div>
     </div>
@@ -33,6 +33,8 @@
 import { computed } from "vue"
 import { formatYMDtoDDMMYYYY } from "../utils/formatDate"
 import DayRow from "./DayRow.vue"
+import IconPot from "./icons/IconPot.vue"
+import IconFork from "./icons/IconFork.vue"
 
 const DAY_LABELS = ["ПН", "ВТ", "СР", "ЧТ", "ПТ", "СБ", "ВС"]
 

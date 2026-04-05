@@ -3,9 +3,7 @@
     <!-- Header -->
     <div class="detail-header">
       <button class="detail-header__back" @click="goBack" aria-label="Назад">
-        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <polyline points="13 15 8 10 13 5" />
-        </svg>
+        <IconChevronLeft />
       </button>
       <div class="detail-header__info">
         <h1 class="detail-header__title">{{ store.currentList?.name ?? "" }}</h1>
@@ -13,19 +11,13 @@
       </div>
       <div class="detail-header__actions">
         <button class="detail-header__btn" @click="showEditForm = true" aria-label="Редактировать" title="Редактировать">
-          <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M10 3l5 5-9.5 9.5H1v-4.5z"/>
-          </svg>
+          <IconEdit />
         </button>
         <button class="detail-header__btn" @click="confirmRecalculate" aria-label="Пересчитать" title="Пересчитать">
-          <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M1 1v6h6"/><path d="M3.51 11a7 7 0 1013.26-3.36A7 7 0 003.51 11z"/>
-          </svg>
+          <IconRefresh />
         </button>
         <button class="detail-header__btn detail-header__btn--danger" @click="confirmDeleteList" aria-label="Удалить" title="Удалить">
-          <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M2.5 4.5h13M5.5 4.5V3a1.5 1.5 0 011.5-1.5h4A1.5 1.5 0 0112.5 3v1.5M7 8v5M11 8v5M4 4.5l.75 10.5a1.5 1.5 0 001.5 1.5h5.5a1.5 1.5 0 001.5-1.5L14 4.5"/>
-          </svg>
+          <IconTrash />
         </button>
       </div>
     </div>
@@ -83,10 +75,7 @@
 
     <!-- FAB: add item -->
     <button class="detail-fab" @click="showAddItem = true" aria-label="Добавить позицию">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-        <line x1="12" y1="5" x2="12" y2="19"/>
-        <line x1="5" y1="12" x2="19" y2="12"/>
-      </svg>
+      <IconPlus />
     </button>
 
     <!-- Edit form modal -->
@@ -144,6 +133,11 @@ import { formatYMDtoDDMMYYYY } from "../utils/formatDate"
 import ShoppingListItemRow from "../components/ShoppingListItemRow.vue"
 import ShoppingListForm from "../components/forms/ShoppingListForm.vue"
 import AddShoppingItemForm from "../components/forms/AddShoppingItemForm.vue"
+import IconChevronLeft from "../components/icons/IconChevronLeft.vue"
+import IconEdit from "../components/icons/IconEdit.vue"
+import IconRefresh from "../components/icons/IconRefresh.vue"
+import IconTrash from "../components/icons/IconTrash.vue"
+import IconPlus from "../components/icons/IconPlus.vue"
 
 const route = useRoute()
 const router = useRouter()

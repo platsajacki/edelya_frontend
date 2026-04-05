@@ -4,19 +4,14 @@
     <div class="recipes-header">
       <h1 class="recipes-header__title">Рецепты</h1>
       <button class="recipes-header__filter-btn" @click="showFilters = true" aria-label="Фильтры">
-        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M2 4h16M5 10h10M7 16h6"/>
-        </svg>
+        <IconFilter />
         <span v-if="store.hasActiveFilters" class="recipes-header__filter-dot" />
       </button>
     </div>
 
     <!-- Search -->
     <div class="recipes-search">
-      <svg class="recipes-search__icon" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
-        <circle cx="7" cy="7" r="4.5"/>
-        <path d="M10.5 10.5L14 14"/>
-      </svg>
+      <IconSearch class="recipes-search__icon" />
       <input
         v-model="searchQuery"
         type="text"
@@ -95,10 +90,7 @@
 
     <!-- FAB: create new dish -->
     <button class="recipes-fab" @click="showCreateForm = true" aria-label="Создать блюдо">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-        <line x1="12" y1="5" x2="12" y2="19"/>
-        <line x1="5" y1="12" x2="19" y2="12"/>
-      </svg>
+      <IconPlus />
     </button>
 
     <!-- Filter panel -->
@@ -139,6 +131,9 @@ import RecipeDishCard from "../components/RecipeDishCard.vue"
 import RecipeFilterPanel from "../components/RecipeFilterPanel.vue"
 import RecipeDishDetail from "../components/RecipeDishDetail.vue"
 import DishForm from "../components/forms/DishForm.vue"
+import IconFilter from "../components/icons/IconFilter.vue"
+import IconSearch from "../components/icons/IconSearch.vue"
+import IconPlus from "../components/icons/IconPlus.vue"
 
 const store = useRecipesStore()
 

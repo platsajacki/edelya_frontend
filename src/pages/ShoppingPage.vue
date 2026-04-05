@@ -9,13 +9,7 @@
         :title="sortAsc ? 'Сортировка: сначала старые' : 'Сортировка: сначала новые'"
         @click="sortAsc = !sortAsc"
       >
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-          <line x1="2" y1="4" x2="10" y2="4"/>
-          <line x1="2" y1="8" x2="8" y2="8"/>
-          <line x1="2" y1="12" x2="6" y2="12"/>
-          <polyline v-if="sortAsc" points="13 11 13 5 11 7"/>
-          <polyline v-else points="13 5 13 11 11 9"/>
-        </svg>
+        <IconSort :ascending="sortAsc" />
         {{ sortAsc ? 'Сначала старые' : 'Сначала новые' }}
       </button>
     </div>
@@ -27,11 +21,7 @@
 
     <!-- Empty state -->
     <div v-else-if="!store.lists.length" class="shopping-empty">
-      <svg class="shopping-empty__icon" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/>
-        <line x1="3" y1="6" x2="21" y2="6"/>
-        <path d="M16 10a4 4 0 01-8 0"/>
-      </svg>
+      <IconShoppingBag class="shopping-empty__icon" width="48" height="48" :stroke-width="1.2" />
       <p class="shopping-empty__text">Нет списков покупок</p>
       <button class="shopping-empty__add" @click="showForm = true">
         + Создать список
@@ -50,10 +40,7 @@
 
     <!-- FAB -->
     <button class="shopping-fab" @click="showForm = true" aria-label="Создать список">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-        <line x1="12" y1="5" x2="12" y2="19"/>
-        <line x1="5" y1="12" x2="19" y2="12"/>
-      </svg>
+      <IconPlus />
     </button>
 
     <!-- Create form -->
@@ -77,6 +64,9 @@ import { useRouter } from "vue-router"
 import { useShoppingStore } from "../store/shopping"
 import ShoppingListCard from "../components/ShoppingListCard.vue"
 import ShoppingListForm from "../components/forms/ShoppingListForm.vue"
+import IconSort from "../components/icons/IconSort.vue"
+import IconShoppingBag from "../components/icons/IconShoppingBag.vue"
+import IconPlus from "../components/icons/IconPlus.vue"
 
 const store = useShoppingStore()
 const router = useRouter()

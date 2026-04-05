@@ -63,6 +63,7 @@ const ERROR_MESSAGES = {
   "Token is invalid or expired.": "Сессия истекла, войдите снова.",
   "date_from must be before or equal to date_to.": "Дата начала должна быть раньше или равна дате окончания.",
   "At least one ingredient must be required.": "Нужен хотя бы один обязательный ингредиент.",
+  "This ingredient is already in the shopping list.": "Этот ингредиент уже в списке покупок.",
 }
 
 const FIELD_NAMES = {

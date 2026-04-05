@@ -7,7 +7,7 @@
         <div v-if="selectedDish" class="selected-dish">
           <span class="selected-dish__name">{{ selectedDish.name }}</span>
           <button type="button" class="selected-dish__edit" title="Редактировать блюдо" @click="editDish = selectedDish; showDishForm = true">
-            <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M11.5 2.5a1.414 1.414 0 012 2L5.5 12.5l-3 1 1-3 8-8z" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <IconPencil width="14" height="14" />
           </button>
           <button type="button" class="selected-dish__clear" @click="selectedDish = null">&times;</button>
         </div>
@@ -55,6 +55,7 @@ import DishForm from "./DishForm.vue"
 import DateInput from "./DateInput.vue"
 import MultiDayPicker from "./MultiDayPicker.vue"
 import { usePlanningStore } from "../../store/planning"
+import IconPencil from "../icons/IconPencil.vue"
 
 const props = defineProps({
   modelValue: { type: Boolean, required: true },

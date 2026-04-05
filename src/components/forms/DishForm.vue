@@ -63,10 +63,10 @@
               <span v-if="ing.is_optional" class="ingredient-row__opt-label">опц. · </span>{{ formatShoppingAmount(ing.amount, ing.base_unit).display }}
             </span>
             <button type="button" class="ingredient-row__edit" @click="startEditIngredient(idx)" title="Редактировать">
-              <svg width="12" height="12" viewBox="0 0 14 14" fill="none"><path d="M8.5 2.5a1 1 0 011.415 0l1.585 1.585a1 1 0 010 1.415L4.5 12.5l-3 .5.5-3z" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <IconPencilSm />
             </button>
             <button type="button" class="ingredient-row__remove" @click="removeIngredient(idx)" title="Удалить">
-              <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="1" y1="1" x2="11" y2="11"/><line x1="11" y1="1" x2="1" y2="11"/></svg>
+              <IconClose />
             </button>
           </div>
         </template>
@@ -147,6 +147,8 @@
 import { ref, computed, watch } from "vue"
 import ModalWrapper from "./ModalWrapper.vue"
 import IngredientForm from "./IngredientForm.vue"
+import IconPencilSm from "../icons/IconPencilSm.vue"
+import IconClose from "../icons/IconClose.vue"
 import { createDish, updateDish, fetchDishCategories } from "../../services/dishService"
 import { fetchIngredients } from "../../services/ingredientService"
 import { formatAmount } from "../../utils/formatAmount"

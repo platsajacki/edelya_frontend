@@ -10,10 +10,7 @@
       @click="$emit('toggle-checked', item)"
       aria-label="Отметить как купленное"
     >
-      <svg v-if="item.is_checked" width="10" height="10" viewBox="0 0 10 10" fill="none"
-        stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-        <polyline points="1 5 4 8 9 2" />
-      </svg>
+      <IconCheck v-if="item.is_checked" width="10" height="10" />
     </button>
 
     <!-- Name + sub-line -->
@@ -69,9 +66,7 @@
       @click="$emit('delete', item)"
       aria-label="Удалить"
     >
-      <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-        <line x1="1" y1="1" x2="9" y2="9"/><line x1="9" y1="1" x2="1" y2="9"/>
-      </svg>
+      <IconClose width="10" height="10" />
     </button>
 
   </div>
@@ -79,6 +74,8 @@
 
 <script setup>
 import { computed, ref, nextTick } from "vue"
+import IconCheck from "./icons/IconCheck.vue"
+import IconClose from "./icons/IconClose.vue"
 import { formatShoppingAmount } from "../utils/formatShoppingAmount"
 import { getUnitStep } from "../utils/unitSteps"
 

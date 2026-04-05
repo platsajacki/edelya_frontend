@@ -14,7 +14,7 @@
             </span>
           </div>
           <button type="button" class="detail__dish-edit" :title="isOwn ? 'Редактировать блюдо' : 'Создать копию'" @click="handleDishEdit">
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M11.5 2.5a1.414 1.414 0 012 2L5.5 12.5l-3 1 1-3 8-8z" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <IconPencil />
           </button>
         </div>
         <p v-if="dish.category?.name" class="detail__meta">
@@ -144,6 +144,7 @@
 import { ref, computed, watch } from "vue"
 import ModalWrapper from "./forms/ModalWrapper.vue"
 import DishForm from "./forms/DishForm.vue"
+import IconPencil from "./icons/IconPencil.vue"
 import { formatYMDtoDDMMYYYY } from "../utils/formatDate"
 import { formatAmount } from "../utils/formatAmount"
 import { formatShoppingAmount } from "../utils/formatShoppingAmount"
