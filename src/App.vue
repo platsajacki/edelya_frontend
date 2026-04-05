@@ -24,7 +24,9 @@ onMounted(async () => {
 
   try {
     await auth.init()
-    if (auth.user) router.push("/")
+    if (auth.user) {
+      router.push("/")
+    }
   } catch (err) {
     console.error("Auth failed:", err)
     auth.logout()

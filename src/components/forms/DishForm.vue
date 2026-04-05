@@ -27,7 +27,10 @@
 
         <div v-for="(ing, idx) in ingredients" :key="idx" class="ingredient-row">
           <span class="ingredient-row__name">{{ ing.ingredientName }}</span>
-          <span class="ingredient-row__amount">{{ formatAmount(ing.amount) }} {{ ing.unitLabel || '' }}</span>
+          <span class="ingredient-row__amount">
+            {{ formatShoppingAmount(ing.amount, ing.base_unit).display }}
+          </span>
+          <span v-if="ing.is_optional" class="ingredient-row__optional">опц.</span>
           <button type="button" class="ingredient-row__remove" @click="ingredients.splice(idx, 1)" title="Удалить">
             <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 4h10M5.5 4V3a1 1 0 011-1h3a1 1 0 011 1v1M6.5 7v4M9.5 7v4M4.5 4l.5 9a1 1 0 001 1h4a1 1 0 001-1l.5-9" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
           </button>
@@ -36,18 +39,20 @@
         <!-- Amount input after selecting ingredient -->
         <div v-if="pendingIngredient" class="ingredient-amount">
           <span class="ingredient-amount__name">{{ pendingIngredient.name }}</span>
-          <div class="ingredient-amount__row">
+          <div v-if="pendingIngredient.base_unit !== 'to_taste'" class="ingredient-amount__row">
             <input
               v-model="pendingAmount"
-              type="number"
-              step="0.001"
-              min="0.001"
+              type="text"
+              inputmode="decimal"
+              autocomplete="off"
               class="form__input ingredient-amount__input"
-              placeholder="Количество"
+              placeholder="Например: 200"
+              @focus="$event.target.select()"
               @keydown.enter.prevent="confirmIngredient"
             />
             <span class="ingredient-amount__unit">{{ UNIT_LABELS[pendingIngredient.base_unit] || pendingIngredient.base_unit }}</span>
           </div>
+          <p v-else class="ingredient-amount__taste-hint">Количество не указывается — добавится как «по вкусу»</p>
           <label class="ingredient-amount__optional">
             <input v-model="pendingOptional" type="checkbox" />
             Опционально
@@ -107,6 +112,7 @@ import IngredientForm from "./IngredientForm.vue"
 import { createDish, updateDish, fetchDishCategories } from "../../services/dishService"
 import { fetchIngredients } from "../../services/ingredientService"
 import { formatAmount } from "../../utils/formatAmount"
+import { formatShoppingAmount } from "../../utils/formatShoppingAmount"
 
 const UNIT_LABELS = {
   gram: "г",
@@ -183,6 +189,7 @@ watch(() => props.modelValue, async (v) => {
         ingredient: di.ingredient?.id ?? di.ingredient,
         ingredientName: di.ingredient?.name ?? di.name ?? "",
         amount: formatAmount(di.amount),
+        base_unit: di.ingredient?.base_unit ?? '',
         unitLabel: UNIT_LABELS[di.ingredient?.base_unit] || di.ingredient?.base_unit || '',
         is_optional: di.is_optional ?? false,
       }))
@@ -194,6 +201,7 @@ watch(() => props.modelValue, async (v) => {
         ingredient: di.ingredient?.id ?? di.ingredient,
         ingredientName: di.ingredient?.name ?? di.name ?? "",
         amount: formatAmount(di.amount),
+        base_unit: di.ingredient?.base_unit ?? '',
         unitLabel: UNIT_LABELS[di.ingredient?.base_unit] || di.ingredient?.base_unit || '',
         is_optional: di.is_optional ?? false,
       }))
@@ -232,23 +240,36 @@ function searchIngredients() {
 }
 
 function selectIngredient(ing) {
+  const alreadyAdded = ingredients.value.some(i => i.ingredient === ing.id)
+  if (alreadyAdded) {
+    amountError.value = "Ингредиент уже добавлен."
+    return
+  }
   pendingIngredient.value = ing
   ingredientQuery.value = ""
   ingredientResults.value = []
+  amountError.value = ""
 }
 
 function confirmIngredient() {
-  if (!pendingIngredient.value || !pendingAmount.value) return
-  const num = Number(pendingAmount.value)
-  if (!num || num <= 0) {
-    amountError.value = "Количество должно быть больше 0."
-    return
+  if (!pendingIngredient.value) return
+  const isToTaste = pendingIngredient.value.base_unit === 'to_taste'
+  let finalAmount = "1"
+  if (!isToTaste) {
+    const raw = pendingAmount.value.trim().replace(',', '.')
+    const num = Number(raw)
+    if (!raw || isNaN(num) || num <= 0) {
+      amountError.value = "Введите количество больше 0."
+      return
+    }
+    finalAmount = String(num)
   }
   amountError.value = ""
   ingredients.value.push({
     ingredient: pendingIngredient.value.id,
     ingredientName: pendingIngredient.value.name,
-    amount: String(pendingAmount.value),
+    amount: finalAmount,
+    base_unit: pendingIngredient.value.base_unit,
     unitLabel: UNIT_LABELS[pendingIngredient.value.base_unit] || pendingIngredient.value.base_unit || '',
     is_optional: pendingOptional.value,
   })
@@ -408,6 +429,17 @@ async function submit() {
   font-size: 13px;
 }
 
+.ingredient-row__optional {
+  font-size: 11px;
+  color: var(--color-mint);
+  background: color-mix(in srgb, var(--color-mint) 12%, transparent);
+  border-radius: 4px;
+  padding: 1px 5px;
+  font-weight: 500;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
 .ingredient-row__remove {
   width: 24px;
   height: 24px;
@@ -493,6 +525,13 @@ async function submit() {
   font-size: 13px;
   color: var(--color-text-secondary);
   white-space: nowrap;
+}
+
+.ingredient-amount__taste-hint {
+  font-size: var(--font-sm, 12px);
+  color: var(--color-text-secondary);
+  font-style: italic;
+  margin: 0;
 }
 
 .ingredient-amount__optional {

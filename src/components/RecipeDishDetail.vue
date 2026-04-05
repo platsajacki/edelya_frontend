@@ -33,8 +33,9 @@
           <li v-for="di in dish.dish_ingredients" :key="di.id" class="detail__ingredient">
             <span class="detail__ingredient-name">{{ di.ingredient?.name ?? di.name }}</span>
             <span class="detail__ingredient-amount">
-              {{ formatAmount(di.amount) }} {{ unitLabel(di.ingredient?.base_unit ?? di.base_unit) }}
+              {{ formatShoppingAmount(di.amount, di.ingredient?.base_unit ?? di.base_unit).display }}
             </span>
+            <span v-if="di.is_optional" class="detail__ingredient-optional">опц.</span>
           </li>
         </ul>
       </div>
@@ -110,6 +111,7 @@ import ModalWrapper from "./forms/ModalWrapper.vue"
 import DishForm from "./forms/DishForm.vue"
 import { fetchDish } from "../services/dishService"
 import { formatAmount } from "../utils/formatAmount"
+import { formatShoppingAmount } from "../utils/formatShoppingAmount"
 import { isDishOwn } from "../utils/dishOwnership"
 
 const UNIT_LABELS = {
@@ -333,6 +335,17 @@ function onCloneCreated() {
   font-size: 13px;
   color: var(--color-text-secondary);
   white-space: nowrap;
+}
+
+.detail__ingredient-optional {
+  font-size: 11px;
+  color: var(--color-mint);
+  background: color-mix(in srgb, var(--color-mint) 12%, transparent);
+  border-radius: 4px;
+  padding: 1px 5px;
+  font-weight: 500;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .detail__loading {

@@ -2,6 +2,22 @@
   <div class="shopping-page">
     <div class="shopping-header">
       <h1 class="shopping-header__title">Покупки</h1>
+      <button
+        v-if="store.lists.length"
+        class="shopping-header__sort"
+        type="button"
+        :title="sortAsc ? 'Сортировка: сначала старые' : 'Сортировка: сначала новые'"
+        @click="sortAsc = !sortAsc"
+      >
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="2" y1="4" x2="10" y2="4"/>
+          <line x1="2" y1="8" x2="8" y2="8"/>
+          <line x1="2" y1="12" x2="6" y2="12"/>
+          <polyline v-if="sortAsc" points="13 11 13 5 11 7"/>
+          <polyline v-else points="13 5 13 11 11 9"/>
+        </svg>
+        {{ sortAsc ? 'Сначала старые' : 'Сначала новые' }}
+      </button>
     </div>
 
     <!-- Loading -->
@@ -25,7 +41,7 @@
     <!-- Lists -->
     <div v-else class="shopping-list">
       <ShoppingListCard
-        v-for="list in store.lists"
+        v-for="list in sortedLists"
         :key="list.id"
         :list="list"
         @tap="openList"
@@ -56,7 +72,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue"
+import { ref, computed, onMounted } from "vue"
 import { useRouter } from "vue-router"
 import { useShoppingStore } from "../store/shopping"
 import ShoppingListCard from "../components/ShoppingListCard.vue"
@@ -66,6 +82,15 @@ const store = useShoppingStore()
 const router = useRouter()
 
 const showForm = ref(false)
+const sortAsc = ref(false)
+
+const sortedLists = computed(() => {
+  return [...store.lists].sort((a, b) => {
+    const da = a.date_from ?? ""
+    const db = b.date_from ?? ""
+    return sortAsc.value ? da.localeCompare(db) : db.localeCompare(da)
+  })
+})
 
 onMounted(() => {
   store.loadLists()
@@ -95,6 +120,26 @@ function onListCreated(list) {
   display: flex;
   align-items: center;
   justify-content: space-between;
+}
+
+.shopping-header__sort {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: none;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 5px 10px;
+  font-size: var(--font-xs);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.shopping-header__sort:active {
+  color: var(--color-mint);
+  border-color: var(--color-mint);
 }
 
 .shopping-header__title {

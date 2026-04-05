@@ -68,7 +68,22 @@ button {
 input,
 textarea,
 select {
-  caret-color: var(--color-text);
+  caret-color: var(--color-text) !important;
+}
+
+button,
+a,
+input,
+label,
+select,
+textarea {
+  touch-action: manipulation;
+}
+
+.modal-body .form__submit {
+  position: sticky;
+  bottom: 8px;
+  z-index: 1;
 }
 
 .form__required {

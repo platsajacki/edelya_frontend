@@ -33,17 +33,21 @@
           <button type="button" class="amount-step__change" @click="clearSelection">Изменить</button>
         </div>
 
-        <label class="form__field">
+        <p v-if="selectedIngredient.base_unit === 'to_taste'" class="amount-step__taste-hint">
+          Количество не указывается — добавится как «по вкусу»
+        </p>
+        <label v-else class="form__field">
           <span class="form__label">Количество <span class="form__required">*</span></span>
           <div class="amount-step__row">
             <input
               ref="amountInput"
               v-model="amount"
-              type="number"
-              step="0.001"
-              min="0.001"
+              type="text"
+              inputmode="decimal"
+              autocomplete="off"
               class="form__input amount-step__input"
-              placeholder="0"
+              :placeholder="'Например: 100'"
+              @focus="$event.target.select()"
               @keydown.enter.prevent="submit"
             />
             <span class="amount-step__unit">{{ unitLabel(selectedIngredient.base_unit) }}</span>
@@ -154,18 +158,26 @@ function clearSelection() {
 }
 
 async function submit() {
-  const num = Number(amount.value)
-  if (!num || num <= 0) {
-    error.value = "Количество должно быть больше 0."
-    return
+  const isToTaste = selectedIngredient.value?.base_unit === 'to_taste'
+
+  let finalAmount = "0"
+  if (!isToTaste) {
+    const raw = amount.value.trim().replace(',', '.')
+    const num = Number(raw)
+    if (!raw || isNaN(num) || num <= 0) {
+      error.value = "Введите количество больше 0."
+      return
+    }
+    finalAmount = String(num)
   }
+
   error.value = ""
   saving.value = true
   try {
     const store = useShoppingStore()
     const data = await store.addItem(props.listId, {
       ingredient: selectedIngredient.value.id,
-      amount: String(num),
+      amount: finalAmount,
     })
     emit("created", data)
     open.value = false
@@ -190,6 +202,12 @@ async function submit() {
   padding: 12px 0;
   color: var(--color-text-secondary);
   font-size: var(--font-sm);
+}
+
+.amount-step__taste-hint {
+  font-size: var(--font-sm);
+  color: var(--color-text-secondary);
+  padding: 4px 0 8px;
 }
 
 .ingredient-search {

@@ -97,8 +97,8 @@ const formatted = computed(() =>
 
 .item-row__check {
   flex-shrink: 0;
-  width: 26px;
-  height: 26px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   border: 2px solid var(--color-border);
   background: transparent;
@@ -178,10 +178,10 @@ const formatted = computed(() =>
 }
 
 .item-row__btn {
-  width: 30px;
-  height: 30px;
+  width: 44px;
+  height: 44px;
   border: 1.5px solid var(--color-border);
-  border-radius: 8px;
+  border-radius: 10px;
   background: var(--color-surface);
   font-size: 16px;
   font-weight: 600;
@@ -214,8 +214,8 @@ const formatted = computed(() =>
 
 .item-row__delete {
   flex-shrink: 0;
-  width: 28px;
-  height: 28px;
+  width: 44px;
+  height: 44px;
   border: none;
   border-radius: 6px;
   background: transparent;
