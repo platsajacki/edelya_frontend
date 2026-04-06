@@ -2,6 +2,7 @@
   <button
     class="meal-card"
     :class="{ 'meal-card--shared': !isOwn && !isManual, 'meal-card--manual': isManual }"
+    :style="cardStyle"
     type="button"
     :data-id="item.id"
     @click="$emit('tap', item)"
@@ -25,6 +26,21 @@ defineEmits(["tap"])
 
 const isOwn = computed(() => isDishOwn(props.item.dish))
 const isManual = computed(() => props.item.is_manual === true)
+
+function hexToRgba(hex, alpha) {
+  const r = parseInt(hex.slice(1, 3), 16)
+  const g = parseInt(hex.slice(3, 5), 16)
+  const b = parseInt(hex.slice(5, 7), 16)
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`
+}
+
+const cardStyle = computed(() => {
+  if (!props.item.color) return {}
+  return {
+    '--card-accent': props.item.color,
+    '--card-bg': hexToRgba(props.item.color, 0.2),
+  }
+})
 </script>
 
 <style scoped>
@@ -50,11 +66,11 @@ const isManual = computed(() => props.item.is_manual === true)
 }
 
 .meal-card--shared {
-  border-left-color: var(--color-shared-accent);
+  border-left-color: var(--card-accent, var(--color-shared-accent));
 }
 
 .meal-card--manual {
-  border-left-color: var(--color-manual-meal);
+  border-left-color: var(--card-accent, var(--color-manual-meal));
   background: var(--color-manual-meal-bg);
 }
 
