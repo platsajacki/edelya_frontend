@@ -44,7 +44,7 @@ function isActive(to) {
   background: var(--color-surface);
   border-top: 1px solid var(--color-border);
   padding: 6px 0 calc(6px + env(safe-area-inset-bottom, 0px));
-  z-index: 900;
+  z-index: var(--z-nav);
 }
 
 .bottom-nav__tab {
@@ -62,7 +62,7 @@ function isActive(to) {
 
 .bottom-nav__tab--active {
   color: var(--color-mint);
-  background: rgba(138, 99, 181, 0.10);
+  background: var(--color-mint-alpha-10);
   border-radius: var(--radius-sm);
 }
 

@@ -1,5 +1,5 @@
 <template>
-  <div class="recipes-page">
+  <div class="page-layout recipes-page">
     <!-- Header -->
     <div class="recipes-header">
       <h1 class="recipes-header__title">Рецепты</h1>
@@ -89,9 +89,9 @@
     </div>
 
     <!-- FAB: create new dish -->
-    <button class="recipes-fab" @click="showCreateForm = true" aria-label="Создать блюдо">
+    <FabButton @click="showCreateForm = true" aria-label="Создать блюдо">
       <IconPlus />
-    </button>
+    </FabButton>
 
     <!-- Filter panel -->
     <RecipeFilterPanel
@@ -116,11 +116,7 @@
     />
 
     <!-- Toast -->
-    <Transition name="toast">
-      <div v-if="store.toast" class="recipes-toast" @click="store.toast = null">
-        {{ store.toast }}
-      </div>
-    </Transition>
+    <Toast :message="store.toast" @dismiss="store.toast = null" />
   </div>
 </template>
 
@@ -134,6 +130,8 @@ import DishForm from "../components/forms/DishForm.vue"
 import IconFilter from "../components/icons/IconFilter.vue"
 import IconSearch from "../components/icons/IconSearch.vue"
 import IconPlus from "../components/icons/IconPlus.vue"
+import FabButton from "../components/FabButton.vue"
+import Toast from "../components/Toast.vue"
 
 const store = useRecipesStore()
 
@@ -243,13 +241,7 @@ onUnmounted(() => {
 
 <style scoped>
 .recipes-page {
-  max-width: 480px;
-  margin: 0 auto;
   padding: 12px 16px calc(var(--nav-height) + 72px);
-  min-height: 100dvh;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
 }
 
 /* Header */
@@ -363,7 +355,7 @@ onUnmounted(() => {
   gap: 4px;
   padding: 4px 10px;
   border: 1px solid var(--color-border);
-  border-radius: 20px;
+  border-radius: var(--radius-lg);
   background: var(--color-empty);
   font-size: var(--font-xs);
   font-weight: 500;
@@ -457,7 +449,7 @@ onUnmounted(() => {
   flex: 1;
   padding: 8px 0;
   border: none;
-  border-radius: 8px;
+  border-radius: var(--radius-xs);
   background: transparent;
   font-size: var(--font-sm);
   font-weight: 600;
@@ -470,7 +462,7 @@ onUnmounted(() => {
 .recipes-tabs__item--active {
   background: var(--color-surface);
   color: var(--color-text);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  box-shadow: var(--shadow-tab);
 }
 
 /* Sections & list */
@@ -487,66 +479,8 @@ onUnmounted(() => {
   min-height: 1px;
 }
 
-/* FAB */
-.recipes-fab {
-  position: fixed;
-  bottom: var(--nav-height);
-  right: max(16px, calc((100vw - 480px) / 2 + 16px));
-  width: 52px;
-  height: 52px;
-  border: none;
-  border-radius: 50%;
-  background: var(--color-mint);
-  color: var(--on-primary);
-  box-shadow: var(--shadow-elevated);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 800;
-  transition: background 0.15s, transform 0.15s;
-  -webkit-tap-highlight-color: transparent;
-}
-
-.recipes-fab:hover {
-  background: var(--color-mint-hover);
-}
-
-.recipes-fab:active {
-  transform: scale(0.93);
-}
-
-/* Toast */
-.recipes-toast {
-  position: fixed;
-  bottom: 80px;
-  left: 50%;
-  transform: translateX(-50%);
-  padding: 12px 20px;
-  background: var(--color-text);
-  color: var(--color-surface);
-  border-radius: var(--radius-sm);
-  font-size: 13px;
-  box-shadow: var(--shadow-elevated);
-  cursor: pointer;
-  z-index: 99999;
-  max-width: calc(100vw - 32px);
-  text-align: center;
-}
-
-.toast-enter-active,
-.toast-leave-active {
-  transition: opacity 0.25s ease, transform 0.25s ease;
-}
-
-.toast-enter-from,
-.toast-leave-to {
-  opacity: 0;
-  transform: translateX(-50%) translateY(12px);
-}
-
 @media (min-width: 600px) {
   .recipes-page {
-    max-width: 540px;
     padding: 16px 24px 88px;
   }
 }

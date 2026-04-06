@@ -145,67 +145,6 @@ async function submit() {
 </script>
 
 <style scoped>
-.form {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.form__field {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.form__label {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--color-text);
-}
-
-.form__input {
-  padding: 10px 12px;
-  border: 1.5px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  font-size: 16px;
-  font-family: inherit;
-  background: var(--color-surface);
-  color: var(--color-text);
-  outline: none;
-  transition: border-color 0.15s;
-}
-
-.form__input:focus {
-  border-color: var(--color-mint);
-  outline: none;
-}
-
-.form__error {
-  font-size: 13px;
-  color: var(--color-danger);
-  padding: 4px 0;
-}
-
-.form__submit {
-  padding: 12px;
-  border: none;
-  border-radius: var(--radius-sm);
-  background: var(--color-mint);
-  color: var(--on-primary);
-  font-size: 15px;
-  font-weight: 600;
-  transition: background 0.15s;
-}
-
-.form__submit:hover:not(:disabled) {
-  background: var(--color-mint-hover);
-}
-
-.form__submit:disabled {
-  opacity: 0.45;
-  cursor: not-allowed;
-}
-
 .selected-dish {
   display: flex;
   align-items: center;
@@ -218,10 +157,11 @@ async function submit() {
 
 .selected-dish__name {
   flex: 1;
-  font-size: 15px;
+  font-size: var(--font-base);
   font-weight: 500;
 }
 
+.selected-dish__clear,
 .selected-dish__edit {
   width: 24px;
   height: 24px;
@@ -232,25 +172,15 @@ async function submit() {
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
   transition: color 0.15s;
+}
+
+.selected-dish__clear {
+  font-size: 18px;
 }
 
 .selected-dish__edit:hover {
   color: var(--color-mint);
-}
-
-.selected-dish__clear {
-  width: 24px;
-  height: 24px;
-  border: none;
-  background: none;
-  font-size: 18px;
-  color: var(--color-text-secondary);
-  border-radius: 6px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 
 .selected-dish__clear:hover {

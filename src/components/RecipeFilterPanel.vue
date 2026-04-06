@@ -99,7 +99,7 @@ function close() {
   position: fixed;
   inset: 0;
   background: var(--overlay-bg);
-  z-index: 950;
+  z-index: var(--z-filter);
   display: flex;
   justify-content: flex-end;
 }
@@ -124,7 +124,7 @@ function close() {
 }
 
 .filter-panel__title {
-  font-size: 17px;
+  font-size: var(--font-lg);
   font-weight: 700;
   color: var(--color-text);
   margin: 0;
@@ -140,7 +140,7 @@ function close() {
   background: none;
   font-size: 22px;
   color: var(--color-text-secondary);
-  border-radius: 8px;
+  border-radius: var(--radius-xs);
   transition: background 0.15s;
 }
 
@@ -178,8 +178,7 @@ function close() {
   align-items: center;
   gap: 10px;
   padding: 10px 12px;
-  border-radius: 8px;
-  cursor: pointer;
+  border-radius: var(--radius-xs);
   transition: background 0.12s;
 }
 
@@ -188,7 +187,7 @@ function close() {
 }
 
 .filter-radio--active {
-  background: rgba(138, 99, 181, 0.08);
+  background: var(--color-mint-alpha-08);
 }
 
 .filter-radio__input {

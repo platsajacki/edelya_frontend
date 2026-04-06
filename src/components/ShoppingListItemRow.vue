@@ -169,7 +169,7 @@ function cancelEdit() {
 .item-row__check--on {
   border-color: var(--color-eat);
   background: var(--color-eat);
-  color: #fff;
+  color: var(--on-primary);
 }
 
 .item-row__check:disabled {
@@ -194,7 +194,7 @@ function cancelEdit() {
 }
 
 .item-row__name {
-  font-size: 15px;
+  font-size: var(--font-base);
   font-weight: 500;
   color: var(--color-text);
 }
@@ -206,12 +206,12 @@ function cancelEdit() {
 
 .item-row__manual-badge {
   flex-shrink: 0;
-  font-size: 13px;
+  font-size: var(--font-sm);
   line-height: 1;
 }
 
 .item-row__taste {
-  font-size: 11px;
+  font-size: var(--font-xs);
   color: var(--color-text-secondary);
   font-style: italic;
 }
@@ -233,7 +233,7 @@ function cancelEdit() {
   height: 100%;
   border: none;
   background: transparent;
-  font-size: 17px;
+  font-size: var(--font-lg);
   font-weight: 400;
   color: var(--color-text);
   display: flex;

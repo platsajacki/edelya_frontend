@@ -1,5 +1,5 @@
 <template>
-  <div class="planner">
+  <div class="page-layout planner">
     <WeekNav
       :label="planning.weekLabel"
       :disabled="planning.loading"
@@ -54,11 +54,7 @@
       @view-cooking="onViewCookingFromMeal"
     />
 
-    <Transition name="toast">
-      <div v-if="planning.toast" class="planner__toast" @click="planning.toast = null">
-        {{ planning.toast }}
-      </div>
-    </Transition>
+    <Toast :message="planning.toast" @dismiss="planning.toast = null" />
   </div>
 </template>
 
@@ -71,6 +67,7 @@ import MealPlanItemForm from "./forms/MealPlanItemForm.vue"
 import CardDetailSheet from "./CardDetailSheet.vue"
 import { usePlanningStore } from "../store/planning"
 import { fetchCookingEvent } from "../services/planningService"
+import Toast from "./Toast.vue"
 
 defineProps({
   user: {
@@ -179,13 +176,7 @@ onMounted(() => {
 
 <style scoped>
 .planner {
-  max-width: 480px;
-  margin: 0 auto;
   padding: 12px 16px var(--nav-height);
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  min-height: 100dvh;
   position: relative;
 }
 
@@ -218,37 +209,8 @@ onMounted(() => {
   font-weight: 600;
 }
 
-.planner__toast {
-  position: fixed;
-  bottom: 80px;
-  left: 50%;
-  transform: translateX(-50%);
-  padding: 12px 20px;
-  background: var(--color-text);
-  color: var(--color-surface);
-  border-radius: var(--radius-sm);
-  font-size: 13px;
-  box-shadow: var(--shadow-elevated);
-  cursor: pointer;
-  z-index: 99999;
-  max-width: calc(100vw - 32px);
-  text-align: center;
-}
-
-.toast-enter-active,
-.toast-leave-active {
-  transition: opacity 0.25s ease, transform 0.25s ease;
-}
-
-.toast-enter-from,
-.toast-leave-to {
-  opacity: 0;
-  transform: translateX(-50%) translateY(12px);
-}
-
 @media (min-width: 600px) {
   .planner {
-    max-width: 540px;
     padding: 16px 24px 88px;
   }
 }

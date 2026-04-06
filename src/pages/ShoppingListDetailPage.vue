@@ -1,5 +1,5 @@
 <template>
-  <div class="detail-page">
+  <div class="page-layout detail-page">
     <!-- Header -->
     <div class="detail-header">
       <button class="detail-header__back" @click="goBack" aria-label="Назад">
@@ -74,9 +74,9 @@
     </div>
 
     <!-- FAB: add item -->
-    <button class="detail-fab" @click="showAddItem = true" aria-label="Добавить позицию">
+    <FabButton @click="showAddItem = true" aria-label="Добавить позицию">
       <IconPlus />
-    </button>
+    </FabButton>
 
     <!-- Edit form modal -->
     <ShoppingListForm
@@ -117,11 +117,7 @@
     </Teleport>
 
     <!-- Toast -->
-    <Transition name="toast">
-      <div v-if="store.toast" class="detail-toast" @click="store.toast = null">
-        {{ store.toast }}
-      </div>
-    </Transition>
+    <Toast :message="store.toast" @dismiss="store.toast = null" />
   </div>
 </template>
 
@@ -138,6 +134,8 @@ import IconPencil from "../components/icons/IconPencil.vue"
 import IconRefresh from "../components/icons/IconRefresh.vue"
 import IconTrash from "../components/icons/IconTrash.vue"
 import IconPlus from "../components/icons/IconPlus.vue"
+import FabButton from "../components/FabButton.vue"
+import Toast from "../components/Toast.vue"
 
 const route = useRoute()
 const router = useRouter()
@@ -291,13 +289,7 @@ async function doDeleteList() {
 
 <style scoped>
 .detail-page {
-  max-width: 480px;
-  margin: 0 auto;
   padding: 12px 16px calc(var(--nav-height) + 72px);
-  min-height: 100dvh;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
 }
 
 /* ---- Header ---- */
@@ -483,34 +475,6 @@ async function doDeleteList() {
   border-top: 1px solid var(--color-border);
 }
 
-/* ---- FAB ---- */
-.detail-fab {
-  position: fixed;
-  bottom: var(--nav-height);
-  right: max(16px, calc((100vw - 480px) / 2 + 16px));
-  width: 52px;
-  height: 52px;
-  border: none;
-  border-radius: 50%;
-  background: var(--color-mint);
-  color: var(--on-primary);
-  box-shadow: var(--shadow-elevated);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 800;
-  transition: background 0.15s, transform 0.15s;
-  -webkit-tap-highlight-color: transparent;
-}
-
-.detail-fab:hover {
-  background: var(--color-mint-hover);
-}
-
-.detail-fab:active {
-  transform: scale(0.93);
-}
-
 /* ---- Confirm dialog ---- */
 .confirm-overlay {
   position: fixed;
@@ -582,7 +546,7 @@ async function doDeleteList() {
 
 .confirm-panel__btn--danger {
   background: var(--color-danger);
-  color: #fff;
+  color: var(--on-primary);
 }
 
 .confirm-panel__btn--danger:hover {
@@ -592,35 +556,6 @@ async function doDeleteList() {
 .confirm-panel__btn:disabled {
   opacity: 0.5;
   cursor: default;
-}
-
-/* ---- Toast ---- */
-.detail-toast {
-  position: fixed;
-  bottom: 80px;
-  left: 50%;
-  transform: translateX(-50%);
-  padding: 12px 20px;
-  background: var(--color-text);
-  color: var(--color-surface);
-  border-radius: var(--radius-sm);
-  font-size: 13px;
-  box-shadow: var(--shadow-elevated);
-  cursor: pointer;
-  z-index: 99999;
-  max-width: calc(100vw - 32px);
-  text-align: center;
-}
-
-.toast-enter-active,
-.toast-leave-active {
-  transition: opacity 0.25s ease, transform 0.25s ease;
-}
-
-.toast-enter-from,
-.toast-leave-to {
-  opacity: 0;
-  transform: translateX(-50%) translateY(12px);
 }
 
 .modal-enter-active,
@@ -635,7 +570,6 @@ async function doDeleteList() {
 
 @media (min-width: 600px) {
   .detail-page {
-    max-width: 540px;
     padding: 16px 24px 88px;
   }
 }

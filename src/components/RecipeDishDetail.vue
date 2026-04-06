@@ -6,12 +6,7 @@
         <div class="detail__dish-header">
           <div class="detail__dish-title-row">
             <h4 class="detail__dish-name">{{ dish.name }}</h4>
-            <span
-              class="detail__ownership-badge"
-              :class="isOwn ? 'detail__ownership-badge--own' : 'detail__ownership-badge--shared'"
-            >
-              {{ isOwn ? '👤 Личный рецепт' : '🌐 Общий рецепт' }}
-            </span>
+            <OwnershipBadge :is-own="isOwn" />
           </div>
           <button
             type="button"
@@ -110,6 +105,7 @@ import { ref, computed, watch } from "vue"
 import ModalWrapper from "./forms/ModalWrapper.vue"
 import DishForm from "./forms/DishForm.vue"
 import IconPencil from "./icons/IconPencil.vue"
+import OwnershipBadge from "./OwnershipBadge.vue"
 import { fetchDish } from "../services/dishService"
 import { formatAmount } from "../utils/formatAmount"
 import { formatShoppingAmount } from "../utils/formatShoppingAmount"
@@ -212,215 +208,15 @@ function onCloneCreated() {
 }
 </script>
 
+<style>
+@import '../styles/detail-sheet.css';
+</style>
+
 <style scoped>
-.detail {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.detail__section {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.detail__section + .detail__section {
-  padding-top: 16px;
-  border-top: 1px solid var(--color-border);
-}
-
-.detail__dish-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-}
-
-.detail__dish-title-row {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  min-width: 0;
-}
-
-.detail__dish-name {
-  font-size: 17px;
-  font-weight: 700;
-  color: var(--color-text);
-  margin: 0;
-}
-
-.detail__ownership-badge {
-  display: inline-flex;
-  align-items: center;
-  font-size: 11px;
-  font-weight: 600;
-  padding: 2px 8px;
-  border-radius: 10px;
-  width: fit-content;
-}
-
-.detail__ownership-badge--own {
-  background: rgba(138, 99, 181, 0.12);
-  color: var(--color-mint);
-}
-
-.detail__ownership-badge--shared {
-  background: var(--color-shared-bg);
-  color: var(--color-shared);
-}
-
-.detail__dish-edit {
-  width: 32px;
-  height: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: none;
-  background: none;
-  color: var(--color-text-secondary);
-  border-radius: 8px;
-  flex-shrink: 0;
-  transition: background 0.15s, color 0.15s;
-}
-
-.detail__dish-edit:hover {
-  background: var(--color-empty);
-  color: var(--color-mint);
-}
-
-.detail__meta {
-  font-size: 13px;
-  color: var(--color-text-secondary);
-  margin: 0;
-}
-
-.detail__recipe {
-  font-size: 15px;
-  color: var(--color-text);
-  line-height: 1.5;
-  margin: 0;
-  white-space: pre-line;
-}
-
-.detail__label {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--color-text-secondary);
-}
-
-.detail__ingredients {
-  list-style: none;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.detail__ingredient {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 8px 12px;
-  background: var(--color-border);
-  border-radius: 8px;
-  font-size: 13px;
-}
-
-.detail__ingredient-name {
-  font-weight: 500;
-  color: var(--color-text);
-}
-
-.detail__ingredient-amount {
-  font-size: 13px;
-  color: var(--color-text-secondary);
-  white-space: nowrap;
-}
-
-.detail__ingredient-optional {
-  font-size: 11px;
-  color: var(--color-mint);
-  background: color-mix(in srgb, var(--color-mint) 12%, transparent);
-  border-radius: 4px;
-  padding: 1px 5px;
-  font-weight: 500;
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-
 .detail__loading {
   text-align: center;
   font-size: var(--font-sm);
   color: var(--color-text-secondary);
   padding: 12px 0;
-}
-
-.detail__actions {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.detail__btn {
-  width: 100%;
-  padding: 12px;
-  border: none;
-  border-radius: var(--radius-sm);
-  font-size: 15px;
-  font-weight: 600;
-  transition: background 0.15s, opacity 0.15s;
-}
-
-.detail__btn--edit {
-  background: var(--color-mint);
-  color: var(--on-primary);
-}
-
-.detail__btn--edit:hover {
-  background: var(--color-mint-hover);
-}
-
-.detail__btn--delete {
-  background: var(--color-danger-pale);
-  color: var(--color-danger-muted);
-}
-
-.detail__btn--delete:hover {
-  background: var(--color-danger-bg);
-}
-
-.detail__btn--cancel {
-  background: var(--color-empty);
-  color: var(--color-text-secondary);
-}
-
-.detail__btn--cancel:hover {
-  background: var(--color-border);
-}
-
-.detail__confirm-text {
-  font-size: 15px;
-  font-weight: 600;
-  color: var(--color-danger-muted);
-  text-align: center;
-  margin: 0 0 12px;
-}
-
-.detail__confirm-actions {
-  display: flex;
-  gap: 8px;
-}
-
-.detail__confirm-actions .detail__btn {
-  flex: 1;
-}
-
-.detail__clone-text {
-  font-size: 13px;
-  color: var(--color-text);
-  line-height: 1.5;
-  text-align: center;
-  margin: 0 0 12px;
 }
 </style>

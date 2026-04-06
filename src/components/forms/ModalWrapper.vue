@@ -102,7 +102,7 @@ onUnmounted(() => {
 }
 
 .modal-title {
-  font-size: 17px;
+  font-size: var(--font-lg);
   font-weight: 700;
   color: var(--color-text);
   margin: 0;
@@ -118,7 +118,7 @@ onUnmounted(() => {
   background: none;
   font-size: 22px;
   color: var(--color-text-secondary);
-  border-radius: 8px;
+  border-radius: var(--radius-xs);
   transition: background 0.15s;
 }
 

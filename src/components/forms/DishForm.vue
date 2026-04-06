@@ -408,78 +408,12 @@ async function submit() {
 </script>
 
 <style scoped>
-.form {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.form__field {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
 .form__section {
   display: flex;
   flex-direction: column;
   gap: 8px;
   border-top: 1px solid var(--color-border);
   padding-top: 16px;
-}
-
-.form__label {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--color-text);
-}
-
-.form__input,
-.form__select,
-.form__textarea {
-  padding: 10px 12px;
-  border: 1.5px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  font-size: 16px;
-  font-family: inherit;
-  background: var(--color-surface);
-  color: var(--color-text);
-  outline: none;
-  transition: border-color 0.15s;
-  resize: vertical;
-}
-
-.form__input:focus,
-.form__select:focus,
-.form__textarea:focus {
-  border-color: var(--color-mint);
-  outline: none;
-}
-
-.form__error {
-  font-size: 13px;
-  color: var(--color-danger);
-  padding: 4px 0;
-}
-
-.form__submit {
-  padding: 12px;
-  border: none;
-  border-radius: var(--radius-sm);
-  background: var(--color-mint);
-  color: var(--on-primary);
-  font-size: 15px;
-  font-weight: 600;
-  transition: background 0.15s;
-}
-
-.form__submit:hover:not(:disabled) {
-  background: var(--color-mint-hover);
-}
-
-.form__submit:disabled {
-  opacity: 0.45;
-  cursor: not-allowed;
 }
 
 /* Ingredient rows */
@@ -489,8 +423,8 @@ async function submit() {
   gap: 6px;
   padding: 8px 12px;
   background: var(--color-empty);
-  border-radius: 8px;
-  font-size: 13px;
+  border-radius: var(--radius-xs);
+  font-size: var(--font-sm);
 }
 
 .ingredient-row--optional {
@@ -508,19 +442,20 @@ async function submit() {
 
 .ingredient-row__amount {
   flex-shrink: 0;
-  font-size: 13px;
+  font-size: var(--font-sm);
   color: var(--color-text-secondary);
   white-space: nowrap;
 }
 
 .ingredient-row__opt-label {
-  font-size: 11px;
+  font-size: var(--font-xs);
   color: var(--color-text-secondary);
   font-style: italic;
   font-weight: 400;
 }
 
-.ingredient-row__edit {
+.ingredient-row__edit,
+.ingredient-row__remove {
   flex-shrink: 0;
   width: 22px;
   height: 22px;
@@ -540,23 +475,7 @@ async function submit() {
 .ingredient-row:hover .ingredient-row__edit {
   opacity: 1;
   color: var(--color-mint);
-  background: color-mix(in srgb, var(--color-mint) 10%, transparent);
-}
-
-.ingredient-row__remove {
-  flex-shrink: 0;
-  width: 22px;
-  height: 22px;
-  border: none;
-  background: none;
-  color: var(--color-text-secondary);
-  border-radius: 5px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  opacity: 0.4;
-  transition: opacity 0.15s, color 0.15s, background 0.15s;
-  padding: 0;
+  background: var(--color-mint-alpha-10);
 }
 
 .ingredient-row__remove:hover {
@@ -585,7 +504,7 @@ async function submit() {
   justify-content: space-between;
   padding: 8px 12px;
   cursor: pointer;
-  font-size: 13px;
+  font-size: var(--font-sm);
   transition: background 0.1s;
 }
 
@@ -598,7 +517,7 @@ async function submit() {
 }
 
 .ingredient-search__unit {
-  font-size: 11px;
+  font-size: var(--font-xs);
   color: var(--color-text-secondary);
 }
 
@@ -609,7 +528,7 @@ async function submit() {
   gap: 8px;
   padding: 12px;
   background: var(--color-empty);
-  border-radius: 8px;
+  border-radius: var(--radius-xs);
   border: 1.5px solid var(--color-border);
 }
 
@@ -620,12 +539,12 @@ async function submit() {
 }
 
 .ingredient-amount__name {
-  font-size: 13px;
+  font-size: var(--font-sm);
   font-weight: 600;
 }
 
 .ingredient-amount__mode {
-  font-size: 11px;
+  font-size: var(--font-xs);
   color: var(--color-text-secondary);
   font-style: italic;
 }
@@ -641,13 +560,13 @@ async function submit() {
 }
 
 .ingredient-amount__unit {
-  font-size: 13px;
+  font-size: var(--font-sm);
   color: var(--color-text-secondary);
   white-space: nowrap;
 }
 
 .ingredient-amount__taste-hint {
-  font-size: var(--font-sm, 12px);
+  font-size: var(--font-sm);
   color: var(--color-text-secondary);
   font-style: italic;
   margin: 0;
@@ -657,7 +576,7 @@ async function submit() {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 13px;
+  font-size: var(--font-sm);
   color: var(--color-text-secondary);
 }
 
@@ -670,8 +589,8 @@ async function submit() {
 .btn {
   padding: 8px 16px;
   border: none;
-  border-radius: 8px;
-  font-size: 13px;
+  border-radius: var(--radius-xs);
+  font-size: var(--font-sm);
   font-weight: 600;
   cursor: pointer;
   transition: background 0.15s;
@@ -701,7 +620,7 @@ async function submit() {
   border: 1.5px dashed var(--color-border);
   border-radius: var(--radius-sm);
   background: transparent;
-  font-size: 13px;
+  font-size: var(--font-sm);
   font-weight: 500;
   color: var(--color-mint-hover);
   transition: background 0.15s, border-color 0.15s;

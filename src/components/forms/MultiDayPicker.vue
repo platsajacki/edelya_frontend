@@ -88,7 +88,7 @@ function toggle(iso) {
 }
 
 .multi-day-picker__chip:hover:not(:disabled) {
-  background: rgba(138, 99, 181, 0.06);
+  background: var(--color-mint-alpha-06);
   border-color: var(--color-mint);
 }
 
@@ -97,7 +97,7 @@ function toggle(iso) {
   border-color: var(--color-mint);
   color: var(--on-primary);
   transform: scale(1.05);
-  box-shadow: 0 2px 8px rgba(138, 99, 181, 0.25);
+  box-shadow: 0 2px 8px var(--color-mint-alpha-25);
 }
 
 .multi-day-picker__chip--selected:hover:not(:disabled) {
@@ -105,19 +105,19 @@ function toggle(iso) {
   border-color: var(--color-mint-hover);
   color: var(--on-primary);
   transform: scale(1.05);
-  box-shadow: 0 2px 8px rgba(138, 99, 181, 0.25);
+  box-shadow: 0 2px 8px var(--color-mint-alpha-25);
 }
 
 
 .multi-day-picker__weekday {
-  font-size: 11px;
+  font-size: var(--font-xs);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.03em;
 }
 
 .multi-day-picker__date {
-  font-size: 13px;
+  font-size: var(--font-sm);
   font-weight: 500;
 }
 </style>

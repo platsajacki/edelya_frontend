@@ -1,5 +1,5 @@
 <template>
-  <div class="shopping-page">
+  <div class="page-layout shopping-page">
     <div class="shopping-header">
       <h1 class="shopping-header__title">Покупки</h1>
       <button
@@ -39,9 +39,9 @@
     </div>
 
     <!-- FAB -->
-    <button class="shopping-fab" @click="showForm = true" aria-label="Создать список">
+    <FabButton @click="showForm = true" aria-label="Создать список">
       <IconPlus />
-    </button>
+    </FabButton>
 
     <!-- Create form -->
     <ShoppingListForm
@@ -50,11 +50,7 @@
     />
 
     <!-- Toast -->
-    <Transition name="toast">
-      <div v-if="store.toast" class="shopping-toast" @click="store.toast = null">
-        {{ store.toast }}
-      </div>
-    </Transition>
+    <Toast :message="store.toast" @dismiss="store.toast = null" />
   </div>
 </template>
 
@@ -67,6 +63,8 @@ import ShoppingListForm from "../components/forms/ShoppingListForm.vue"
 import IconSort from "../components/icons/IconSort.vue"
 import IconShoppingBag from "../components/icons/IconShoppingBag.vue"
 import IconPlus from "../components/icons/IconPlus.vue"
+import FabButton from "../components/FabButton.vue"
+import Toast from "../components/Toast.vue"
 
 const store = useShoppingStore()
 const router = useRouter()
@@ -97,13 +95,7 @@ function onListCreated(list) {
 
 <style scoped>
 .shopping-page {
-  max-width: 480px;
-  margin: 0 auto;
   padding: 12px 16px calc(var(--nav-height) + 72px);
-  min-height: 100dvh;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
 }
 
 .shopping-header {
@@ -193,66 +185,8 @@ function onListCreated(list) {
   gap: 8px;
 }
 
-/* FAB */
-.shopping-fab {
-  position: fixed;
-  bottom: var(--nav-height);
-  right: max(16px, calc((100vw - 480px) / 2 + 16px));
-  width: 52px;
-  height: 52px;
-  border: none;
-  border-radius: 50%;
-  background: var(--color-mint);
-  color: var(--on-primary);
-  box-shadow: var(--shadow-elevated);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 800;
-  transition: background 0.15s, transform 0.15s;
-  -webkit-tap-highlight-color: transparent;
-}
-
-.shopping-fab:hover {
-  background: var(--color-mint-hover);
-}
-
-.shopping-fab:active {
-  transform: scale(0.93);
-}
-
-/* Toast */
-.shopping-toast {
-  position: fixed;
-  bottom: 80px;
-  left: 50%;
-  transform: translateX(-50%);
-  padding: 12px 20px;
-  background: var(--color-text);
-  color: var(--color-surface);
-  border-radius: var(--radius-sm);
-  font-size: 13px;
-  box-shadow: var(--shadow-elevated);
-  cursor: pointer;
-  z-index: 99999;
-  max-width: calc(100vw - 32px);
-  text-align: center;
-}
-
-.toast-enter-active,
-.toast-leave-active {
-  transition: opacity 0.25s ease, transform 0.25s ease;
-}
-
-.toast-enter-from,
-.toast-leave-to {
-  opacity: 0;
-  transform: translateX(-50%) translateY(12px);
-}
-
 @media (min-width: 600px) {
   .shopping-page {
-    max-width: 540px;
     padding: 16px 24px 88px;
   }
 }

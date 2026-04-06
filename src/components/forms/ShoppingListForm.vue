@@ -121,54 +121,14 @@ async function submit() {
 </script>
 
 <style scoped>
-.form {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.form__field {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.form__label {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--color-text);
-}
-
-.form__input {
-  padding: 10px 12px;
-  border: 1.5px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  font-size: 16px;
-  font-family: inherit;
-  background: var(--color-surface);
-  color: var(--color-text);
-  outline: none;
-  transition: border-color 0.15s;
-}
-
-.form__input:focus {
-  border-color: var(--color-mint);
-}
-
-.form__error {
-  font-size: 13px;
-  color: var(--color-danger);
-  padding: 4px 0;
-}
-
 .form__warning {
   display: flex;
   align-items: flex-start;
   gap: 7px;
-  font-size: 13px;
-  color: #92661a;
-  background: #fef9ec;
-  border: 1px solid #f3d98a;
+  font-size: var(--font-sm);
+  color: var(--color-warning);
+  background: var(--color-warning-bg);
+  border: 1px solid var(--color-warning-border);
   border-radius: var(--radius-sm);
   padding: 9px 12px;
   line-height: 1.45;
@@ -177,26 +137,6 @@ async function submit() {
 .form__warning svg {
   flex-shrink: 0;
   margin-top: 1px;
-  color: #c47f0a;
-}
-
-.form__submit {
-  padding: 12px;
-  border: none;
-  border-radius: var(--radius-sm);
-  background: var(--color-mint);
-  color: var(--on-primary);
-  font-size: 15px;
-  font-weight: 600;
-  transition: background 0.15s;
-}
-
-.form__submit:hover:not(:disabled) {
-  background: var(--color-mint-hover);
-}
-
-.form__submit:disabled {
-  opacity: 0.45;
-  cursor: not-allowed;
+  color: var(--color-warning-icon);
 }
 </style>

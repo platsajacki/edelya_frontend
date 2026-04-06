@@ -95,7 +95,7 @@ const cardStyle = computed(() => {
 .meal-card--drag {
   opacity: 0.9;
   transform: rotate(2deg);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  box-shadow: var(--shadow-drag);
   transition: none;
 }
 
