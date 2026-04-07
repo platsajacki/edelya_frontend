@@ -237,7 +237,7 @@ async function submit() {
     const store = useShoppingStore()
     const data = await store.addItem(props.listId, {
       ingredient: selectedIngredient.value.id,
-      amount: finalAmount,
+      manual_amount: finalAmount,
     })
     emit("created", data)
     open.value = false
@@ -260,11 +260,11 @@ async function confirmAdd() {
   if (!item) return
 
   const raw = amount.value.trim().replace(',', '.')
-  const newAmount = String(Number(item.amount) + Number(raw))
+  const newManualAmount = String(Number(item.manual_amount ?? 0) + Number(raw))
 
   saving.value = true
   try {
-    const data = await store.updateItemAmount(props.listId, item.id, newAmount)
+    const data = await store.updateItemManualAmount(props.listId, item.id, newManualAmount)
     emit("created", data)
     open.value = false
   } catch (err) {

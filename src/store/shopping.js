@@ -138,8 +138,8 @@ export const useShoppingStore = defineStore("shopping", {
       return data
     },
 
-    async updateItemAmount(listId, itemId, amount) {
-      const data = await updateShoppingListItem(listId, itemId, { amount })
+    async updateItemManualAmount(listId, itemId, manualAmount) {
+      const data = await updateShoppingListItem(listId, itemId, { manual_amount: manualAmount })
       const idx = this.items.findIndex((i) => i.id === itemId)
       if (idx !== -1) Object.assign(this.items[idx], data)
       this.showToast("Количество обновлено")
@@ -169,11 +169,14 @@ export const useShoppingStore = defineStore("shopping", {
     },
 
     async adjustItemAmount(listId, item, delta) {
-      const oldAmount = parseFloat(item.amount)
-      const newAmount = parseFloat(Math.max(0, oldAmount + delta).toFixed(4))
-      if (newAmount === oldAmount) return
+      const oldManual = parseFloat(item.manual_amount ?? 0)
+      const newManual = parseFloat(Math.max(0, oldManual + delta).toFixed(4))
+      const effectiveDelta = newManual - oldManual
+      if (effectiveDelta === 0) return
 
-      item.amount = String(newAmount)
+      const oldAmount = parseFloat(item.amount)
+      item.manual_amount = String(newManual)
+      item.amount = String(parseFloat((oldAmount + effectiveDelta).toFixed(4)))
 
       if (!this._adjustTimers) this._adjustTimers = {}
       if (!this._adjustPrev) this._adjustPrev = {}
@@ -181,7 +184,7 @@ export const useShoppingStore = defineStore("shopping", {
       clearTimeout(this._adjustTimers[item.id])
 
       if (this._adjustPrev[item.id] === undefined) {
-        this._adjustPrev[item.id] = String(oldAmount)
+        this._adjustPrev[item.id] = { amount: String(oldAmount), manual_amount: String(oldManual) }
       }
 
       this._adjustTimers[item.id] = setTimeout(async () => {
@@ -191,11 +194,12 @@ export const useShoppingStore = defineStore("shopping", {
 
         try {
           const updated = await updateShoppingListItem(listId, item.id, {
-            amount: item.amount,
+            manual_amount: item.manual_amount,
           })
           Object.assign(item, updated)
         } catch {
-          item.amount = prevVal
+          item.amount = prevVal.amount
+          item.manual_amount = prevVal.manual_amount
           this.showToast("Не удалось изменить количество")
         }
       }, 600)
