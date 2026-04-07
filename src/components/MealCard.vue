@@ -80,7 +80,7 @@ const cardStyle = computed(() => {
 }
 
 .meal-card--ghost {
-  opacity: 0.3;
+  opacity: 0.5;
   border: 2px dashed var(--card-accent, var(--color-mint));
   background: var(--card-bg, var(--color-empty));
 }

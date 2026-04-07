@@ -113,7 +113,7 @@ useSortable(eatRef, makeSortableOptions('meals'))
 }
 
 .day-row--muted {
-  opacity: 0.55;
+  opacity: 0.75;
 }
 
 .day-row__label {

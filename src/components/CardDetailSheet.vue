@@ -26,10 +26,10 @@
         <ul class="detail__ingredients">
           <li v-for="di in dish.dish_ingredients" :key="di.id" class="detail__ingredient">
             <span class="detail__ingredient-name">{{ di.ingredient?.name ?? di.name }}</span>
+            <span v-if="di.is_optional" class="detail__ingredient-optional">опц.</span>
             <span class="detail__ingredient-amount">
               {{ formatShoppingAmount(di.amount, di.ingredient?.base_unit ?? di.base_unit).display }}
             </span>
-            <span v-if="di.is_optional" class="detail__ingredient-optional">опц.</span>
           </li>
         </ul>
       </div>
@@ -253,12 +253,9 @@ async function onCloneCreated() {
 }
 
 .detail__eat-date {
-  padding: 4px 12px;
-  background: var(--color-empty);
-  border-radius: var(--radius-sm);
   font-size: var(--font-sm);
-  font-weight: 500;
-  color: var(--color-text);
+  font-weight: 400;
+  color: var(--color-text-secondary);
 }
 
 .detail__link {

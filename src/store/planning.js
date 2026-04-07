@@ -50,7 +50,9 @@ export const usePlanningStore = defineStore("planning", {
       year,
       week,
       weekData: emptyWeek(year, week),
+      nextWeekData: null,
       loading: false,
+      loadingNextWeek: false,
       loadError: false,
       toast: null,
     }
@@ -78,6 +80,18 @@ export const usePlanningStore = defineStore("planning", {
       }
     },
 
+    async loadNextWeek(year, week) {
+      if (this.nextWeekData || this.loadingNextWeek) return
+      this.loadingNextWeek = true
+      try {
+        this.nextWeekData = await fetchWeek(year, week)
+      } catch {
+        this.nextWeekData = emptyWeek(year, week)
+      } finally {
+        this.loadingNextWeek = false
+      }
+    },
+
     showToast(message) {
       this.toast = message
       setTimeout(() => {
@@ -92,6 +106,7 @@ export const usePlanningStore = defineStore("planning", {
         this.year--
         this.week = 52
       }
+      this.nextWeekData = null
       await this.loadWeek()
     },
 
@@ -102,6 +117,7 @@ export const usePlanningStore = defineStore("planning", {
         this.year++
         this.week = 1
       }
+      this.nextWeekData = null
       await this.loadWeek()
     },
 
@@ -173,20 +189,59 @@ export const usePlanningStore = defineStore("planning", {
 
     async handleDragEnd({ itemId, fromDate, toDate, oldIndex, newIndex, type }) {
       const snapshot = JSON.parse(JSON.stringify(this.weekData))
+      const nextSnapshot = this.nextWeekData ? JSON.parse(JSON.stringify(this.nextWeekData)) : null
+      const nextInvolved = this.nextWeekData && (
+        (fromDate >= this.nextWeekData.start_week && fromDate <= this.nextWeekData.end_week) ||
+        (toDate >= this.nextWeekData.start_week && toDate <= this.nextWeekData.end_week)
+      )
 
       try {
         if (type === 'meals') {
           await this._handleMealDrag(itemId, fromDate, toDate, oldIndex, newIndex)
-          await this.loadWeek()
         } else if (type === 'cooking') {
           await this._handleCookingDrag(itemId, fromDate, toDate)
-          // Backend moves related objects — need fresh data
-          await this.loadWeek()
         }
+        // Fire-and-forget background sync — no loading flag, no visual jump
+        this._silentRefreshBackground(nextInvolved)
       } catch {
         this.weekData = snapshot
+        if (nextSnapshot) this.nextWeekData = nextSnapshot
         this.showToast("Не удалось переместить")
       }
+    },
+
+    async _silentRefreshBackground(includeNext) {
+      try {
+        const fresh = await fetchWeek(this.year, this.week)
+        this.weekData.meal_plan_items.splice(0, Infinity, ...fresh.meal_plan_items)
+        this.weekData.cooking_events.splice(0, Infinity, ...fresh.cooking_events)
+        if (includeNext && this.nextWeekData) {
+          const { year, week } = getISOWeek(new Date(this.nextWeekData.start_week + 'T00:00:00'))
+          const freshNext = await fetchWeek(year, week)
+          this.nextWeekData.meal_plan_items.splice(0, Infinity, ...freshNext.meal_plan_items)
+          this.nextWeekData.cooking_events.splice(0, Infinity, ...freshNext.cooking_events)
+        }
+      } catch {
+        // Optimistic state remains — silent failure is acceptable
+      }
+    },
+
+    _mealItemsForDate(date) {
+      if (this.nextWeekData &&
+          date >= this.nextWeekData.start_week &&
+          date <= this.nextWeekData.end_week) {
+        return this.nextWeekData.meal_plan_items
+      }
+      return this.weekData.meal_plan_items
+    },
+
+    _cookingEventsForDate(date) {
+      if (this.nextWeekData &&
+          date >= this.nextWeekData.start_week &&
+          date <= this.nextWeekData.end_week) {
+        return this.nextWeekData.cooking_events
+      }
+      return this.weekData.cooking_events
     },
 
     _positionBetween(dayItems, newIndex) {
@@ -201,13 +256,13 @@ export const usePlanningStore = defineStore("planning", {
     },
 
     async _handleMealDrag(itemId, fromDate, toDate, oldIndex, newIndex) {
-      const items = this.weekData.meal_plan_items
-      const movedItem = items.find((m) => m.id === itemId)
+      const fromItems = this._mealItemsForDate(fromDate)
+      const movedItem = fromItems.find((m) => m.id === itemId)
       if (!movedItem) return
 
       if (fromDate === toDate) {
         // Within same day — reorder
-        const dayItems = items
+        const dayItems = fromItems
           .filter((m) => m.date === fromDate)
           .sort((a, b) => a.position - b.position)
 
@@ -221,13 +276,14 @@ export const usePlanningStore = defineStore("planning", {
           await updateMealPlanItem(movedItem.id, { date: movedItem.date, position })
         } else {
           dayItems.splice(newIndex, 0, movedItem)
-          await this._recalcAndPatch(dayItems, items)
+          await this._recalcAndPatch(dayItems, fromItems)
         }
       } else {
-        // Cross-day move — source day is not touched
+        // Cross-day move
         movedItem.date = toDate
 
-        const targetItems = items
+        const toItems = this._mealItemsForDate(toDate)
+        const targetItems = toItems
           .filter((m) => m.date === toDate && m.id !== itemId)
           .sort((a, b) => a.position - b.position)
 
@@ -238,7 +294,7 @@ export const usePlanningStore = defineStore("planning", {
           await updateMealPlanItem(movedItem.id, { date: toDate, position })
         } else {
           targetItems.splice(newIndex, 0, movedItem)
-          await this._recalcAndPatch(targetItems, items)
+          await this._recalcAndPatch(targetItems, toItems)
         }
       }
     },
@@ -263,7 +319,8 @@ export const usePlanningStore = defineStore("planning", {
     async _handleCookingDrag(itemId, fromDate, toDate) {
       if (fromDate === toDate) return
 
-      const event = this.weekData.cooking_events.find((e) => e.id === itemId)
+      const events = this._cookingEventsForDate(fromDate)
+      const event = events.find((e) => e.id === itemId)
       if (!event) return
 
       event.cooking_date = toDate

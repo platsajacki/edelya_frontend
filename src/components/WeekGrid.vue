@@ -27,7 +27,7 @@
         <path d="M7.5 5L12.5 10L7.5 15"
           stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
       </svg>
-      <span class="week-grid__past-label">{{ pastLabel }}</span>
+      <span class="week-grid__past-label">Прошедшие дни · {{ pastLabel }}</span>
     </button>
 
     <!-- Past days (expandable) -->
@@ -73,16 +73,56 @@
       @add-meal="$emit('add-meal', $event)"
       @drag-end="$emit('drag-end', $event)"
     />
+
+    <!-- Next week section -->
+    <template v-if="!showNextWeek">
+      <button
+        type="button"
+        class="week-grid__next-toggle"
+        :disabled="planning.loadingNextWeek"
+        @click="loadNext"
+      >
+        <span v-if="planning.loadingNextWeek" class="week-grid__next-spinner"><span class="spinner spinner--sm" /></span>
+        <span v-else class="week-grid__next-text">Показать следующую неделю</span>
+      </button>
+    </template>
+
+    <template v-if="showNextWeek">
+      <!-- Next week divider -->
+      <div class="week-grid__section-divider">
+        <span class="week-grid__section-line"></span>
+        <span class="week-grid__section-badge">{{ nextWeekLabel }}</span>
+        <span class="week-grid__section-line"></span>
+      </div>
+
+      <DayRow
+        v-for="day in nextWeekDays"
+        :key="'next-' + day.rawDate"
+        :day="day.label"
+        :date="day.date"
+        :raw-date="day.rawDate"
+        :meals="day.meals"
+        :cooking-events="day.cookingEvents"
+        @tap-cooking="$emit('tap-cooking', $event)"
+        @tap-meal="$emit('tap-meal', $event)"
+        @add-cooking="$emit('add-cooking', $event)"
+        @add-meal="$emit('add-meal', $event)"
+        @drag-end="$emit('drag-end', $event)"
+      />
+    </template>
   </div>
 </template>
 
 <script setup>
 import { computed, ref, watch } from "vue"
 import { formatYMDtoDDMMYYYY } from "../utils/formatDate"
-import { DAY_LABELS, splitDays, pastDaysLabel } from "../utils/weekDays"
+import { DAY_LABELS, splitDays, pastDaysLabel, getNextWeekInfo } from "../utils/weekDays"
+import { usePlanningStore } from "../store/planning"
 import DayRow from "./DayRow.vue"
 import IconPot from "./icons/IconPot.vue"
 import IconFork from "./icons/IconFork.vue"
+
+const planning = usePlanningStore()
 
 const props = defineProps({
   weekData: {
@@ -94,10 +134,12 @@ const props = defineProps({
 defineEmits(['add-cooking', 'add-meal', 'tap-cooking', 'tap-meal', 'drag-end'])
 
 const showPast = ref(false)
+const showNextWeek = ref(false)
 
 // Reset collapse state when week changes
 watch(() => props.weekData.start_week, () => {
   showPast.value = false
+  showNextWeek.value = false
 })
 
 const days = computed(() => {
@@ -132,6 +174,40 @@ const split = computed(() => splitDays(days.value, props.weekData.start_week))
 const pastDays = computed(() => split.value.pastDays)
 const visibleDays = computed(() => split.value.visibleDays)
 const pastLabel = computed(() => pastDaysLabel(pastDays.value))
+
+const nextInfo = computed(() => getNextWeekInfo(props.weekData.start_week))
+const nextWeekLabel = 'Следующая неделя'
+
+const nextWeekDays = computed(() => {
+  const data = planning.nextWeekData
+  if (!data) return []
+  const start = new Date(data.start_week + 'T00:00:00')
+  const result = []
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(start)
+    d.setDate(start.getDate() + i)
+    const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+    const meals = data.meal_plan_items
+      .filter((m) => m.date === dateStr)
+      .sort((a, b) => a.position - b.position)
+    const cookingEvents = data.cooking_events
+      .filter((e) => e.cooking_date === dateStr)
+    result.push({
+      rawDate: dateStr,
+      date: formatYMDtoDDMMYYYY(dateStr),
+      label: DAY_LABELS[i],
+      meals,
+      cookingEvents,
+    })
+  }
+  return result
+})
+
+async function loadNext() {
+  const { year, week } = nextInfo.value
+  await planning.loadNextWeek(year, week)
+  showNextWeek.value = true
+}
 </script>
 
 <style scoped>
@@ -268,5 +344,57 @@ const pastLabel = computed(() => pastDaysLabel(pastDays.value))
 .past-expand-leave-to {
   opacity: 0;
   max-height: 0;
+}
+
+/* ── Next week toggle button ── */
+.week-grid__next-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 16px;
+  margin: 4px 16px 0;
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-md);
+  background: transparent;
+  cursor: pointer;
+  transition: background var(--transition-fast), border-color var(--transition-fast);
+}
+
+.week-grid__next-toggle:active {
+  background: var(--color-bg-secondary);
+}
+
+.week-grid__next-toggle:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.week-grid__next-text {
+  font-size: var(--font-sm);
+  font-weight: 500;
+  color: var(--color-text-secondary);
+}
+
+/* ── Next week divider (same as today but secondary color) ── */
+.week-grid__section-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 16px;
+}
+
+.week-grid__section-line {
+  flex: 1;
+  height: 1px;
+  background: var(--color-border);
+}
+
+.week-grid__section-badge {
+  font-size: var(--font-xs);
+  font-weight: 600;
+  color: var(--color-mint);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
 }
 </style>

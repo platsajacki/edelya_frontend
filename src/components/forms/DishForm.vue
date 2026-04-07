@@ -59,9 +59,8 @@
           <!-- Normal row -->
           <div v-else class="ingredient-row" :class="{ 'ingredient-row--optional': ing.is_optional }">
             <span class="ingredient-row__name">{{ ing.ingredientName }}</span>
-            <span class="ingredient-row__amount">
-              <span v-if="ing.is_optional" class="ingredient-row__opt-label">опц. · </span>{{ formatShoppingAmount(ing.amount, ing.base_unit).display }}
-            </span>
+            <span v-if="ing.is_optional" class="ingredient-row__opt-label">опц.</span>
+            <span class="ingredient-row__amount">{{ formatShoppingAmount(ing.amount, ing.base_unit).display }}</span>
             <button type="button" class="ingredient-row__edit" @click="startEditIngredient(idx)" title="Редактировать">
               <IconPencil width="14" height="14" />
             </button>
@@ -420,11 +419,14 @@ async function submit() {
 .ingredient-row {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 8px 12px;
-  background: var(--color-empty);
-  border-radius: var(--radius-xs);
+  gap: 8px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--color-border);
   font-size: var(--font-sm);
+}
+
+.ingredient-row:last-of-type {
+  border-bottom: none;
 }
 
 .ingredient-row--optional {
@@ -449,9 +451,12 @@ async function submit() {
 
 .ingredient-row__opt-label {
   font-size: var(--font-xs);
-  color: var(--color-text-secondary);
-  font-style: italic;
-  font-weight: 400;
+  color: var(--color-mint);
+  background: var(--color-mint-alpha-12);
+  border-radius: var(--radius-xs);
+  padding: 1px 5px;
+  font-weight: 500;
+  white-space: nowrap;
 }
 
 .ingredient-row__edit,
