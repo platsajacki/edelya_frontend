@@ -67,25 +67,26 @@ onUnmounted(() => {
   position: fixed;
   inset: 0;
   background: var(--overlay-bg);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
   display: flex;
-  align-items: flex-start;
+  align-items: flex-end;
   justify-content: center;
-  padding: 16px;
-  padding-top: max(16px, env(safe-area-inset-top, 16px));
-  padding-bottom: max(16px, env(safe-area-inset-bottom, 16px));
+  padding: 0;
   overflow-y: auto;
   overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
 }
 
 .modal-panel {
   background: var(--color-surface);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
   box-shadow: var(--shadow-elevated);
   width: 100%;
   max-width: 420px;
   max-height: calc(100dvh - 32px);
-  margin: auto 0;
+  margin-top: auto;
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -119,7 +120,7 @@ onUnmounted(() => {
   font-size: 22px;
   color: var(--color-text-secondary);
   border-radius: var(--radius-xs);
-  transition: background 0.15s;
+  transition: background var(--transition-fast);
 }
 
 .modal-close:hover {
@@ -130,6 +131,7 @@ onUnmounted(() => {
   padding: 16px 20px;
   overflow-y: auto;
   flex: 1;
+  overscroll-behavior: contain;
 }
 
 .modal-footer {
@@ -141,12 +143,15 @@ onUnmounted(() => {
 /* Transitions */
 .modal-enter-active,
 .modal-leave-active {
-  transition: opacity 0.2s ease;
+  transition: opacity var(--transition-normal);
 }
 
-.modal-enter-active .modal-panel,
+.modal-enter-active .modal-panel {
+  transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1);
+}
+
 .modal-leave-active .modal-panel {
-  transition: transform 0.2s ease;
+  transition: transform var(--transition-normal);
 }
 
 .modal-enter-from,
@@ -155,10 +160,30 @@ onUnmounted(() => {
 }
 
 .modal-enter-from .modal-panel {
-  transform: scale(0.95);
+  transform: translateY(100%);
 }
 
 .modal-leave-to .modal-panel {
-  transform: scale(0.95);
+  transform: translateY(100%);
+}
+
+@media (min-width: 600px) {
+  .modal-overlay {
+    align-items: center;
+    padding: 16px;
+  }
+
+  .modal-panel {
+    border-radius: var(--radius-md);
+    margin: auto 0;
+  }
+
+  .modal-enter-from .modal-panel {
+    transform: scale(0.95);
+  }
+
+  .modal-leave-to .modal-panel {
+    transform: scale(0.95);
+  }
 }
 </style>

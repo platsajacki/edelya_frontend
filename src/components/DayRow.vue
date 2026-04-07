@@ -124,15 +124,15 @@ useSortable(eatRef, makeSortableOptions('meals'))
 
 .day-row__day {
   font-weight: 700;
-  font-size: 13px;
+  font-size: var(--font-sm);
   color: var(--color-text-secondary);
   text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.05em;
 }
 
 .day-row__date {
   font-weight: 600;
-  font-size: 15px;
+  font-size: var(--font-base);
   color: var(--color-text-secondary);
 }
 
@@ -189,17 +189,17 @@ useSortable(eatRef, makeSortableOptions('meals'))
   background: none;
   font-weight: 500;
   cursor: pointer;
-  transition: background 0.15s, border-color 0.15s, color 0.15s;
+  transition: background var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast);
   color: var(--color-text-secondary);
 }
 
 .day-row__add-icon {
-  font-size: 15px;
+  font-size: var(--font-base);
   line-height: 1;
 }
 
 .day-row__add-text {
-  font-size: 11px;
+  font-size: var(--font-xs);
 }
 
 .day-row__add--cook:hover {

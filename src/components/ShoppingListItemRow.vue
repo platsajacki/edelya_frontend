@@ -141,7 +141,7 @@ function cancelEdit() {
   align-items: center;
   gap: 8px;
   padding: 10px 12px;
-  transition: opacity 0.2s;
+  transition: opacity var(--transition-normal);
   -webkit-tap-highlight-color: transparent;
 }
 
@@ -152,8 +152,8 @@ function cancelEdit() {
 /* ── Checkbox ── */
 .item-row__check {
   flex-shrink: 0;
-  width: 26px;
-  height: 26px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   border: 1.8px solid var(--color-border);
   background: transparent;
@@ -162,7 +162,7 @@ function cancelEdit() {
   justify-content: center;
   padding: 0;
   cursor: pointer;
-  transition: border-color 0.15s, background 0.15s;
+  transition: border-color var(--transition-fast), background var(--transition-fast);
   -webkit-tap-highlight-color: transparent;
 }
 
@@ -175,6 +175,7 @@ function cancelEdit() {
 .item-row__check:disabled {
   opacity: 0.5;
   cursor: default;
+  pointer-events: none;
 }
 
 /* ── Info ── */
@@ -223,13 +224,13 @@ function cancelEdit() {
   align-items: center;
   height: 34px;
   border: 1.5px solid var(--color-border);
-  border-radius: 100px;
+  border-radius: var(--radius-pill);
   overflow: hidden;
   background: var(--color-surface);
 }
 
 .item-row__step-btn {
-  width: 32px;
+  min-width: 44px;
   height: 100%;
   border: none;
   background: transparent;
@@ -243,7 +244,7 @@ function cancelEdit() {
   cursor: pointer;
   flex-shrink: 0;
   -webkit-tap-highlight-color: transparent;
-  transition: background 0.12s;
+  transition: background var(--transition-fast);
 }
 
 .item-row__step-btn:active {
@@ -268,7 +269,7 @@ function cancelEdit() {
 }
 
 .item-row__step-label {
-  font-size: 12px;
+  font-size: var(--font-2xs);
   font-weight: 600;
   color: var(--color-text);
   white-space: nowrap;
@@ -281,7 +282,7 @@ function cancelEdit() {
   border: none;
   outline: none;
   background: transparent;
-  font-size: 12px;
+  font-size: var(--font-2xs);
   font-weight: 600;
   color: var(--color-text);
   text-align: center;
@@ -293,7 +294,7 @@ function cancelEdit() {
 /* ── Checked amount / to_taste done ── */
 .item-row__amount-done {
   flex-shrink: 0;
-  font-size: 12px;
+  font-size: var(--font-2xs);
   color: var(--color-text-secondary);
   white-space: nowrap;
 }
@@ -313,7 +314,7 @@ function cancelEdit() {
   opacity: 0.3;
   cursor: pointer;
   border-radius: 50%;
-  transition: opacity 0.15s, background 0.15s, color 0.15s;
+  transition: opacity var(--transition-fast), background var(--transition-fast), color var(--transition-fast);
   -webkit-tap-highlight-color: transparent;
 }
 

@@ -14,7 +14,7 @@
       <IconSearch class="recipes-search__icon" />
       <input
         v-model="searchQuery"
-        type="text"
+        type="search"
         class="recipes-search__input"
         placeholder="Поиск блюда..."
         @input="onSearchInput"
@@ -30,12 +30,12 @@
     </div>
 
     <!-- Ownership tabs -->
-    <div class="recipes-tabs">
+    <div class="tabs">
       <button
         v-for="tab in tabs"
         :key="tab.value"
-        class="recipes-tabs__item"
-        :class="{ 'recipes-tabs__item--active': activeTab === tab.value }"
+        class="tabs__item"
+        :class="{ 'tabs__item--active': activeTab === tab.value }"
         @click="switchTab(tab.value)"
       >
         {{ tab.label }}
@@ -61,14 +61,14 @@
     </div>
 
     <!-- Empty state -->
-    <div v-else-if="!store.activeDishes.length" class="recipes-empty">
-      <p class="recipes-empty__text">
+    <div v-else-if="!store.activeDishes.length" class="empty-state">
+      <p class="empty-state__text">
         {{ activeTab === 'own' ? 'У вас пока нет личных блюд' : activeTab === 'global' ? 'Общих блюд не найдено' : 'Блюда не найдены' }}
       </p>
-      <button v-if="activeTab === 'own'" class="recipes-empty__add" @click="showCreateForm = true">
+      <button v-if="activeTab === 'own'" class="empty-state__action" @click="showCreateForm = true">
         + Добавить блюдо
       </button>
-      <button v-if="store.hasActiveFilters" class="recipes-empty__reset" @click="store.resetFilters(); searchQuery = ''">
+      <button v-if="store.hasActiveFilters" class="empty-state__secondary" @click="store.resetFilters(); searchQuery = ''">
         Сбросить фильтры
       </button>
     </div>
@@ -269,7 +269,7 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background 0.15s;
+  transition: background var(--transition-fast);
 }
 
 .recipes-header__filter-btn:active {
@@ -310,11 +310,12 @@ onUnmounted(() => {
   background: var(--color-surface);
   color: var(--color-text);
   outline: none;
-  transition: border-color 0.15s;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
 }
 
 .recipes-search__input:focus {
-  border-color: var(--color-mint);
+  border-color: var(--color-mint-alpha-25);
+  box-shadow: 0 0 0 3px var(--color-mint-alpha-10);
 }
 
 .recipes-search__input::placeholder {
@@ -334,8 +335,8 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 6px;
-  transition: background 0.12s;
+  border-radius: var(--radius-xs);
+  transition: background var(--transition-fast);
 }
 
 .recipes-search__clear:hover {
@@ -361,7 +362,7 @@ onUnmounted(() => {
   font-weight: 500;
   color: var(--color-text);
   cursor: pointer;
-  transition: background 0.12s;
+  transition: background var(--transition-fast);
 }
 
 .recipes-chip:hover {
@@ -385,85 +386,7 @@ onUnmounted(() => {
   color: var(--color-text-secondary);
 }
 
-/* Empty */
-.recipes-empty {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 12px;
-  padding: 48px 24px;
-  background: var(--color-surface);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-card);
-  text-align: center;
-}
 
-.recipes-empty__text {
-  font-size: var(--font-md);
-  color: var(--color-text-secondary);
-  margin: 0;
-}
-
-.recipes-empty__reset {
-  padding: 8px 16px;
-  border: none;
-  border-radius: var(--radius-sm);
-  background: var(--color-empty);
-  color: var(--color-mint);
-  font-size: var(--font-sm);
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.15s;
-}
-
-.recipes-empty__reset:hover {
-  background: var(--color-border);
-}
-
-.recipes-empty__add {
-  padding: 10px 20px;
-  border: none;
-  border-radius: var(--radius-sm);
-  background: var(--color-mint);
-  color: var(--on-primary);
-  font-size: var(--font-md);
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.15s;
-}
-
-.recipes-empty__add:hover {
-  background: var(--color-mint-hover);
-}
-
-/* Tabs */
-.recipes-tabs {
-  display: flex;
-  gap: 0;
-  background: var(--color-empty);
-  border-radius: var(--radius-sm);
-  padding: 3px;
-}
-
-.recipes-tabs__item {
-  flex: 1;
-  padding: 8px 0;
-  border: none;
-  border-radius: var(--radius-xs);
-  background: transparent;
-  font-size: var(--font-sm);
-  font-weight: 600;
-  color: var(--color-text-secondary);
-  cursor: pointer;
-  transition: background 0.15s, color 0.15s, box-shadow 0.15s;
-  -webkit-tap-highlight-color: transparent;
-}
-
-.recipes-tabs__item--active {
-  background: var(--color-surface);
-  color: var(--color-text);
-  box-shadow: var(--shadow-tab);
-}
 
 /* Sections & list */
 .recipes-list {

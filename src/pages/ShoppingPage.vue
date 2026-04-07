@@ -20,10 +20,10 @@
     </div>
 
     <!-- Empty state -->
-    <div v-else-if="!store.lists.length" class="shopping-empty">
-      <IconShoppingBag class="shopping-empty__icon" width="48" height="48" :stroke-width="1.2" />
-      <p class="shopping-empty__text">Нет списков покупок</p>
-      <button class="shopping-empty__add" @click="showForm = true">
+    <div v-else-if="!store.lists.length" class="empty-state">
+      <IconShoppingBag class="empty-state__icon" width="48" height="48" :stroke-width="1.2" />
+      <p class="empty-state__text">Нет списков покупок</p>
+      <button class="empty-state__action" @click="showForm = true">
         + Создать список
       </button>
     </div>
@@ -115,7 +115,7 @@ function onListCreated(list) {
   font-size: var(--font-xs);
   color: var(--color-text-secondary);
   cursor: pointer;
-  transition: border-color 0.15s, color 0.15s;
+  transition: border-color var(--transition-fast), color var(--transition-fast);
   -webkit-tap-highlight-color: transparent;
 }
 
@@ -137,45 +137,6 @@ function onListCreated(list) {
   align-items: center;
   justify-content: center;
   padding: 40px 0;
-}
-
-/* Empty */
-.shopping-empty {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 16px;
-  padding: 48px 24px;
-  background: var(--color-surface);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-card);
-  text-align: center;
-}
-
-.shopping-empty__icon {
-  color: var(--color-border);
-}
-
-.shopping-empty__text {
-  font-size: var(--font-md);
-  color: var(--color-text-secondary);
-  margin: 0;
-}
-
-.shopping-empty__add {
-  padding: 10px 20px;
-  border: none;
-  border-radius: var(--radius-sm);
-  background: var(--color-mint);
-  color: var(--on-primary);
-  font-size: var(--font-md);
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.15s;
-}
-
-.shopping-empty__add:hover {
-  background: var(--color-mint-hover);
 }
 
 /* List */

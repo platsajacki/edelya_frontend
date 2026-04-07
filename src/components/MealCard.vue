@@ -55,10 +55,10 @@ const cardStyle = computed(() => {
   background: var(--card-bg, var(--color-empty));
   border: none;
   border-left: 3px solid var(--card-accent, var(--color-mint));
-  font-size: 13px;
+  font-size: var(--font-sm);
   text-align: left;
   cursor: pointer;
-  transition: box-shadow 0.15s, transform 0.15s;
+  transition: box-shadow var(--transition-fast), transform var(--transition-fast);
   -webkit-user-select: none;
   user-select: none;
   -webkit-touch-callout: none;
@@ -76,7 +76,7 @@ const cardStyle = computed(() => {
 
 .meal-card:hover {
   box-shadow: var(--shadow-card);
-  transform: translateY(-1px);
+  border-color: var(--color-mint-alpha-10);
 }
 
 .meal-card--ghost {

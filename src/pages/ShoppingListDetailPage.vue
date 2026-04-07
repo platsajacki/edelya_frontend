@@ -24,16 +24,16 @@
 
     <!-- Filter tabs -->
     <div class="detail-filters">
-      <div class="detail-tabs">
+      <div class="tabs">
         <button
           v-for="tab in filterTabs"
           :key="tab.value"
-          class="detail-tabs__item"
-          :class="{ 'detail-tabs__item--active': activeFilter === tab.value }"
+          class="tabs__item"
+          :class="{ 'tabs__item--active': activeFilter === tab.value }"
           @click="activeFilter = tab.value"
         >
           {{ tab.label }}
-          <span v-if="tab.count != null" class="detail-tabs__count">{{ tab.count }}</span>
+          <span v-if="tab.count != null" class="tabs__count">{{ tab.count }}</span>
         </button>
       </div>
 
@@ -50,8 +50,8 @@
     </div>
 
     <!-- Empty state -->
-    <div v-else-if="!filteredGroups.length" class="detail-empty">
-      <p class="detail-empty__text">
+    <div v-else-if="!filteredGroups.length" class="empty-state">
+      <p class="empty-state__text">
         {{ emptyText }}
       </p>
     </div>
@@ -311,7 +311,7 @@ async function doDeleteList() {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: background 0.12s;
+  transition: background var(--transition-fast);
   -webkit-tap-highlight-color: transparent;
 }
 
@@ -356,7 +356,7 @@ async function doDeleteList() {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: background 0.12s, color 0.12s;
+  transition: background var(--transition-fast), color var(--transition-fast);
   -webkit-tap-highlight-color: transparent;
 }
 
@@ -375,44 +375,6 @@ async function doDeleteList() {
   gap: 8px;
 }
 
-.detail-tabs {
-  display: flex;
-  gap: 0;
-  background: var(--color-empty);
-  border-radius: var(--radius-sm);
-  padding: 3px;
-}
-
-.detail-tabs__item {
-  flex: 1;
-  padding: 7px 0;
-  border: none;
-  border-radius: 8px;
-  background: transparent;
-  font-size: var(--font-sm);
-  font-weight: 600;
-  color: var(--color-text-secondary);
-  cursor: pointer;
-  transition: background 0.15s, color 0.15s, box-shadow 0.15s;
-  -webkit-tap-highlight-color: transparent;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-}
-
-.detail-tabs__item--active {
-  background: var(--color-surface);
-  color: var(--color-text);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
-}
-
-.detail-tabs__count {
-  font-size: 11px;
-  font-weight: 700;
-  opacity: 0.6;
-}
-
 
 
 /* ---- Loading ---- */
@@ -423,24 +385,6 @@ async function doDeleteList() {
   padding: 40px 0;
 }
 
-/* ---- Empty ---- */
-.detail-empty {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 12px;
-  padding: 48px 24px;
-  background: var(--color-surface);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-card);
-  text-align: center;
-}
-
-.detail-empty__text {
-  font-size: var(--font-md);
-  color: var(--color-text-secondary);
-  margin: 0;
-}
 
 /* ---- Groups ---- */
 .detail-groups {
@@ -480,11 +424,13 @@ async function doDeleteList() {
   position: fixed;
   inset: 0;
   background: var(--overlay-bg);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 16px;
-  z-index: 1100;
+  z-index: var(--z-confirm);
 }
 
 .confirm-panel {
@@ -497,7 +443,7 @@ async function doDeleteList() {
 }
 
 .confirm-panel__title {
-  font-size: 17px;
+  font-size: var(--font-lg);
   font-weight: 700;
   color: var(--color-text);
   margin: 0 0 8px;
@@ -523,7 +469,7 @@ async function doDeleteList() {
   font-size: var(--font-sm);
   font-weight: 600;
   cursor: pointer;
-  transition: background 0.15s;
+  transition: background var(--transition-fast);
 }
 
 .confirm-panel__btn--cancel {
@@ -555,7 +501,7 @@ async function doDeleteList() {
 
 .confirm-panel__btn:disabled {
   opacity: 0.5;
-  cursor: default;
+  pointer-events: none;
 }
 
 .modal-enter-active,

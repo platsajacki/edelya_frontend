@@ -41,7 +41,9 @@ function isActive(to) {
   display: flex;
   justify-content: space-around;
   align-items: center;
-  background: var(--color-surface);
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   border-top: 1px solid var(--color-border);
   padding: 6px 0 calc(6px + env(safe-area-inset-bottom, 0px));
   z-index: var(--z-nav);
@@ -56,8 +58,12 @@ function isActive(to) {
   text-decoration: none;
   color: var(--color-text-secondary);
   border-radius: var(--radius-sm);
-  transition: color 0.15s;
+  transition: color var(--transition-fast);
   -webkit-tap-highlight-color: transparent;
+}
+
+.bottom-nav__tab:hover:not(.bottom-nav__tab--active) {
+  color: var(--color-text);
 }
 
 .bottom-nav__tab--active {

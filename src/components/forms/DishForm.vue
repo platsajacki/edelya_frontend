@@ -106,7 +106,7 @@
         <div v-else class="ingredient-search">
           <input
             v-model="ingredientQuery"
-            type="text"
+            type="search"
             class="form__input"
             placeholder="Поиск ингредиента..."
             @input="searchIngredients"
@@ -462,12 +462,12 @@ async function submit() {
   border: none;
   background: none;
   color: var(--color-text-secondary);
-  border-radius: 5px;
+  border-radius: var(--radius-xs);
   display: flex;
   align-items: center;
   justify-content: center;
   opacity: 0.4;
-  transition: opacity 0.15s, color 0.15s, background 0.15s;
+  transition: opacity var(--transition-fast), color var(--transition-fast), background var(--transition-fast);
   padding: 0;
 }
 
@@ -485,41 +485,6 @@ async function submit() {
 }
 
 /* Ingredient search */
-.ingredient-search {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.ingredient-search__list {
-  list-style: none;
-  max-height: 150px;
-  overflow-y: auto;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
-}
-
-.ingredient-search__item {
-  display: flex;
-  justify-content: space-between;
-  padding: 8px 12px;
-  cursor: pointer;
-  font-size: var(--font-sm);
-  transition: background 0.1s;
-}
-
-.ingredient-search__item:hover {
-  background: var(--color-empty);
-}
-
-.ingredient-search__item + .ingredient-search__item {
-  border-top: 1px solid var(--color-border);
-}
-
-.ingredient-search__unit {
-  font-size: var(--font-xs);
-  color: var(--color-text-secondary);
-}
 
 /* Pending ingredient amount */
 .ingredient-amount {
@@ -593,7 +558,7 @@ async function submit() {
   font-size: var(--font-sm);
   font-weight: 600;
   cursor: pointer;
-  transition: background 0.15s;
+  transition: background var(--transition-fast);
 }
 
 .btn--sm {
@@ -623,7 +588,7 @@ async function submit() {
   font-size: var(--font-sm);
   font-weight: 500;
   color: var(--color-mint-hover);
-  transition: background 0.15s, border-color 0.15s;
+  transition: background var(--transition-fast), border-color var(--transition-fast);
 }
 
 .dish-search__create:hover {

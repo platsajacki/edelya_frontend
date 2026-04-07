@@ -168,46 +168,4 @@ async function submit() {
 </script>
 
 <style scoped>
-.selected-dish {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 12px;
-  background: var(--color-empty);
-  border-radius: var(--radius-sm);
-  border: 1.5px solid var(--color-mint);
-}
-
-.selected-dish__name {
-  flex: 1;
-  font-size: var(--font-base);
-  font-weight: 500;
-}
-
-.selected-dish__clear,
-.selected-dish__edit {
-  width: 24px;
-  height: 24px;
-  border: none;
-  background: none;
-  color: var(--color-text-secondary);
-  border-radius: 6px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: color 0.15s;
-}
-
-.selected-dish__clear {
-  font-size: 18px;
-}
-
-.selected-dish__edit:hover {
-  color: var(--color-mint);
-}
-
-.selected-dish__clear:hover {
-  background: var(--color-border);
-  color: var(--color-danger);
-}
 </style>

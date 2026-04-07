@@ -12,8 +12,8 @@
   position: fixed;
   bottom: var(--nav-height);
   right: max(16px, calc((100vw - 480px) / 2 + 16px));
-  width: 52px;
-  height: 52px;
+  width: 56px;
+  height: 56px;
   border: none;
   border-radius: 50%;
   background: var(--color-mint);
@@ -23,7 +23,7 @@
   align-items: center;
   justify-content: center;
   z-index: var(--z-fab);
-  transition: background 0.15s, transform 0.15s;
+  transition: background var(--transition-fast), transform var(--transition-fast);
   -webkit-tap-highlight-color: transparent;
 }
 
@@ -32,6 +32,6 @@
 }
 
 .fab:active {
-  transform: scale(0.93);
+  transform: scale(var(--press-scale-lg));
 }
 </style>

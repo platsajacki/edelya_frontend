@@ -182,7 +182,7 @@ onMounted(() => {
 
 .planner__grid--loading {
   opacity: 0.5;
-  transition: opacity 0.2s ease;
+  transition: opacity var(--transition-normal);
   pointer-events: none;
 }
 
@@ -195,7 +195,7 @@ onMounted(() => {
   background: var(--color-danger-pale);
   border: 1px solid var(--color-danger-soft);
   border-radius: var(--radius-sm);
-  font-size: 14px;
+  font-size: var(--font-body);
   color: var(--color-danger-muted);
 }
 
@@ -205,7 +205,7 @@ onMounted(() => {
   border-radius: var(--radius-sm);
   background: var(--color-danger);
   color: var(--on-primary);
-  font-size: 13px;
+  font-size: var(--font-sm);
   font-weight: 600;
 }
 

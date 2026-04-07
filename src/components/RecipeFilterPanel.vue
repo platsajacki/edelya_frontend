@@ -99,6 +99,8 @@ function close() {
   position: fixed;
   inset: 0;
   background: var(--overlay-bg);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
   z-index: var(--z-filter);
   display: flex;
   justify-content: flex-end;
@@ -141,7 +143,7 @@ function close() {
   font-size: 22px;
   color: var(--color-text-secondary);
   border-radius: var(--radius-xs);
-  transition: background 0.15s;
+  transition: background var(--transition-fast);
 }
 
 .filter-panel__close:hover {
@@ -155,6 +157,7 @@ function close() {
   display: flex;
   flex-direction: column;
   gap: 24px;
+  overscroll-behavior: contain;
 }
 
 .filter-section__label {
@@ -179,7 +182,7 @@ function close() {
   gap: 10px;
   padding: 10px 12px;
   border-radius: var(--radius-xs);
-  transition: background 0.12s;
+  transition: background var(--transition-fast);
 }
 
 .filter-radio:hover {
@@ -198,7 +201,7 @@ function close() {
   border-radius: 50%;
   flex-shrink: 0;
   position: relative;
-  transition: border-color 0.15s;
+  transition: border-color var(--transition-fast);
 }
 
 .filter-radio__input:checked {
@@ -217,7 +220,7 @@ function close() {
 }
 
 .filter-radio__label {
-  font-size: var(--font-md);
+  font-size: var(--font-body);
   color: var(--color-text);
   font-weight: 500;
 }
@@ -237,9 +240,9 @@ function close() {
   border-radius: var(--radius-sm);
   background: var(--color-empty);
   color: var(--color-text-secondary);
-  font-size: var(--font-md);
+  font-size: var(--font-body);
   font-weight: 600;
-  transition: background 0.15s;
+  transition: background var(--transition-fast);
 }
 
 .filter-panel__clear:hover:not(:disabled) {
@@ -247,8 +250,9 @@ function close() {
 }
 
 .filter-panel__clear:disabled {
-  opacity: 0.4;
+  opacity: 0.5;
   cursor: not-allowed;
+  pointer-events: none;
 }
 
 .filter-panel__apply {
@@ -258,24 +262,28 @@ function close() {
   border-radius: var(--radius-sm);
   background: var(--color-mint);
   color: var(--on-primary);
-  font-size: var(--font-md);
+  font-size: var(--font-body);
   font-weight: 600;
-  transition: background 0.15s;
+  transition: background var(--transition-fast), transform var(--transition-fast);
 }
 
 .filter-panel__apply:hover {
   background: var(--color-mint-hover);
 }
 
+.filter-panel__apply:active {
+  transform: scale(var(--press-scale-md));
+}
+
 /* Slide-in transition */
 .filter-panel-enter-active,
 .filter-panel-leave-active {
-  transition: opacity 0.25s ease;
+  transition: opacity var(--transition-normal);
 }
 
 .filter-panel-enter-active .filter-panel,
 .filter-panel-leave-active .filter-panel {
-  transition: transform 0.25s ease;
+  transition: transform var(--transition-normal);
 }
 
 .filter-panel-enter-from,

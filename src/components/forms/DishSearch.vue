@@ -3,7 +3,7 @@
     <input
       ref="inputEl"
       v-model="query"
-      type="text"
+      type="search"
       class="dish-search__input"
       placeholder="Поиск блюда..."
       @input="onInput"
@@ -91,15 +91,16 @@ onMounted(() => {
   padding: 10px 12px;
   border: 1.5px solid var(--color-border);
   border-radius: var(--radius-sm);
-  font-size: 16px;
+  font-size: var(--font-md);
   background: var(--color-surface);
   color: var(--color-text);
   outline: none;
-  transition: border-color 0.15s;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
 }
 
 .dish-search__input:focus {
-  border-color: var(--color-mint);
+  border-color: var(--color-mint-alpha-25);
+  box-shadow: 0 0 0 3px var(--color-mint-alpha-10);
 }
 
 .dish-search__list {
@@ -117,7 +118,7 @@ onMounted(() => {
   gap: 8px;
   padding: 10px 12px;
   cursor: pointer;
-  transition: background 0.1s;
+  transition: background var(--transition-fast);
 }
 
 .dish-search__item:hover {
@@ -136,17 +137,17 @@ onMounted(() => {
 }
 
 .dish-search__name {
-  font-size: 13px;
+  font-size: var(--font-sm);
   font-weight: 500;
 }
 
 .dish-search__category {
-  font-size: 11px;
+  font-size: var(--font-xs);
   color: var(--color-text-secondary);
 }
 
 .dish-search__status {
-  font-size: 13px;
+  font-size: var(--font-sm);
   color: var(--color-text-secondary);
   padding: 8px 0;
 }
@@ -157,10 +158,10 @@ onMounted(() => {
   border: 1.5px dashed var(--color-border);
   border-radius: var(--radius-sm);
   background: transparent;
-  font-size: 13px;
+  font-size: var(--font-sm);
   font-weight: 500;
   color: var(--color-mint-hover);
-  transition: background 0.15s, border-color 0.15s;
+  transition: background var(--transition-fast), border-color var(--transition-fast);
 }
 
 .dish-search__create:hover {

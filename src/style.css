@@ -1,70 +1,91 @@
 :root {
-  --color-bg: #ffffff;
-  --color-surface: #FFFFFF;
+  /* ─── Colors: backgrounds & surfaces ─── */
+  --color-bg: #f8f7f3;
+  --color-surface: #ffffff;
+  --color-surface-muted: #eeeae5;
   --color-text: #252520;
   --color-text-secondary: #5F5F56;
-  --color-border: #D6DEC0;
-  --color-empty: #F2F2EE;
+  --color-border: #e0ddd6;
+  --color-empty: #f4f3f0;
+
+  /* ─── Colors: primary (mint / lavender) ─── */
   --color-mint: #8A63B5;
   --color-mint-hover: #7D56A9;
+  --on-primary: #ffffff;
+
+  /* ─── Colors: semantic (eat / cook) ─── */
   --color-eat: #6F9737;
   --color-eat-bg: rgba(111, 151, 55, 0.12);
+  --color-eat-bg-strong: rgba(111, 151, 55, 0.22);
   --color-cook: #8AAA25;
   --color-cook-bg: rgba(138, 170, 37, 0.14);
-  --color-eat-bg-strong: rgba(111, 151, 55, 0.22);
   --color-cook-bg-strong: rgba(138, 170, 37, 0.22);
 
+  /* ─── Colors: shared / manual ─── */
   --color-shared: #6B7280;
   --color-shared-bg: rgba(107, 114, 128, 0.10);
   --color-shared-accent: #9CA3AF;
+  --color-manual-meal: #6B8FBF;
+  --color-manual-meal-bg: rgba(107, 143, 191, 0.12);
 
+  /* ─── Colors: danger ─── */
   --color-danger: #D64545;
   --color-danger-muted: #B91C1C;
   --color-danger-bg: #FEE2E2;
   --color-danger-soft: #FECACA;
   --color-danger-pale: #FEF2F2;
 
-  --color-manual-meal: #6B8FBF;
-  --color-manual-meal-bg: rgba(107, 143, 191, 0.12);
+  /* ─── Colors: warning ─── */
+  --color-warning: #92661a;
+  --color-warning-bg: #fef9ec;
+  --color-warning-border: #f3d98a;
+  --color-warning-icon: #c47f0a;
 
-  --nav-height: calc(64px + env(safe-area-inset-bottom, 0px));
-
-  --overlay-bg: rgba(30, 20, 45, 0.48);
-  --on-primary: #ffffff;
-  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02);
-  --shadow-day: 0 1px 4px rgba(0, 0, 0, 0.05), 0 0 0 1px var(--color-border);
-  --shadow-elevated: 0 4px 16px rgba(0, 0, 0, 0.10);
-  --radius-sm: 10px;
-  --radius-md: 16px;
-  --radius-lg: 20px;
-
-  --font-lg: 17px;
-  --font-md: 16px;
-  --font-base: 15px;
-  --font-sm: 13px;
-  --font-xs: 11px;
-
-  /* Mint alpha-palette */
+  /* ─── Colors: mint alpha palette ─── */
   --color-mint-alpha-06: rgba(138, 99, 181, 0.06);
   --color-mint-alpha-08: rgba(138, 99, 181, 0.08);
   --color-mint-alpha-10: rgba(138, 99, 181, 0.10);
   --color-mint-alpha-12: rgba(138, 99, 181, 0.12);
   --color-mint-alpha-25: rgba(138, 99, 181, 0.25);
 
-  /* Warning color family */
-  --color-warning: #92661a;
-  --color-warning-bg: #fef9ec;
-  --color-warning-border: #f3d98a;
-  --color-warning-icon: #c47f0a;
+  /* ─── Layout ─── */
+  --nav-height: calc(64px + env(safe-area-inset-bottom, 0px));
+  --overlay-bg: rgba(30, 20, 45, 0.48);
 
-  /* Extra radius */
-  --radius-xs: 8px;
-
-  /* Extra shadows */
+  /* ─── Shadows ─── */
+  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02);
+  --shadow-day: 0 1px 4px rgba(0, 0, 0, 0.05), 0 0 0 1px var(--color-border);
+  --shadow-elevated: 0 8px 30px rgba(0, 0, 0, 0.10);
   --shadow-tab: 0 1px 3px rgba(0, 0, 0, 0.08);
   --shadow-drag: 0 8px 25px rgba(0, 0, 0, 0.15);
 
-  /* Z-index scale */
+  /* ─── Radii ─── */
+  --radius-xs: 8px;
+  --radius-sm: 10px;
+  --radius-md: 16px;
+  --radius-lg: 20px;
+  --radius-pill: 9999px;
+
+  /* ─── Typography ─── */
+  --font-lg: 18px;
+  --font-md: 16px;
+  --font-base: 15px;
+  --font-body: 14px;
+  --font-sm: 13px;
+  --font-2xs: 12px;
+  --font-xs: 11px;
+
+  /* ─── Transitions ─── */
+  --transition-fast: 0.15s ease;
+  --transition-normal: 0.2s ease;
+  --transition-slow: 0.3s ease;
+
+  /* ─── Press scales ─── */
+  --press-scale-sm: 0.99;
+  --press-scale-md: 0.98;
+  --press-scale-lg: 0.95;
+
+  /* ─── Z-index scale ─── */
   --z-fab: 800;
   --z-nav: 900;
   --z-filter: 950;
@@ -98,8 +119,8 @@ button {
 }
 
 *:focus-visible {
-  outline: 2px solid var(--color-mint);
-  outline-offset: 2px;
+  outline: none;
+  box-shadow: 0 0 0 2px var(--color-surface), 0 0 0 4px var(--color-mint-alpha-25);
 }
 
 input,
@@ -148,7 +169,7 @@ textarea {
   background: var(--color-surface);
   color: var(--color-text);
   outline: none;
-  transition: border-color 0.15s;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
 }
 
 .form__textarea {
@@ -158,7 +179,8 @@ textarea {
 .form__input:focus,
 .form__select:focus,
 .form__textarea:focus {
-  border-color: var(--color-mint);
+  border-color: var(--color-mint-alpha-25);
+  box-shadow: 0 0 0 3px var(--color-mint-alpha-10);
   outline: none;
 }
 
@@ -181,16 +203,21 @@ textarea {
   color: var(--on-primary);
   font-size: var(--font-base);
   font-weight: 600;
-  transition: background 0.15s;
+  transition: background var(--transition-fast), transform var(--transition-fast);
 }
 
 .form__submit:hover:not(:disabled) {
   background: var(--color-mint-hover);
 }
 
+.form__submit:active:not(:disabled) {
+  transform: scale(var(--press-scale-md));
+}
+
 .form__submit:disabled {
-  opacity: 0.45;
+  opacity: 0.5;
   cursor: not-allowed;
+  pointer-events: none;
 }
 
 /* Sticky submit button inside modal scrollable body */
@@ -233,4 +260,199 @@ textarea {
 
 @keyframes spin {
   to { transform: rotate(360deg); }
+}
+
+/* ─── Shared tabs (segment control) ───────────────────────── */
+
+.tabs {
+  display: flex;
+  gap: 0;
+  background: var(--color-surface-muted);
+  border-radius: var(--radius-sm);
+  padding: 3px;
+}
+
+.tabs__item {
+  flex: 1;
+  padding: 8px 0;
+  border: none;
+  border-radius: var(--radius-xs);
+  background: transparent;
+  font-size: var(--font-sm);
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: background var(--transition-fast), color var(--transition-fast), box-shadow var(--transition-fast);
+  -webkit-tap-highlight-color: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+.tabs__item:hover:not(.tabs__item--active) {
+  color: var(--color-text);
+}
+
+.tabs__item--active {
+  background: var(--color-surface);
+  color: var(--color-text);
+  box-shadow: var(--shadow-tab);
+}
+
+.tabs__count {
+  font-size: var(--font-xs);
+  font-weight: 700;
+  opacity: 0.6;
+}
+
+/* ─── Shared empty state ──────────────────────────────────── */
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 48px 24px;
+  background: var(--color-surface);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
+  text-align: center;
+}
+
+.empty-state__icon {
+  color: var(--color-border);
+}
+
+.empty-state__text {
+  font-size: var(--font-md);
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+.empty-state__action {
+  padding: 10px 20px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: var(--color-mint);
+  color: var(--on-primary);
+  font-size: var(--font-md);
+  font-weight: 600;
+  cursor: pointer;
+  transition: background var(--transition-fast), transform var(--transition-fast);
+}
+
+.empty-state__action:hover {
+  background: var(--color-mint-hover);
+}
+
+.empty-state__action:active {
+  transform: scale(var(--press-scale-md));
+}
+
+.empty-state__secondary {
+  padding: 8px 16px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: var(--color-empty);
+  color: var(--color-mint);
+  font-size: var(--font-sm);
+  font-weight: 600;
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.empty-state__secondary:hover {
+  background: var(--color-border);
+}
+
+/* ─── Shared selected-dish (forms) ────────────────────────── */
+
+.selected-dish {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  background: var(--color-empty);
+  border-radius: var(--radius-sm);
+  border: 1.5px solid var(--color-mint);
+}
+
+.selected-dish__name {
+  flex: 1;
+  font-size: var(--font-base);
+  font-weight: 500;
+}
+
+.selected-dish__clear,
+.selected-dish__edit {
+  width: 24px;
+  height: 24px;
+  border: none;
+  background: none;
+  color: var(--color-text-secondary);
+  border-radius: var(--radius-xs);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color var(--transition-fast), background var(--transition-fast);
+}
+
+.selected-dish__clear {
+  font-size: 18px;
+}
+
+.selected-dish__edit:hover {
+  color: var(--color-mint);
+}
+
+.selected-dish__clear:hover {
+  background: var(--color-border);
+  color: var(--color-danger);
+}
+
+/* ─── Shared ingredient search (forms) ────────────────────── */
+
+.ingredient-search {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ingredient-search__list {
+  list-style: none;
+  max-height: 200px;
+  overflow-y: auto;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+}
+
+.ingredient-search__item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 12px;
+  cursor: pointer;
+  font-size: var(--font-sm);
+  transition: background var(--transition-fast);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.ingredient-search__item:hover,
+.ingredient-search__item:active {
+  background: var(--color-empty);
+}
+
+.ingredient-search__item + .ingredient-search__item {
+  border-top: 1px solid var(--color-border);
+}
+
+.ingredient-search__name {
+  font-size: var(--font-md);
+  color: var(--color-text);
+}
+
+.ingredient-search__unit {
+  font-size: var(--font-xs);
+  color: var(--color-text-secondary);
 }

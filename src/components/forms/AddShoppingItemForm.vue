@@ -6,7 +6,7 @@
         <input
           ref="searchInput"
           v-model="query"
-          type="text"
+          type="search"
           class="form__input"
           placeholder="Поиск ингредиента..."
           @input="onSearch"
@@ -297,63 +297,21 @@ async function confirmAdd() {
   padding: 4px 0 8px;
 }
 
-.ingredient-search {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
 .add-item-form__create {
   align-self: flex-start;
   padding: 8px 16px;
   border: 1.5px dashed var(--color-border);
   border-radius: var(--radius-sm);
   background: transparent;
-  font-size: 13px;
+  font-size: var(--font-sm);
   font-weight: 500;
   color: var(--color-mint-hover);
-  transition: background 0.15s, border-color 0.15s;
+  transition: background var(--transition-fast), border-color var(--transition-fast);
 }
 
 .add-item-form__create:hover {
   background: var(--color-empty);
   border-color: var(--color-mint);
-}
-
-.ingredient-search__list {
-  list-style: none;
-  max-height: 240px;
-  overflow-y: auto;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
-}
-
-.ingredient-search__item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 10px 12px;
-  cursor: pointer;
-  transition: background 0.1s;
-  -webkit-tap-highlight-color: transparent;
-}
-
-.ingredient-search__item:active {
-  background: var(--color-empty);
-}
-
-.ingredient-search__item + .ingredient-search__item {
-  border-top: 1px solid var(--color-border);
-}
-
-.ingredient-search__name {
-  font-size: var(--font-md);
-  color: var(--color-text);
-}
-
-.ingredient-search__unit {
-  font-size: var(--font-xs);
-  color: var(--color-text-secondary);
 }
 
 .amount-step {
@@ -409,7 +367,7 @@ async function confirmAdd() {
 }
 
 .form__label {
-  font-size: 13px;
+  font-size: var(--font-sm);
   font-weight: 600;
   color: var(--color-text);
 }
@@ -418,20 +376,21 @@ async function confirmAdd() {
   padding: 10px 12px;
   border: 1.5px solid var(--color-border);
   border-radius: var(--radius-sm);
-  font-size: 16px;
+  font-size: var(--font-md);
   font-family: inherit;
   background: var(--color-surface);
   color: var(--color-text);
   outline: none;
-  transition: border-color 0.15s;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
 }
 
 .form__input:focus {
-  border-color: var(--color-mint);
+  border-color: var(--color-mint-alpha-25);
+  box-shadow: 0 0 0 3px var(--color-mint-alpha-10);
 }
 
 .form__error {
-  font-size: 13px;
+  font-size: var(--font-sm);
   color: var(--color-danger);
   padding: 4px 0;
 }
@@ -442,9 +401,9 @@ async function confirmAdd() {
   border-radius: var(--radius-sm);
   background: var(--color-mint);
   color: var(--on-primary);
-  font-size: 15px;
+  font-size: var(--font-base);
   font-weight: 600;
-  transition: background 0.15s;
+  transition: background var(--transition-fast);
   width: 100%;
 }
 
@@ -453,8 +412,8 @@ async function confirmAdd() {
 }
 
 .form__submit:disabled {
-  opacity: 0.45;
-  cursor: not-allowed;
+  opacity: 0.5;
+  pointer-events: none;
 }
 
 .amount-step__confirm {
@@ -482,10 +441,10 @@ async function confirmAdd() {
   border-radius: var(--radius-sm);
   background: transparent;
   color: var(--color-text);
-  font-size: 15px;
+  font-size: var(--font-base);
   font-weight: 600;
   width: 100%;
-  transition: background 0.15s;
+  transition: background var(--transition-fast);
 }
 
 .amount-step__confirm-cancel:hover {

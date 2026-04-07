@@ -39,12 +39,17 @@ const dateRange = computed(() => {
   border-radius: var(--radius-sm);
   text-align: left;
   cursor: pointer;
-  transition: background 0.12s;
+  transition: background var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast), transform var(--transition-fast);
   -webkit-tap-highlight-color: transparent;
 }
 
+.shopping-card:hover {
+  box-shadow: var(--shadow-card);
+  border-color: var(--color-mint-alpha-10);
+}
+
 .shopping-card:active {
-  background: var(--color-empty);
+  transform: scale(var(--press-scale-sm));
 }
 
 .shopping-card__main {
@@ -55,7 +60,7 @@ const dateRange = computed(() => {
 }
 
 .shopping-card__name {
-  font-size: var(--font-md);
+  font-size: var(--font-base);
   font-weight: 600;
   color: var(--color-text);
   overflow: hidden;

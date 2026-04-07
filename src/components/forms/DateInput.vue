@@ -86,17 +86,18 @@ function onPickerInput(e) {
   padding: 10px 36px 10px 12px;
   border: 1.5px solid var(--color-border);
   border-radius: var(--radius-sm);
-  font-size: 16px;
+  font-size: var(--font-md);
   font-family: inherit;
   background: var(--color-surface);
   color: var(--color-text);
   outline: none;
-  transition: border-color 0.15s;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
   box-sizing: border-box;
 }
 
 .date-input__text:focus {
-  border-color: var(--color-mint);
+  border-color: var(--color-mint-alpha-25);
+  box-shadow: 0 0 0 3px var(--color-mint-alpha-10);
 }
 
 .date-input__btn {

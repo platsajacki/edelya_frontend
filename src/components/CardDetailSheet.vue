@@ -273,7 +273,7 @@ async function onCloneCreated() {
   padding: 0;
   text-decoration: underline;
   text-underline-offset: 3px;
-  transition: color 0.15s, text-decoration-thickness 0.15s;
+  transition: color var(--transition-fast), text-decoration-thickness var(--transition-fast);
 }
 
 .detail__link:hover {

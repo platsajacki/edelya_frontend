@@ -50,7 +50,7 @@ defineEmits(["prev", "next"])
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background 0.15s, border-color 0.15s;
+  transition: background var(--transition-fast), border-color var(--transition-fast);
 }
 
 .week-nav__btn:active {
@@ -58,12 +58,13 @@ defineEmits(["prev", "next"])
 }
 
 .week-nav__btn:disabled {
-  opacity: 0.4;
+  opacity: 0.5;
   cursor: default;
+  pointer-events: none;
 }
 
 .week-nav__label {
-  font-size: 17px;
+  font-size: var(--font-lg);
   font-weight: 600;
   letter-spacing: -0.01em;
   text-align: center;
