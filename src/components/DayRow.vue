@@ -1,5 +1,5 @@
 <template>
-    <div class="day-row">
+    <div class="day-row" :class="{ 'day-row--muted': muted }">
         <div class="day-row__label">
           <span class="day-row__day">{{ day }}</span>
           <span class="day-row__date">{{ date.slice(0, 2) }}</span>
@@ -48,6 +48,7 @@ const props = defineProps({
   rawDate: { type: String, required: true },
   meals: { type: Array, default: () => [] },
   cookingEvents: { type: Array, default: () => [] },
+  muted: { type: Boolean, default: false },
 })
 
 const emit = defineEmits(["tap-cooking", "tap-meal", "add-cooking", "add-meal", "drag-end"])
@@ -108,6 +109,11 @@ useSortable(eatRef, makeSortableOptions('meals'))
   background: var(--color-surface);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-day);
+  transition: opacity var(--transition-normal);
+}
+
+.day-row--muted {
+  opacity: 0.55;
 }
 
 .day-row__label {
