@@ -16,7 +16,7 @@
   height: 56px;
   border: none;
   border-radius: 50%;
-  background: var(--color-mint);
+  background: var(--color-mint-dark);
   color: var(--on-primary);
   box-shadow: var(--shadow-elevated);
   display: flex;
@@ -28,7 +28,7 @@
 }
 
 .fab:hover {
-  background: var(--color-mint-hover);
+  background: var(--color-mint-dark-hover);
 }
 
 .fab:active {

@@ -11,6 +11,8 @@
   /* ─── Colors: primary (mint / lavender) ─── */
   --color-mint: #8A63B5;
   --color-mint-hover: #7D56A9;
+  --color-mint-dark: #5C3A8E;
+  --color-mint-dark-hover: #4D2E7C;
   --on-primary: #ffffff;
 
   /* ─── Colors: semantic (eat / cook) ─── */
@@ -51,6 +53,7 @@
   /* ─── Layout ─── */
   --nav-height: calc(64px + env(safe-area-inset-bottom, 0px));
   --overlay-bg: rgba(30, 20, 45, 0.48);
+  --color-surface-glass: rgba(255, 255, 255, 0.92);
 
   /* ─── Shadows ─── */
   --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02);
@@ -58,6 +61,7 @@
   --shadow-elevated: 0 8px 30px rgba(0, 0, 0, 0.10);
   --shadow-tab: 0 1px 3px rgba(0, 0, 0, 0.08);
   --shadow-drag: 0 8px 25px rgba(0, 0, 0, 0.15);
+  --shadow-side: -4px 0 16px rgba(0, 0, 0, 0.10);
 
   /* ─── Radii ─── */
   --radius-xs: 8px;
@@ -220,12 +224,7 @@ textarea {
   pointer-events: none;
 }
 
-/* Sticky submit button inside modal scrollable body */
-.modal-body .form__submit {
-  position: sticky;
-  bottom: 8px;
-  z-index: 1;
-}
+/* Submit button sits at the end of the form — no sticky (causes overlay when keyboard opens on mobile) */
 
 /* ─── Page layout base ─────────────────────────────────────── */
 

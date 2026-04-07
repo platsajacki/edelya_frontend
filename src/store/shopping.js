@@ -169,7 +169,7 @@ export const useShoppingStore = defineStore("shopping", {
     },
 
     async adjustItemAmount(listId, item, delta) {
-      const oldManual = parseFloat(item.manual_amount ?? 0)
+      const oldManual = parseFloat(item.manual_amount ?? item.amount ?? 0)
       const newManual = parseFloat(Math.max(0, oldManual + delta).toFixed(4))
       const effectiveDelta = newManual - oldManual
       if (effectiveDelta === 0) return
@@ -196,7 +196,9 @@ export const useShoppingStore = defineStore("shopping", {
           const updated = await updateShoppingListItem(listId, item.id, {
             manual_amount: item.manual_amount,
           })
-          Object.assign(item, updated)
+          if (!this._adjustTimers?.[item.id]) {
+            Object.assign(item, updated)
+          }
         } catch {
           item.amount = prevVal.amount
           item.manual_amount = prevVal.manual_amount

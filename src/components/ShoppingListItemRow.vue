@@ -94,7 +94,7 @@ const baseUnit = computed(() => props.item.ingredient?.base_unit ?? "piece")
 const step = computed(() => getUnitStep(baseUnit.value))
 const isToTaste = computed(() => baseUnit.value === "to_taste")
 const showControls = computed(() => !isToTaste.value && !props.item.is_checked)
-const canDecrease = computed(() => parseFloat(props.item.manual_amount ?? 0) >= step.value)
+const canDecrease = computed(() => parseFloat(props.item.manual_amount ?? props.item.amount ?? 0) >= step.value)
 const formatted = computed(() => formatShoppingAmount(props.item.amount, baseUnit.value))
 
 function startEdit() {
