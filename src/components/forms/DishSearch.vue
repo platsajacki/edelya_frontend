@@ -75,7 +75,7 @@ function onInput() {
 }
 
 onMounted(() => {
-  inputEl.value?.focus()
+  setTimeout(() => inputEl.value?.focus(), 360)
 })
 </script>
 

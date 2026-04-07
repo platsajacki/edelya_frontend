@@ -160,7 +160,7 @@ function unitLabel(unit) {
 watch(() => props.modelValue, (v) => {
   if (v) {
     reset()
-    nextTick(() => searchInput.value?.focus())
+    setTimeout(() => searchInput.value?.focus(), 360)
   }
 })
 
