@@ -36,7 +36,6 @@
 
       <!-- Type-specific info -->
       <div v-if="type === 'cooking'" class="detail__section">
-        <span class="detail__label">Планирование</span>
         <div class="detail__row">
           <span class="detail__label">Дата готовки</span>
           <span class="detail__value">{{ formatDate(item.cooking_date) }}</span>
@@ -55,7 +54,6 @@
       </div>
 
       <div v-if="type === 'meal'" class="detail__section">
-        <span class="detail__label">Планирование</span>
         <div class="detail__row">
           <span class="detail__label">Дата</span>
           <span class="detail__value">{{ formatDate(item.date) }}</span>

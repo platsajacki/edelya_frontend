@@ -41,7 +41,7 @@ function isActive(to) {
   display: flex;
   justify-content: space-around;
   align-items: center;
-  background: rgba(255, 255, 255, 0.92);
+  background: var(--color-surface-glass);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border-top: 1px solid var(--color-border);

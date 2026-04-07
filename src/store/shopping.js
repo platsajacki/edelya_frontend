@@ -193,7 +193,9 @@ export const useShoppingStore = defineStore("shopping", {
           const updated = await updateShoppingListItem(listId, item.id, {
             amount: item.amount,
           })
-          Object.assign(item, updated)
+          if (!this._adjustTimers?.[item.id]) {
+            Object.assign(item, updated)
+          }
         } catch {
           item.amount = prevVal
           this.showToast("Не удалось изменить количество")

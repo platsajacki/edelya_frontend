@@ -113,7 +113,7 @@ function close() {
   background: var(--color-surface);
   display: flex;
   flex-direction: column;
-  box-shadow: -4px 0 16px rgba(0, 0, 0, 0.10);
+  box-shadow: var(--shadow-side);
 }
 
 .filter-panel__header {
