@@ -3,18 +3,17 @@
     <div class="week-grid__week-actions">
       <span v-if="greeting" class="week-grid__greeting">{{ greeting }}</span>
       <button type="button" class="week-grid__week-shopping-btn" @click="onWeekShopping">
-        <span>Создать</span>
         <IconShoppingBag :width="15" :height="15" :stroke-width="1.6" />
-        <span>на неделю</span>
+        <span>На неделю</span>
       </button>
     </div>
     <div class="week-grid__header">
       <div class="week-grid__header-col week-grid__header-col--cook">
-        <IconPot />
+        <IconPot :width="13" :height="13" />
         Готовлю
       </div>
       <div class="week-grid__header-col week-grid__header-col--eat">
-        <IconFork />
+        <IconFork :width="13" :height="13" />
         Ем
       </div>
     </div>
@@ -255,7 +254,7 @@ async function loadNext() {
 }
 
 .week-grid__greeting {
-  font-size: var(--font-sm);
+  font-size: var(--font-2xs);
   font-weight: 600;
   color: var(--color-text-secondary);
 }
@@ -268,10 +267,11 @@ async function loadNext() {
   border: none;
   background: none;
   border-radius: var(--radius-sm);
-  font-size: var(--font-sm);
+  font-size: var(--font-2xs);
   font-weight: 600;
   color: var(--color-text-secondary);
   cursor: pointer;
+  white-space: nowrap;
   transition: color var(--transition-fast), background var(--transition-fast);
   -webkit-tap-highlight-color: transparent;
 }
@@ -295,24 +295,22 @@ async function loadNext() {
 .week-grid__header-col {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 8px;
-  font-size: var(--font-sm);
-  font-weight: 700;
+  justify-content: flex-start;
+  gap: 5px;
+  font-size: var(--font-2xs);
+  font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
-  padding: 8px 0;
-  border-radius: var(--radius-sm);
+  letter-spacing: 0.06em;
+  padding: 4px 0;
+  border-bottom: 2px solid currentColor;
 }
 
 .week-grid__header-col--eat {
   color: var(--color-eat);
-  background: var(--color-eat-bg-strong);
 }
 
 .week-grid__header-col--cook {
   color: var(--color-cook);
-  background: var(--color-cook-bg-strong);
 }
 
 /* ── Past days toggle ── */

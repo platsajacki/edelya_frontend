@@ -65,6 +65,7 @@
       v-model="showShoppingConfirm"
       :message="shoppingConfirmMsg"
       :loading="shoppingCreating"
+      :no-items="shoppingNoItems"
       @confirm="onConfirmShopping"
     />
   </div>
@@ -108,10 +109,19 @@ const greeting = computed(() => {
 const showShoppingConfirm = ref(false)
 const shoppingConfirmMsg  = ref('')
 const shoppingCreating    = ref(false)
+const shoppingNoItems     = ref(false)
 const pendingShoppingPayload = ref(null)
+
+function hasCookingInRange(dateFrom, dateTo) {
+  const sources = [planning.weekData, planning.nextWeekData].filter(Boolean)
+  return sources.some(data =>
+    data.cooking_events.some(e => e.cooking_date >= dateFrom && e.cooking_date <= dateTo)
+  )
+}
 
 function handleCreateShoppingDay({ rawDate, dayLabel }) {
   const dateLabel = formatDateRuShort(rawDate)
+  shoppingNoItems.value = !hasCookingInRange(rawDate, rawDate)
   pendingShoppingPayload.value = {
     name:      `Продукты на ${dayLabel} ${dateLabel}`,
     date_from: rawDate,
@@ -122,6 +132,7 @@ function handleCreateShoppingDay({ rawDate, dayLabel }) {
 }
 
 function handleCreateShoppingWeek({ dateFrom, dateTo }) {
+  shoppingNoItems.value = !hasCookingInRange(dateFrom, dateTo)
   pendingShoppingPayload.value = {
     name:      `Продукты на неделю ${formatDateRuShort(dateFrom)}–${formatDateRuShort(dateTo)}`,
     date_from: dateFrom,

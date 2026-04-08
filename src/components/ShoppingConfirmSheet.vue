@@ -4,26 +4,40 @@
     title="Список покупок"
     @update:model-value="$emit('update:modelValue', $event)"
   >
-    <p class="confirm__message">{{ message }}</p>
+    <div v-if="noItems" class="confirm__empty">
+      <IconWarning class="confirm__empty-icon" />
+      <p class="confirm__message">Сначала добавь блюда в готовку на эти дни — список покупок строится на их основе.</p>
+    </div>
+    <p v-else class="confirm__message">{{ message }}</p>
     <template #footer>
       <div class="confirm__actions">
         <button
-          type="button"
-          class="confirm__btn confirm__btn--cancel"
-          :disabled="loading"
-          @click="$emit('update:modelValue', false)"
-        >
-          Отмена
-        </button>
-        <button
+          v-if="noItems"
           type="button"
           class="confirm__btn confirm__btn--create"
-          :disabled="loading"
-          @click="$emit('confirm')"
+          @click="$emit('update:modelValue', false)"
         >
-          <span v-if="loading" class="spinner spinner--sm" />
-          <span v-else>Создать</span>
+          Понятно
         </button>
+        <template v-else>
+          <button
+            type="button"
+            class="confirm__btn confirm__btn--cancel"
+            :disabled="loading"
+            @click="$emit('update:modelValue', false)"
+          >
+            Отмена
+          </button>
+          <button
+            type="button"
+            class="confirm__btn confirm__btn--create"
+            :disabled="loading"
+            @click="$emit('confirm')"
+          >
+            <span v-if="loading" class="spinner spinner--sm" />
+            <span v-else>Создать</span>
+          </button>
+        </template>
       </div>
     </template>
   </ModalWrapper>
@@ -31,11 +45,13 @@
 
 <script setup>
 import ModalWrapper from "./forms/ModalWrapper.vue"
+import IconWarning from "./icons/IconWarning.vue"
 
 defineProps({
   modelValue: { type: Boolean, required: true },
   message:    { type: String,  default: '' },
   loading:    { type: Boolean, default: false },
+  noItems:    { type: Boolean, default: false },
 })
 
 defineEmits(['update:modelValue', 'confirm'])
@@ -47,6 +63,22 @@ defineEmits(['update:modelValue', 'confirm'])
   font-size: var(--font-body);
   color: var(--color-text);
   line-height: 1.5;
+}
+
+.confirm__empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  text-align: center;
+  padding: 8px 0;
+}
+
+.confirm__empty-icon {
+  color: var(--color-text-secondary);
+  opacity: 0.5;
+  width: 32px;
+  height: 32px;
 }
 
 .confirm__actions {
