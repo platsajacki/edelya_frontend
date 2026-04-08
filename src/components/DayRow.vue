@@ -77,14 +77,11 @@ function makeSortableOptions(type) {
       const { oldIndex, oldDraggableIndex, newDraggableIndex } = evt
 
       // Revert DOM so Vue stays in control of rendering
-      const { from, to, item } = evt
-      if (from !== to) {
-        to.removeChild(item)
+      try {
+        const { from, item } = evt
+        if (item.parentNode) item.parentNode.removeChild(item)
         from.insertBefore(item, from.children[oldIndex] || null)
-      } else {
-        from.removeChild(item)
-        from.insertBefore(item, from.children[oldIndex] || null)
-      }
+      } catch { /* Vue re-render will reconcile */ }
 
       if (fromDate === toDate && oldDraggableIndex === newDraggableIndex) return
 
@@ -100,12 +97,11 @@ useSortable(eatRef, makeSortableOptions('meals'))
 <style scoped>
 .day-row {
   display: grid;
-  grid-template-columns: 36px 1fr 1fr;
+  grid-template-columns: 1fr 1fr;
   column-gap: 12px;
-  row-gap: 12px;
+  row-gap: 8px;
   align-items: start;
   padding: 12px 16px;
-  min-height: 56px;
   background: var(--color-surface);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-day);
@@ -117,28 +113,25 @@ useSortable(eatRef, makeSortableOptions('meals'))
 }
 
 .day-row__label {
+  grid-column: 1 / -1;
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 2px;
-  padding-top: 1px;
-  padding-right: 8px;
-  text-align: center;
+  flex-direction: row;
+  align-items: baseline;
+  gap: 4px;
   line-height: 1;
-  border-right: 1px solid var(--color-border);
 }
 
 .day-row__day {
   font-weight: 700;
-  font-size: var(--font-sm);
+  font-size: var(--font-xs);
   color: var(--color-text-secondary);
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.06em;
 }
 
 .day-row__date {
-  font-weight: 600;
-  font-size: var(--font-base);
+  font-weight: 700;
+  font-size: var(--font-xs);
   color: var(--color-text-secondary);
 }
 
@@ -186,16 +179,15 @@ useSortable(eatRef, makeSortableOptions('meals'))
 .day-row__add {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 4px;
+  justify-content: flex-start;
+  gap: 3px;
   width: 100%;
-  padding: 8px 0;
-  border: 1.5px dashed var(--color-border);
-  border-radius: var(--radius-sm);
+  padding: 6px 0;
+  border: none;
   background: none;
   font-weight: 500;
   cursor: pointer;
-  transition: background var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast);
+  transition: color var(--transition-fast);
   color: var(--color-text-secondary);
 }
 
@@ -209,14 +201,10 @@ useSortable(eatRef, makeSortableOptions('meals'))
 }
 
 .day-row__add--cook:hover {
-  border-color: var(--color-cook);
   color: var(--color-cook);
-  background: var(--color-cook-bg);
 }
 
 .day-row__add--eat:hover {
-  border-color: var(--color-eat);
   color: var(--color-eat);
-  background: var(--color-eat-bg);
 }
 </style>

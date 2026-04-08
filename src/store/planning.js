@@ -280,9 +280,17 @@ export const usePlanningStore = defineStore("planning", {
         }
       } else {
         // Cross-day move
+        const toItems = this._mealItemsForDate(toDate)
+
+        // Transfer between datasets when crossing week boundaries
+        if (fromItems !== toItems) {
+          const idx = fromItems.indexOf(movedItem)
+          if (idx !== -1) fromItems.splice(idx, 1)
+          toItems.push(movedItem)
+        }
+
         movedItem.date = toDate
 
-        const toItems = this._mealItemsForDate(toDate)
         const targetItems = toItems
           .filter((m) => m.date === toDate && m.id !== itemId)
           .sort((a, b) => a.position - b.position)
@@ -319,9 +327,18 @@ export const usePlanningStore = defineStore("planning", {
     async _handleCookingDrag(itemId, fromDate, toDate) {
       if (fromDate === toDate) return
 
-      const events = this._cookingEventsForDate(fromDate)
-      const event = events.find((e) => e.id === itemId)
+      const fromEvents = this._cookingEventsForDate(fromDate)
+      const event = fromEvents.find((e) => e.id === itemId)
       if (!event) return
+
+      const toEvents = this._cookingEventsForDate(toDate)
+
+      // Transfer between datasets when crossing week boundaries
+      if (fromEvents !== toEvents) {
+        const idx = fromEvents.indexOf(event)
+        if (idx !== -1) fromEvents.splice(idx, 1)
+        toEvents.push(event)
+      }
 
       event.cooking_date = toDate
       await updateCookingEvent(itemId, { cooking_date: toDate })

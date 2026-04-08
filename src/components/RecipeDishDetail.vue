@@ -1,5 +1,5 @@
 <template>
-  <ModalWrapper v-model="open" :title="dish.name || 'Блюдо'" :z-index="990">
+  <ModalWrapper v-model="open" :title="'Рецепт'" :z-index="990">
     <div class="detail">
       <!-- Dish info -->
       <div class="detail__section">
