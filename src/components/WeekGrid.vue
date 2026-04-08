@@ -1,6 +1,7 @@
 <template>
   <div class="week-grid">
     <div class="week-grid__week-actions">
+      <span v-if="greeting" class="week-grid__greeting">{{ greeting }}</span>
       <button type="button" class="week-grid__week-shopping-btn" @click="onWeekShopping">
         <IconShoppingBag :width="15" :height="15" :stroke-width="1.6" />
         <span>На неделю</span>
@@ -138,6 +139,10 @@ const props = defineProps({
     type: Object,
     required: true,
   },
+  greeting: {
+    type: String,
+    default: '',
+  },
 })
 
 const emit = defineEmits(['add-cooking', 'add-meal', 'tap-cooking', 'tap-meal', 'drag-end', 'create-shopping-day', 'create-shopping-week'])
@@ -243,8 +248,16 @@ async function loadNext() {
 
 .week-grid__week-actions {
   display: flex;
-  justify-content: flex-end;
-  padding: 0 16px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 4px 0 4px;
+}
+
+.week-grid__greeting {
+  font-size: var(--font-sm);
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  padding: 6px 8px;
 }
 
 .week-grid__week-shopping-btn {

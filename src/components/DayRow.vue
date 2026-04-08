@@ -246,10 +246,10 @@ useSortable(eatRef, makeSortableOptions('meals'))
 }
 
 .day-row__add--cook:hover {
-  color: var(--color-cook);
+  color: var(--color-mint);
 }
 
 .day-row__add--eat:hover {
-  color: var(--color-eat);
+  color: var(--color-mint);
 }
 </style>

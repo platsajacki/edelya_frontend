@@ -6,8 +6,10 @@
       @prev="planning.prevWeek"
       @next="planning.nextWeek"
     />
+
     <WeekGrid
       :week-data="planning.weekData"
+      :greeting="user?.first_name ? `${greeting}, ${user.first_name}!` : ''"
       :class="{ 'planner__grid--loading': planning.loading }"
       @add-cooking="openCookingForm"
       @add-meal="openMealForm"
@@ -69,7 +71,7 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from "vue"
+import { onMounted, ref, computed } from "vue"
 import { useRouter } from "vue-router"
 import WeekNav from "./WeekNav.vue"
 import WeekGrid from "./WeekGrid.vue"
@@ -93,6 +95,14 @@ defineProps({
 const planning = usePlanningStore()
 const shopping = useShoppingStore()
 const router = useRouter()
+
+const greeting = computed(() => {
+  const h = new Date().getHours()
+  if (h >= 5 && h < 12) return 'Доброе утро'
+  if (h >= 12 && h < 18) return 'Добрый день'
+  if (h >= 18 && h < 23) return 'Добрый вечер'
+  return 'Доброй ночи'
+})
 
 // --- Shopping confirm ---
 const showShoppingConfirm = ref(false)
