@@ -1,7 +1,6 @@
 <template>
   <div class="week-grid">
     <div class="week-grid__header">
-      <div class="week-grid__header-spacer"></div>
       <div class="week-grid__header-col week-grid__header-col--cook">
         <IconPot />
         Готовлю
@@ -219,13 +218,10 @@ async function loadNext() {
 
 .week-grid__header {
   display: grid;
-  grid-template-columns: 36px 1fr 1fr;
-  column-gap: 12px;
-  padding: 0 16px;
-}
-
-.week-grid__header-spacer {
-  /* Spacer to align with day label column */
+  grid-template-columns: 1fr 1fr;
+  grid-row: 1fr;
+  column-gap: 5px;
+  padding: 0 5px 0 5px;
 }
 
 .week-grid__header-col {
