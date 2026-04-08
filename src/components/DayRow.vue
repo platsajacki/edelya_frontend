@@ -1,8 +1,18 @@
 <template>
     <div class="day-row" :class="{ 'day-row--muted': muted }">
         <div class="day-row__label">
-          <span class="day-row__day">{{ day }}</span>
-          <span class="day-row__date">{{ date.slice(0, 2) }}</span>
+          <div class="day-row__label-text">
+            <span class="day-row__day">{{ day }}</span>
+            <span class="day-row__date">{{ date.slice(0, 2) }}</span>
+          </div>
+          <button
+            type="button"
+            class="day-row__shopping-btn"
+            :title="`Список покупок на ${day} ${date.slice(0, 2)}`"
+            @click.stop="$emit('create-shopping-day', { rawDate, dayLabel: day })"
+          >
+            <IconShoppingBag :width="16" :height="16" :stroke-width="1.5" />
+          </button>
         </div>
 
         <div class="day-row__cook">
@@ -40,6 +50,7 @@
 <script setup>
 import { ref } from 'vue'
 import MealCard from './MealCard.vue'
+import IconShoppingBag from './icons/IconShoppingBag.vue'
 import { useSortable } from '../composables/useSortable'
 
 const props = defineProps({
@@ -51,7 +62,7 @@ const props = defineProps({
   muted: { type: Boolean, default: false },
 })
 
-const emit = defineEmits(["tap-cooking", "tap-meal", "add-cooking", "add-meal", "drag-end"])
+const emit = defineEmits(["tap-cooking", "tap-meal", "add-cooking", "add-meal", "drag-end", "create-shopping-day"])
 
 const cookRef = ref(null)
 const eatRef = ref(null)
@@ -116,9 +127,43 @@ useSortable(eatRef, makeSortableOptions('meals'))
   grid-column: 1 / -1;
   display: flex;
   flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  line-height: 1;
+  border-bottom: 0.5px solid var(--color-border);
+}
+
+.day-row__label-text {
+  display: flex;
+  flex-direction: row;
   align-items: baseline;
   gap: 4px;
-  line-height: 1;
+}
+
+.day-row__shopping-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: none;
+  background: none;
+  border-radius: var(--radius-xs);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: color var(--transition-fast), background var(--transition-fast);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.day-row__shopping-btn:hover {
+  color: var(--color-mint);
+  background: color-mix(in srgb, var(--color-mint) 10%, transparent);
+}
+
+.day-row__shopping-btn:active {
+  background: var(--color-empty);
 }
 
 .day-row__day {
@@ -182,7 +227,7 @@ useSortable(eatRef, makeSortableOptions('meals'))
   justify-content: flex-start;
   gap: 3px;
   width: 100%;
-  padding: 6px 0;
+  padding: 0 0 0 6px;
   border: none;
   background: none;
   font-weight: 500;

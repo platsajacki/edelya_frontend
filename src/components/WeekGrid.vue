@@ -1,5 +1,11 @@
 <template>
   <div class="week-grid">
+    <div class="week-grid__week-actions">
+      <button type="button" class="week-grid__week-shopping-btn" @click="onWeekShopping">
+        <IconShoppingBag :width="15" :height="15" :stroke-width="1.6" />
+        <span>На неделю</span>
+      </button>
+    </div>
     <div class="week-grid__header">
       <div class="week-grid__header-col week-grid__header-col--cook">
         <IconPot />
@@ -46,6 +52,7 @@
           @add-cooking="$emit('add-cooking', $event)"
           @add-meal="$emit('add-meal', $event)"
           @drag-end="$emit('drag-end', $event)"
+          @create-shopping-day="$emit('create-shopping-day', $event)"
         />
 
         <!-- "Сегодня" divider -->
@@ -71,6 +78,7 @@
       @add-cooking="$emit('add-cooking', $event)"
       @add-meal="$emit('add-meal', $event)"
       @drag-end="$emit('drag-end', $event)"
+      @create-shopping-day="$emit('create-shopping-day', $event)"
     />
 
     <!-- Next week section -->
@@ -107,6 +115,7 @@
         @add-cooking="$emit('add-cooking', $event)"
         @add-meal="$emit('add-meal', $event)"
         @drag-end="$emit('drag-end', $event)"
+        @create-shopping-day="$emit('create-shopping-day', $event)"
       />
     </template>
   </div>
@@ -115,11 +124,12 @@
 <script setup>
 import { computed, ref, watch } from "vue"
 import { formatYMDtoDDMMYYYY } from "../utils/formatDate"
-import { DAY_LABELS, splitDays, pastDaysLabel, getNextWeekInfo } from "../utils/weekDays"
+import { DAY_LABELS, splitDays, pastDaysLabel, getNextWeekInfo, getTodayISO } from "../utils/weekDays"
 import { usePlanningStore } from "../store/planning"
 import DayRow from "./DayRow.vue"
 import IconPot from "./icons/IconPot.vue"
 import IconFork from "./icons/IconFork.vue"
+import IconShoppingBag from "./icons/IconShoppingBag.vue"
 
 const planning = usePlanningStore()
 
@@ -130,7 +140,7 @@ const props = defineProps({
   },
 })
 
-defineEmits(['add-cooking', 'add-meal', 'tap-cooking', 'tap-meal', 'drag-end'])
+const emit = defineEmits(['add-cooking', 'add-meal', 'tap-cooking', 'tap-meal', 'drag-end', 'create-shopping-day', 'create-shopping-week'])
 
 const showPast = ref(false)
 const showNextWeek = ref(false)
@@ -202,6 +212,21 @@ const nextWeekDays = computed(() => {
   return result
 })
 
+const weekEndDate = computed(() => {
+  const start = new Date(props.weekData.start_week + 'T00:00:00')
+  start.setDate(start.getDate() + 6)
+  return `${start.getFullYear()}-${String(start.getMonth() + 1).padStart(2, '0')}-${String(start.getDate()).padStart(2, '0')}`
+})
+
+function onWeekShopping() {
+  const today = getTodayISO()
+  // On the current week start from today; on any other week start from the week's Monday
+  const dateFrom = today >= props.weekData.start_week && today <= weekEndDate.value
+    ? today
+    : props.weekData.start_week
+  emit('create-shopping-week', { dateFrom, dateTo: weekEndDate.value })
+}
+
 async function loadNext() {
   const { year, week } = nextInfo.value
   await planning.loadNextWeek(year, week)
@@ -214,6 +239,37 @@ async function loadNext() {
   display: flex;
   flex-direction: column;
   gap: 12px;
+}
+
+.week-grid__week-actions {
+  display: flex;
+  justify-content: flex-end;
+  padding: 0 16px;
+}
+
+.week-grid__week-shopping-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border: none;
+  background: none;
+  border-radius: var(--radius-sm);
+  font-size: var(--font-xs);
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: color var(--transition-fast), background var(--transition-fast);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.week-grid__week-shopping-btn:hover {
+  color: var(--color-mint);
+  background: color-mix(in srgb, var(--color-mint) 10%, transparent);
+}
+
+.week-grid__week-shopping-btn:active {
+  background: var(--color-empty);
 }
 
 .week-grid__header {

@@ -14,6 +14,8 @@
       @tap-cooking="openCookingDetail"
       @tap-meal="openMealDetail"
       @drag-end="onDragEnd"
+      @create-shopping-day="handleCreateShoppingDay"
+      @create-shopping-week="handleCreateShoppingWeek"
     />
 
     <div v-if="planning.loadError" class="planner__error">
@@ -55,18 +57,30 @@
     />
 
     <Toast :message="planning.toast" @dismiss="planning.toast = null" />
+
+    <!-- Shopping list confirm -->
+    <ShoppingConfirmSheet
+      v-model="showShoppingConfirm"
+      :message="shoppingConfirmMsg"
+      :loading="shoppingCreating"
+      @confirm="onConfirmShopping"
+    />
   </div>
 </template>
 
 <script setup>
 import { onMounted, ref } from "vue"
+import { useRouter } from "vue-router"
 import WeekNav from "./WeekNav.vue"
 import WeekGrid from "./WeekGrid.vue"
 import CookingEventForm from "./forms/CookingEventForm.vue"
 import MealPlanItemForm from "./forms/MealPlanItemForm.vue"
 import CardDetailSheet from "./CardDetailSheet.vue"
+import ShoppingConfirmSheet from "./ShoppingConfirmSheet.vue"
 import { usePlanningStore } from "../store/planning"
+import { useShoppingStore } from "../store/shopping"
 import { fetchCookingEvent } from "../services/planningService"
+import { formatDateRuShort } from "../utils/formatDate"
 import Toast from "./Toast.vue"
 
 defineProps({
@@ -77,6 +91,47 @@ defineProps({
 })
 
 const planning = usePlanningStore()
+const shopping = useShoppingStore()
+const router = useRouter()
+
+// --- Shopping confirm ---
+const showShoppingConfirm = ref(false)
+const shoppingConfirmMsg  = ref('')
+const shoppingCreating    = ref(false)
+const pendingShoppingPayload = ref(null)
+
+function handleCreateShoppingDay({ rawDate, dayLabel }) {
+  const dateLabel = formatDateRuShort(rawDate)
+  pendingShoppingPayload.value = {
+    name:      `Продукты на ${dayLabel} ${dateLabel}`,
+    date_from: rawDate,
+    date_to:   rawDate,
+  }
+  shoppingConfirmMsg.value  = `Хотите создать список покупок на ${dayLabel} ${dateLabel}?`
+  showShoppingConfirm.value = true
+}
+
+function handleCreateShoppingWeek({ dateFrom, dateTo }) {
+  pendingShoppingPayload.value = {
+    name:      `Продукты на неделю ${formatDateRuShort(dateFrom)}–${formatDateRuShort(dateTo)}`,
+    date_from: dateFrom,
+    date_to:   dateTo,
+  }
+  shoppingConfirmMsg.value  = `Хотите создать список покупок с ${formatDateRuShort(dateFrom)} по ${formatDateRuShort(dateTo)}?`
+  showShoppingConfirm.value = true
+}
+
+async function onConfirmShopping() {
+  if (!pendingShoppingPayload.value) return
+  shoppingCreating.value = true
+  try {
+    const list = await shopping.createList(pendingShoppingPayload.value)
+    showShoppingConfirm.value = false
+    router.push(`/shopping/${list.id}`)
+  } finally {
+    shoppingCreating.value = false
+  }
+}
 
 // --- Create flow ---
 const showCookingForm = ref(false)
