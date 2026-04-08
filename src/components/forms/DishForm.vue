@@ -1,6 +1,6 @@
 <template>
   <ModalWrapper v-model="open" :title="isEdit ? 'Редактировать блюдо' : isClone ? 'Создать личную копию' : 'Новое блюдо'" :z-index="zIndex">
-    <form class="form" @submit.prevent="submit">
+    <form id="dish-form" class="form" @submit.prevent="submit">
       <label class="form__field">
         <span class="form__label">Название <span class="form__required">*</span></span>
         <input v-model="name" type="text" class="form__input" required />
@@ -129,9 +129,6 @@
 
       <div v-if="error" class="form__error">{{ error }}</div>
 
-      <button type="submit" class="form__submit" :disabled="saving">
-        {{ saving ? "Сохранение..." : (isEdit ? "Сохранить" : "Создать блюдо") }}
-      </button>
     </form>
 
     <IngredientForm
@@ -139,6 +136,12 @@
       :z-index="zIndex + 10"
       @created="onIngredientCreated"
     />
+
+    <template #footer>
+      <button type="submit" form="dish-form" class="form__submit" :disabled="saving">
+        {{ saving ? "Сохранение..." : (isEdit ? "Сохранить" : "Создать блюдо") }}
+      </button>
+    </template>
   </ModalWrapper>
 </template>
 

@@ -1,6 +1,6 @@
 <template>
   <ModalWrapper v-model="open" :title="isEdit ? 'Редактировать приём пищи' : 'Добавить приём пищи'" :z-index="1000">
-    <form class="form" @submit.prevent="submit">
+    <form id="meal-plan-form" class="form" @submit.prevent="submit">
       <!-- Dish selection -->
       <div class="form__field">
         <span class="form__label">Блюдо <span class="form__required">*</span></span>
@@ -26,9 +26,6 @@
 
       <div v-if="error" class="form__error">{{ error }}</div>
 
-      <button type="submit" class="form__submit" :disabled="saving || !selectedDish">
-        {{ saving ? "Сохранение..." : (isEdit ? "Сохранить" : "Добавить") }}
-      </button>
     </form>
 
     <DishForm
@@ -39,6 +36,12 @@
       @created="onDishCreated"
       @updated="onDishUpdated"
     />
+
+    <template #footer>
+      <button type="submit" form="meal-plan-form" class="form__submit" :disabled="saving || !selectedDish">
+        {{ saving ? "Сохранение..." : (isEdit ? "Сохранить" : "Добавить") }}
+      </button>
+    </template>
   </ModalWrapper>
 </template>
 

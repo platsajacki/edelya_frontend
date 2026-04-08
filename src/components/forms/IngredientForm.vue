@@ -1,6 +1,6 @@
 <template>
   <ModalWrapper v-model="open" title="Новый ингредиент" :z-index="zIndex">
-    <form class="form" @submit.prevent="submit">
+    <form id="ingredient-form" class="form" @submit.prevent="submit">
       <label class="form__field">
         <span class="form__label">Название <span class="form__required">*</span></span>
         <input v-model="name" type="text" class="form__input" required />
@@ -28,10 +28,13 @@
 
       <div v-if="error" class="form__error">{{ error }}</div>
 
-      <button type="submit" class="form__submit" :disabled="saving">
+    </form>
+
+    <template #footer>
+      <button type="submit" form="ingredient-form" class="form__submit" :disabled="saving">
         {{ saving ? "Сохранение..." : "Создать ингредиент" }}
       </button>
-    </form>
+    </template>
   </ModalWrapper>
 </template>
 
