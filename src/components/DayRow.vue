@@ -112,7 +112,7 @@ useSortable(eatRef, makeSortableOptions('meals'))
   column-gap: 12px;
   row-gap: 8px;
   align-items: start;
-  padding: 12px 16px;
+  padding: 6px 16px 12px;
   background: var(--color-surface);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-day);
@@ -129,8 +129,9 @@ useSortable(eatRef, makeSortableOptions('meals'))
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
+  padding-bottom: 4px;
   line-height: 1;
-  border-bottom: 0.5px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border);
 }
 
 .day-row__label-text {
@@ -167,16 +168,16 @@ useSortable(eatRef, makeSortableOptions('meals'))
 }
 
 .day-row__day {
-  font-weight: 700;
-  font-size: var(--font-xs);
+  font-weight: 550;
+  font-size: var(--font-sm);
   color: var(--color-text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.06em;
 }
 
 .day-row__date {
-  font-weight: 700;
-  font-size: var(--font-xs);
+  font-weight: 550;
+  font-size: var(--font-sm);
   color: var(--color-text-secondary);
 }
 
@@ -227,7 +228,7 @@ useSortable(eatRef, makeSortableOptions('meals'))
   justify-content: flex-start;
   gap: 3px;
   width: 100%;
-  padding: 0 0 0 6px;
+  padding: 6px;
   border: none;
   background: none;
   font-weight: 500;

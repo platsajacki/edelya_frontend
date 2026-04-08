@@ -3,8 +3,9 @@
     <div class="week-grid__week-actions">
       <span v-if="greeting" class="week-grid__greeting">{{ greeting }}</span>
       <button type="button" class="week-grid__week-shopping-btn" @click="onWeekShopping">
+        <span>Создать</span>
         <IconShoppingBag :width="15" :height="15" :stroke-width="1.6" />
-        <span>На неделю</span>
+        <span>на неделю</span>
       </button>
     </div>
     <div class="week-grid__header">
@@ -250,25 +251,24 @@ async function loadNext() {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 4px 0 4px;
+  padding: 0 16px;
 }
 
 .week-grid__greeting {
   font-size: var(--font-sm);
-  font-weight: 500;
+  font-weight: 600;
   color: var(--color-text-secondary);
-  padding: 6px 8px;
 }
 
 .week-grid__week-shopping-btn {
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 6px 12px;
+  padding: 6px;
   border: none;
   background: none;
   border-radius: var(--radius-sm);
-  font-size: var(--font-xs);
+  font-size: var(--font-sm);
   font-weight: 600;
   color: var(--color-text-secondary);
   cursor: pointer;
@@ -288,9 +288,8 @@ async function loadNext() {
 .week-grid__header {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  grid-row: 1fr;
-  column-gap: 5px;
-  padding: 0 5px 0 5px;
+  column-gap: 12px;
+  padding: 0 16px;
 }
 
 .week-grid__header-col {
