@@ -65,6 +65,7 @@ const UNITS = [
 const props = defineProps({
   modelValue: { type: Boolean, required: true },
   zIndex: { type: Number, default: 1020 },
+  initialName: { type: String, default: "" },
 })
 
 const emit = defineEmits(["update:modelValue", "created"])
@@ -83,7 +84,7 @@ const error = ref("")
 watch(() => props.modelValue, async (v) => {
   if (v) {
     error.value = ""
-    name.value = ""
+    name.value = props.initialName || ""
     categoryId.value = ""
     baseUnit.value = ""
     try {

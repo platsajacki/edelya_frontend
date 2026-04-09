@@ -1,13 +1,16 @@
 <template>
   <div class="dish-search">
-    <input
-      ref="inputEl"
-      v-model="query"
-      type="search"
-      class="dish-search__input"
-      placeholder="Поиск блюда..."
-      @input="onInput"
-    />
+    <div class="search-field">
+      <input
+        ref="inputEl"
+        v-model="query"
+        type="search"
+        class="dish-search__input"
+        placeholder="Поиск блюда..."
+        @input="onInput"
+      />
+      <button v-if="query" type="button" class="search-field__clear" aria-label="Очистить" @click="clearQuery">&times;</button>
+    </div>
 
     <div v-if="loading" class="dish-search__status"><div class="spinner spinner--sm" /></div>
 
@@ -72,6 +75,13 @@ function onInput() {
       searched.value = true
     }
   }, 300)
+}
+
+function clearQuery() {
+  query.value = ""
+  results.value = []
+  searched.value = false
+  inputEl.value?.focus()
 }
 
 onMounted(() => {

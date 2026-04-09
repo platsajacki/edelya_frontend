@@ -103,13 +103,16 @@
 
         <!-- Ingredient search (always visible when no pending ingredient) -->
         <div v-else class="ingredient-search">
-          <input
-            v-model="ingredientQuery"
-            type="search"
-            class="form__input"
-            placeholder="Поиск ингредиента..."
-            @input="searchIngredients"
-          />
+          <div class="search-field">
+            <input
+              v-model="ingredientQuery"
+              type="search"
+              class="form__input"
+              placeholder="Поиск ингредиента..."
+              @input="searchIngredients"
+            />
+            <button v-if="ingredientQuery" type="button" class="search-field__clear" aria-label="Очистить" @click="clearIngredientQuery">&times;</button>
+          </div>
           <ul v-if="ingredientResults.length" class="ingredient-search__list">
             <li
               v-for="ing in ingredientResults"
@@ -121,7 +124,7 @@
               <span class="ingredient-search__unit">{{ UNIT_LABELS[ing.base_unit] || ing.base_unit }}</span>
             </li>
           </ul>
-          <button type="button" class="dish-search__create" @click="showIngredientForm = true">
+          <button type="button" class="dish-search__create" @click="openIngredientForm">
             + Создать ингредиент
           </button>
         </div>
@@ -134,6 +137,7 @@
     <IngredientForm
       v-model="showIngredientForm"
       :z-index="zIndex + 10"
+      :initial-name="ingredientFormInitialName"
       @created="onIngredientCreated"
     />
 
@@ -204,6 +208,7 @@ const error = ref("")
 const ingredientQuery = ref("")
 const ingredientResults = ref([])
 const showIngredientForm = ref(false)
+const ingredientFormInitialName = ref("")
 
 // Pending ingredient (selected but not yet confirmed with amount)
 const pendingIngredient = ref(null)
@@ -256,6 +261,16 @@ watch(() => props.modelValue, async (v) => {
     }
   }
 })
+
+function openIngredientForm() {
+  ingredientFormInitialName.value = ingredientQuery.value.trim()
+  showIngredientForm.value = true
+}
+
+function clearIngredientQuery() {
+  ingredientQuery.value = ""
+  ingredientResults.value = []
+}
 
 function resetIngredientSearch() {
   ingredientQuery.value = ""

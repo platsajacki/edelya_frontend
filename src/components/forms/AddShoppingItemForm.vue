@@ -3,14 +3,17 @@
     <div class="add-item-form">
       <!-- Step 1: Search ingredient -->
       <div v-if="!selectedIngredient" class="ingredient-search">
-        <input
-          ref="searchInput"
-          v-model="query"
-          type="search"
-          class="form__input"
-          placeholder="Поиск ингредиента..."
-          @input="onSearch"
-        />
+        <div class="search-field">
+          <input
+            ref="searchInput"
+            v-model="query"
+            type="search"
+            class="form__input"
+            placeholder="Поиск ингредиента..."
+            @input="onSearch"
+          />
+          <button v-if="query" type="button" class="search-field__clear" aria-label="Очистить" @click="clearQuery">&times;</button>
+        </div>
         <div v-if="searching" class="add-item-form__status"><div class="spinner spinner--sm" /></div>
         <ul v-if="results.length" class="ingredient-search__list">
           <li
@@ -24,7 +27,7 @@
           </li>
         </ul>
         <div v-else-if="searched && !searching" class="add-item-form__status">Ничего не найдено</div>
-        <button type="button" class="add-item-form__create" @click="showIngredientForm = true">
+        <button type="button" class="add-item-form__create" @click="openIngredientForm">
           + Создать ингредиент
         </button>
       </div>
@@ -106,6 +109,7 @@
     <IngredientForm
       v-model="showIngredientForm"
       :z-index="zIndex + 10"
+      :initial-name="ingredientFormInitialName"
       @created="onIngredientCreated"
     />
   </ModalWrapper>
@@ -143,6 +147,7 @@ const amount = ref("")
 const saving = ref(false)
 const error = ref("")
 const showIngredientForm = ref(false)
+const ingredientFormInitialName = ref("")
 const confirmDuplicate = ref(false)
 const existingItem = ref(null)
 
@@ -174,6 +179,18 @@ function reset() {
   error.value = ""
   confirmDuplicate.value = false
   existingItem.value = null
+}
+
+function clearQuery() {
+  query.value = ""
+  results.value = []
+  searched.value = false
+  searchInput.value?.focus()
+}
+
+function openIngredientForm() {
+  ingredientFormInitialName.value = query.value.trim()
+  showIngredientForm.value = true
 }
 
 function onIngredientCreated(ing) {
