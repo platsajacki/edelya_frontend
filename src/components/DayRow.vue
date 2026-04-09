@@ -15,30 +15,26 @@
           </button>
         </div>
 
-        <div class="day-row__cook">
-          <div ref="cookRef" class="day-row__items" :data-date="rawDate">
-            <MealCard
-              v-for="event in cookingEvents"
-              :key="event.id"
-              :item="event"
-              @tap="$emit('tap-cooking', $event)"
-            />
-          </div>
+        <div ref="cookRef" class="day-row__cook" :data-date="rawDate">
+          <MealCard
+            v-for="event in cookingEvents"
+            :key="event.id"
+            :item="event"
+            @tap="$emit('tap-cooking', $event)"
+          />
           <button type="button" class="day-row__add day-row__add--cook" @click="$emit('add-cooking', rawDate)">
             <span class="day-row__add-icon">+</span>
             <span class="day-row__add-text">Добавить</span>
           </button>
         </div>
 
-        <div class="day-row__eat">
-          <div ref="eatRef" class="day-row__items" :data-date="rawDate">
-            <MealCard
-              v-for="item in meals"
-              :key="item.id"
-              :item="item"
-              @tap="$emit('tap-meal', $event)"
-            />
-          </div>
+        <div ref="eatRef" class="day-row__eat" :data-date="rawDate">
+          <MealCard
+            v-for="item in meals"
+            :key="item.id"
+            :item="item"
+            @tap="$emit('tap-meal', $event)"
+          />
           <button type="button" class="day-row__add day-row__add--eat" @click="$emit('add-meal', rawDate)">
             <span class="day-row__add-icon">+</span>
             <span class="day-row__add-text">Добавить</span>
@@ -71,6 +67,9 @@ function makeSortableOptions(type) {
   return {
     group: type,
     draggable: '.meal-card',
+    filter: '.day-row__add',
+    preventOnFilter: true,
+    emptyInsertThreshold: 20,
     ghostClass: 'meal-card--ghost',
     chosenClass: 'meal-card--chosen',
     dragClass: 'meal-card--drag',
@@ -81,7 +80,12 @@ function makeSortableOptions(type) {
     forceFallback: true,
     fallbackOnBody: true,
     fallbackTolerance: 3,
+    onStart() {
+      document.documentElement.dataset.dragging = type
+    },
     onEnd(evt) {
+      delete document.documentElement.dataset.dragging
+
       const itemId = evt.item.dataset.id
       const fromDate = evt.from.dataset.date
       const toDate = evt.to.dataset.date
@@ -186,6 +190,8 @@ useSortable(eatRef, makeSortableOptions('meals'))
   --card-accent: var(--color-eat);
   display: flex;
   flex-direction: column;
+  gap: 8px;
+  min-height: 40px;
   position: relative;
   padding-left: 8px;
 }
@@ -205,24 +211,12 @@ useSortable(eatRef, makeSortableOptions('meals'))
   --card-accent: var(--color-cook);
   display: flex;
   flex-direction: column;
-}
-
-.day-row__items {
-  display: flex;
-  flex-direction: column;
   gap: 8px;
-  min-height: 1px;
-}
-
-.day-row__items:not(:empty) {
-  margin-bottom: 8px;
-}
-
-.day-row__items:empty + .day-row__add {
-  margin-top: 0;
+  min-height: 40px;
 }
 
 .day-row__add {
+  order: 999;
   display: flex;
   align-items: center;
   justify-content: flex-start;
@@ -252,5 +246,15 @@ useSortable(eatRef, makeSortableOptions('meals'))
 
 .day-row__add--eat:hover {
   color: var(--color-mint);
+}
+</style>
+
+<style>
+/* Global (unscoped) styles for drag-active visual indicators */
+html[data-dragging="meals"] .day-row__eat,
+html[data-dragging="cooking"] .day-row__cook {
+  background: color-mix(in srgb, var(--card-accent) 4%, transparent);
+  border-radius: var(--radius-sm);
+  transition: background var(--transition-fast);
 }
 </style>
