@@ -18,11 +18,25 @@ export const useShoppingStore = defineStore("shopping", {
     currentList: null,
     items: [],
     loading: false,
+    loadingMore: false,
     loadingItems: false,
+    hasMore: false,
+    page: 1,
+    filters: {
+      search: "",
+      dateFrom: "",
+    },
     toast: null,
   }),
 
   getters: {
+    queryParams(state) {
+      const params = { ordering: "-created_at" }
+      if (state.filters.search.trim()) params.name__icontains = state.filters.search.trim()
+      if (state.filters.dateFrom) params.date_from__gte = state.filters.dateFrom
+      return params
+    },
+
     groupedItems(state) {
       const groups = {}
       const uncategorized = []
@@ -66,15 +80,41 @@ export const useShoppingStore = defineStore("shopping", {
   actions: {
     async loadLists() {
       this.loading = true
+      this.page = 1
       try {
-        const data = await fetchShoppingLists({ ordering: "-created_at" })
+        const params = { ...this.queryParams, page: 1 }
+        const data = await fetchShoppingLists(params)
         this.lists = data.results ?? []
+        this.hasMore = !!data.next
       } catch {
         this.lists = []
+        this.hasMore = false
         this.showToast("Не удалось загрузить списки покупок")
       } finally {
         this.loading = false
       }
+    },
+
+    async loadMoreLists() {
+      if (this.loadingMore || !this.hasMore) return
+      this.loadingMore = true
+      this.page++
+      try {
+        const params = { ...this.queryParams, page: this.page }
+        const data = await fetchShoppingLists(params)
+        this.lists.push(...(data.results ?? []))
+        this.hasMore = !!data.next
+      } catch {
+        this.page--
+        this.showToast("Не удалось загрузить ещё списки")
+      } finally {
+        this.loadingMore = false
+      }
+    },
+
+    setFilter(key, value) {
+      this.filters[key] = value
+      this.loadLists()
     },
 
     async loadList(id) {

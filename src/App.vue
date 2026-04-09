@@ -3,7 +3,11 @@
     <div class="spinner" />
   </div>
   <template v-else>
-    <RouterView />
+    <RouterView v-slot="{ Component }">
+      <KeepAlive :include="['RecipesPage', 'ShoppingPage']">
+        <component :is="Component" />
+      </KeepAlive>
+    </RouterView>
     <BottomNav v-if="auth.user" />
   </template>
 </template>

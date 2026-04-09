@@ -2,11 +2,6 @@
   <ModalWrapper v-model="open" :title="isEdit ? 'Редактировать список' : 'Новый список покупок'" :z-index="zIndex">
     <form id="shopping-list-form" class="form" @submit.prevent="submit">
       <label class="form__field">
-        <span class="form__label">Название <span class="form__required">*</span></span>
-        <input v-model="name" type="text" class="form__input" required placeholder="Например: Продукты на неделю" />
-      </label>
-
-      <label class="form__field">
         <span class="form__label">Начало периода <span class="form__required">*</span></span>
         <DateInput v-model="dateFrom" />
       </label>
@@ -14,6 +9,11 @@
       <label class="form__field">
         <span class="form__label">Конец периода <span class="form__required">*</span></span>
         <DateInput v-model="dateTo" />
+      </label>
+
+      <label class="form__field">
+        <span class="form__label">Название <span class="form__required">*</span></span>
+        <input v-model="name" type="text" class="form__input" required placeholder="Например: Продукты на неделю" @input="onNameInput" />
       </label>
 
       <div v-if="isEdit && datesChanged" class="form__warning">
@@ -64,6 +64,7 @@ const dateFrom = ref("")
 const dateTo = ref("")
 const saving = ref(false)
 const error = ref("")
+const nameManuallyEdited = ref(false)
 
 function todayISO() {
   const d = new Date()
@@ -73,20 +74,43 @@ function todayISO() {
   return `${y}-${m}-${day}`
 }
 
+function formatDateShort(iso) {
+  if (!iso) return ""
+  const [, m, d] = iso.split("-")
+  return `${d}.${m}`
+}
+
+function generateName(from, to) {
+  if (from && to) return `Список покупок ${formatDateShort(from)}–${formatDateShort(to)}`
+  if (from) return `Список покупок с ${formatDateShort(from)}`
+  return ""
+}
+
 watch(() => props.modelValue, (v) => {
   if (v) {
     error.value = ""
+    nameManuallyEdited.value = false
     if (props.editList) {
       name.value = props.editList.name || ""
       dateFrom.value = props.editList.date_from || ""
       dateTo.value = props.editList.date_to || ""
     } else {
-      name.value = ""
       dateFrom.value = todayISO()
       dateTo.value = ""
+      name.value = generateName(dateFrom.value, dateTo.value)
     }
   }
 })
+
+watch([dateFrom, dateTo], ([from, to]) => {
+  if (!isEdit.value && !nameManuallyEdited.value) {
+    name.value = generateName(from, to)
+  }
+})
+
+function onNameInput() {
+  nameManuallyEdited.value = name.value !== generateName(dateFrom.value, dateTo.value)
+}
 
 function validate() {
   if (!name.value.trim()) return "Укажите название списка."

@@ -1,27 +1,45 @@
 import { defineStore } from "pinia"
 import { fetchDishes, fetchDishCategories, deleteDish } from "../services/dishService"
-import { isDishOwn } from "../utils/dishOwnership"
+
+const DEFAULT_SORTING = "-created_at"
+
+export const SORT_OPTIONS = [
+  { value: "-created_at", label: "Сначала новые" },
+  { value: "created_at", label: "Сначала старые" },
+  { value: "name", label: "По имени А–Я" },
+  { value: "-name", label: "По имени Я–А" },
+]
 
 export const useRecipesStore = defineStore("recipes", {
   state: () => ({
     dishes: [],
     categories: [],
-    loading: false,
+
+    initialLoading: false,
     loadingMore: false,
+    refreshing: false,
+
+    initialError: null,
+    loadMoreError: null,
+
     hasMore: false,
     page: 1,
+
     filters: {
-      ownership: "all", // 'all' | 'own' | 'global'
+      ownership: "own",
       categoryId: null,
       search: "",
+      sorting: DEFAULT_SORTING,
     },
+
     toast: null,
+    _loadId: 0,
   }),
 
   getters: {
-    /** Build API query params from current filters */
     queryParams(state) {
       const params = { owened_first: true }
+      if (state.filters.sorting) params.ordering = state.filters.sorting
       if (state.filters.ownership === "own") params.only_owned = true
       if (state.filters.ownership === "global") params.only_global = true
       if (state.filters.categoryId) params.category = state.filters.categoryId
@@ -29,27 +47,19 @@ export const useRecipesStore = defineStore("recipes", {
       return params
     },
 
-    /** Dishes filtered by current ownership tab */
-    ownDishes(state) {
-      return state.dishes.filter((d) => isDishOwn(d))
-    },
-
-    sharedDishes(state) {
-      return state.dishes.filter((d) => !isDishOwn(d))
-    },
-
-    /** Active dishes based on selected tab */
-    activeDishes(state) {
-      if (state.filters.ownership === "own") return this.ownDishes
-      if (state.filters.ownership === "global") return this.sharedDishes
-      return state.dishes
-    },
-
     hasActiveFilters(state) {
       return (
         state.filters.categoryId !== null ||
         state.filters.search.trim() !== ""
       )
+    },
+
+    hasNonDefaultSort(state) {
+      return state.filters.sorting !== DEFAULT_SORTING
+    },
+
+    sortLabel(state) {
+      return SORT_OPTIONS.find((o) => o.value === state.filters.sorting)?.label ?? ""
     },
   },
 
@@ -64,25 +74,33 @@ export const useRecipesStore = defineStore("recipes", {
     },
 
     async loadDishes() {
-      this.loading = true
+      const loadId = ++this._loadId
+      this.initialLoading = true
+      this.initialError = null
+      this.loadMoreError = null
       this.page = 1
       try {
         const params = { ...this.queryParams, page: 1 }
         const data = await fetchDishes(params)
+        if (loadId !== this._loadId) return
         this.dishes = data.results ?? []
         this.hasMore = !!data.next
       } catch {
+        if (loadId !== this._loadId) return
         this.dishes = []
         this.hasMore = false
-        this.showToast("Не удалось загрузить блюда")
+        this.initialError = "Не удалось загрузить блюда"
       } finally {
-        this.loading = false
+        if (loadId === this._loadId) {
+          this.initialLoading = false
+        }
       }
     },
 
     async loadMore() {
-      if (this.loadingMore || !this.hasMore) return
+      if (this.loadingMore || !this.hasMore || this.initialLoading) return
       this.loadingMore = true
+      this.loadMoreError = null
       this.page++
       try {
         const params = { ...this.queryParams, page: this.page }
@@ -91,9 +109,31 @@ export const useRecipesStore = defineStore("recipes", {
         this.hasMore = !!data.next
       } catch {
         this.page--
-        this.showToast("Не удалось загрузить ещё блюда")
+        this.loadMoreError = "Не удалось загрузить ещё блюда"
       } finally {
         this.loadingMore = false
+      }
+    },
+
+    async refresh() {
+      const loadId = ++this._loadId
+      this.refreshing = true
+      this.initialError = null
+      this.loadMoreError = null
+      this.page = 1
+      try {
+        const params = { ...this.queryParams, page: 1 }
+        const data = await fetchDishes(params)
+        if (loadId !== this._loadId) return
+        this.dishes = data.results ?? []
+        this.hasMore = !!data.next
+      } catch {
+        if (loadId !== this._loadId) return
+        this.showToast("Не удалось обновить список")
+      } finally {
+        if (loadId === this._loadId) {
+          this.refreshing = false
+        }
       }
     },
 
@@ -102,10 +142,15 @@ export const useRecipesStore = defineStore("recipes", {
       this.loadDishes()
     },
 
+    setSorting(value) {
+      this.filters.sorting = value
+      this.loadDishes()
+    },
+
     resetFilters() {
-      this.filters.ownership = "all"
       this.filters.categoryId = null
       this.filters.search = ""
+      this.filters.sorting = DEFAULT_SORTING
       this.loadDishes()
     },
 
@@ -121,12 +166,12 @@ export const useRecipesStore = defineStore("recipes", {
 
     onDishCreated() {
       this.showToast("Блюдо создано")
-      this.loadDishes()
+      this.refresh()
     },
 
     onDishUpdated() {
       this.showToast("Блюдо обновлено")
-      this.loadDishes()
+      this.refresh()
     },
 
     showToast(message) {
