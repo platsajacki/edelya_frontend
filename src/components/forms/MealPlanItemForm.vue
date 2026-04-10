@@ -7,7 +7,7 @@
         <div v-if="selectedDish" class="selected-dish">
           <span class="selected-dish__name">{{ selectedDish.name }}</span>
           <button type="button" class="selected-dish__edit" @click="editDish = selectedDish; showDishForm = true" title="Редактировать блюдо">
-            <IconPencil variant="filled" />
+            <IconPencil />
           </button>
           <button type="button" class="selected-dish__clear" @click="selectedDish = null">&times;</button>
         </div>

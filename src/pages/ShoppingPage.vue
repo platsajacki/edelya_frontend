@@ -46,7 +46,7 @@
 
     <!-- Empty state: no lists at all -->
     <div v-else-if="!store.lists.length" class="empty-state">
-      <IconShoppingBag class="empty-state__icon" width="48" height="48" :stroke-width="1.2" />
+      <IconShoppingBag class="empty-state__icon" width="48" height="48" />
       <p class="empty-state__text">Нет списков покупок</p>
       <button class="empty-state__action" @click="showForm = true">
         + Создать список
@@ -105,8 +105,8 @@ let searchTimer = null
 
 const sortedLists = computed(() => {
   return [...store.lists].sort((a, b) => {
-    const da = a.date_from ?? ""
-    const db = b.date_from ?? ""
+    const da = a.created_at ?? ""
+    const db = b.created_at ?? ""
     return sortAsc.value ? da.localeCompare(db) : db.localeCompare(da)
   })
 })

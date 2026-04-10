@@ -11,7 +11,7 @@
             :title="`Список покупок на ${day} ${date.slice(0, 2)}`"
             @click.stop="$emit('create-shopping-day', { rawDate, dayLabel: day })"
           >
-            <IconShoppingBag :width="16" :height="16" :stroke-width="1.5" />
+            <IconCartPlus :width="16" :height="16" />
           </button>
         </div>
 
@@ -50,7 +50,7 @@
 <script setup>
 import { ref } from 'vue'
 import MealCard from './MealCard.vue'
-import IconShoppingBag from './icons/IconShoppingBag.vue'
+import IconCartPlus from './icons/IconCartPlus.vue'
 import { useSortable } from '../composables/useSortable'
 
 const props = defineProps({

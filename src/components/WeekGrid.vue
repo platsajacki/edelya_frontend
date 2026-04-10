@@ -3,7 +3,7 @@
     <div class="week-grid__week-actions">
       <span v-if="greeting" class="week-grid__greeting">{{ greeting }}</span>
       <button type="button" class="week-grid__week-shopping-btn" @click="onWeekShopping">
-        <IconShoppingBag :width="15" :height="15" :stroke-width="1.6" />
+        <IconCartPlus :width="15" :height="15" />
         <span>На неделю</span>
       </button>
     </div>
@@ -130,7 +130,7 @@ import { usePlanningStore } from "../store/planning"
 import DayRow from "./DayRow.vue"
 import IconPot from "./icons/IconPot.vue"
 import IconFork from "./icons/IconFork.vue"
-import IconShoppingBag from "./icons/IconShoppingBag.vue"
+import IconCartPlus from "./icons/IconCartPlus.vue"
 
 const planning = usePlanningStore()
 

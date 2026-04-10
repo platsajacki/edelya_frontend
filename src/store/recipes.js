@@ -38,7 +38,7 @@ export const useRecipesStore = defineStore("recipes", {
 
   getters: {
     queryParams(state) {
-      const params = { owened_first: true }
+      const params = {}
       if (state.filters.sorting) params.ordering = state.filters.sorting
       if (state.filters.ownership === "own") params.only_owned = true
       if (state.filters.ownership === "global") params.only_global = true
@@ -144,7 +144,7 @@ export const useRecipesStore = defineStore("recipes", {
 
     setSorting(value) {
       this.filters.sorting = value
-      this.loadDishes()
+      this.refresh()
     },
 
     resetFilters() {
