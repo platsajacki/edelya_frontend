@@ -66,6 +66,15 @@ const ERROR_MESSAGES = {
   "This ingredient is already in the shopping list.": "Этот ингредиент уже в списке покупок.",
 }
 
+const SUBSCRIPTION_DETAIL_TO_CODE = {
+  "Subscription required to access this resource.": "subscription_required",
+  "Trial period has expired. Please subscribe to continue using this resource.": "trial_expired",
+  "Your subscription is inactive. Please check your subscription status.": "subscription_inactive",
+  "Your subscription has been cancelled. Please renew your subscription to continue using this resource.": "subscription_cancelled",
+  "Your subscription payment is past due. Please update your payment information to continue using this resource.": "subscription_past_due",
+  "Your subscription has expired. Please renew your subscription to continue using this resource.": "subscription_expired",
+}
+
 const FIELD_NAMES = {
   name: "Название",
   category: "Категория",
@@ -123,7 +132,7 @@ async function parseError(response) {
   const err = new Error()
   err.status = response.status
   err.body = body
-
+  err.code = body?.code ?? SUBSCRIPTION_DETAIL_TO_CODE[body?.detail] ?? null
   if (!body) {
     err.message = "Ошибка сервера. Попробуйте позже."
     return err
@@ -183,6 +192,18 @@ export async function api(url, options = {}) {
     await refreshing  // throws if refresh failed — caller handles it
     headers.Authorization = `Bearer ${getAccess()}`
     response = await fetch(API + url, { ...options, headers })
+  }
+
+  if (response.status === 402) {
+    const err = await parseError(response)
+    const { useSubscriptionStore } = await import("../store/subscription")
+    const subscriptionStore = useSubscriptionStore()
+    subscriptionStore.setError(err.code, err.message)
+
+    const { router } = await import("../router")
+    router.push("/billing")
+
+    throw err
   }
 
   if (!response.ok) {

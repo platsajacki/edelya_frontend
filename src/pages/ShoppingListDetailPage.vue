@@ -179,7 +179,7 @@ const filteredGroups = computed(() => {
 })
 
 const emptyText = computed(() => {
-  if (store.items.length === 0) return "В этом списке пока нет позиций. Добавьте вручную или выполните пересчёт."
+  if (store.items.length === 0) return "В этом списке пока нет позиций. Проверьте, что на эти дни есть готовки. Добавьте вручную или выполните пересчёт."
   if (activeFilter.value === "checked") return "Нет купленных позиций"
   if (activeFilter.value === "unchecked") return "Все позиции уже куплены!"
   return "Нет позиций"
