@@ -8,9 +8,14 @@
       <IconWarning class="billing-page__icon" :width="48" :height="48" />
       <h2 class="billing-page__heading">{{ config.title }}</h2>
       <p class="billing-page__description">{{ config.description }}</p>
-      <button class="billing-page__action" @click="handleAction">
-        {{ config.actionText }}
+      <button
+        class="billing-page__action"
+        :disabled="loading"
+        @click="handleAction"
+      >
+        {{ loading ? "Загрузка..." : config.actionText }}
       </button>
+      <p v-if="actionError" class="billing-page__error">{{ actionError }}</p>
     </div>
 
     <div v-else class="billing-page__card">
@@ -20,18 +25,23 @@
 </template>
 
 <script setup>
-import { computed } from "vue"
+import { ref, computed, onMounted } from "vue"
+import { useRouter } from "vue-router"
 import { useSubscriptionStore } from "../store/subscription"
 import IconWarning from "../components/icons/IconWarning.vue"
 
+const router = useRouter()
 const subscription = useSubscriptionStore()
+const loading = ref(false)
+const actionError = ref(null)
 
-const BILLING_CONFIG = {
-  subscription_required: {
-    title: "Начните бесплатный период",
-    description: "У вас ещё нет подписки. Попробуйте бесплатно!",
-    actionText: "Начать бесплатно",
-  },
+onMounted(() => {
+  if (subscription.errorCode === "subscription_required" && subscription.trialDays === null) {
+    subscription.loadTrialDuration()
+  }
+})
+
+const BILLING_CONFIG_STATIC = {
   trial_expired: {
     title: "Пробный период закончился",
     description: "Выберите тариф, чтобы продолжить пользоваться сервисом.",
@@ -59,9 +69,35 @@ const BILLING_CONFIG = {
   },
 }
 
-const config = computed(() => BILLING_CONFIG[subscription.errorCode] ?? null)
+const config = computed(() => {
+  if (subscription.errorCode === "subscription_required") {
+    const days = subscription.trialDays
+    return {
+      title: "Начните бесплатный период",
+      description: days
+        ? `У вас ещё нет подписки. Попробуйте бесплатно ${days} дней!`
+        : "У вас ещё нет подписки. Попробуйте бесплатно!",
+      actionText: "Начать бесплатно",
+    }
+  }
+  return BILLING_CONFIG_STATIC[subscription.errorCode] ?? null
+})
 
-function handleAction() {
+async function handleAction() {
+  actionError.value = null
+  if (subscription.errorCode === "subscription_required") {
+    loading.value = true
+    try {
+      await subscription.startTrial()
+      subscription.clear()
+      router.push("/")
+    } catch (err) {
+      actionError.value = err.message ?? "Не удалось запустить триал."
+    } finally {
+      loading.value = false
+    }
+    return
+  }
   // TODO: integrate real billing actions per errorCode
   console.log("Billing action:", subscription.errorCode)
 }
@@ -130,5 +166,15 @@ function handleAction() {
 
 .billing-page__action--secondary:active {
   background: var(--color-border);
+}
+
+.billing-page__action:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.billing-page__error {
+  font-size: var(--font-sm);
+  color: var(--color-error);
 }
 </style>
