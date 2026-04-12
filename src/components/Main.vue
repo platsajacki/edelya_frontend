@@ -5,11 +5,11 @@
       :disabled="planning.loading"
       @prev="planning.prevWeek"
       @next="planning.nextWeek"
+      @create-shopping-week="handleCreateShoppingWeek"
     />
 
     <WeekGrid
       :week-data="planning.weekData"
-      :greeting="user?.first_name ? `${greeting}, ${user.first_name}!` : ''"
       :class="{ 'planner__grid--loading': planning.loading }"
       @add-cooking="openCookingForm"
       @add-meal="openMealForm"
@@ -17,7 +17,6 @@
       @tap-meal="openMealDetail"
       @drag-end="onDragEnd"
       @create-shopping-day="handleCreateShoppingDay"
-      @create-shopping-week="handleCreateShoppingWeek"
     />
 
     <div v-if="planning.loadError" class="planner__error">
@@ -84,6 +83,7 @@ import { usePlanningStore } from "../store/planning"
 import { useShoppingStore } from "../store/shopping"
 import { fetchCookingEvent } from "../services/planningService"
 import { formatDateRuShort } from "../utils/formatDate"
+import { getTodayISO } from "../utils/weekDays"
 import Toast from "./Toast.vue"
 
 defineProps({
@@ -97,20 +97,18 @@ const planning = usePlanningStore()
 const shopping = useShoppingStore()
 const router = useRouter()
 
-const greeting = computed(() => {
-  const h = new Date().getHours()
-  if (h >= 5 && h < 12) return 'Доброе утро'
-  if (h >= 12 && h < 18) return 'Добрый день'
-  if (h >= 18 && h < 23) return 'Добрый вечер'
-  return 'Доброй ночи'
-})
-
 // --- Shopping confirm ---
 const showShoppingConfirm = ref(false)
 const shoppingConfirmMsg  = ref('')
 const shoppingCreating    = ref(false)
 const shoppingNoItems     = ref(false)
 const pendingShoppingPayload = ref(null)
+
+const weekEndDate = computed(() => {
+  const start = new Date(planning.weekData.start_week + 'T00:00:00')
+  start.setDate(start.getDate() + 6)
+  return `${start.getFullYear()}-${String(start.getMonth() + 1).padStart(2, '0')}-${String(start.getDate()).padStart(2, '0')}`
+})
 
 function hasCookingInRange(dateFrom, dateTo) {
   const sources = [planning.weekData, planning.nextWeekData].filter(Boolean)
@@ -131,14 +129,22 @@ function handleCreateShoppingDay({ rawDate, dayLabel }) {
   showShoppingConfirm.value = true
 }
 
-function handleCreateShoppingWeek({ dateFrom, dateTo }) {
-  shoppingNoItems.value = !hasCookingInRange(dateFrom, dateTo)
+function handleCreateShoppingWeek({ dateFrom, dateTo } = {}) {
+  const today = getTodayISO()
+  const from = dateFrom || (today >= planning.weekData.start_week && today <= weekEndDate.value ? today : planning.weekData.start_week)
+  const to = dateTo || weekEndDate.value
+  shoppingNoItems.value = !hasCookingInRange(from, to)
+  const singleDay = from === to
   pendingShoppingPayload.value = {
-    name:      `Продукты на неделю ${formatDateRuShort(dateFrom)}–${formatDateRuShort(dateTo)}`,
-    date_from: dateFrom,
-    date_to:   dateTo,
+    name:      singleDay
+      ? `Продукты на ${formatDateRuShort(from)}`
+      : `Продукты на неделю ${formatDateRuShort(from)}–${formatDateRuShort(to)}`,
+    date_from: from,
+    date_to:   to,
   }
-  shoppingConfirmMsg.value  = `Хотите создать список покупок с ${formatDateRuShort(dateFrom)} по ${formatDateRuShort(dateTo)}?`
+  shoppingConfirmMsg.value = singleDay
+    ? `Хотите создать список покупок на ${formatDateRuShort(from)}?`
+    : `Хотите создать список покупок с ${formatDateRuShort(from)} по ${formatDateRuShort(to)}?`
   showShoppingConfirm.value = true
 }
 

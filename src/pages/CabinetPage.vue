@@ -3,7 +3,7 @@
     <!-- Header -->
     <header class="cabinet__header">
       <h1 class="cabinet__title">Личный кабинет</h1>
-      <p v-if="userName" class="cabinet__user-name">{{ userName }}</p>
+      <p v-if="userName" class="cabinet__user-name">{{ greeting }}, {{ userName }}!</p>
     </header>
 
     <!-- Subscription card -->
@@ -98,6 +98,14 @@ const actionError = ref(null)
 const cancelConfirmId = ref(null)
 
 const userName = computed(() => auth.user?.first_name ?? null)
+
+const greeting = computed(() => {
+  const h = new Date().getHours()
+  if (h >= 5 && h < 12) return 'Доброе утро'
+  if (h >= 12 && h < 18) return 'Добрый день'
+  if (h >= 18 && h < 23) return 'Добрый вечер'
+  return 'Доброй ночи'
+})
 
 onMounted(async () => {
   const promises = []
