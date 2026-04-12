@@ -18,6 +18,7 @@ import { useRoute } from "vue-router"
 import IconNavPlanner from "./icons/IconNavPlanner.vue"
 import IconNavRecipes from "./icons/IconNavRecipes.vue"
 import IconShoppingBag from "./icons/IconShoppingBag.vue"
+import IconProfile from "./icons/IconProfile.vue"
 
 const route = useRoute()
 
@@ -25,6 +26,7 @@ const tabs = [
   { to: "/", label: "Еделя", icon: IconNavPlanner },
   { to: "/recipes", label: "Блюда", icon: IconNavRecipes },
   { to: "/shopping", label: "Покупки", icon: IconShoppingBag },
+  { to: "/cabinet", label: "Кабинет", icon: IconProfile },
 ]
 
 function isActive(to) {

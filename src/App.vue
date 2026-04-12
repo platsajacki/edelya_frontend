@@ -16,9 +16,11 @@
 import { ref, onMounted } from "vue"
 import { useRouter } from "vue-router"
 import { useAuthStore } from "./store/auth"
+import { useSubscriptionStore } from "./store/subscription"
 import BottomNav from "./components/BottomNav.vue"
 
 const auth = useAuthStore()
+const subscription = useSubscriptionStore()
 const router = useRouter()
 const loading = ref(true)
 
@@ -29,6 +31,7 @@ onMounted(async () => {
   try {
     await auth.init()
     if (auth.user) {
+      await subscription.loadMySubscription().catch(() => {})
       router.push("/")
     }
   } catch (err) {

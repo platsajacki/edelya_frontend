@@ -4,14 +4,14 @@ import HomePage from "../pages/HomePage.vue"
 import ShoppingPage from "../pages/ShoppingPage.vue"
 import ShoppingListDetailPage from "../pages/ShoppingListDetailPage.vue"
 import RecipesPage from "../pages/RecipesPage.vue"
-import BillingPage from "../pages/BillingPage.vue"
+import CabinetPage from "../pages/CabinetPage.vue"
 
 const routes = [
   { path: "/", component: HomePage },
   { path: "/shopping", component: ShoppingPage },
   { path: "/shopping/:id", component: ShoppingListDetailPage, meta: { requiresAuth: true } },
   { path: "/recipes", component: RecipesPage },
-  { path: "/billing", component: BillingPage },
+  { path: "/cabinet", component: CabinetPage },
 ]
 
 export const router = createRouter({

@@ -16,3 +16,7 @@ export function startTrial() {
 export function getTrialDuration() {
   return api("/api/v1/subscriptions/tariffs/trial-duration/")
 }
+
+export function fetchTariffs() {
+  return api("/api/v1/subscriptions/tariffs/")
+}
