@@ -108,11 +108,10 @@ const greeting = computed(() => {
 })
 
 onMounted(async () => {
-  const promises = []
+  const promises = [sub.loadMySubscription(), sub.loadTariffs()]
   if (!sub.hasSubscription && sub.trialDays === null) {
     promises.push(sub.loadTrialDuration())
   }
-  promises.push(sub.loadTariffs())
   await Promise.allSettled(promises)
 })
 
@@ -175,7 +174,7 @@ const subscriptionCard = computed(() => {
       iconClass: "cabinet__card-icon--ok",
       title: "Пробный период",
       description: sub.daysLeft !== null
-        ? `Осталось ${sub.daysLeft} ${dayWord(sub.daysLeft)}`
+        ? `Все функции сервиса доступны. Осталось ${sub.daysLeft} ${dayWord(sub.daysLeft)}.`
         : "Пробный период активен — все функции сервиса доступны",
       actionText: null,
     }
