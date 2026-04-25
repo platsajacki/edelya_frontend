@@ -33,6 +33,19 @@
       </template>
     </section>
 
+    <!-- Tariff change confirmation sheet -->
+    <ConfirmTariffSheet
+      v-if="confirmSheetScenario"
+      :model-value="showConfirmSheet"
+      :scenario="confirmSheetScenario"
+      :loading="tariffLoading"
+      @update:model-value="closeConfirmSheet"
+      @confirm="onConfirmTariff"
+    />
+
+    <!-- Toast -->
+    <Toast :message="toast" @dismiss="toast = null" />
+
     <!-- Tariffs -->
     <section v-if="showTariffs && sub.tariffs.length" class="cabinet__tariffs">
       <h2 class="cabinet__section-title">Тарифы</h2>
@@ -83,19 +96,41 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from "vue"
-import { useRouter } from "vue-router"
+import { ref, computed, onMounted, onUnmounted } from "vue"
+import { useRouter, useRoute } from "vue-router"
 import { useAuthStore } from "../store/auth"
 import { useSubscriptionStore } from "../store/subscription"
+import { getTariffChangeScenario } from "../utils/tariffScenario"
 import IconWarning from "../components/icons/IconWarning.vue"
 import IconCheck from "../components/icons/IconCheck.vue"
+import ConfirmTariffSheet from "../components/ConfirmTariffSheet.vue"
+import Toast from "../components/Toast.vue"
 
 const router = useRouter()
+const route = useRoute()
 const auth = useAuthStore()
 const sub = useSubscriptionStore()
 const loading = ref(false)
 const actionError = ref(null)
 const cancelConfirmId = ref(null)
+
+const toast = ref(null)
+let toastTimer = null
+
+function showToast(message) {
+  toast.value = message
+  clearTimeout(toastTimer)
+  toastTimer = setTimeout(() => { toast.value = null }, 3500)
+}
+
+const showConfirmSheet = ref(false)
+const confirmSheetTariff = ref(null)
+const tariffLoading = ref(false)
+
+const confirmSheetScenario = computed(() => {
+  if (!confirmSheetTariff.value || !sub.subscription) return null
+  return getTariffChangeScenario(sub.subscription, confirmSheetTariff.value)
+})
 
 const userName = computed(() => auth.user?.first_name ?? null)
 
@@ -113,6 +148,17 @@ onMounted(async () => {
     promises.push(sub.loadTrialDuration())
   }
   await Promise.allSettled(promises)
+
+  // Returned from YooKassa redirect — refresh subscription and clear query param
+  if (route.query.payment_return) {
+    await sub.loadMySubscription().catch(() => {})
+    router.replace({ query: {} })
+    showToast("Подписка обновлена")
+  }
+})
+
+onUnmounted(() => {
+  clearTimeout(toastTimer)
 })
 
 const BILLING_PERIOD_LABEL = {
@@ -296,7 +342,46 @@ async function handleAction() {
 }
 
 function selectTariff(tariff) {
-  console.log("Select tariff:", tariff.id, tariff.name)
+  if (!sub.subscription) return
+  const scenario = getTariffChangeScenario(sub.subscription, tariff)
+  if (!scenario) return
+  confirmSheetTariff.value = tariff
+  showConfirmSheet.value = true
+}
+
+function closeConfirmSheet() {
+  if (tariffLoading.value) return
+  showConfirmSheet.value = false
+  confirmSheetTariff.value = null
+}
+
+const CONFLICT_MESSAGES = {
+  "You are already subscribed to this tariff": "Вы уже подписаны на этот тариф.",
+  "You have a pending subscription to this tariff": "Этот тариф уже запланирован.",
+  "Upgrade payment was canceled": "Платёж был отменён. Попробуйте ещё раз.",
+  "Active payment method required to upgrade. Please update your payment info.": "Требуется активный способ оплаты. Обновите платёжные данные.",
+}
+
+async function onConfirmTariff() {
+  if (!confirmSheetTariff.value) return
+  tariffLoading.value = true
+  try {
+    const result = await sub.selectTariff(confirmSheetTariff.value.id)
+    showConfirmSheet.value = false
+    confirmSheetTariff.value = null
+    if (result.action === "redirect") {
+      window.location.href = result.confirmation_url
+    } else {
+      showToast(result.description ?? "Тариф изменён.")
+    }
+  } catch (err) {
+    showConfirmSheet.value = false
+    confirmSheetTariff.value = null
+    const message = CONFLICT_MESSAGES[err.body?.detail] ?? err.message ?? "Не удалось сменить тариф."
+    showToast(message)
+  } finally {
+    tariffLoading.value = false
+  }
 }
 
 function cancelTariff(tariff) {

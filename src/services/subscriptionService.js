@@ -20,3 +20,10 @@ export function getTrialDuration() {
 export function fetchTariffs() {
   return api("/api/v1/subscriptions/tariffs/")
 }
+
+export function selectTariff(tariffId) {
+  return api("/api/v1/subscriptions/select-tariff/", {
+    method: "POST",
+    body: JSON.stringify({ tariff_id: tariffId }),
+  })
+}

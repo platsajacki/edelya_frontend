@@ -4,6 +4,7 @@ import {
   getTrialDuration,
   startTrial as apiStartTrial,
   fetchTariffs as apiFetchTariffs,
+  selectTariff as apiSelectTariff,
 } from "../services/subscriptionService"
 
 export const useSubscriptionStore = defineStore("subscription", {
@@ -67,6 +68,14 @@ export const useSubscriptionStore = defineStore("subscription", {
       const sub = await apiStartTrial()
       this.subscription = sub
       return sub
+    },
+
+    async selectTariff(tariffId) {
+      const result = await apiSelectTariff(tariffId)
+      if (result.action === "success") {
+        this.subscription = result.subscription
+      }
+      return result
     },
   },
 })
