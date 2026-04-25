@@ -7,8 +7,10 @@
       class="bottom-nav__tab"
       :class="{ 'bottom-nav__tab--active': isActive(tab.to) }"
     >
-      <component :is="tab.icon" class="bottom-nav__icon" width="22" height="22" />
-      <span class="bottom-nav__label">{{ tab.label }}</span>
+      <span class="bottom-nav__tab-inner">
+        <component :is="tab.icon" class="bottom-nav__icon" width="22" height="22" />
+        <span class="bottom-nav__label">{{ tab.label }}</span>
+      </span>
     </router-link>
   </nav>
 </template>
@@ -41,8 +43,6 @@ function isActive(to) {
   left: 0;
   right: 0;
   display: flex;
-  justify-content: space-around;
-  align-items: center;
   background: var(--color-surface-glass);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
@@ -52,26 +52,40 @@ function isActive(to) {
 }
 
 .bottom-nav__tab {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  padding: 4px 8px;
+  text-decoration: none;
+  color: var(--color-text-secondary);
+  transition: color var(--transition-fast);
+  -webkit-tap-highlight-color: transparent;
+  min-width: 0;
+}
+
+.bottom-nav__tab-inner {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 2px;
-  padding: 4px 16px;
-  text-decoration: none;
-  color: var(--color-text-secondary);
+  padding: 4px 14px;
   border-radius: var(--radius-sm);
-  transition: color var(--transition-fast);
-  -webkit-tap-highlight-color: transparent;
+  transition: background var(--transition-fast);
 }
 
-.bottom-nav__tab:hover:not(.bottom-nav__tab--active) {
-  color: var(--color-text);
+.bottom-nav__tab:hover:not(.bottom-nav__tab--active) .bottom-nav__tab-inner {
+  background: var(--color-empty);
 }
 
 .bottom-nav__tab--active {
   color: var(--color-mint);
+}
+
+.bottom-nav__tab--active .bottom-nav__tab-inner {
   background: var(--color-mint-alpha-10);
-  border-radius: var(--radius-sm);
 }
 
 .bottom-nav__tab--active .bottom-nav__label {

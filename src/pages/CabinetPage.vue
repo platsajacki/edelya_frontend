@@ -396,10 +396,11 @@ function cancelTariff(tariff) {
   display: flex;
   flex-direction: column;
   gap: 20px;
+  padding: 12px 16px var(--nav-height);
 }
 
 .cabinet__header {
-  padding: 16px 0 0;
+  padding: 0;
 }
 
 .cabinet__title {

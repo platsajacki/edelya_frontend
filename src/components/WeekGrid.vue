@@ -349,6 +349,7 @@ async function loadNext() {
   display: flex;
   align-items: center;
   justify-content: center;
+  min-height: 44px;
   padding: 10px 16px;
   margin: 4px 16px 0;
   border: 1px dashed var(--color-border);
@@ -371,6 +372,14 @@ async function loadNext() {
   font-size: var(--font-sm);
   font-weight: 500;
   color: var(--color-text-secondary);
+}
+
+.week-grid__next-spinner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
 }
 
 /* ── Next week divider (same as today but secondary color) ── */

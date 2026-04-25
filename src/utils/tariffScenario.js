@@ -43,8 +43,8 @@ export function getTariffChangeScenario(subscription, newTariff) {
         type: "card_binding",
         title: "Привязка карты",
         description:
-          `Для выбора тарифа «${newTariff.name}» нужно привязать банковскую карту.\n` +
-          `Тариф будет активирован автоматически после успешной привязки.\n` +
+          `Для выбора тарифа «${newTariff.name}» нужно привязать банковскую карту. ` +
+          `Тариф будет активирован автоматически после успешной привязки. ` +
           `Оплата сейчас не производится.`,
         confirmLabel: "Привязать карту",
         proration: null,
@@ -54,8 +54,8 @@ export function getTariffChangeScenario(subscription, newTariff) {
       type: "schedule",
       title: "Подтвердите выбор тарифа",
       description:
-        `Тариф «${newTariff.name}» будет активирован с начала следующего расчётного периода.\n` +
-        `Стоимость: ${formatPrice(newTariff)}.\n` +
+        `Тариф «${newTariff.name}» будет активирован с начала следующего расчётного периода. ` +
+        `Стоимость: ${formatPrice(newTariff)}. ` +
         `Сейчас деньги не списываются.`,
       confirmLabel: "Подтвердить",
       proration: null,
@@ -67,7 +67,7 @@ export function getTariffChangeScenario(subscription, newTariff) {
       type: "payment",
       title: "Оплата и активация",
       description:
-        `Для активации тарифа «${newTariff.name}» необходимо оплатить ${formatPrice(newTariff)}.\n` +
+        `Для активации тарифа «${newTariff.name}» необходимо оплатить ${formatPrice(newTariff)}. ` +
         `Вы будете перенаправлены на страницу оплаты.`,
       confirmLabel: "Перейти к оплате",
       proration: null,
@@ -83,8 +83,8 @@ export function getTariffChangeScenario(subscription, newTariff) {
         type: "downgrade",
         title: "Смена тарифа",
         description:
-          `Тариф «${newTariff.name}» (${formatPrice(newTariff)}) будет активирован с ${periodEnd}.\n` +
-          `До этого момента действует тариф «${currentTariff.name}».\n` +
+            `Тариф «${newTariff.name}» (${formatPrice(newTariff)}) будет активирован с ${periodEnd}. ` +
+            `До этого момента действует тариф «${currentTariff.name}». ` +
           `Возврат средств за оставшиеся дни не производится.`,
         confirmLabel: "Запланировать смену",
         proration: null,
@@ -99,8 +99,8 @@ export function getTariffChangeScenario(subscription, newTariff) {
       type: "upgrade",
       title: "Повышение тарифа",
       description:
-        `Тариф «${newTariff.name}» будет активирован немедленно.\n` +
-        `${proratedText}\n` +
+        `Тариф «${newTariff.name}» будет активирован немедленно. ` +
+        `${proratedText} ` +
         `Новый расчётный период начнётся сегодня.`,
       confirmLabel: "Оплатить и активировать",
       proration,

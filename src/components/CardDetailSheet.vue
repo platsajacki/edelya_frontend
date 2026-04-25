@@ -91,14 +91,16 @@
   <!-- Delete confirmation modal -->
   <ModalWrapper v-model="confirming" title="Подтверждение" :z-index="1050">
     <p class="detail__confirm-text">Удалить этот элемент?</p>
-    <div class="detail__confirm-actions">
-      <button class="detail__btn detail__btn--delete" @click="confirming = false; open = false; $emit('delete')">
-        Да, удаляем
-      </button>
-      <button class="detail__btn detail__btn--cancel" @click="confirming = false">
-        Нет
-      </button>
-    </div>
+    <template #footer>
+      <div class="detail__confirm-actions">
+        <button class="detail__btn detail__btn--delete" @click="confirming = false; open = false; $emit('delete')">
+          Да, удаляем
+        </button>
+        <button class="detail__btn detail__btn--cancel" @click="confirming = false">
+          Нет
+        </button>
+      </div>
+    </template>
   </ModalWrapper>
 
   <DishForm
@@ -114,14 +116,16 @@
       Это общее блюдо, его нельзя редактировать.
       Вы можете создать личную копию и настроить её под себя.
     </p>
-    <div class="detail__confirm-actions">
-      <button class="detail__btn detail__btn--edit" @click="startClone">
-        Создать копию
-      </button>
-      <button class="detail__btn detail__btn--cancel" @click="showCloneConfirm = false">
-        Отмена
-      </button>
-    </div>
+    <template #footer>
+      <div class="detail__confirm-actions">
+        <button class="detail__btn detail__btn--edit" @click="startClone">
+          Создать копию
+        </button>
+        <button class="detail__btn detail__btn--cancel" @click="showCloneConfirm = false">
+          Отмена
+        </button>
+      </div>
+    </template>
   </ModalWrapper>
 
   <!-- Clone DishForm -->

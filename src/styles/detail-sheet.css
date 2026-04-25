@@ -176,7 +176,7 @@
   font-weight: 600;
   color: var(--color-danger-muted);
   text-align: center;
-  margin: 0 0 12px;
+  margin: 0;
 }
 
 .detail__confirm-actions {
@@ -192,6 +192,5 @@
   font-size: var(--font-sm);
   color: var(--color-text);
   line-height: 1.5;
-  text-align: center;
-  margin: 0 0 12px;
+  margin: 0;
 }

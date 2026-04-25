@@ -6,6 +6,7 @@
             <span class="day-row__date">{{ date.slice(0, 2) }}</span>
           </div>
           <button
+            v-if="cookingEvents.length > 0"
             type="button"
             class="day-row__shopping-btn"
             :title="`Список покупок на ${day} ${date.slice(0, 2)}`"

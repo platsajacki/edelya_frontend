@@ -62,7 +62,6 @@ function onClose() {
   font-size: var(--font-body);
   color: var(--color-text);
   line-height: 1.6;
-  white-space: pre-line;
 }
 
 .tariff-confirm__proration {
