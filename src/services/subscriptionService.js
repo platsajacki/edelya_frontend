@@ -27,3 +27,20 @@ export function selectTariff(tariffId) {
     body: JSON.stringify({ tariff_id: tariffId }),
   })
 }
+
+export async function getPaymentMethod() {
+  try {
+    return await api("/api/v1/subscriptions/payment-method/")
+  } catch (err) {
+    if (err.status === 404) return null
+    throw err
+  }
+}
+
+export function bindPaymentMethod() {
+  return api("/api/v1/subscriptions/payment-method/", { method: "POST" })
+}
+
+export function deletePaymentMethod() {
+  return api("/api/v1/subscriptions/payment-method/", { method: "DELETE" })
+}

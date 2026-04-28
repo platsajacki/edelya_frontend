@@ -46,6 +46,35 @@
     <!-- Toast -->
     <Toast :message="toast" @dismiss="toast = null" />
 
+    <!-- Payment method -->
+    <section v-if="showPaymentMethod" class="cabinet__card cabinet__payment">
+      <h2 class="cabinet__section-title cabinet__payment-title">Способ оплаты</h2>
+      <template v-if="sub.paymentMethod">
+        <p class="cabinet__payment-card">
+          {{ sub.paymentMethod.card_type }} •••• {{ sub.paymentMethod.card_last4 }}
+        </p>
+        <p class="cabinet__payment-warning">⚠ Удаление карты отключит автопродление</p>
+        <button
+          class="cabinet__btn cabinet__btn--cancel"
+          :disabled="paymentLoading"
+          @click="handleDeletePaymentMethod"
+        >
+          {{ paymentLoading ? "Загрузка..." : "Удалить карту" }}
+        </button>
+      </template>
+      <template v-else>
+        <p class="cabinet__card-text">Карта не привязана</p>
+        <button
+          class="cabinet__btn"
+          :disabled="paymentLoading"
+          @click="handleBindPaymentMethod"
+        >
+          {{ paymentLoading ? "Загрузка..." : "Привязать карту" }}
+        </button>
+      </template>
+      <p v-if="paymentError" class="cabinet__error">{{ paymentError }}</p>
+    </section>
+
     <!-- Tariffs -->
     <section v-if="showTariffs && sub.tariffs.length" class="cabinet__tariffs">
       <h2 class="cabinet__section-title">Тарифы</h2>
@@ -113,6 +142,8 @@ const sub = useSubscriptionStore()
 const loading = ref(false)
 const actionError = ref(null)
 const cancelConfirmId = ref(null)
+const paymentLoading = ref(false)
+const paymentError = ref(null)
 
 const toast = ref(null)
 let toastTimer = null
@@ -143,7 +174,7 @@ const greeting = computed(() => {
 })
 
 onMounted(async () => {
-  const promises = [sub.loadMySubscription(), sub.loadTariffs()]
+  const promises = [sub.loadMySubscription(), sub.loadTariffs(), sub.loadPaymentMethod()]
   if (!sub.hasSubscription && sub.trialDays === null) {
     promises.push(sub.loadTrialDuration())
   }
@@ -178,6 +209,11 @@ function isCurrent(tariff) {
 const showTariffs = computed(() => {
   if (sub.errorCode === "subscription_required") return false
   return true
+})
+
+const showPaymentMethod = computed(() => {
+  const tariff = sub.subscription?.tariff
+  return !!tariff && !tariff.is_trial_tariff
 })
 
 // Subscription card config based on state
@@ -388,6 +424,38 @@ function cancelTariff(tariff) {
   // TODO: integrate cancellation endpoint when available
   console.log("Cancel tariff:", tariff.id, tariff.name)
   cancelConfirmId.value = null
+}
+
+async function handleBindPaymentMethod() {
+  paymentError.value = null
+  paymentLoading.value = true
+  try {
+    const result = await sub.bindPaymentMethod()
+    if (result.action === "redirect") {
+      window.location.href = result.confirmation_url
+    }
+  } catch (err) {
+    if (err.status === 409) {
+      paymentError.value = "Карта уже привязана. Удалите текущую карту, чтобы привязать новую."
+      await sub.loadPaymentMethod().catch(() => {})
+    } else {
+      paymentError.value = err.message ?? "Не удалось начать привязку карты."
+    }
+  } finally {
+    paymentLoading.value = false
+  }
+}
+
+async function handleDeletePaymentMethod() {
+  paymentError.value = null
+  paymentLoading.value = true
+  try {
+    await sub.deletePaymentMethod()
+  } catch (err) {
+    paymentError.value = err.message ?? "Не удалось удалить карту."
+  } finally {
+    paymentLoading.value = false
+  }
 }
 </script>
 
@@ -628,5 +696,27 @@ function cancelTariff(tariff) {
 
 .cabinet__btn--cancel-dismiss:active {
   background: var(--color-mint-hover);
+}
+
+/* Payment method section */
+.cabinet__payment {
+  align-items: stretch;
+  text-align: left;
+}
+
+.cabinet__payment-title {
+  margin-bottom: 4px;
+}
+
+.cabinet__payment-card {
+  font-size: var(--font-md);
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.cabinet__payment-warning {
+  font-size: var(--font-xs);
+  color: var(--color-text-secondary);
+  line-height: 1.4;
 }
 </style>

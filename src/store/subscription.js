@@ -5,6 +5,9 @@ import {
   startTrial as apiStartTrial,
   fetchTariffs as apiFetchTariffs,
   selectTariff as apiSelectTariff,
+  getPaymentMethod as apiGetPaymentMethod,
+  bindPaymentMethod as apiBindPaymentMethod,
+  deletePaymentMethod as apiDeletePaymentMethod,
 } from "../services/subscriptionService"
 
 export const useSubscriptionStore = defineStore("subscription", {
@@ -14,6 +17,7 @@ export const useSubscriptionStore = defineStore("subscription", {
     trialDays: null,
     subscription: null,
     tariffs: [],
+    paymentMethod: null,
   }),
 
   getters: {
@@ -76,6 +80,20 @@ export const useSubscriptionStore = defineStore("subscription", {
         this.subscription = result.subscription
       }
       return result
+    },
+
+    async loadPaymentMethod() {
+      this.paymentMethod = await apiGetPaymentMethod()
+    },
+
+    async bindPaymentMethod() {
+      const result = await apiBindPaymentMethod()
+      return result
+    },
+
+    async deletePaymentMethod() {
+      await apiDeletePaymentMethod()
+      this.paymentMethod = null
     },
   },
 })
