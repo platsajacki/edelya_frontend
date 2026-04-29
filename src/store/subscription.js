@@ -8,6 +8,8 @@ import {
   getPaymentMethod as apiGetPaymentMethod,
   bindPaymentMethod as apiBindPaymentMethod,
   deletePaymentMethod as apiDeletePaymentMethod,
+  cancelSubscription as apiCancelSubscription,
+  resumeSubscription as apiResumeSubscription,
 } from "../services/subscriptionService"
 
 export const useSubscriptionStore = defineStore("subscription", {
@@ -94,6 +96,18 @@ export const useSubscriptionStore = defineStore("subscription", {
     async deletePaymentMethod() {
       await apiDeletePaymentMethod()
       this.paymentMethod = null
+    },
+
+    async cancelSubscription() {
+      const sub = await apiCancelSubscription()
+      this.subscription = sub
+      return sub
+    },
+
+    async resumeSubscription() {
+      const sub = await apiResumeSubscription()
+      this.subscription = sub
+      return sub
     },
   },
 })

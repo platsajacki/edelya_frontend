@@ -44,3 +44,11 @@ export function bindPaymentMethod() {
 export function deletePaymentMethod() {
   return api("/api/v1/subscriptions/payment-method/", { method: "DELETE" })
 }
+
+export function cancelSubscription() {
+  return api("/api/v1/subscriptions/cancel/", { method: "POST" })
+}
+
+export function resumeSubscription() {
+  return api("/api/v1/subscriptions/resume/", { method: "POST" })
+}

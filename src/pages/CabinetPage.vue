@@ -97,7 +97,19 @@
         </ul>
         <!-- Current tariff: subtle cancel with inline confirmation -->
         <template v-if="isCurrent(tariff)">
-          <template v-if="cancelConfirmId !== tariff.id">
+          <template v-if="sub.subscription?.cancelled_at">
+            <p class="cabinet__cancel-pending">
+              Подписка будет отменена по истечении текущего периода
+            </p>
+            <button
+              class="cabinet__btn cabinet__btn--tariff"
+              :disabled="resumeLoading"
+              @click="resumeTariff"
+            >
+              {{ resumeLoading ? "Загрузка..." : "Возобновить подписку" }}
+            </button>
+          </template>
+          <template v-else-if="cancelConfirmId !== tariff.id">
             <button class="cabinet__btn cabinet__btn--cancel" @click="cancelConfirmId = tariff.id">
               Отменить подписку
             </button>
@@ -105,8 +117,10 @@
           <div v-else class="cabinet__cancel-confirm">
             <p class="cabinet__cancel-text">Вы уверены? Отменить подписку?</p>
             <div class="cabinet__cancel-actions">
-              <button class="cabinet__btn cabinet__btn--cancel-confirm" @click="cancelTariff(tariff)">Да, отменить</button>
-              <button class="cabinet__btn cabinet__btn--cancel-dismiss" @click="cancelConfirmId = null">Нет</button>
+              <button class="cabinet__btn cabinet__btn--cancel-confirm" :disabled="cancelLoading" @click="cancelTariff">
+                {{ cancelLoading ? "Загрузка..." : "Да, отменить" }}
+              </button>
+              <button class="cabinet__btn cabinet__btn--cancel-dismiss" :disabled="cancelLoading" @click="cancelConfirmId = null">Нет</button>
             </div>
           </div>
         </template>
@@ -251,6 +265,15 @@ const subscriptionCard = computed(() => {
 
   const s = sub.subscription
   if (s.status === "trial" && s.is_active && s.tariff?.is_trial_tariff) {
+    if (s.cancelled_at) {
+      return {
+        icon: IconWarning,
+        iconClass: "cabinet__card-icon--warning",
+        title: "Пробный период отменён",
+        description: "Автоматический переход на платный тариф отключён. Доступ сохраняется до конца пробного периода.",
+        actionText: null,
+      }
+    }
     return {
       icon: IconCheck,
       iconClass: "cabinet__card-icon--ok",
@@ -273,6 +296,17 @@ const subscriptionCard = computed(() => {
   }
 
   if (s.status === "active" && s.is_active) {
+    if (s.cancelled_at) {
+      return {
+        icon: IconWarning,
+        iconClass: "cabinet__card-icon--warning",
+        title: `Тариф: ${s.tariff?.name}`,
+        description: s.current_period_end
+          ? `Подписка будет отменена ${formatDate(s.current_period_end)}. Отмена запрошена ${formatDateTime(s.cancelled_at)}.`
+          : `Подписка будет отменена. Отмена запрошена ${formatDateTime(s.cancelled_at)}.`,
+        actionText: null,
+      }
+    }
     return {
       icon: IconCheck,
       iconClass: "cabinet__card-icon--ok",
@@ -341,7 +375,9 @@ const ERROR_CARDS = {
     icon: IconWarning,
     iconClass: "cabinet__card-icon--warning",
     title: "Подписка отменена",
-    description: "Вы можете возобновить подписку в любой момент.",
+    description: sub.subscription?.cancelled_at
+      ? `Подписка была отменена ${formatDateTime(sub.subscription.cancelled_at)}.`
+      : "Подписка отменена.",
     actionText: null,
   },
 }
@@ -360,6 +396,16 @@ function formatDate(iso) {
     day: "numeric",
     month: "long",
     year: "numeric",
+  })
+}
+
+function formatDateTime(iso) {
+  return new Date(iso).toLocaleString("ru-RU", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
   })
 }
 
@@ -420,10 +466,46 @@ async function onConfirmTariff() {
   }
 }
 
-function cancelTariff(tariff) {
-  // TODO: integrate cancellation endpoint when available
-  console.log("Cancel tariff:", tariff.id, tariff.name)
-  cancelConfirmId.value = null
+const cancelLoading = ref(false)
+const resumeLoading = ref(false)
+
+const CANCEL_ERROR_MESSAGES = {
+  "Subscription is already cancelled.": "Подписка уже отменена.",
+  "Subscription is already in the process of cancellation.": "Отмена уже в процессе.",
+  "Subscription cannot be cancelled in current status.": "Подписку невозможно отменить в текущем статусе.",
+}
+
+async function cancelTariff() {
+  cancelLoading.value = true
+  try {
+    await sub.cancelSubscription()
+    cancelConfirmId.value = null
+    showToast("Подписка отменена")
+  } catch (err) {
+    cancelConfirmId.value = null
+    const message = CANCEL_ERROR_MESSAGES[err.body?.detail] ?? err.message ?? "Не удалось отменить подписку."
+    showToast(message)
+  } finally {
+    cancelLoading.value = false
+  }
+}
+
+const RESUME_ERROR_MESSAGES = {
+  "Subscription is not pending cancellation.": "Подписка не находится в процессе отмены.",
+  "Subscription cannot be resumed in current status.": "Подписку невозможно возобновить в текущем статусе.",
+}
+
+async function resumeTariff() {
+  resumeLoading.value = true
+  try {
+    await sub.resumeSubscription()
+    showToast("Подписка возобновлена")
+  } catch (err) {
+    const message = RESUME_ERROR_MESSAGES[err.body?.detail] ?? err.message ?? "Не удалось возобновить подписку."
+    showToast(message)
+  } finally {
+    resumeLoading.value = false
+  }
 }
 
 async function handleBindPaymentMethod() {
@@ -647,6 +729,12 @@ async function handleDeletePaymentMethod() {
 .cabinet__btn--cancel:active {
   background: var(--color-border);
   color: var(--color-text);
+}
+
+.cabinet__cancel-pending {
+  font-size: var(--font-sm);
+  color: var(--color-text-secondary);
+  text-align: center;
 }
 
 .cabinet__cancel-confirm {
