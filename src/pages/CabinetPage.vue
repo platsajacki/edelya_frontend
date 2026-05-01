@@ -580,6 +580,7 @@ async function handleDeletePaymentMethod() {
   paymentLoading.value = true
   try {
     await sub.deletePaymentMethod()
+    await sub.loadMySubscription().catch(() => {})
     deleteCardConfirm.value = false
   } catch (err) {
     paymentError.value = err.message ?? "Не удалось удалить карту."
