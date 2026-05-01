@@ -82,7 +82,7 @@
         v-for="tariff in sub.tariffs"
         :key="tariff.id"
         class="cabinet__tariff"
-        :class="{ 'cabinet__tariff--current': isCurrent(tariff) }"
+        :class="{ 'cabinet__tariff--current': isCurrent(tariff), 'cabinet__tariff--pending': isPending(tariff) }"
       >
         <div class="cabinet__tariff-header">
           <span class="cabinet__tariff-name">{{ tariff.name }}</span>
@@ -125,14 +125,21 @@
           </div>
         </template>
         <!-- Soon: no button, badge is enough -->
-        <!-- Selectable: primary CTA -->
-        <button
-          v-else-if="!tariff.soon"
-          class="cabinet__btn cabinet__btn--tariff"
-          @click="selectTariff(tariff)"
-        >
-          {{ sub.hasSubscription && !sub.isTrialActive ? "Сменить тариф" : "Выбрать тариф" }}
-        </button>
+        <!-- Pending: already scheduled, show badge only -->
+        <template v-else-if="!tariff.soon">
+          <div v-if="isPending(tariff)" class="cabinet__tariff-pending-note">
+            <span class="cabinet__tariff-badge cabinet__tariff-badge--pending">Запланирован</span>
+            <p class="cabinet__tariff-pending-text">{{ pendingActivationText }}</p>
+          </div>
+          <!-- Selectable: primary CTA -->
+          <button
+            v-else
+            class="cabinet__btn cabinet__btn--tariff"
+            @click="selectTariff(tariff)"
+          >
+            {{ sub.hasSubscription && !sub.isTrialActive ? "Сменить тариф" : "Выбрать тариф" }}
+          </button>
+        </template>
       </div>
     </section>
   </div>
@@ -194,9 +201,9 @@ onMounted(async () => {
   }
   await Promise.allSettled(promises)
 
-  // Returned from YooKassa redirect — refresh subscription and clear query param
+  // Returned from YooKassa redirect — refresh subscription and card, then clear query param
   if (route.query.payment_return) {
-    await sub.loadMySubscription().catch(() => {})
+    await Promise.allSettled([sub.loadMySubscription(), sub.loadPaymentMethod()])
     router.replace({ query: {} })
     showToast("Подписка обновлена")
   }
@@ -220,12 +227,24 @@ function isCurrent(tariff) {
   return sub.subscription?.tariff?.id === tariff.id
 }
 
+function isPending(tariff) {
+  return sub.subscription?.pending_tariff?.id === tariff.id
+}
+
+const pendingActivationText = computed(() => {
+  const s = sub.subscription
+  if (!s) return ""
+  if (s.status === "trial") return "Будет подключён после окончания пробного периода"
+  return "Будет подключён с началом следующего расчётного периода"
+})
+
 const showTariffs = computed(() => {
   if (sub.errorCode === "subscription_required") return false
   return true
 })
 
 const showPaymentMethod = computed(() => {
+  if (sub.paymentMethod) return true
   const tariff = sub.subscription?.tariff
   return !!tariff && !tariff.is_trial_tariff
 })
@@ -274,13 +293,16 @@ const subscriptionCard = computed(() => {
         actionText: null,
       }
     }
+    const pendingNote = s.pending_tariff
+      ? ` Тариф «${s.pending_tariff.name}» будет подключён с началом следующего расчётного периода.`
+      : ""
     return {
       icon: IconCheck,
       iconClass: "cabinet__card-icon--ok",
       title: "Пробный период",
-      description: sub.daysLeft !== null
+      description: (sub.daysLeft !== null
         ? `Все функции сервиса доступны. Осталось ${sub.daysLeft} ${dayWord(sub.daysLeft)}.`
-        : "Пробный период активен — все функции сервиса доступны",
+        : "Пробный период активен — все функции сервиса доступны") + pendingNote,
       actionText: null,
     }
   }
@@ -803,6 +825,28 @@ async function handleDeletePaymentMethod() {
 }
 
 .cabinet__payment-warning {
+  font-size: var(--font-xs);
+  color: var(--color-text-secondary);
+  line-height: 1.4;
+}
+
+/* Pending tariff state */
+.cabinet__tariff--pending {
+  border-color: var(--color-border);
+}
+
+.cabinet__tariff-badge--pending {
+  background: var(--color-surface-muted);
+  color: var(--color-text-secondary);
+}
+
+.cabinet__tariff-pending-note {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.cabinet__tariff-pending-text {
   font-size: var(--font-xs);
   color: var(--color-text-secondary);
   line-height: 1.4;
