@@ -53,17 +53,30 @@
         <p class="cabinet__payment-card">
           {{ sub.paymentMethod.card_type }} •••• {{ sub.paymentMethod.card_last4 }}
         </p>
-        <p class="cabinet__payment-warning">⚠ Удаление карты отключит автопродление</p>
-        <button
-          class="cabinet__btn cabinet__btn--cancel"
-          :disabled="paymentLoading"
-          @click="handleDeletePaymentMethod"
-        >
-          {{ paymentLoading ? "Загрузка..." : "Удалить карту" }}
-        </button>
+        <template v-if="!deleteCardConfirm">
+          <p class="cabinet__payment-warning">⚠ Удаление карты отключит автопродление</p>
+          <button
+            class="cabinet__btn cabinet__btn--cancel"
+            :disabled="paymentLoading"
+            @click="deleteCardConfirm = true"
+          >
+            Удалить карту
+          </button>
+        </template>
+        <div v-else class="cabinet__cancel-confirm">
+          <p class="cabinet__cancel-text">Удалить привязанную карту?</p>
+          <div class="cabinet__cancel-actions">
+            <button class="cabinet__btn cabinet__btn--cancel-confirm" :disabled="paymentLoading" @click="handleDeletePaymentMethod">
+              {{ paymentLoading ? "Загрузка..." : "Да, удалить" }}
+            </button>
+            <button class="cabinet__btn cabinet__btn--cancel-dismiss" :disabled="paymentLoading" @click="deleteCardConfirm = false">Нет</button>
+          </div>
+        </div>
       </template>
       <template v-else>
-        <p class="cabinet__card-text">Карта не привязана</p>
+        <p class="cabinet__payment-warning">
+          ⚠ Карта не привязана. Для автоматического списания необходимо привязать карту.
+        </p>
         <button
           class="cabinet__btn"
           :disabled="paymentLoading"
@@ -88,6 +101,7 @@
           <span class="cabinet__tariff-name">{{ tariff.name }}</span>
           <span v-if="tariff.soon" class="cabinet__tariff-badge">Скоро</span>
           <span v-if="isCurrent(tariff)" class="cabinet__tariff-badge cabinet__tariff-badge--current">Текущий</span>
+          <span v-if="isPending(tariff)" class="cabinet__tariff-badge cabinet__tariff-badge--pending">Запланирован</span>
         </div>
         <p class="cabinet__tariff-price">{{ formatPrice(tariff) }}</p>
         <p v-if="tariff.description" class="cabinet__tariff-desc">{{ tariff.description }}</p>
@@ -128,7 +142,6 @@
         <!-- Pending: already scheduled, show badge only -->
         <template v-else-if="!tariff.soon">
           <div v-if="isPending(tariff)" class="cabinet__tariff-pending-note">
-            <span class="cabinet__tariff-badge cabinet__tariff-badge--pending">Запланирован</span>
             <p class="cabinet__tariff-pending-text">{{ pendingActivationText }}</p>
           </div>
           <!-- Selectable: primary CTA -->
@@ -165,6 +178,7 @@ const actionError = ref(null)
 const cancelConfirmId = ref(null)
 const paymentLoading = ref(false)
 const paymentError = ref(null)
+const deleteCardConfirm = ref(false)
 
 const toast = ref(null)
 let toastTimer = null
@@ -245,6 +259,7 @@ const showTariffs = computed(() => {
 
 const showPaymentMethod = computed(() => {
   if (sub.paymentMethod) return true
+  if (sub.subscription?.pending_tariff) return true
   const tariff = sub.subscription?.tariff
   return !!tariff && !tariff.is_trial_tariff
 })
@@ -294,7 +309,7 @@ const subscriptionCard = computed(() => {
       }
     }
     const pendingNote = s.pending_tariff
-      ? ` Тариф «${s.pending_tariff.name}» будет подключён с началом следующего расчётного периода.`
+      ? ` Тариф «${s.pending_tariff.name}»: ${pendingActivationText.value.toLowerCase()}.`
       : ""
     return {
       icon: IconCheck,
@@ -336,6 +351,18 @@ const subscriptionCard = computed(() => {
       description: s.current_period_end
         ? `Активен до ${formatDate(s.current_period_end)}`
         : "Подписка активна",
+      actionText: null,
+    }
+  }
+
+  if (s.status === "cancelled") {
+    return {
+      icon: IconWarning,
+      iconClass: "cabinet__card-icon--warning",
+      title: "Подписка отменена",
+      description: s.cancelled_at
+        ? `Подписка была отменена ${formatDateTime(s.cancelled_at)}.`
+        : "Подписка отменена.",
       actionText: null,
     }
   }
@@ -397,9 +424,7 @@ const ERROR_CARDS = {
     icon: IconWarning,
     iconClass: "cabinet__card-icon--warning",
     title: "Подписка отменена",
-    description: sub.subscription?.cancelled_at
-      ? `Подписка была отменена ${formatDateTime(sub.subscription.cancelled_at)}.`
-      : "Подписка отменена.",
+    description: "Подписка отменена.",
     actionText: null,
   },
 }
@@ -555,6 +580,7 @@ async function handleDeletePaymentMethod() {
   paymentLoading.value = true
   try {
     await sub.deletePaymentMethod()
+    deleteCardConfirm.value = false
   } catch (err) {
     paymentError.value = err.message ?? "Не удалось удалить карту."
   } finally {
