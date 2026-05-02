@@ -10,7 +10,7 @@
 <style scoped>
 .fab {
   position: fixed;
-  bottom: var(--nav-height);
+  bottom: calc(var(--nav-height) + 10px);
   right: max(16px, calc((100vw - 480px) / 2 + 16px));
   width: 56px;
   height: 56px;

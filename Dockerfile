@@ -1,11 +1,11 @@
 FROM node:25-alpine AS build
 
-ARG BUILD_DATE
 WORKDIR /app
 
 COPY package.json package-lock.json ./
 RUN npm ci
 
+ARG BUILD_DATE
 COPY . .
 RUN npm run build
 
