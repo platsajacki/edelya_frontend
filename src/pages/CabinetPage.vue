@@ -51,7 +51,7 @@
       <h2 class="cabinet__section-title cabinet__payment-title">Способ оплаты</h2>
       <template v-if="sub.paymentMethod">
         <p class="cabinet__payment-card">
-          {{ sub.paymentMethod.card_type }} •••• {{ sub.paymentMethod.card_last4 }}
+          {{ sub.paymentMethod.title || `${sub.paymentMethod.card_type} •••• ${sub.paymentMethod.card_last4}` }}
         </p>
         <template v-if="!deleteCardConfirm">
           <p class="cabinet__payment-warning">⚠ Удаление карты отключит автопродление</p>
@@ -115,6 +115,15 @@
             <p class="cabinet__cancel-pending">
               Подписка будет отменена по истечении текущего периода
             </p>
+            <button
+              class="cabinet__btn cabinet__btn--tariff"
+              :disabled="resumeLoading"
+              @click="resumeTariff"
+            >
+              {{ resumeLoading ? "Загрузка..." : "Возобновить подписку" }}
+            </button>
+          </template>
+          <template v-else-if="sub.subscription?.status === 'expired'">
             <button
               class="cabinet__btn cabinet__btn--tariff"
               :disabled="resumeLoading"
@@ -195,7 +204,7 @@ const tariffLoading = ref(false)
 
 const confirmSheetScenario = computed(() => {
   if (!confirmSheetTariff.value || !sub.subscription) return null
-  return getTariffChangeScenario(sub.subscription, confirmSheetTariff.value)
+  return getTariffChangeScenario(sub.subscription, confirmSheetTariff.value, sub.paymentMethod)
 })
 
 const userName = computed(() => auth.user?.first_name ?? null)
@@ -209,6 +218,7 @@ const greeting = computed(() => {
 })
 
 onMounted(async () => {
+  const isPaymentReturn = !!route.query.payment_return
   const promises = [sub.loadMySubscription(), sub.loadTariffs(), sub.loadPaymentMethod()]
   if (!sub.hasSubscription && sub.trialDays === null) {
     promises.push(sub.loadTrialDuration())
@@ -216,7 +226,7 @@ onMounted(async () => {
   await Promise.allSettled(promises)
 
   // Returned from YooKassa redirect — refresh subscription and card, then clear query param
-  if (route.query.payment_return) {
+  if (isPaymentReturn) {
     await Promise.allSettled([sub.loadMySubscription(), sub.loadPaymentMethod()])
     router.replace({ query: {} })
     showToast("Подписка обновлена")
@@ -248,6 +258,7 @@ function isPending(tariff) {
 const pendingActivationText = computed(() => {
   const s = sub.subscription
   if (!s) return ""
+  if (s.cancelled_at) return "Тариф не может быть подключён, пока подписка отменена. Возобновите подписку."
   if (s.status === "trial") return "Будет подключён после окончания пробного периода"
   return "Будет подключён с началом следующего расчётного периода"
 })
@@ -344,13 +355,16 @@ const subscriptionCard = computed(() => {
         actionText: null,
       }
     }
+    const pendingNote = s.pending_tariff
+      ? ` Тариф «${s.pending_tariff.name}» будет подключён с ${s.current_period_end ? formatDate(s.current_period_end) : "начала следующего периода"}.`
+      : ""
     return {
       icon: IconCheck,
       iconClass: "cabinet__card-icon--ok",
       title: `Тариф: ${s.tariff?.name}`,
-      description: s.current_period_end
-        ? `Активен до ${formatDate(s.current_period_end)}`
-        : "Подписка активна",
+      description: (s.current_period_end
+        ? `Активен до ${formatDate(s.current_period_end)}.`
+        : "Подписка активна.") + pendingNote,
       actionText: null,
     }
   }
@@ -403,14 +417,14 @@ const ERROR_CARDS = {
     icon: IconWarning,
     iconClass: "cabinet__card-icon--warning",
     title: "Подписка истекла",
-    description: "Продлите подписку, чтобы продолжить пользоваться сервисом.",
+    description: "Возможно, возникла проблема с оплатой. Проверьте платёжную информацию.",
     actionText: null,
   },
   expired: {
     icon: IconWarning,
     iconClass: "cabinet__card-icon--warning",
     title: "Подписка истекла",
-    description: "Продлите подписку, чтобы продолжить пользоваться сервисом.",
+    description: "Возможно, возникла проблема с оплатой. Проверьте платёжную информацию.",
     actionText: null,
   },
   subscription_inactive: {

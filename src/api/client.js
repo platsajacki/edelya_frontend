@@ -201,7 +201,9 @@ export async function api(url, options = {}) {
     subscriptionStore.setError(err.code, err.message)
 
     const { router } = await import("../router")
-    router.push("/cabinet")
+    if (router.currentRoute.value.path !== "/cabinet") {
+      router.push("/cabinet")
+    }
 
     throw err
   }

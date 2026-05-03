@@ -29,13 +29,14 @@ function formatDate(iso) {
  *   downgrade    — active, cheaper tariff → schedule for next period
  *   upgrade      — active, more expensive → immediate charge + activation
  *
- * @param {object} subscription - current subscription from the store
- * @param {object} newTariff    - the tariff the user wants to switch to
+ * @param {object} subscription  - current subscription from the store
+ * @param {object} newTariff     - the tariff the user wants to switch to
+ * @param {object|null} paymentMethod - payment method from the store (takes priority)
  * @returns {{ type, title, description, confirmLabel, proration: number|null }}
  */
-export function getTariffChangeScenario(subscription, newTariff) {
+export function getTariffChangeScenario(subscription, newTariff, paymentMethod = null) {
   const { status, tariff: currentTariff, payment_method, current_period_end } = subscription
-  const hasCard = payment_method?.is_active === true
+  const hasCard = paymentMethod?.is_active === true || payment_method?.is_active === true
 
   if (status === "trial") {
     if (!hasCard) {
