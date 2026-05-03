@@ -121,11 +121,24 @@ export const usePlanningStore = defineStore("planning", {
       await this.loadWeek()
     },
 
+    async _refreshAfterMutation() {
+      const refreshes = [this.loadWeek()]
+      if (this.nextWeekData) {
+        const { year, week } = getISOWeek(new Date(this.nextWeekData.start_week + 'T00:00:00'))
+        refreshes.push(
+          fetchWeek(year, week)
+            .then((data) => { this.nextWeekData = data })
+            .catch(() => {})
+        )
+      }
+      await Promise.all(refreshes)
+    },
+
     async addCookingEvent(payload) {
       try {
         await createCookingEvent(payload)
         this.showToast("Готовка создана")
-        await this.loadWeek()
+        await this._refreshAfterMutation()
       } catch (err) {
         this.showToast("Не удалось создать готовку")
         throw err
@@ -136,7 +149,7 @@ export const usePlanningStore = defineStore("planning", {
       try {
         await createMealPlanItem(payload)
         this.showToast("Приём пищи добавлен")
-        await this.loadWeek()
+        await this._refreshAfterMutation()
       } catch (err) {
         this.showToast("Не удалось добавить приём пищи")
         throw err
@@ -147,7 +160,7 @@ export const usePlanningStore = defineStore("planning", {
       try {
         await updateCookingEvent(id, payload)
         this.showToast("Готовка обновлена")
-        await this.loadWeek()
+        await this._refreshAfterMutation()
       } catch (err) {
         this.showToast("Не удалось обновить готовку")
         throw err
@@ -158,7 +171,7 @@ export const usePlanningStore = defineStore("planning", {
       try {
         await deleteCookingEvent(id)
         this.showToast("Готовка удалена")
-        await this.loadWeek()
+        await this._refreshAfterMutation()
       } catch (err) {
         this.showToast("Не удалось удалить готовку")
         throw err
@@ -169,7 +182,7 @@ export const usePlanningStore = defineStore("planning", {
       try {
         await updateMealPlanItem(id, payload)
         this.showToast("Приём пищи обновлён")
-        await this.loadWeek()
+        await this._refreshAfterMutation()
       } catch (err) {
         this.showToast("Не удалось обновить приём пищи")
         throw err
@@ -180,7 +193,7 @@ export const usePlanningStore = defineStore("planning", {
       try {
         await deleteMealPlanItem(id)
         this.showToast("Приём пищи удалён")
-        await this.loadWeek()
+        await this._refreshAfterMutation()
       } catch (err) {
         this.showToast("Не удалось удалить приём пищи")
         throw err
