@@ -64,6 +64,22 @@ const ERROR_MESSAGES = {
   "date_from must be before or equal to date_to.": "Дата начала должна быть раньше или равна дате окончания.",
   "At least one ingredient must be required.": "Нужен хотя бы один обязательный ингредиент.",
   "This ingredient is already in the shopping list.": "Этот ингредиент уже в списке покупок.",
+  "User already has a subscription.": "У вас уже есть подписка.",
+  "User must be authenticated.": "Необходимо войти в аккаунт.",
+  "User must be authenticated to select a tariff": "Необходимо войти в аккаунт.",
+  "No subscription found.": "Подписка не найдена.",
+  "Tariff not found": "Тариф не найден.",
+  "User subscription not found": "Подписка не найдена.",
+  "Payment method already exists. Delete the existing one before adding a new one.": "Способ оплаты уже привязан. Удалите текущий, чтобы добавить новый.",
+  "You are already subscribed to this tariff": "Вы уже подписаны на этот тариф.",
+  "You have a pending subscription to this tariff": "Этот тариф уже запланирован.",
+  "Upgrade payment was canceled": "Платёж был отменён. Попробуйте ещё раз.",
+  "Active payment method required to upgrade. Please update your payment info.": "Требуется активный способ оплаты. Обновите платёжные данные.",
+  "Subscription is already cancelled.": "Подписка уже отменена.",
+  "Subscription is already in the process of cancellation.": "Отмена уже в процессе.",
+  "Subscription cannot be cancelled in current status.": "Подписку невозможно отменить в текущем статусе.",
+  "Subscription is not pending cancellation.": "Подписка не находится в процессе отмены.",
+  "Subscription cannot be resumed in current status.": "Подписку невозможно возобновить в текущем статусе.",
 }
 
 const SUBSCRIPTION_DETAIL_TO_CODE = {
@@ -118,6 +134,8 @@ function translateMessage(msg) {
     return `Значение должно быть не менее ${n}.`
   }
   if (/must make a unique set/.test(msg)) return "Такая запись уже существует."
+  // "Cannot select tariff for subscription with status 'xxx'" — dynamic
+  if (/^Cannot select tariff for subscription with status/.test(msg)) return "Смена тарифа недоступна для текущего статуса подписки."
   if (/^This field is required/.test(msg)) return "Обязательное поле."
   if (/^This field may not be blank/.test(msg)) return "Поле не может быть пустым."
   if (/^This field may not be null/.test(msg)) return "Поле не может быть пустым."

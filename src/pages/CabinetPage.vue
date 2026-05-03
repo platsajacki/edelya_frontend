@@ -502,6 +502,12 @@ function closeConfirmSheet() {
   confirmSheetTariff.value = null
 }
 
+const TARIFF_RESULT_DESCRIPTIONS = {
+  "Tariff change scheduled for the next billing cycle.": "Смена тарифа запланирована.",
+  "Tariff downgrade scheduled for the next billing cycle.": "Понижение тарифа запланировано.",
+  "Tariff upgraded successfully.": "Тариф успешно повышен.",
+}
+
 const CONFLICT_MESSAGES = {
   "You are already subscribed to this tariff": "Вы уже подписаны на этот тариф.",
   "You have a pending subscription to this tariff": "Этот тариф уже запланирован.",
@@ -519,7 +525,7 @@ async function onConfirmTariff() {
     if (result.action === "redirect") {
       window.location.href = result.confirmation_url
     } else {
-      showToast(result.description ?? "Тариф изменён.")
+      showToast(TARIFF_RESULT_DESCRIPTIONS[result.description] ?? result.description ?? "Тариф изменён.")
     }
   } catch (err) {
     showConfirmSheet.value = false
