@@ -32,7 +32,9 @@ onMounted(async () => {
     await auth.init()
     if (auth.user) {
       await subscription.loadMySubscription().catch(() => {})
-      router.push("/")
+      if (router.currentRoute.value.path === '/') {
+        router.push("/")
+      }
     }
   } catch (err) {
     console.error("Auth failed:", err)
