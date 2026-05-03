@@ -51,7 +51,11 @@
       <h2 class="cabinet__section-title cabinet__payment-title">Способ оплаты</h2>
       <template v-if="sub.paymentMethod">
         <p class="cabinet__payment-card">
-          {{ sub.paymentMethod.title || `${sub.paymentMethod.card_type} •••• ${sub.paymentMethod.card_last4}` }}
+          {{
+            sub.paymentMethod?.card_type && sub.paymentMethod?.card_last4
+              ? `${sub.paymentMethod.card_type} *${sub.paymentMethod.card_last4}`
+              : sub.paymentMethod?.title
+          }}
         </p>
         <template v-if="!deleteCardConfirm">
           <p class="cabinet__payment-warning">⚠ Удаление карты отключит автопродление</p>
