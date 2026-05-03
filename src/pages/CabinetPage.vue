@@ -130,10 +130,9 @@
           <template v-else-if="sub.subscription?.status === 'expired'">
             <button
               class="cabinet__btn cabinet__btn--tariff"
-              :disabled="resumeLoading"
-              @click="resumeTariff"
+              @click="selectTariff(tariff)"
             >
-              {{ resumeLoading ? "Загрузка..." : "Возобновить подписку" }}
+              Возобновить подписку
             </button>
           </template>
           <template v-else-if="cancelConfirmId !== tariff.id">
