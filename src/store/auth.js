@@ -1,10 +1,12 @@
 import { defineStore } from "pinia"
-import { login, telegramLogin } from "../services/authService"
-import { clearTokens, getAccess, getRefreshExp } from "../storage/tokenStorage"
+import { login, telegramLogin, telegramLoginWithConsent } from "../services/authService"
+import { clearTokens, getAccess, getRefreshExp, saveTokens } from "../storage/tokenStorage"
 
 export const useAuthStore = defineStore("auth", {
   state: () => ({
-    user: null
+    user: null,
+    requiresConsent: false,
+    consentFields: [],
   }),
 
   actions: {
@@ -43,13 +45,31 @@ export const useAuthStore = defineStore("auth", {
       tg.ready()
       tg.expand()
 
-      await telegramLogin(tg.initData)
+      const result = await telegramLogin(tg.initData)
+      if (result.ok) {
+        saveTokens(result.tokens)
+        this.user = tg.initDataUnsafe?.user ?? null
+      } else {
+        this.requiresConsent = true
+        this.consentFields = result.consents
+      }
+    },
+
+    async submitConsent(terms, marketing) {
+      const tg = window.Telegram?.WebApp
+      if (!tg?.initData) throw new Error("Нет данных Telegram.")
+      const tokens = await telegramLoginWithConsent(tg.initData, terms, marketing)
+      saveTokens(tokens)
       this.user = tg.initDataUnsafe?.user ?? null
+      this.requiresConsent = false
+      this.consentFields = []
     },
 
     logout() {
       clearTokens()
       this.user = null
+      this.requiresConsent = false
+      this.consentFields = []
     }
   }
 })

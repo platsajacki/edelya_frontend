@@ -18,6 +18,10 @@
         />
         <h2 class="cabinet__card-heading">{{ subscriptionCard.title }}</h2>
         <p class="cabinet__card-text">{{ subscriptionCard.description }}</p>
+        <p v-if="subscriptionCard.actionText" class="cabinet__recurring-notice">
+          После окончания бесплатного периода подписка продлевается автоматически каждый месяц.
+          Автопродление можно отключить в любой момент.
+        </p>
         <button
           v-if="subscriptionCard.actionText"
           class="cabinet__btn"
@@ -696,6 +700,14 @@ async function handleDeletePaymentMethod() {
 .cabinet__error {
   font-size: var(--font-sm);
   color: var(--color-error);
+}
+
+.cabinet__recurring-notice {
+  margin: 0;
+  font-size: var(--font-xs, 12px);
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+  text-align: center;
 }
 
 /* Tariffs section */

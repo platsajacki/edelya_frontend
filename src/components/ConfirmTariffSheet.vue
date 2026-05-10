@@ -14,6 +14,10 @@
     </div>
 
     <template #footer>
+      <p class="tariff-confirm__recurring-notice">
+        Подписка продлевается автоматически каждый месяц.
+        Автопродление можно отключить в любой момент.
+      </p>
       <div class="tariff-confirm__actions">
         <button
           type="button"
@@ -116,6 +120,14 @@ function onClose() {
 
 .tariff-confirm__btn--cancel:hover:not(:disabled) {
   opacity: 0.75;
+}
+
+.tariff-confirm__recurring-notice {
+  margin: 0 0 12px;
+  font-size: var(--font-xs, 12px);
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+  text-align: center;
 }
 
 .tariff-confirm__btn--confirm {

@@ -2,6 +2,7 @@
   <div v-if="loading" class="app-loading">
     <div class="spinner" />
   </div>
+  <ConsentScreen v-else-if="auth.requiresConsent" />
   <template v-else>
     <RouterView v-slot="{ Component }">
       <KeepAlive :include="['RecipesPage', 'ShoppingPage']">
@@ -18,6 +19,7 @@ import { useRouter } from "vue-router"
 import { useAuthStore } from "./store/auth"
 import { useSubscriptionStore } from "./store/subscription"
 import BottomNav from "./components/BottomNav.vue"
+import ConsentScreen from "./components/ConsentScreen.vue"
 
 const auth = useAuthStore()
 const subscription = useSubscriptionStore()

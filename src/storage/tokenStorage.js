@@ -12,17 +12,17 @@ export function saveTokens(tokens) {
   if (!tokens?.access || !tokens?.refresh) {
     throw new Error("Invalid token response from server")
   }
-  localStorage.setItem("access", tokens.access)
+  sessionStorage.setItem("access", tokens.access)
   localStorage.setItem("refresh", tokens.refresh)
 
   const accessExp = decodeJwtExp(tokens.access)
   const refreshExp = decodeJwtExp(tokens.refresh)
-  if (accessExp !== null) localStorage.setItem("access_exp", accessExp)
+  if (accessExp !== null) sessionStorage.setItem("access_exp", accessExp)
   if (refreshExp !== null) localStorage.setItem("refresh_exp", refreshExp)
 }
 
 export function getAccess() {
-  return localStorage.getItem("access")
+  return sessionStorage.getItem("access")
 }
 
 export function getRefresh() {
@@ -30,7 +30,7 @@ export function getRefresh() {
 }
 
 export function getAccessExp() {
-  const exp = localStorage.getItem("access_exp")
+  const exp = sessionStorage.getItem("access_exp")
   return exp !== null ? Number(exp) : null
 }
 
@@ -40,8 +40,8 @@ export function getRefreshExp() {
 }
 
 export function clearTokens() {
-  localStorage.removeItem("access")
+  sessionStorage.removeItem("access")
+  sessionStorage.removeItem("access_exp")
   localStorage.removeItem("refresh")
-  localStorage.removeItem("access_exp")
   localStorage.removeItem("refresh_exp")
 }
