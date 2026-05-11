@@ -127,7 +127,6 @@ function onClose() {
   font-size: var(--font-xs, 12px);
   color: var(--color-text-secondary);
   line-height: 1.5;
-  text-align: center;
 }
 
 .tariff-confirm__btn--confirm {

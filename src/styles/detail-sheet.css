@@ -175,7 +175,6 @@
   font-size: var(--font-base);
   font-weight: 600;
   color: var(--color-danger-muted);
-  text-align: center;
   margin: 0;
 }
 

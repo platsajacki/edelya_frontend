@@ -19,7 +19,7 @@
         <h2 class="cabinet__card-heading">{{ subscriptionCard.title }}</h2>
         <p class="cabinet__card-text">{{ subscriptionCard.description }}</p>
         <p v-if="subscriptionCard.actionText" class="cabinet__recurring-notice">
-          На время пробного периода доступны все функции сервиса бесплатно.
+          На время пробного периода все функции сервиса доступны бесплатно.
           После мы предложим выбрать тариф для продолжения доступа к сервису.
         </p>
         <button
