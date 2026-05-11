@@ -88,10 +88,14 @@ async function submit() {
   display: flex;
   flex-direction: column;
   gap: 24px;
+  background: var(--color-surface);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
+  padding: 32px 24px;
 }
 
 .consent__title {
-  font-size: var(--font-title);
+  font-size: var(--font-lg);
   font-weight: 700;
   color: var(--color-text);
   margin: 0;
@@ -116,7 +120,7 @@ async function submit() {
   height: 20px;
   flex-shrink: 0;
   margin-top: 2px;
-  accent-color: var(--color-primary);
+  accent-color: var(--color-mint);
   cursor: pointer;
 }
 
@@ -127,7 +131,7 @@ async function submit() {
 }
 
 .consent__link {
-  color: var(--color-primary);
+  color: var(--color-mint);
   text-decoration: underline;
 }
 
@@ -146,8 +150,8 @@ async function submit() {
   padding: 14px 16px;
   border: none;
   border-radius: var(--radius-sm);
-  background: var(--color-primary);
-  color: var(--color-primary-text, #fff);
+  background: var(--color-mint);
+  color: var(--on-primary);
   font-size: var(--font-body);
   font-weight: 600;
   cursor: pointer;

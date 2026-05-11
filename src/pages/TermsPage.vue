@@ -21,7 +21,7 @@
 }
 
 .legal-page__title {
-  font-size: var(--font-title);
+  font-size: var(--font-lg);
   font-weight: 700;
   color: var(--color-text);
   margin: 0;
