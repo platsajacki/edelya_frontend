@@ -1,15 +1,109 @@
 <template>
   <Main v-if="auth.user" :user="auth.user" />
-  <main v-else>
-      Заходите в Telegram
-      <a :href="botUrl" target="_blank">@edelya_bot</a>
+  <main v-else class="home-landing">
+    <div class="home-landing__card">
+      <img src="/edelya.svg" alt="Еделя" class="home-landing__logo" />
+      <h1 class="home-landing__title">Еделя</h1>
+      <p class="home-landing__subtitle">Планировщик питания.<br>Доступен в Telegram Mini App</p>
+      <a :href="botUrl" target="_blank" rel="noopener noreferrer" class="home-landing__bot-link">
+        @edelya_plan_bot
+      </a>
+    </div>
+    <footer class="home-landing__footer">
+      <router-link to="/terms" class="home-landing__legal-link">Условия использования</router-link>
+      <span class="home-landing__footer-sep">·</span>
+      <router-link to="/privacy" class="home-landing__legal-link">Политика конфиденциальности</router-link>
+    </footer>
   </main>
 </template>
 
 <script setup>
 import { useAuthStore } from "../store/auth"
-import Main from "../components/Main.vue";
+import Main from "../components/Main.vue"
 
 const auth = useAuthStore()
 const botUrl = window.__APP_CONFIG__?.telegramBot ?? import.meta.env.VITE_TELEGRAM_BOT
 </script>
+
+<style scoped>
+.home-landing {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 16px 40px;
+  background: var(--color-bg);
+}
+
+.home-landing__card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  text-align: center;
+  flex: 1;
+  justify-content: center;
+}
+
+.home-landing__logo {
+  width: 64px;
+  height: 56px;
+}
+
+.home-landing__title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--color-text);
+  margin: 0;
+}
+
+.home-landing__subtitle {
+  font-size: var(--font-body);
+  color: var(--color-text-secondary);
+  margin: 0;
+  max-width: 280px;
+  line-height: 1.5;
+}
+
+.home-landing__bot-link {
+  display: inline-block;
+  margin-top: 4px;
+  padding: 12px 24px;
+  background: var(--color-mint);
+  color: var(--on-primary);
+  font-size: var(--font-body);
+  font-weight: 600;
+  border-radius: 12px;
+  text-decoration: none;
+  transition: background 0.15s;
+}
+
+.home-landing__bot-link:hover {
+  background: var(--color-mint-hover);
+}
+
+.home-landing__footer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.home-landing__footer-sep {
+  color: var(--color-text-secondary);
+  font-size: 0.85rem;
+}
+
+.home-landing__legal-link {
+  font-size: 0.8rem;
+  color: var(--color-text-secondary);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.home-landing__legal-link:hover {
+  color: var(--color-text);
+}
+</style>
