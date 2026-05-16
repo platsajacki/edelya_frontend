@@ -108,6 +108,7 @@ const cardStyle = computed(() => {
   font-weight: 500;
   line-height: 1.3;
   color: var(--color-text);
+  min-width: 0;
   -webkit-hyphens: auto;
   hyphens: auto;
   overflow-wrap: break-word;
