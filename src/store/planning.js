@@ -209,7 +209,6 @@ export const usePlanningStore = defineStore("planning", {
     },
 
     async handleDragEnd({ itemId, fromDate, toDate, oldIndex, newIndex, type }) {
-      const numericId = Number(itemId)
       const opId = ++_opCounter
       const snapshot = JSON.parse(JSON.stringify(this.weekData))
       const nextSnapshot = this.nextWeekData ? JSON.parse(JSON.stringify(this.nextWeekData)) : null
@@ -218,15 +217,15 @@ export const usePlanningStore = defineStore("planning", {
         (toDate   >= this.weekData.start_week && toDate   <= this.weekData.end_week)
       const nextInvolved = !!this.nextWeekData
 
-      if (!this.savingItemIds.includes(numericId)) {
-        this.savingItemIds.push(numericId)
+      if (!this.savingItemIds.includes(itemId)) {
+        this.savingItemIds.push(itemId)
       }
 
       try {
         if (type === 'meals') {
-          await this._handleMealDrag(numericId, fromDate, toDate, oldIndex, newIndex)
+          await this._handleMealDrag(itemId, fromDate, toDate, oldIndex, newIndex)
         } else if (type === 'cooking') {
-          await this._handleCookingDrag(numericId, fromDate, toDate)
+          await this._handleCookingDrag(itemId, fromDate, toDate)
         }
         if (opId === _opCounter) {
           this._silentRefreshBackground(currentInvolved, nextInvolved, opId)
@@ -238,7 +237,7 @@ export const usePlanningStore = defineStore("planning", {
         }
         this.showToast(err?.message || "Не удалось переместить")
       } finally {
-        const idx = this.savingItemIds.indexOf(numericId)
+        const idx = this.savingItemIds.indexOf(itemId)
         if (idx !== -1) this.savingItemIds.splice(idx, 1)
       }
     },
