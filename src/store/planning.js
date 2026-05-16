@@ -19,6 +19,11 @@ function getISOWeek(date) {
   return { year: d.getUTCFullYear(), week }
 }
 
+function lastISOWeek(year) {
+  // Dec 28 is always in the last ISO week of the year
+  return getISOWeek(new Date(year, 11, 28)).week
+}
+
 function formatDateRange(startISO, endISO) {
   const fmt = (iso) => {
     const d = new Date(iso + "T00:00:00")
@@ -104,14 +109,14 @@ export const usePlanningStore = defineStore("planning", {
         this.week--
       } else {
         this.year--
-        this.week = 52
+        this.week = lastISOWeek(this.year)
       }
       this.nextWeekData = null
       await this.loadWeek()
     },
 
     async nextWeek() {
-      if (this.week < 52) {
+      if (this.week < lastISOWeek(this.year)) {
         this.week++
       } else {
         this.year++
@@ -203,9 +208,12 @@ export const usePlanningStore = defineStore("planning", {
     async handleDragEnd({ itemId, fromDate, toDate, oldIndex, newIndex, type }) {
       const snapshot = JSON.parse(JSON.stringify(this.weekData))
       const nextSnapshot = this.nextWeekData ? JSON.parse(JSON.stringify(this.nextWeekData)) : null
-      const nextInvolved = this.nextWeekData && (
+      const currentInvolved =
+        (fromDate >= this.weekData.start_week && fromDate <= this.weekData.end_week) ||
+        (toDate   >= this.weekData.start_week && toDate   <= this.weekData.end_week)
+      const nextInvolved = !!this.nextWeekData && (
         (fromDate >= this.nextWeekData.start_week && fromDate <= this.nextWeekData.end_week) ||
-        (toDate >= this.nextWeekData.start_week && toDate <= this.nextWeekData.end_week)
+        (toDate   >= this.nextWeekData.start_week && toDate   <= this.nextWeekData.end_week)
       )
 
       try {
@@ -215,7 +223,7 @@ export const usePlanningStore = defineStore("planning", {
           await this._handleCookingDrag(itemId, fromDate, toDate)
         }
         // Fire-and-forget background sync — no loading flag, no visual jump
-        this._silentRefreshBackground(nextInvolved)
+        this._silentRefreshBackground(currentInvolved, nextInvolved)
       } catch {
         this.weekData = snapshot
         if (nextSnapshot) this.nextWeekData = nextSnapshot
@@ -223,14 +231,25 @@ export const usePlanningStore = defineStore("planning", {
       }
     },
 
-    async _silentRefreshBackground(includeNext) {
+    async _silentRefreshBackground(includeCurrent, includeNext) {
       try {
-        const fresh = await fetchWeek(this.year, this.week)
-        this.weekData.meal_plan_items.splice(0, Infinity, ...fresh.meal_plan_items)
-        this.weekData.cooking_events.splice(0, Infinity, ...fresh.cooking_events)
+        const fetches = []
+        if (includeCurrent) {
+          fetches.push(fetchWeek(this.year, this.week))
+        }
         if (includeNext && this.nextWeekData) {
           const { year, week } = getISOWeek(new Date(this.nextWeekData.start_week + 'T00:00:00'))
-          const freshNext = await fetchWeek(year, week)
+          fetches.push(fetchWeek(year, week))
+        }
+        const results = await Promise.all(fetches)
+        let i = 0
+        if (includeCurrent) {
+          const fresh = results[i++]
+          this.weekData.meal_plan_items.splice(0, Infinity, ...fresh.meal_plan_items)
+          this.weekData.cooking_events.splice(0, Infinity, ...fresh.cooking_events)
+        }
+        if (includeNext && this.nextWeekData) {
+          const freshNext = results[i]
           this.nextWeekData.meal_plan_items.splice(0, Infinity, ...freshNext.meal_plan_items)
           this.nextWeekData.cooking_events.splice(0, Infinity, ...freshNext.cooking_events)
         }
