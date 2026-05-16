@@ -232,29 +232,46 @@ export const usePlanningStore = defineStore("planning", {
     },
 
     async _silentRefreshBackground(includeCurrent, includeNext) {
-      try {
-        const fetches = []
-        if (includeCurrent) {
-          fetches.push(fetchWeek(this.year, this.week))
-        }
-        if (includeNext && this.nextWeekData) {
-          const { year, week } = getISOWeek(new Date(this.nextWeekData.start_week + 'T00:00:00'))
-          fetches.push(fetchWeek(year, week))
-        }
-        const results = await Promise.all(fetches)
-        let i = 0
-        if (includeCurrent) {
-          const fresh = results[i++]
+      const fetches = []
+      if (includeCurrent) {
+        fetches.push(fetchWeek(this.year, this.week))
+      }
+      if (includeNext && this.nextWeekData) {
+        const { year, week } = getISOWeek(new Date(this.nextWeekData.start_week + 'T00:00:00'))
+        fetches.push(fetchWeek(year, week))
+      }
+      const results = await Promise.allSettled(fetches)
+      let i = 0
+      if (includeCurrent) {
+        const result = results[i++]
+        if (result.status === 'fulfilled') {
+          const fresh = result.value
           this.weekData.meal_plan_items.splice(0, Infinity, ...fresh.meal_plan_items)
           this.weekData.cooking_events.splice(0, Infinity, ...fresh.cooking_events)
         }
-        if (includeNext && this.nextWeekData) {
-          const freshNext = results[i]
-          this.nextWeekData.meal_plan_items.splice(0, Infinity, ...freshNext.meal_plan_items)
-          this.nextWeekData.cooking_events.splice(0, Infinity, ...freshNext.cooking_events)
+      }
+      if (includeNext && this.nextWeekData) {
+        const result = results[i]
+        if (result.status === 'fulfilled') {
+          const freshNext = result.value
+          const localMeals = this.nextWeekData.meal_plan_items
+          const freshMeals = freshNext.meal_plan_items
+          const freshMealIds = new Set(freshMeals.map((m) => m.id))
+          const merged = freshMeals.slice()
+          for (const m of localMeals) {
+            if (!freshMealIds.has(m.id)) merged.push(m)
+          }
+          merged.sort((a, b) => (a.position ?? 0) - (b.position ?? 0))
+          this.nextWeekData.meal_plan_items.splice(0, Infinity, ...merged)
+          const localEvents = this.nextWeekData.cooking_events
+          const freshEvents = freshNext.cooking_events
+          const freshEventIds = new Set(freshEvents.map((e) => e.id))
+          const mergedEvents = freshEvents.slice()
+          for (const e of localEvents) {
+            if (!freshEventIds.has(e.id)) mergedEvents.push(e)
+          }
+          this.nextWeekData.cooking_events.splice(0, Infinity, ...mergedEvents)
         }
-      } catch {
-        // Optimistic state remains — silent failure is acceptable
       }
     },
 
