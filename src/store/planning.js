@@ -211,18 +211,13 @@ export const usePlanningStore = defineStore("planning", {
       const currentInvolved =
         (fromDate >= this.weekData.start_week && fromDate <= this.weekData.end_week) ||
         (toDate   >= this.weekData.start_week && toDate   <= this.weekData.end_week)
-      const nextInvolved = !!this.nextWeekData && (
-        (fromDate >= this.nextWeekData.start_week && fromDate <= this.nextWeekData.end_week) ||
-        (toDate   >= this.nextWeekData.start_week && toDate   <= this.nextWeekData.end_week)
-      )
-
+      const nextInvolved = !!this.nextWeekData
       try {
         if (type === 'meals') {
           await this._handleMealDrag(itemId, fromDate, toDate, oldIndex, newIndex)
         } else if (type === 'cooking') {
           await this._handleCookingDrag(itemId, fromDate, toDate)
         }
-        // Fire-and-forget background sync — no loading flag, no visual jump
         this._silentRefreshBackground(currentInvolved, nextInvolved)
       } catch {
         this.weekData = snapshot
