@@ -109,6 +109,13 @@
   white-space: nowrap;
 }
 
+.detail__ingredient-right {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
 .detail__ingredient-optional {
   font-size: var(--font-xs);
   color: var(--color-mint);
