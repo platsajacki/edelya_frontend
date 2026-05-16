@@ -48,6 +48,8 @@ function emptyWeek(year, week) {
   }
 }
 
+let _opCounter = 0
+
 export const usePlanningStore = defineStore("planning", {
   state: () => {
     const { year, week } = getISOWeek(new Date())
@@ -60,6 +62,7 @@ export const usePlanningStore = defineStore("planning", {
       loadingNextWeek: false,
       loadError: false,
       toast: null,
+      savingItemIds: [],
     }
   },
 
@@ -206,27 +209,41 @@ export const usePlanningStore = defineStore("planning", {
     },
 
     async handleDragEnd({ itemId, fromDate, toDate, oldIndex, newIndex, type }) {
+      const numericId = Number(itemId)
+      const opId = ++_opCounter
       const snapshot = JSON.parse(JSON.stringify(this.weekData))
       const nextSnapshot = this.nextWeekData ? JSON.parse(JSON.stringify(this.nextWeekData)) : null
       const currentInvolved =
         (fromDate >= this.weekData.start_week && fromDate <= this.weekData.end_week) ||
         (toDate   >= this.weekData.start_week && toDate   <= this.weekData.end_week)
       const nextInvolved = !!this.nextWeekData
+
+      if (!this.savingItemIds.includes(numericId)) {
+        this.savingItemIds.push(numericId)
+      }
+
       try {
         if (type === 'meals') {
-          await this._handleMealDrag(itemId, fromDate, toDate, oldIndex, newIndex)
+          await this._handleMealDrag(numericId, fromDate, toDate, oldIndex, newIndex)
         } else if (type === 'cooking') {
-          await this._handleCookingDrag(itemId, fromDate, toDate)
+          await this._handleCookingDrag(numericId, fromDate, toDate)
         }
-        this._silentRefreshBackground(currentInvolved, nextInvolved)
-      } catch {
-        this.weekData = snapshot
-        if (nextSnapshot) this.nextWeekData = nextSnapshot
-        this.showToast("Не удалось переместить")
+        if (opId === _opCounter) {
+          this._silentRefreshBackground(currentInvolved, nextInvolved, opId)
+        }
+      } catch (err) {
+        if (opId === _opCounter) {
+          this.weekData = snapshot
+          if (nextSnapshot) this.nextWeekData = nextSnapshot
+        }
+        this.showToast(err?.message || "Не удалось переместить")
+      } finally {
+        const idx = this.savingItemIds.indexOf(numericId)
+        if (idx !== -1) this.savingItemIds.splice(idx, 1)
       }
     },
 
-    async _silentRefreshBackground(includeCurrent, includeNext) {
+    async _silentRefreshBackground(includeCurrent, includeNext, opId) {
       try {
         const fetches = []
         if (includeCurrent) {
@@ -237,6 +254,8 @@ export const usePlanningStore = defineStore("planning", {
           fetches.push(fetchWeek(year, week))
         }
         const results = await Promise.all(fetches)
+        // Discard if a newer drag started while this fetch was in-flight
+        if (opId !== _opCounter) return
         let i = 0
         if (includeCurrent) {
           const fresh = results[i++]
@@ -367,8 +386,58 @@ export const usePlanningStore = defineStore("planning", {
         toEvents.push(event)
       }
 
+      // Compute day shift delta (backend shifts linked meal_plan_items by the same amount)
+      const deltaDays = Math.round(
+        (new Date(toDate + 'T00:00:00').getTime() - new Date(fromDate + 'T00:00:00').getTime()) / 86400000
+      )
+
+      // Optimistically update cooking event date
       event.cooking_date = toDate
-      await updateCookingEvent(itemId, { cooking_date: toDate })
+
+      // Optimistically shift all linked meal_plan_items by the same delta
+      const linkedItems = [
+        ...this.weekData.meal_plan_items,
+        ...(this.nextWeekData ? this.nextWeekData.meal_plan_items : []),
+      ].filter(m => m.cooking_event === itemId)
+
+      for (const item of linkedItems) {
+        const oldDate = item.date
+        const d = new Date(oldDate + 'T00:00:00')
+        d.setDate(d.getDate() + deltaDays)
+        const newDate = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+
+        if (this.nextWeekData) {
+          const nextStart = this.nextWeekData.start_week
+          if (oldDate < nextStart && newDate >= nextStart) {
+            const i = this.weekData.meal_plan_items.indexOf(item)
+            if (i !== -1) this.weekData.meal_plan_items.splice(i, 1)
+            this.nextWeekData.meal_plan_items.push(item)
+          } else if (oldDate >= nextStart && newDate < nextStart) {
+            const i = this.nextWeekData.meal_plan_items.indexOf(item)
+            if (i !== -1) this.nextWeekData.meal_plan_items.splice(i, 1)
+            this.weekData.meal_plan_items.push(item)
+          }
+        }
+
+        item.date = newDate
+      }
+
+      const response = await updateCookingEvent(itemId, { cooking_date: toDate })
+
+      // Sync linked meal_plan_items from server response (canonical dates from backend)
+      if (response?.meal_plan_items?.length) {
+        const allItems = [
+          ...this.weekData.meal_plan_items,
+          ...(this.nextWeekData ? this.nextWeekData.meal_plan_items : []),
+        ]
+        for (const serverItem of response.meal_plan_items) {
+          const local = allItems.find(m => m.id === serverItem.id)
+          if (local) {
+            local.date = serverItem.date
+            local.position = serverItem.position
+          }
+        }
+      }
     },
   },
 })
