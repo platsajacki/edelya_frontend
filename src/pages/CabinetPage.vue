@@ -20,7 +20,7 @@
         <p class="cabinet__card-text">{{ subscriptionCard.description }}</p>
         <p v-if="subscriptionCard.actionText" class="cabinet__recurring-notice">
           На время пробного периода все функции сервиса доступны бесплатно.
-          После мы предложим выбрать тариф для продолжения доступа к сервису.
+          Далее от 99 руб./месяц.
         </p>
         <button
           v-if="subscriptionCard.actionText"
@@ -293,7 +293,7 @@ const subscriptionCard = computed(() => {
         iconClass: "cabinet__card-icon--warning",
         title: "Начните бесплатный период",
         description: days
-          ? `У вас ещё нет подписки. Попробуйте бесплатно ${days} дней!`
+          ? `У вас ещё нет подписки. Попробуйте бесплатно ${getWeekFromDays(days)}!`
           : "У вас ещё нет подписки. Попробуйте бесплатно!",
         actionText: "Начать бесплатно",
       }
@@ -309,7 +309,7 @@ const subscriptionCard = computed(() => {
       iconClass: "cabinet__card-icon--warning",
       title: "Начните бесплатный период",
       description: days
-        ? `У вас ещё нет подписки. Попробуйте бесплатно ${days} дней!`
+        ? `У вас ещё нет подписки. Попробуйте бесплатно ${getWeekFromDays(days)}!`
         : "У вас ещё нет подписки. Попробуйте бесплатно!",
       actionText: "Начать бесплатно",
     }
@@ -450,6 +450,18 @@ const ERROR_CARDS = {
   },
 }
 
+function getWeekFromDays(days) {
+  const weeks = Math.floor(days / 7)
+  const remainingDays = days % 7
+  if (weeks > 0 && remainingDays === 0) {
+    return `${weeks} ${weekWord(weeks)}`
+  }
+  if (weeks > 0) {
+    return `${weeks} ${weekWord(weeks)} и ${remainingDays} ${dayWord(remainingDays)}`
+  }
+  return `${days} ${dayWord(days)}`
+}
+
 function dayWord(n) {
   const abs = Math.abs(n) % 100
   const last = abs % 10
@@ -457,6 +469,15 @@ function dayWord(n) {
   if (last === 1) return "день"
   if (last >= 2 && last <= 4) return "дня"
   return "дней"
+}
+
+function weekWord(n) {
+  const abs = Math.abs(n) % 100
+  const last = abs % 10
+  if (abs >= 11 && abs <= 19) return "недель"
+  if (last === 1) return "неделя"
+  if (last >= 2 && last <= 4) return "недели"
+  return "недель"
 }
 
 function formatDate(iso) {
