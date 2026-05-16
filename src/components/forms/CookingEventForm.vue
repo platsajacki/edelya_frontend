@@ -6,7 +6,7 @@
         <span class="form__label">Блюдо <span class="form__required">*</span></span>
         <div v-if="selectedDish" class="selected-dish">
           <span class="selected-dish__name">{{ selectedDish.name }}</span>
-          <button type="button" class="selected-dish__edit" title="Редактировать блюдо" @click="editDish = selectedDish; showDishForm = true">
+          <button type="button" class="selected-dish__edit" :title="isDishOwn(selectedDish) ? 'Редактировать блюдо' : 'Создать копию'" @click="onEditDishClick">
             <IconPencil width="14" height="14" />
           </button>
           <button type="button" class="selected-dish__clear" @click="selectedDish = null">&times;</button>
@@ -42,6 +42,27 @@
       @updated="onDishUpdated"
     />
 
+    <!-- Clone confirmation for global dishes -->
+    <ModalWrapper v-model="showCloneConfirm" title="Общее блюдо" :z-index="1020">
+      <p class="clone-confirm__text">
+        Это общее блюдо, его нельзя редактировать.
+        Создать личную копию и открыть для редактирования?
+      </p>
+      <template #footer>
+        <div class="clone-confirm__actions">
+          <button class="form__submit" type="button" @click="startClone">Создать копию</button>
+          <button class="form__cancel" type="button" @click="showCloneConfirm = false">Отмена</button>
+        </div>
+      </template>
+    </ModalWrapper>
+
+    <DishForm
+      v-model="showCloneForm"
+      :z-index="1030"
+      :clone-dish="dishToClone"
+      @created="onCloneCreated"
+    />
+
     <template #footer>
       <button type="submit" form="cooking-event-form" class="form__submit" :disabled="saving || !selectedDish">
         {{ saving ? "Сохранение..." : (isEdit ? "Сохранить" : "Создать готовку") }}
@@ -59,6 +80,7 @@ import DateInput from "./DateInput.vue"
 import MultiDayPicker from "./MultiDayPicker.vue"
 import { usePlanningStore } from "../../store/planning"
 import IconPencil from "../icons/IconPencil.vue"
+import { isDishOwn } from "../../utils/dishOwnership"
 
 const props = defineProps({
   modelValue: { type: Boolean, required: true },
@@ -85,6 +107,9 @@ const error = ref("")
 const showDishForm = ref(false)
 const editDish = ref(null)
 const initialDishName = ref("")
+const showCloneConfirm = ref(false)
+const showCloneForm = ref(false)
+const dishToClone = ref(null)
 
 watch(() => props.modelValue, (v) => {
   if (v && props.editItem) {
@@ -132,6 +157,27 @@ function onDishUpdated(dish) {
   error.value = ""
 }
 
+function onEditDishClick() {
+  if (isDishOwn(selectedDish.value)) {
+    editDish.value = selectedDish.value
+    showDishForm.value = true
+  } else {
+    dishToClone.value = selectedDish.value
+    showCloneConfirm.value = true
+  }
+}
+
+function startClone() {
+  showCloneConfirm.value = false
+  showCloneForm.value = true
+}
+
+function onCloneCreated(dish) {
+  selectedDish.value = dish
+  showCloneForm.value = false
+  error.value = ""
+}
+
 function onCreateDish(searchQuery) {
   editDish.value = null
   initialDishName.value = searchQuery || ""
@@ -171,4 +217,33 @@ async function submit() {
 </script>
 
 <style scoped>
+.clone-confirm__text {
+  font-size: var(--font-sm);
+  color: var(--color-text);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.clone-confirm__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form__cancel {
+  width: 100%;
+  padding: 12px;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: var(--font-base);
+  font-weight: 600;
+  background: var(--color-empty);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.form__cancel:hover {
+  background: var(--color-border);
+}
 </style>
