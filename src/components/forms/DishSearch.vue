@@ -31,19 +31,33 @@
 
     <div v-else-if="searched && !loading" class="dish-search__status">Ничего не найдено</div>
 
-    <button type="button" class="dish-search__create" @click="$emit('create', query.trim())">
-      + Создать новое блюдо
-    </button>
+    <div class="dish-search__actions">
+      <button type="button" class="dish-search__pick" @click="showPicker = true">
+        Выбрать из списка
+      </button>
+      <button type="button" class="dish-search__create" @click="$emit('create', query.trim())">
+        + Создать новое блюдо
+      </button>
+    </div>
+
+    <DishPickerSheet v-model="showPicker" @select="onPickerSelect" />
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue"
+import { ref } from "vue"
 import { fetchDishes } from "../../services/dishService"
 import { isDishOwn } from "../../utils/dishOwnership"
 import OwnershipBadge from "../OwnershipBadge.vue"
+import DishPickerSheet from "../DishPickerSheet.vue"
 
-defineEmits(["select", "create"])
+const emit = defineEmits(["select", "create"])
+
+const showPicker = ref(false)
+
+function onPickerSelect(dish) {
+  emit("select", dish)
+}
 
 const query = ref("")
 const results = ref([])
@@ -83,10 +97,6 @@ function clearQuery() {
   searched.value = false
   inputEl.value?.focus()
 }
-
-onMounted(() => {
-  setTimeout(() => inputEl.value?.focus(), 360)
-})
 </script>
 
 <style scoped>
@@ -162,20 +172,48 @@ onMounted(() => {
   padding: 8px 0;
 }
 
+.dish-search__actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.dish-search__pick {
+  flex: 1;
+  padding: 9px 16px;
+  border: 1.5px solid var(--color-mint-alpha-25);
+  border-radius: var(--radius-sm);
+  background: var(--color-mint-alpha-10);
+  font-size: var(--font-sm);
+  font-weight: 600;
+  color: var(--color-mint);
+  cursor: pointer;
+  transition: background var(--transition-fast), border-color var(--transition-fast);
+  white-space: nowrap;
+}
+
+.dish-search__pick:hover {
+  background: var(--color-mint-alpha-25);
+  border-color: var(--color-mint);
+}
+
 .dish-search__create {
-  align-self: flex-start;
-  padding: 8px 16px;
+  flex: 1;
+  padding: 9px 16px;
   border: 1.5px dashed var(--color-border);
   border-radius: var(--radius-sm);
   background: transparent;
   font-size: var(--font-sm);
   font-weight: 500;
-  color: var(--color-mint-hover);
+  color: var(--color-text-secondary);
+  cursor: pointer;
   transition: background var(--transition-fast), border-color var(--transition-fast);
+  white-space: nowrap;
 }
 
 .dish-search__create:hover {
   background: var(--color-empty);
   border-color: var(--color-mint);
+  color: var(--color-mint);
 }
 </style>

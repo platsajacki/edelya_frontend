@@ -1,7 +1,7 @@
 <template>
   <ModalWrapper v-model="open" :title="title" :z-index="990">
     <div class="detail">
-      <!-- Dish info -->
+      <!-- 1. Dish header: name + category -->
       <div class="detail__section">
         <div class="detail__dish-header">
           <div class="detail__dish-title-row">
@@ -15,28 +15,9 @@
         <p v-if="dish.category?.name" class="detail__meta">
           {{ dish.category.name }}
         </p>
-        <p v-if="dish.recipe" class="detail__recipe">
-          {{ dish.recipe }}
-        </p>
       </div>
 
-      <!-- Ingredients -->
-      <div v-if="dish.dish_ingredients?.length" class="detail__section">
-        <span class="detail__label">Состав</span>
-        <ul class="detail__ingredients">
-          <li v-for="di in dish.dish_ingredients" :key="di.id" class="detail__ingredient">
-            <span class="detail__ingredient-name">{{ di.ingredient?.name ?? di.name }}</span>
-            <span class="detail__ingredient-right">
-              <span v-if="di.is_optional" class="detail__ingredient-optional">опц.</span>
-              <span class="detail__ingredient-amount">
-                {{ formatShoppingAmount(di.amount, di.ingredient?.base_unit ?? di.base_unit).display }}
-              </span>
-            </span>
-          </li>
-        </ul>
-      </div>
-
-      <!-- Type-specific info -->
+      <!-- 2. Dates + source (type-specific) -->
       <div v-if="type === 'cooking'" class="detail__section">
         <div class="detail__row">
           <span class="detail__label">Дата готовки</span>
@@ -72,6 +53,28 @@
           </button>
           <span v-else class="detail__value detail__value--muted">Ручной ввод</span>
         </div>
+      </div>
+
+      <!-- 3. Ingredients -->
+      <div v-if="dish.dish_ingredients?.length" class="detail__section">
+        <span class="detail__label">Состав</span>
+        <ul class="detail__ingredients">
+          <li v-for="di in dish.dish_ingredients" :key="di.id" class="detail__ingredient">
+            <span class="detail__ingredient-name">{{ di.ingredient?.name ?? di.name }}</span>
+            <span class="detail__ingredient-right">
+              <span v-if="di.is_optional" class="detail__ingredient-optional">опц.</span>
+              <span class="detail__ingredient-amount">
+                {{ formatShoppingAmount(di.amount, di.ingredient?.base_unit ?? di.base_unit).display }}
+              </span>
+            </span>
+          </li>
+        </ul>
+      </div>
+
+      <!-- 4. Recipe text -->
+      <div v-if="dish.recipe" class="detail__section">
+        <span class="detail__label">Рецепт</span>
+        <p class="detail__recipe">{{ dish.recipe }}</p>
       </div>
     </div>
 

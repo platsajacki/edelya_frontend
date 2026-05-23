@@ -36,11 +36,23 @@ function close() {
 
 function onFocusIn(e) {
   const el = e.target
-  if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.tagName === 'SELECT') {
-    setTimeout(() => {
-      el.scrollIntoView({ block: 'center', behavior: 'smooth' })
-    }, 300)
-  }
+  if (el.tagName !== 'INPUT' && el.tagName !== 'TEXTAREA' && el.tagName !== 'SELECT') return
+
+  requestAnimationFrame(() => {
+    window.scrollTo(0, 0)
+
+    const scrollParent = el.closest('.modal-body')
+    if (!scrollParent) return
+    const elRect = el.getBoundingClientRect()
+    const parentRect = scrollParent.getBoundingClientRect()
+    const elBottom = elRect.bottom - parentRect.top
+    const elTop = elRect.top - parentRect.top
+    if (elBottom > scrollParent.clientHeight - 8) {
+      scrollParent.scrollTop += elBottom - scrollParent.clientHeight + 16
+    } else if (elTop < 0) {
+      scrollParent.scrollTop += elTop - 8
+    }
+  })
 }
 
 let savedOverflow = ""
