@@ -62,9 +62,12 @@
     <!-- Shopping list confirm -->
     <ShoppingConfirmSheet
       v-model="showShoppingConfirm"
-      :message="shoppingConfirmMsg"
+      :date-from="pendingShoppingPayload?.date_from ?? ''"
+      :date-to="pendingShoppingPayload?.date_to ?? ''"
       :loading="shoppingCreating"
       :no-items="shoppingNoItems"
+      @update:date-from="val => { if (pendingShoppingPayload) pendingShoppingPayload.date_from = val }"
+      @update:date-to="val => { if (pendingShoppingPayload) pendingShoppingPayload.date_to = val }"
       @confirm="onConfirmShopping"
     />
   </div>
@@ -98,11 +101,16 @@ const shopping = useShoppingStore()
 const router = useRouter()
 
 // --- Shopping confirm ---
-const showShoppingConfirm = ref(false)
-const shoppingConfirmMsg  = ref('')
-const shoppingCreating    = ref(false)
-const shoppingNoItems     = ref(false)
+const showShoppingConfirm    = ref(false)
+const shoppingCreating       = ref(false)
 const pendingShoppingPayload = ref(null)
+
+const shoppingNoItems = computed(() => {
+  if (!pendingShoppingPayload.value) return false
+  const { date_from, date_to } = pendingShoppingPayload.value
+  if (!date_from || !date_to) return false
+  return !hasCookingInRange(date_from, date_to)
+})
 
 const weekEndDate = computed(() => {
   const start = new Date(planning.weekData.start_week + 'T00:00:00')
@@ -117,15 +125,11 @@ function hasCookingInRange(dateFrom, dateTo) {
   )
 }
 
-function handleCreateShoppingDay({ rawDate, dayLabel }) {
-  const dateLabel = formatDateRuShort(rawDate)
-  shoppingNoItems.value = !hasCookingInRange(rawDate, rawDate)
+function handleCreateShoppingDay({ rawDate }) {
   pendingShoppingPayload.value = {
-    name:      `Продукты на ${dayLabel} ${dateLabel}`,
     date_from: rawDate,
     date_to:   rawDate,
   }
-  shoppingConfirmMsg.value  = `Хотите создать список покупок на ${dayLabel} ${dateLabel}?`
   showShoppingConfirm.value = true
 }
 
@@ -133,26 +137,22 @@ function handleCreateShoppingWeek({ dateFrom, dateTo } = {}) {
   const today = getTodayISO()
   const from = dateFrom || (today >= planning.weekData.start_week && today <= weekEndDate.value ? today : planning.weekData.start_week)
   const to = dateTo || weekEndDate.value
-  shoppingNoItems.value = !hasCookingInRange(from, to)
-  const singleDay = from === to
   pendingShoppingPayload.value = {
-    name:      singleDay
-      ? `Продукты на ${formatDateRuShort(from)}`
-      : `Продукты на неделю ${formatDateRuShort(from)}–${formatDateRuShort(to)}`,
     date_from: from,
     date_to:   to,
   }
-  shoppingConfirmMsg.value = singleDay
-    ? `Хотите создать список покупок на ${formatDateRuShort(from)}?`
-    : `Хотите создать список покупок с ${formatDateRuShort(from)} по ${formatDateRuShort(to)}?`
   showShoppingConfirm.value = true
 }
 
-async function onConfirmShopping() {
+async function onConfirmShopping(name) {
   if (!pendingShoppingPayload.value) return
+  const { date_from, date_to } = pendingShoppingPayload.value
+  const resolvedName = name || ((!date_to || date_from === date_to)
+    ? `Продукты на ${formatDateRuShort(date_from)}`
+    : `Продукты на неделю ${formatDateRuShort(date_from)}–${formatDateRuShort(date_to)}`)
   shoppingCreating.value = true
   try {
-    const list = await shopping.createList(pendingShoppingPayload.value)
+    const list = await shopping.createList({ name: resolvedName, date_from, date_to })
     showShoppingConfirm.value = false
     router.push(`/shopping/${list.id}`)
   } finally {
