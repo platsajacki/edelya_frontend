@@ -6,12 +6,17 @@
         <span class="form__label">Блюдо <span class="form__required">*</span></span>
         <div v-if="selectedDish" class="selected-dish">
           <span class="selected-dish__name">{{ selectedDish.name }}</span>
-          <button type="button" class="selected-dish__edit" :title="isDishOwn(selectedDish) ? 'Редактировать блюдо' : 'Создать копию'" @click="onEditDishClick">
-            <IconPencil />
-          </button>
-          <button type="button" class="selected-dish__clear" @click="selectedDish = null">&times;</button>
+          <template v-if="!isDishLocked">
+            <button type="button" class="selected-dish__edit" :title="isDishOwn(selectedDish) ? 'Редактировать блюдо' : 'Создать копию'" @click="onEditDishClick">
+              <IconPencil />
+            </button>
+            <button type="button" class="selected-dish__clear" @click="selectedDish = null">&times;</button>
+          </template>
         </div>
-        <DishSearch v-else @select="onDishSelect" @create="onCreateDish" />
+        <template v-else>
+          <DishSearch @select="onDishSelect" @create="onCreateDish" />
+        </template>
+        <p v-if="isDishLocked" class="form__hint">Блюдо нельзя изменить — приём пищи привязан к готовке</p>
       </div>
 
       <label v-if="isEdit" class="form__field">
@@ -88,6 +93,7 @@ const emit = defineEmits(["update:modelValue"])
 const planning = usePlanningStore()
 
 const isEdit = computed(() => !!props.editItem)
+const isDishLocked = computed(() => isEdit.value && !!props.editItem?.cooking_event)
 
 const open = ref(props.modelValue)
 watch(() => props.modelValue, (v) => { open.value = v })
@@ -218,6 +224,13 @@ async function submit() {
   color: var(--color-text-secondary);
   cursor: pointer;
   transition: background var(--transition-fast);
+}
+
+.form__hint {
+  margin: 4px 0 0;
+  font-size: var(--font-sm);
+  color: var(--color-text-secondary);
+  line-height: 1.4;
 }
 
 .form__cancel:hover {
