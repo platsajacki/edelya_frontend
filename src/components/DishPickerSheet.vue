@@ -17,7 +17,7 @@
               v-model="query"
               type="search"
               class="picker-search__input"
-              placeholder="Поиск блюда..."
+              placeholder="Поиск рецепта..."
               @input="onQueryInput"
             />
             <button v-if="query" class="picker-search__clear" @click="clearQuery" aria-label="Очистить">&times;</button>
@@ -60,7 +60,7 @@
             </div>
 
             <div v-else-if="!dishes.length && !initialLoading" class="picker-status">
-              <p class="picker-empty">Блюда не найдены</p>
+              <p class="picker-empty">Рецепты не найдены</p>
             </div>
 
             <ul v-else class="picker-list">
@@ -136,7 +136,7 @@
           </div>
 
           <div class="picker-preview-footer">
-            <button class="picker-select-btn" @click="selectDish(previewDish)">Выбрать это блюдо</button>
+            <button class="picker-select-btn" @click="selectDish(previewDish)">Выбрать этот рецепт</button>
           </div>
         </div>
       </div>
@@ -235,7 +235,7 @@ async function loadFirst() {
     hasMore.value = !!data.next
     page.value = 1
   } catch (e) {
-    initialError.value = e.message || "Не удалось загрузить блюда"
+    initialError.value = e.message || "Не удалось загрузить рецепты"
   } finally {
     initialLoading.value = false
   }

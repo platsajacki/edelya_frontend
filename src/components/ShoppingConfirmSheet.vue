@@ -6,7 +6,7 @@
   >
     <div v-if="noItems" class="confirm__empty">
       <IconWarning class="confirm__empty-icon" />
-      <p class="confirm__message">Сначала добавь блюда в готовку на эти дни — список покупок строится на их основе.</p>
+      <p class="confirm__message">Сначала добавь рецепт в готовку на эти дни — список покупок строится на их основе.</p>
     </div>
     <p v-else class="confirm__message">{{ message }}</p>
     <template #footer>

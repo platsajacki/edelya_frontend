@@ -36,7 +36,7 @@
         v-model="searchQuery"
         type="search"
         class="recipes-search__input"
-        placeholder="Поиск блюда..."
+        placeholder="Поиск рецепта..."
         @input="onSearchInput"
       />
       <button

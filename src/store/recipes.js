@@ -89,7 +89,7 @@ export const useRecipesStore = defineStore("recipes", {
         if (loadId !== this._loadId) return
         this.dishes = []
         this.hasMore = false
-        this.initialError = "Не удалось загрузить блюда"
+        this.initialError = "Не удалось загрузить рецепты"
       } finally {
         if (loadId === this._loadId) {
           this.initialLoading = false
@@ -109,7 +109,7 @@ export const useRecipesStore = defineStore("recipes", {
         this.hasMore = !!data.next
       } catch {
         this.page--
-        this.loadMoreError = "Не удалось загрузить ещё блюда"
+        this.loadMoreError = "Не удалось загрузить ещё рецепты"
       } finally {
         this.loadingMore = false
       }

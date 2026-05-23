@@ -6,7 +6,7 @@
         v-model="query"
         type="search"
         class="dish-search__input"
-        placeholder="Поиск блюда..."
+        placeholder="Поиск рецепта..."
         @input="onInput"
       />
       <button v-if="query" type="button" class="search-field__clear" aria-label="Очистить" @click="clearQuery">&times;</button>
@@ -33,7 +33,7 @@
 
     <div class="dish-search__actions">
       <button type="button" class="dish-search__pick" @click="showPicker = true">
-        Выбрать из списка
+        Выбрать из рецептов
       </button>
       <button type="button" class="dish-search__create" @click="$emit('create', query.trim())">
         + Создать новое блюдо

@@ -26,7 +26,7 @@ const route = useRoute()
 
 const tabs = [
   { to: "/", label: "Еделя", icon: IconNavPlanner },
-  { to: "/recipes", label: "Блюда", icon: IconNavRecipes },
+  { to: "/recipes", label: "Рецепты", icon: IconNavRecipes },
   { to: "/shopping", label: "Покупки", icon: IconShoppingBag },
   { to: "/cabinet", label: "Кабинет", icon: IconProfile },
 ]

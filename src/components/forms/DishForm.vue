@@ -381,7 +381,7 @@ function onIngredientCreated(ingredient) {
 }
 
 function validate() {
-  if (!name.value.trim()) return "Укажите название блюда."
+  if (!name.value.trim()) return "Укажите название рецепта."
   if (!categoryId.value) return "Выберите категорию."
   if (!ingredients.value.length) return "Добавьте хотя бы один ингредиент."
   const ids = ingredients.value.map((i) => i.ingredient)
