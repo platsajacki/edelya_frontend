@@ -34,6 +34,7 @@
             </div>
             <div v-if="pendingIngredient.base_unit !== 'to_taste'" class="ingredient-amount__row">
               <input
+                ref="amountInputRef"
                 v-model="pendingAmount"
                 type="text"
                 inputmode="decimal"
@@ -78,6 +79,7 @@
           </div>
           <div v-if="pendingIngredient.base_unit !== 'to_taste'" class="ingredient-amount__row">
             <input
+              ref="amountInputRef"
               v-model="pendingAmount"
               type="text"
               inputmode="decimal"
@@ -150,7 +152,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from "vue"
+import { ref, computed, watch, nextTick } from "vue"
 import ModalWrapper from "./ModalWrapper.vue"
 import IngredientForm from "./IngredientForm.vue"
 import IconPencil from "../icons/IconPencil.vue"
@@ -216,6 +218,7 @@ const pendingAmount = ref("")
 const pendingOptional = ref(false)
 const amountError = ref("")
 const editingIdx = ref(null)
+const amountInputRef = ref(null)
 
 let ingredientSearchTimer = null
 
@@ -309,6 +312,7 @@ function selectIngredient(ing) {
   ingredientResults.value = []
   amountError.value = ""
   editingIdx.value = null
+  nextTick(() => amountInputRef.value?.focus())
 }
 
 function startEditIngredient(idx) {
@@ -324,6 +328,7 @@ function startEditIngredient(idx) {
   amountError.value = ""
   ingredientQuery.value = ""
   ingredientResults.value = []
+  nextTick(() => amountInputRef.value?.focus())
 }
 
 function removeIngredient(idx) {
