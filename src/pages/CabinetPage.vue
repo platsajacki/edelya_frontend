@@ -107,7 +107,7 @@
       >
         <div class="cabinet__tariff-header">
           <span class="cabinet__tariff-name">{{ tariff.name }}</span>
-          <span v-if="tariff.soon" class="cabinet__tariff-badge">Скоро</span>
+          <span v-if="tariff.soon" class="cabinet__tariff-badge cabinet__tariff-badge--soon">Скоро</span>
           <span v-if="isCurrent(tariff)" class="cabinet__tariff-badge cabinet__tariff-badge--current">Текущий</span>
           <span v-if="isPending(tariff)" class="cabinet__tariff-badge cabinet__tariff-badge--pending">Запланирован</span>
         </div>
@@ -679,7 +679,7 @@ async function handleDeletePaymentMethod() {
 }
 
 .cabinet__card-icon--ok {
-  color: var(--color-mint);
+  color: var(--color-success);
 }
 
 .cabinet__card-heading {
@@ -780,6 +780,16 @@ async function handleDeletePaymentMethod() {
 .cabinet__tariff-badge--current {
   background: var(--color-mint-alpha-10, color-mix(in srgb, var(--color-mint) 10%, transparent));
   color: var(--color-mint);
+}
+
+.cabinet__tariff-badge--pending {
+  background: var(--color-mint-alpha-10, color-mix(in srgb, var(--color-mint) 10%, transparent));
+  color: var(--color-mint);
+}
+
+.cabinet__tariff-badge--soon {
+  background: var(--color-warning-bg);
+  color: var(--color-warning);
 }
 
 .cabinet__tariff-price {

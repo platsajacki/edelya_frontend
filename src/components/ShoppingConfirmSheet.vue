@@ -168,7 +168,6 @@ watch(listName, (val) => { editableName.value = val })
 
 .confirm__empty-icon {
   color: var(--color-text-secondary);
-  opacity: 0.5;
   width: 32px;
   height: 32px;
 }
