@@ -278,7 +278,7 @@ onMounted(() => {
   border: 1px solid var(--color-danger-soft);
   border-radius: var(--radius-sm);
   font-size: var(--font-body);
-  color: var(--color-danger-muted);
+  color: var(--color-danger-dark);
 }
 
 .planner__error-retry {

@@ -616,7 +616,7 @@ onUnmounted(() => {
   border: none;
   border-radius: var(--radius-sm);
   background: var(--color-mint);
-  color: #fff;
+  color: var(--on-primary);
   font-size: var(--font-sm);
   font-weight: 600;
   cursor: pointer;
@@ -651,7 +651,7 @@ onUnmounted(() => {
   border: none;
   border-radius: var(--radius-sm);
   background: var(--color-mint);
-  color: #fff;
+  color: var(--on-primary);
   font-size: var(--font-base);
   font-weight: 700;
   cursor: pointer;

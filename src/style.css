@@ -33,10 +33,22 @@
 
   /* ─── Colors: danger ─── */
   --color-danger: #D64545;
-  --color-danger-muted: #B91C1C;
+  --color-danger-dark: #B91C1C;
   --color-danger-bg: #FEE2E2;
   --color-danger-soft: #FECACA;
   --color-danger-pale: #FEF2F2;
+  --color-error: var(--color-danger);
+
+  /* ─── Colors: success ─── */
+  --color-success: #3D8C3D;
+  --color-success-bg: rgba(61, 140, 61, 0.10);
+
+  /* ─── Colors: info ─── */
+  --color-info: #2563EB;
+  --color-info-bg: rgba(37, 99, 235, 0.10);
+
+  /* ─── Colors: focus ─── */
+  --color-focus: var(--color-mint);
 
   /* ─── Colors: warning ─── */
   --color-warning: #92661a;
