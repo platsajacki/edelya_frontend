@@ -134,6 +134,13 @@
 
       <div v-if="error" ref="errorRef" class="form__error">{{ error }}</div>
 
+      <div v-if="duplicateActions" class="form__duplicate-actions">
+        <button type="button" class="form__duplicate-use" :disabled="loadingExisting" @click="useExistingDish">
+          {{ loadingExisting ? 'Поиск...' : 'Использовать существующее' }}
+        </button>
+        <span class="form__duplicate-hint">или переименуйте выше</span>
+      </div>
+
     </form>
 
     <IngredientForm
@@ -157,7 +164,8 @@ import ModalWrapper from "./ModalWrapper.vue"
 import IngredientForm from "./IngredientForm.vue"
 import IconPencil from "../icons/IconPencil.vue"
 import IconClose from "../icons/IconClose.vue"
-import { createDish, updateDish, fetchDishCategories } from "../../services/dishService"
+import { createDish, updateDish, fetchDishCategories, fetchDishes } from "../../services/dishService"
+import { isDishOwn } from "../../utils/dishOwnership"
 import { fetchIngredients } from "../../services/ingredientService"
 import { formatAmount } from "../../utils/formatAmount"
 import { formatShoppingAmount } from "../../utils/formatShoppingAmount"
@@ -205,6 +213,8 @@ const categories = ref([])
 const ingredients = ref([])
 const saving = ref(false)
 const error = ref("")
+const duplicateActions = ref(false)
+const loadingExisting = ref(false)
 watch(error, (val) => {
   if (val) nextTick(() => errorRef.value?.scrollIntoView({ behavior: 'smooth', block: 'nearest' }))
 })
@@ -235,6 +245,7 @@ let ingredientSearchTimer = null
 watch(() => props.modelValue, async (v) => {
   if (v) {
     error.value = ""
+    duplicateActions.value = false
     resetIngredientSearch()
     try {
       const data = await fetchDishCategories()
@@ -435,13 +446,74 @@ async function submit() {
     open.value = false
   } catch (err) {
     error.value = err.message || "Не удалось создать блюдо"
+    if (isClone.value && err.message?.includes('уже существует')) {
+      duplicateActions.value = true
+    }
   } finally {
     saving.value = false
+  }
+}
+
+async function useExistingDish() {
+  loadingExisting.value = true
+  try {
+    const data = await fetchDishes({ name__icontains: name.value.trim(), only_owned: true })
+    const found = (data.results ?? []).find(
+      (d) => isDishOwn(d) && d.name.toLowerCase() === name.value.trim().toLowerCase()
+    )
+    if (!found) {
+      error.value = "Не удалось найти блюдо. Переименуйте и попробуйте снова."
+      duplicateActions.value = false
+      return
+    }
+    emit("created", found)
+    open.value = false
+  } catch {
+    error.value = "Ошибка при поиске блюда."
+  } finally {
+    loadingExisting.value = false
   }
 }
 </script>
 
 <style scoped>
+.form__duplicate-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  background: var(--color-mint-alpha-10);
+  border: 1.5px solid var(--color-mint-alpha-25);
+  border-radius: var(--radius-sm);
+}
+
+.form__duplicate-use {
+  flex-shrink: 0;
+  padding: 7px 14px;
+  border: 1.5px solid var(--color-mint);
+  border-radius: var(--radius-sm);
+  background: var(--color-mint);
+  color: var(--on-primary);
+  font-size: var(--font-sm);
+  font-weight: 600;
+  cursor: pointer;
+  transition: background var(--transition-fast), opacity var(--transition-fast);
+}
+
+.form__duplicate-use:hover {
+  background: var(--color-mint-hover);
+}
+
+.form__duplicate-use:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.form__duplicate-hint {
+  font-size: var(--font-sm);
+  color: var(--color-text-secondary);
+}
+
 .form__section {
   display: flex;
   flex-direction: column;

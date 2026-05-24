@@ -192,9 +192,9 @@ function confirmDelete() {
   emit("deleted", dish.value.id)
 }
 
-function onDishUpdated() {
+function onDishUpdated(updatedDish) {
   showDishForm.value = false
-  open.value = false
+  if (updatedDish) fullDish.value = updatedDish
   emit("updated")
 }
 
