@@ -16,7 +16,7 @@
         <template v-else>
           <DishSearch @select="onDishSelect" @create="onCreateDish" />
         </template>
-        <p v-if="isDishLocked" class="form__hint">Блюдо нельзя изменить — приём пищи привязан к готовке</p>
+        <p v-if="isDishLocked" class="form__hint">Блюдо привязано к готовке и не может быть изменено</p>
       </div>
 
       <label v-if="isEdit" class="form__field">
@@ -42,23 +42,9 @@
       @updated="onDishUpdated"
     />
 
-    <!-- Clone confirmation for global dishes -->
-    <ModalWrapper v-model="showCloneConfirm" title="Общее блюдо" :z-index="1020">
-      <p class="clone-confirm__text">
-        Это общее блюдо, его нельзя редактировать.
-        Создать личную копию и открыть для редактирования?
-      </p>
-      <template #footer>
-        <div class="clone-confirm__actions">
-          <button class="form__submit" type="button" @click="startClone">Создать копию</button>
-          <button class="form__cancel" type="button" @click="showCloneConfirm = false">Отмена</button>
-        </div>
-      </template>
-    </ModalWrapper>
-
     <DishForm
       v-model="showCloneForm"
-      :z-index="1030"
+      :z-index="1020"
       :clone-dish="dishToClone"
       @created="onCloneCreated"
     />
@@ -111,7 +97,6 @@ watch(error, (val) => {
 const showDishForm = ref(false)
 const editDish = ref(null)
 const initialDishName = ref("")
-const showCloneConfirm = ref(false)
 const showCloneForm = ref(false)
 const dishToClone = ref(null)
 
@@ -156,13 +141,8 @@ function onEditDishClick() {
     showDishForm.value = true
   } else {
     dishToClone.value = selectedDish.value
-    showCloneConfirm.value = true
+    showCloneForm.value = true
   }
-}
-
-function startClone() {
-  showCloneConfirm.value = false
-  showCloneForm.value = true
 }
 
 function onCloneCreated(dish) {

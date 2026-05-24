@@ -95,14 +95,14 @@
 
   <!-- Delete confirmation modal -->
   <ModalWrapper v-model="confirming" title="Подтверждение" :z-index="1050">
-    <p class="detail__confirm-text">Удалить этот элемент?</p>
+    <p class="detail__confirm-text">Удалить {{ type === 'cooking' ? 'готовку' : 'приём пищи' }} «{{ dish.name }}»?</p>
     <template #footer>
       <div class="detail__confirm-actions">
         <button class="detail__btn detail__btn--delete" @click="confirming = false; open = false; $emit('delete')">
-          Да, удаляем
+          Удалить
         </button>
         <button class="detail__btn detail__btn--cancel" @click="confirming = false">
-          Нет
+          Отмена
         </button>
       </div>
     </template>
@@ -114,29 +114,6 @@
     :edit-dish="dish"
     @updated="onDishUpdated"
   />
-
-  <!-- Clone confirmation modal -->
-  <ModalWrapper v-model="showCloneConfirm" title="Общее блюдо" :z-index="1050">
-    <p class="detail__clone-text">
-      <template v-if="type === 'cooking'">
-        Это общий рецепт. Создать личную копию и использовать её в этой готовке?
-      </template>
-      <template v-else>
-        Это общий рецепт, его нельзя редактировать.
-        Вы можете создать личную копию и настроить её под себя.
-      </template>
-    </p>
-    <template #footer>
-      <div class="detail__confirm-actions">
-        <button class="detail__btn detail__btn--edit" @click="startClone">
-          {{ type === 'cooking' ? 'Создать и использовать здесь' : 'Создать копию' }}
-        </button>
-        <button class="detail__btn detail__btn--cancel" @click="showCloneConfirm = false">
-          Отмена
-        </button>
-      </div>
-    </template>
-  </ModalWrapper>
 
   <!-- Clone DishForm -->
   <DishForm
@@ -158,16 +135,7 @@ import { formatAmount } from "../utils/formatAmount"
 import { formatShoppingAmount } from "../utils/formatShoppingAmount"
 import { usePlanningStore } from "../store/planning"
 import { isDishOwn } from "../utils/dishOwnership"
-
-const UNIT_LABELS = {
-  gram: "г",
-  kilogram: "кг",
-  milliliter: "мл",
-  liter: "л",
-  piece: "шт",
-  tablespoon: "ст. л.",
-  teaspoon: "ч. л.",
-}
+import { UNIT_LABELS } from "../utils/unitLabels"
 
 const props = defineProps({
   modelValue: { type: Boolean, required: true },
@@ -185,7 +153,6 @@ watch(open, (v) => { emit("update:modelValue", v) })
 
 const confirming = ref(false)
 const showDishForm = ref(false)
-const showCloneConfirm = ref(false)
 const showCloneForm = ref(false)
 
 const isOwn = computed(() => isDishOwn(dish.value))
@@ -193,7 +160,6 @@ const isOwn = computed(() => isDishOwn(dish.value))
 watch(() => props.modelValue, (v) => {
   if (v) {
     confirming.value = false
-    showCloneConfirm.value = false
   }
 })
 
@@ -227,13 +193,8 @@ function handleDishEdit() {
   if (isOwn.value) {
     showDishForm.value = true
   } else {
-    showCloneConfirm.value = true
+    showCloneForm.value = true
   }
-}
-
-function startClone() {
-  showCloneConfirm.value = false
-  showCloneForm.value = true
 }
 
 async function onCloneCreated(dish) {

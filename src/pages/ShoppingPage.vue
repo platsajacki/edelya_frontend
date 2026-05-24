@@ -5,27 +5,27 @@
       <button
         class="shopping-header__sort"
         type="button"
-        :title="sortAsc ? 'Сортировка: сначала старые' : 'Сортировка: сначала новые'"
+        :title="sortAsc ? 'Переключить: сначала новые' : 'Переключить: сначала старые'"
         @click="sortAsc = !sortAsc"
       >
         <IconSort :ascending="sortAsc" />
-        {{ sortAsc ? 'Сначала старые' : 'Сначала новые' }}
+        {{ sortAsc ? 'Сначала новые' : 'Сначала старые' }}
       </button>
     </div>
 
     <!-- Search -->
-    <div class="shopping-search">
-      <IconSearch class="shopping-search__icon" />
+    <div class="search-field">
+      <IconSearch class="search-field__icon" />
       <input
         v-model="searchQuery"
         type="search"
-        class="shopping-search__input"
+        class="search-field__input"
         placeholder="Поиск списка..."
         @input="onSearchInput"
       />
       <button
         v-if="searchQuery"
-        class="shopping-search__clear"
+        class="search-field__clear"
         @click="clearSearch"
         aria-label="Очистить"
       >
@@ -176,63 +176,6 @@ function onListCreated(list) {
   font-weight: 700;
   color: var(--color-text);
   margin: 0;
-}
-
-/* Search */
-.shopping-search {
-  position: relative;
-  display: flex;
-  align-items: center;
-}
-
-.shopping-search__icon {
-  position: absolute;
-  left: 12px;
-  color: var(--color-text-secondary);
-  pointer-events: none;
-}
-
-.shopping-search__input {
-  width: 100%;
-  padding: 10px 36px 10px 36px;
-  border: 1.5px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  font-size: var(--font-md);
-  font-family: inherit;
-  background: var(--color-surface);
-  color: var(--color-text);
-  outline: none;
-  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
-}
-
-.shopping-search__input:focus {
-  border-color: var(--color-mint-alpha-25);
-  box-shadow: 0 0 0 3px var(--color-mint-alpha-10);
-}
-
-.shopping-search__input::placeholder {
-  color: var(--color-text-secondary);
-  opacity: 0.6;
-}
-
-.shopping-search__clear {
-  position: absolute;
-  right: 4px;
-  width: 28px;
-  height: 28px;
-  border: none;
-  background: none;
-  color: var(--color-text-secondary);
-  font-size: 18px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: var(--radius-xs);
-  transition: background var(--transition-fast);
-}
-
-.shopping-search__clear:hover {
-  background: var(--color-empty);
 }
 
 /* Loading */

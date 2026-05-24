@@ -7,12 +7,20 @@
         <button class="recipes-header__action-btn" @click="showSortMenu = !showSortMenu" aria-label="Сортировка">
           <IconSort />
         </button>
-        <button class="recipes-header__action-btn" @click="showFilters = true" aria-label="Фильтры">
+        <button
+          class="recipes-header__action-btn"
+          :class="{ 'recipes-header__action-btn--active': store.hasActiveFilters }"
+          @click="showFilters = true"
+          aria-label="Фильтры"
+        >
           <IconFilter />
           <span v-if="store.hasActiveFilters" class="recipes-header__filter-dot" />
         </button>
       </div>
     </div>
+
+    <!-- Sort dropdown overlay -->
+    <div v-if="showSortMenu" class="sort-dropdown-overlay" @click="showSortMenu = false" />
 
     <!-- Sort dropdown -->
     <Transition name="dropdown">
@@ -30,18 +38,18 @@
     </Transition>
 
     <!-- Search -->
-    <div class="recipes-search">
-      <IconSearch class="recipes-search__icon" />
+    <div class="search-field">
+      <IconSearch class="search-field__icon" />
       <input
         v-model="searchQuery"
         type="search"
-        class="recipes-search__input"
-        placeholder="Поиск рецепта..."
+        class="search-field__input"
+        placeholder="Поиск блюд..."
         @input="onSearchInput"
       />
       <button
         v-if="searchQuery"
-        class="recipes-search__clear"
+        class="search-field__clear"
         @click="clearSearch"
         aria-label="Очистить"
       >
@@ -82,17 +90,17 @@
 
     <!-- Initial error -->
     <div v-else-if="store.initialError && !store.dishes.length" class="recipes-error">
-      <p class="recipes-error__text">{{ store.initialError }}</p>
+      <p class="recipes-error__text">Не удалось загрузить. Проверьте интернет.</p>
       <button class="recipes-error__retry" @click="store.loadDishes()">Повторить</button>
     </div>
 
     <!-- Empty state -->
     <div v-else-if="!store.dishes.length" class="empty-state">
       <p class="empty-state__text">
-        {{ store.filters.ownership === 'own' ? 'У вас пока нет личных блюд' : 'Общих блюд не найдено' }}
+        {{ store.filters.ownership === 'own' ? 'У вас пока нет личных блюд' : 'Общих блюд пока нет' }}
       </p>
       <button v-if="store.filters.ownership === 'own'" class="empty-state__action" @click="showCreateForm = true">
-        + Добавить блюдо
+        Добавить первое блюдо
       </button>
       <button v-if="store.hasActiveFilters || store.hasNonDefaultSort" class="empty-state__secondary" @click="resetAll">
         Сбросить фильтры
@@ -115,7 +123,7 @@
 
       <!-- Load more error -->
       <div v-if="store.loadMoreError" class="recipes-load-more-error">
-        <span class="recipes-load-more-error__text">{{ store.loadMoreError }}</span>
+        <span class="recipes-load-more-error__text">Не удалось загрузить. Проверьте интернет.</span>
         <button class="recipes-load-more-error__retry" @click="store.loadMore()">Повторить</button>
       </div>
 
@@ -337,18 +345,31 @@ onUnmounted(() => {
   background: var(--color-border);
 }
 
+.recipes-header__action-btn--active {
+  border-color: var(--color-mint);
+  color: var(--color-mint);
+}
+
 .recipes-header__filter-dot {
   position: absolute;
-  top: 6px;
-  right: 6px;
-  width: 7px;
-  height: 7px;
+  top: 5px;
+  right: 5px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
   background: var(--color-mint);
 }
 
 /* Sort dropdown */
+.sort-dropdown-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+}
+
 .sort-dropdown {
+  position: relative;
+  z-index: 11;
   display: flex;
   flex-direction: column;
   background: var(--color-surface);
@@ -381,63 +402,6 @@ onUnmounted(() => {
 
 .sort-dropdown__item + .sort-dropdown__item {
   border-top: 1px solid var(--color-border);
-}
-
-/* Search */
-.recipes-search {
-  position: relative;
-  display: flex;
-  align-items: center;
-}
-
-.recipes-search__icon {
-  position: absolute;
-  left: 12px;
-  color: var(--color-text-secondary);
-  pointer-events: none;
-}
-
-.recipes-search__input {
-  width: 100%;
-  padding: 10px 36px 10px 36px;
-  border: 1.5px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  font-size: var(--font-md);
-  font-family: inherit;
-  background: var(--color-surface);
-  color: var(--color-text);
-  outline: none;
-  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
-}
-
-.recipes-search__input:focus {
-  border-color: var(--color-mint-alpha-25);
-  box-shadow: 0 0 0 3px var(--color-mint-alpha-10);
-}
-
-.recipes-search__input::placeholder {
-  color: var(--color-text-secondary);
-  opacity: 0.6;
-}
-
-.recipes-search__clear {
-  position: absolute;
-  right: 4px;
-  width: 28px;
-  height: 28px;
-  border: none;
-  background: none;
-  color: var(--color-text-secondary);
-  font-size: 18px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: var(--radius-xs);
-  transition: background var(--transition-fast);
-}
-
-.recipes-search__clear:hover {
-  background: var(--color-empty);
 }
 
 /* Filter chips */

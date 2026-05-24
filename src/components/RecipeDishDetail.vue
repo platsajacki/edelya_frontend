@@ -8,14 +8,6 @@
             <h4 class="detail__dish-name">{{ dish.name }}</h4>
             <OwnershipBadge :is-own="isOwn" />
           </div>
-          <button
-            type="button"
-            class="detail__dish-edit"
-            :title="isOwn ? 'Редактировать рецепт' : 'Создать личную копию'"
-            @click="handleDishEdit"
-          >
-            <IconPencil />
-          </button>
         </div>
         <p v-if="dish.category?.name" class="detail__meta">{{ dish.category.name }}</p>
         <p v-if="dish.recipe" class="detail__recipe">{{ dish.recipe }}</p>
@@ -61,10 +53,10 @@
     <p class="detail__confirm-text">Удалить блюдо «{{ dish.name }}»?</p>
     <div class="detail__confirm-actions">
       <button class="detail__btn detail__btn--delete" @click="confirmDelete">
-        Да, удаляем
+        Удалить
       </button>
       <button class="detail__btn detail__btn--cancel" @click="confirming = false">
-        Нет
+        Отмена
       </button>
     </div>
   </ModalWrapper>
@@ -76,22 +68,6 @@
     :edit-dish="dish"
     @updated="onDishUpdated"
   />
-
-  <!-- Clone confirmation -->
-  <ModalWrapper v-model="showCloneConfirm" title="Общее блюдо" :z-index="1050">
-    <p class="detail__clone-text">
-      Это общее блюдо, его нельзя редактировать.
-      Вы можете создать личную копию и настроить её под себя.
-    </p>
-    <div class="detail__confirm-actions">
-      <button class="detail__btn detail__btn--edit" @click="startClone">
-        Создать личную копию
-      </button>
-      <button class="detail__btn detail__btn--cancel" @click="showCloneConfirm = false">
-        Отмена
-      </button>
-    </div>
-  </ModalWrapper>
 
   <!-- Clone DishForm -->
   <DishForm
@@ -106,31 +82,12 @@
 import { ref, computed, watch } from "vue"
 import ModalWrapper from "./forms/ModalWrapper.vue"
 import DishForm from "./forms/DishForm.vue"
-import IconPencil from "./icons/IconPencil.vue"
 import OwnershipBadge from "./OwnershipBadge.vue"
 import { fetchDish } from "../services/dishService"
 import { formatAmount } from "../utils/formatAmount"
 import { formatShoppingAmount } from "../utils/formatShoppingAmount"
 import { isDishOwn } from "../utils/dishOwnership"
-
-const UNIT_LABELS = {
-  gram: "г",
-  kilogram: "кг",
-  milligram: "мг",
-  milliliter: "мл",
-  liter: "л",
-  piece: "шт",
-  slice: "ломт.",
-  teaspoon: "ч. л.",
-  tablespoon: "ст. л.",
-  glass: "стак.",
-  cup: "чашка",
-  bunch: "пучок",
-  can: "банка",
-  pinch: "щеп.",
-  clove: "зубч.",
-  to_taste: "по вкусу",
-}
+import { UNIT_LABELS } from "../utils/unitLabels"
 
 const props = defineProps({
   modelValue: { type: Boolean, required: true },
@@ -145,7 +102,6 @@ watch(open, (v) => { emit("update:modelValue", v) })
 
 const confirming = ref(false)
 const showDishForm = ref(false)
-const showCloneConfirm = ref(false)
 const showCloneForm = ref(false)
 const loadingFull = ref(false)
 const fullDish = ref(null)
@@ -182,7 +138,7 @@ function handleDishEdit() {
   if (isOwn.value) {
     showDishForm.value = true
   } else {
-    showCloneConfirm.value = true
+    showCloneForm.value = true
   }
 }
 
@@ -196,11 +152,6 @@ function onDishUpdated(updatedDish) {
   showDishForm.value = false
   if (updatedDish) fullDish.value = updatedDish
   emit("updated")
-}
-
-function startClone() {
-  showCloneConfirm.value = false
-  showCloneForm.value = true
 }
 
 function onCloneCreated() {

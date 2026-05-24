@@ -1,6 +1,11 @@
 <template>
   <ModalWrapper v-model="open" :title="isEdit ? 'Редактировать блюдо' : isClone ? 'Создать личную копию' : 'Новое блюдо'" :z-index="zIndex">
     <form id="dish-form" class="form" @submit.prevent="submit">
+      <!-- Clone notice -->
+      <div v-if="isClone" class="dish-form__clone-notice">
+        Это личная копия общего блюда — вы можете изменить её под себя.
+      </div>
+
       <label class="form__field">
         <span class="form__label">Название <span class="form__required">*</span></span>
         <input v-model="name" type="text" class="form__input" required />
@@ -169,25 +174,7 @@ import { isDishOwn } from "../../utils/dishOwnership"
 import { fetchIngredients } from "../../services/ingredientService"
 import { formatAmount } from "../../utils/formatAmount"
 import { formatShoppingAmount } from "../../utils/formatShoppingAmount"
-
-const UNIT_LABELS = {
-  gram: "г",
-  kilogram: "кг",
-  milligram: "мг",
-  liter: "л",
-  milliliter: "мл",
-  piece: "шт",
-  slice: "ломт.",
-  teaspoon: "ч.л.",
-  tablespoon: "ст.л.",
-  glass: "стак.",
-  cup: "чашка",
-  bunch: "пучок",
-  can: "банка",
-  pinch: "щеп.",
-  clove: "зубч.",
-  to_taste: "по вкусу",
-}
+import { UNIT_LABELS } from "../../utils/unitLabels"
 
 const props = defineProps({
   modelValue: { type: Boolean, required: true },
@@ -477,6 +464,16 @@ async function useExistingDish() {
 </script>
 
 <style scoped>
+.dish-form__clone-notice {
+  padding: 10px 12px;
+  background: var(--color-mint-alpha-08);
+  border: 1px solid var(--color-mint-alpha-25);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-sm);
+  color: var(--color-text-secondary);
+  line-height: 1.45;
+}
+
 .form__duplicate-actions {
   display: flex;
   align-items: center;

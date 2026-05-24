@@ -1,0 +1,18 @@
+export const UNIT_LABELS = {
+  gram: "г",
+  kilogram: "кг",
+  milligram: "мг",
+  milliliter: "мл",
+  liter: "л",
+  piece: "шт",
+  slice: "ломт.",
+  teaspoon: "ч. л.",
+  tablespoon: "ст. л.",
+  glass: "стак.",
+  cup: "чашка",
+  bunch: "пучок",
+  can: "банка",
+  pinch: "щеп.",
+  clove: "зубч.",
+  to_taste: "по вкусу",
+}

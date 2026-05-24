@@ -51,6 +51,16 @@ function isActive(to) {
   z-index: var(--z-nav);
 }
 
+@media (min-width: 600px) {
+  .bottom-nav {
+    max-width: 540px;
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%);
+    border-radius: var(--radius-md) var(--radius-md) 0 0;
+  }
+}
+
 .bottom-nav__tab {
   flex: 1;
   display: flex;

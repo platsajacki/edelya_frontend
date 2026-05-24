@@ -1,6 +1,7 @@
 :root {
   /* ─── Colors: backgrounds & surfaces ─── */
   --color-bg: #f8f7f3;
+  --color-bg-secondary: #efede8;
   --color-surface: #ffffff;
   --color-surface-muted: #eeeae5;
   --color-text: #252520;
@@ -71,6 +72,7 @@
   --radius-pill: 9999px;
 
   /* ─── Typography ─── */
+  --font-display: 2rem;
   --font-lg: 18px;
   --font-md: 16px;
   --font-base: 15px;
@@ -118,20 +120,46 @@ input[type="search"]::-webkit-search-results-decoration {
   display: none;
 }
 
-/* ─── Search field with clear button ─── */
+/* ─── Search field with icon + clear button ─── */
 .search-field {
   position: relative;
+  display: flex;
+  align-items: center;
 }
 
-.search-field input {
-  padding-right: 36px;
+.search-field__icon {
+  position: absolute;
+  left: 12px;
+  color: var(--color-text-secondary);
+  pointer-events: none;
+}
+
+.search-field__input {
+  width: 100%;
+  padding: 10px 36px 10px 36px;
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-md);
+  font-family: inherit;
+  background: var(--color-surface);
+  color: var(--color-text);
+  outline: none;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.search-field__input:focus {
+  border-color: var(--color-mint-alpha-25);
+  box-shadow: 0 0 0 3px var(--color-mint-alpha-10);
+}
+
+.search-field__input::placeholder {
+  color: var(--color-text-secondary);
+  opacity: 0.6;
 }
 
 .search-field__clear {
   position: absolute;
   right: 4px;
-  top: 50%;
-  transform: translateY(-50%);
   width: 28px;
   height: 28px;
   border: none;

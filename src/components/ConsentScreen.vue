@@ -142,7 +142,7 @@ async function submit() {
 .consent__error {
   margin: 0;
   font-size: var(--font-sm);
-  color: var(--color-error, #e53e3e);
+  color: var(--color-danger);
 }
 
 .consent__btn {

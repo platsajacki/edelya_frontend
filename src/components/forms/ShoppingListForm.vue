@@ -2,6 +2,11 @@
   <ModalWrapper v-model="open" :title="isEdit ? 'Редактировать список' : 'Новый список покупок'" :z-index="zIndex">
     <form id="shopping-list-form" class="form" @submit.prevent="submit">
       <label class="form__field">
+        <span class="form__label">Название <span class="form__required">*</span></span>
+        <input v-model="name" type="text" class="form__input" required placeholder="Например: Продукты на неделю" @input="onNameInput" />
+      </label>
+
+      <label class="form__field">
         <span class="form__label">Начало периода <span class="form__required">*</span></span>
         <DateInput v-model="dateFrom" />
       </label>
@@ -9,11 +14,6 @@
       <label class="form__field">
         <span class="form__label">Конец периода <span class="form__required">*</span></span>
         <DateInput v-model="dateTo" />
-      </label>
-
-      <label class="form__field">
-        <span class="form__label">Название <span class="form__required">*</span></span>
-        <input v-model="name" type="text" class="form__input" required placeholder="Например: Продукты на неделю" @input="onNameInput" />
       </label>
 
       <div v-if="isEdit && datesChanged" class="form__warning">
