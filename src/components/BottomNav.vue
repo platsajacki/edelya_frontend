@@ -53,6 +53,7 @@ function isActive(to) {
 
 @media (min-width: 600px) {
   .bottom-nav {
+    width: 100%;
     max-width: 540px;
     left: 50%;
     right: auto;
