@@ -11,7 +11,7 @@
           <button
             type="button"
             class="detail__dish-edit"
-            :title="isOwn ? 'Редактировать блюдо' : 'Создать копию'"
+            :title="isOwn ? 'Редактировать рецепт' : 'Создать личную копию'"
             @click="handleDishEdit"
           >
             <IconPencil />
@@ -44,7 +44,7 @@
     <template #footer>
       <div class="detail__actions">
         <button class="detail__btn detail__btn--edit" @click="handleDishEdit">
-          {{ isOwn ? 'Редактировать' : 'Создать копию' }}
+          {{ isOwn ? 'Редактировать рецепт' : 'Создать личную копию' }}
         </button>
         <button v-if="isOwn" class="detail__btn detail__btn--delete" @click="confirming = true">
           Удалить
@@ -85,7 +85,7 @@
     </p>
     <div class="detail__confirm-actions">
       <button class="detail__btn detail__btn--edit" @click="startClone">
-        Создать копию
+        Создать личную копию
       </button>
       <button class="detail__btn detail__btn--cancel" @click="showCloneConfirm = false">
         Отмена

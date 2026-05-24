@@ -452,6 +452,24 @@ textarea {
   color: var(--color-danger);
 }
 
+.selected-dish__replace {
+  flex-shrink: 0;
+  border: none;
+  background: none;
+  font-size: var(--font-sm);
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  padding: 2px 4px;
+  border-radius: var(--radius-xs);
+  cursor: pointer;
+  transition: color var(--transition-fast), background var(--transition-fast);
+}
+
+.selected-dish__replace:hover {
+  color: var(--color-danger);
+  background: var(--color-danger-pale);
+}
+
 /* ─── Shared ingredient search (forms) ────────────────────── */
 
 .ingredient-search {

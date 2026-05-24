@@ -6,10 +6,10 @@
         <span class="form__label">Блюдо <span class="form__required">*</span></span>
         <div v-if="selectedDish" class="selected-dish">
           <span class="selected-dish__name">{{ selectedDish.name }}</span>
-          <button type="button" class="selected-dish__edit" :title="isDishOwn(selectedDish) ? 'Редактировать блюдо' : 'Создать копию'" @click="onEditDishClick">
+          <button type="button" class="selected-dish__edit" :title="isDishOwn(selectedDish) ? 'Редактировать рецепт' : 'Создать личную копию'" @click="onEditDishClick">
             <IconPencil width="14" height="14" />
           </button>
-          <button type="button" class="selected-dish__clear" @click="selectedDish = null">&times;</button>
+          <button type="button" class="selected-dish__replace" @click="selectedDish = null">Заменить</button>
         </div>
         <DishSearch v-else @select="onDishSelect" @create="onCreateDish" />
       </div>
@@ -45,8 +45,8 @@
     <!-- Clone confirmation for global dishes -->
     <ModalWrapper v-model="showCloneConfirm" title="Общее блюдо" :z-index="1020">
       <p class="clone-confirm__text">
-        Это общее блюдо, его нельзя редактировать.
-        Создать личную копию и открыть для редактирования?
+        Это общий рецепт, его нельзя редактировать.
+        Создать личную копию и использовать её в этой готовке?
       </p>
       <template #footer>
         <div class="clone-confirm__actions">

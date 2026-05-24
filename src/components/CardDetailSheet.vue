@@ -8,7 +8,7 @@
             <h4 class="detail__dish-name">{{ dish.name }}</h4>
             <OwnershipBadge :is-own="isOwn" />
           </div>
-          <button type="button" class="detail__dish-edit" :title="isOwn ? 'Редактировать блюдо' : 'Создать копию'" @click="handleDishEdit">
+          <button type="button" class="detail__dish-edit" :title="isOwn ? 'Редактировать рецепт' : 'Создать личную копию'" @click="handleDishEdit">
             <IconPencil />
           </button>
         </div>
@@ -81,7 +81,7 @@
     <template #footer>
       <div class="detail__actions">
         <button class="detail__btn detail__btn--edit" @click="$emit('edit')">
-          Редактировать
+          {{ type === 'cooking' ? 'Редактировать готовку' : 'Редактировать' }}
         </button>
         <button class="detail__btn detail__btn--delete" @click="confirming = true">
           Удалить
@@ -118,13 +118,18 @@
   <!-- Clone confirmation modal -->
   <ModalWrapper v-model="showCloneConfirm" title="Общее блюдо" :z-index="1050">
     <p class="detail__clone-text">
-      Это общее блюдо, его нельзя редактировать.
-      Вы можете создать личную копию и настроить её под себя.
+      <template v-if="type === 'cooking'">
+        Это общий рецепт. Создать личную копию и использовать её в этой готовке?
+      </template>
+      <template v-else>
+        Это общий рецепт, его нельзя редактировать.
+        Вы можете создать личную копию и настроить её под себя.
+      </template>
     </p>
     <template #footer>
       <div class="detail__confirm-actions">
         <button class="detail__btn detail__btn--edit" @click="startClone">
-          Создать копию
+          {{ type === 'cooking' ? 'Создать и использовать здесь' : 'Создать копию' }}
         </button>
         <button class="detail__btn detail__btn--cancel" @click="showCloneConfirm = false">
           Отмена
@@ -231,8 +236,16 @@ function startClone() {
   showCloneForm.value = true
 }
 
-async function onCloneCreated() {
+async function onCloneCreated(dish) {
   showCloneForm.value = false
+  if (props.type === "cooking" && props.item?.id) {
+    await planning.editCookingEvent(props.item.id, {
+      dish: dish.id,
+      cooking_date: props.item.cooking_date,
+      eat_dates: eatDates.value,
+      notes: props.item.notes || undefined,
+    })
+  }
   await planning.loadWeek()
   open.value = false
 }
