@@ -46,7 +46,7 @@ function buildHeaders(extra = {}, hasBody = false) {
 const ERROR_MESSAGES = {
   "At least one ingredient is required.": "Нужен хотя бы один ингредиент.",
   "Duplicate ingredients are not allowed.": "Ингредиенты не должны повторяться.",
-  "Dish with this name already exists.": "Рецепт с таким названием уже существует.",
+  "Dish with this name already exists.": "Личный рецепт с таким названием уже существует.",
   "Dish must have at least one ingredient": "У рецепта должен быть хотя бы один ингредиент.",
   "An ingredient with this name already exists for this user.": "Ингредиент с таким названием уже существует.",
   "Date when eating starts cannot be earlier than cooking date": "Дата начала еды не может быть раньше даты готовки.",
