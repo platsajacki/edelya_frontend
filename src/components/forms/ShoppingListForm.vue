@@ -21,7 +21,7 @@
         При сохранении список покупок будет пересчитан на основе готовок за новый период.
       </div>
 
-      <div v-if="error" class="form__error">{{ error }}</div>
+      <div v-if="error" ref="errorRef" class="form__error">{{ error }}</div>
 
     </form>
 
@@ -34,7 +34,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from "vue"
+import { ref, computed, watch, nextTick } from "vue"
 import ModalWrapper from "./ModalWrapper.vue"
 import DateInput from "./DateInput.vue"
 import { useShoppingStore } from "../../store/shopping"
@@ -64,6 +64,10 @@ const dateFrom = ref("")
 const dateTo = ref("")
 const saving = ref(false)
 const error = ref("")
+const errorRef = ref(null)
+watch(error, (val) => {
+  if (val) nextTick(() => errorRef.value?.scrollIntoView({ behavior: 'smooth', block: 'nearest' }))
+})
 const nameManuallyEdited = ref(false)
 
 function todayISO() {

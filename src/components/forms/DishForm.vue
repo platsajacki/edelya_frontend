@@ -18,7 +18,7 @@
 
       <label class="form__field">
         <span class="form__label">Рецепт</span>
-        <textarea v-model="recipe" class="form__textarea" rows="2" />
+        <textarea ref="recipeRef" v-model="recipe" class="form__textarea form__textarea--auto" rows="2" @input="autoResize($event.target)" />
       </label>
 
       <!-- Ingredients -->
@@ -132,7 +132,7 @@
         </div>
       </div>
 
-      <div v-if="error" class="form__error">{{ error }}</div>
+      <div v-if="error" ref="errorRef" class="form__error">{{ error }}</div>
 
     </form>
 
@@ -205,6 +205,9 @@ const categories = ref([])
 const ingredients = ref([])
 const saving = ref(false)
 const error = ref("")
+watch(error, (val) => {
+  if (val) nextTick(() => errorRef.value?.scrollIntoView({ behavior: 'smooth', block: 'nearest' }))
+})
 
 // Ingredient search state
 const ingredientQuery = ref("")
@@ -219,6 +222,13 @@ const pendingOptional = ref(false)
 const amountError = ref("")
 const editingIdx = ref(null)
 const amountInputRef = ref(null)
+const recipeRef = ref(null)
+const errorRef = ref(null)
+
+function autoResize(el) {
+  el.style.height = 'auto'
+  el.style.height = el.scrollHeight + 'px'
+}
 
 let ingredientSearchTimer = null
 
@@ -262,6 +272,8 @@ watch(() => props.modelValue, async (v) => {
       recipe.value = ""
       ingredients.value = []
     }
+    await nextTick()
+    if (recipeRef.value) autoResize(recipeRef.value)
   }
 })
 

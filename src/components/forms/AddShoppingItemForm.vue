@@ -61,7 +61,7 @@
             </div>
           </label>
 
-          <div v-if="error" class="form__error">{{ error }}</div>
+          <div v-if="error" ref="errorRef" class="form__error">{{ error }}</div>
 
           <button
             type="button"
@@ -146,6 +146,10 @@ const selectedIngredient = ref(null)
 const amount = ref("")
 const saving = ref(false)
 const error = ref("")
+const errorRef = ref(null)
+watch(error, (val) => {
+  if (val) nextTick(() => errorRef.value?.scrollIntoView({ behavior: 'smooth', block: 'nearest' }))
+})
 const showIngredientForm = ref(false)
 const ingredientFormInitialName = ref("")
 const confirmDuplicate = ref(false)

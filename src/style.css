@@ -223,6 +223,12 @@ textarea {
   resize: vertical;
 }
 
+.form__textarea--auto {
+  resize: none;
+  overflow: hidden;
+  min-height: 64px;
+}
+
 .form__input:focus,
 .form__select:focus,
 .form__textarea:focus {
