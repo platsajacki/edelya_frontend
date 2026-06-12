@@ -378,6 +378,7 @@ const MAX_SOURCE_LENGTH = 10000
 const POLL_INTERVAL_MS = 7000
 const PROMPT_INJECTION_MESSAGE = "Обнаружены подозрительные данные, похожие на попытку обойти систему. Пожалуйста, измените формулировку и попробуйте снова."
 const NOT_PROCESSABLE_MESSAGE = "Рецепт не может быть обработан. Пожалуйста, проверьте формат и содержание текста."
+const DEFAULT_PARSE_FAILURE_MESSAGE = "Попробуйте добавить больше деталей: ингредиенты, количество и шаги приготовления."
 
 const props = defineProps({
   modelValue: { type: Boolean, required: true },
@@ -770,19 +771,19 @@ function getCreatedDishId(value) {
 
 function formatValidationErrors(errors) {
   if (!errors || (Array.isArray(errors) && !errors.length)) {
-    return "Попробуйте добавить больше деталей: ингредиенты, количество и шаги приготовления."
+    return DEFAULT_PARSE_FAILURE_MESSAGE
   }
   const text = formatErrorItem(errors)
-  return text || "Попробуйте добавить больше деталей: ингредиенты, количество и шаги приготовления."
+  return text || DEFAULT_PARSE_FAILURE_MESSAGE
 }
 
 function formatErrorItem(item) {
   if (!item) return ""
   if (item === "prompt_injection") return PROMPT_INJECTION_MESSAGE
   if (item === "not_processable") return NOT_PROCESSABLE_MESSAGE
-  if (typeof item === "string") return item
+  if (typeof item === "string") return ""
   if (Array.isArray(item)) return item.map(formatErrorItem).filter(Boolean).join("\n")
-  if (typeof item !== "object") return String(item)
+  if (typeof item !== "object") return ""
   if (item.error_code === "prompt_injection") return PROMPT_INJECTION_MESSAGE
   if (item.code === "prompt_injection") return PROMPT_INJECTION_MESSAGE
   if (item.error_code === "not_processable") return NOT_PROCESSABLE_MESSAGE
@@ -792,9 +793,9 @@ function formatErrorItem(item) {
   if (item.detail) return formatErrorItem(item.detail)
   return Object.entries(item)
     .filter(([key]) => key !== "error_code")
-    .map(([field, value]) => {
+    .map(([, value]) => {
       const text = formatErrorItem(value)
-      return text ? `${field}: ${text}` : ""
+      return text || ""
     })
     .filter(Boolean)
     .join("\n")
