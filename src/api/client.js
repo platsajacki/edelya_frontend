@@ -80,6 +80,16 @@ const ERROR_MESSAGES = {
   "Subscription cannot be cancelled in current status.": "Подписку невозможно отменить в текущем статусе.",
   "Subscription is not pending cancellation.": "Подписка не находится в процессе отмены.",
   "Subscription cannot be resumed in current status.": "Подписку невозможно возобновить в текущем статусе.",
+  "AI recipe limit for the current subscription period has been exceeded.": "Лимит AI-рецептов на текущий период исчерпан.",
+  "AI draft must be parsed before dish creation.": "AI-рецепт ещё не готов к созданию блюда.",
+  "Payload must contain name, recipe, category and ingredients.": "Проверьте название, рецепт, категорию и ингредиенты.",
+  "Ingredients must be a non-empty list.": "Нужен хотя бы один ингредиент.",
+  "Payload must be a dictionary.": "Некорректный формат AI-рецепта.",
+  "New ingredient must not contain ingredient id.": "Некорректный новый ингредиент.",
+  "Existing ingredient id is required.": "Выберите существующий ингредиент.",
+  "At least one ingredient must be required.": "Хотя бы один ингредиент должен быть обязательным.",
+  prompt_injection: "Обнаружены подозрительные данные, похожие на попытку обойти систему. Пожалуйста, измените формулировку и попробуйте снова.",
+  not_processable: "Рецепт не может быть обработан. Пожалуйста, проверьте формат и содержание текста.",
 }
 
 const SUBSCRIPTION_DETAIL_TO_CODE = {
@@ -105,6 +115,9 @@ const FIELD_NAMES = {
   date: "Дата",
   position: "Позиция",
   notes: "Комментарий",
+  source_text: "Текст рецепта",
+  payload: "AI-рецепт",
+  ingredients: "Ингредиенты",
 }
 
 function translateMessage(msg) {
@@ -136,6 +149,11 @@ function translateMessage(msg) {
   if (/must make a unique set/.test(msg)) return "Такая запись уже существует."
   // "Cannot select tariff for subscription with status 'xxx'" — dynamic
   if (/^Cannot select tariff for subscription with status/.test(msg)) return "Смена тарифа недоступна для текущего статуса подписки."
+  if (/^Invalid ingredient unit:/.test(msg)) return "Некорректная единица измерения ингредиента."
+  if (/^Ingredient category not found:/.test(msg)) return "Категория ингредиента не найдена."
+  if (/^Ingredient #\d+ missing keys:/.test(msg)) return "Проверьте данные ингредиентов."
+  if (/^Ingredient #\d+/.test(msg)) return "Проверьте данные ингредиентов."
+  if (/^Invalid payload structure:/.test(msg)) return "Некорректный формат AI-рецепта."
   if (/^This field is required/.test(msg)) return "Обязательное поле."
   if (/^This field may not be blank/.test(msg)) return "Поле не может быть пустым."
   if (/^This field may not be null/.test(msg)) return "Поле не может быть пустым."

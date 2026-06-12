@@ -30,6 +30,9 @@ export const useSubscriptionStore = defineStore("subscription", {
       state.subscription?.is_active === true &&
       state.subscription?.tariff?.is_trial_tariff === true,
 
+    canCreateAIRecipes: (state) =>
+      state.subscription?.tariff?.can_create_ai_recipes === true,
+
     daysLeft: (state) => {
       const sub = state.subscription
       if (!sub || sub.status !== "trial" || !sub.is_active) return null

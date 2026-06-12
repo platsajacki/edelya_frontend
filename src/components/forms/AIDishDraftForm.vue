@@ -1,0 +1,1462 @@
+<template>
+  <ModalWrapper v-model="open" :title="modalTitle" :z-index="zIndex">
+    <form id="ai-dish-form" class="form" @submit.prevent="submit">
+      <template v-if="step === 'input'">
+        <div class="ai-draft__intro">
+          <p class="ai-draft__title">Введите рецепт, продукты или идею блюда</p>
+          <p class="ai-draft__text">
+            ИИ подготовит блюдо с названием, рецептом и ингредиентами. Перед сохранением вы сможете всё проверить и поправить.
+          </p>
+          <ul class="ai-draft__capabilities">
+            <li>Готовый рецепт — вставьте ингредиенты и шаги приготовления.</li>
+            <li>Продукты — напишите, что есть под рукой.</li>
+            <li>Идея блюда — опишите желаемое блюдо, стиль или ограничения.</li>
+          </ul>
+        </div>
+
+        <label class="form__field">
+          <span class="form__label">Что приготовить <span class="form__required">*</span></span>
+          <textarea
+            ref="sourceTextRef"
+            v-model="sourceText"
+            class="form__textarea ai-draft__source"
+            rows="8"
+            :maxlength="MAX_SOURCE_LENGTH"
+            placeholder="Готовый рецепт: Борщ. Ингредиенты: свёкла 300 г, капуста 200 г... Приготовление: нарезать овощи, сварить бульон...
+
+Продукты: есть картофель, яйца, сыр и сметана. Что приготовить?
+
+Идея блюда: лёгкий ужин с курицей без майонеза."
+          />
+        </label>
+        <div class="ai-draft__counter">{{ sourceTextLength }}/{{ MAX_SOURCE_LENGTH }}</div>
+      </template>
+
+      <div v-else-if="step === 'processing'" class="ai-draft__notice">
+        <div class="ai-draft__notice-head">
+          <div class="spinner spinner--sm" />
+          <p class="ai-draft__title">Рецепт в обработке</p>
+        </div>
+        <p class="ai-draft__text">Черновик доступен во вкладке AI-рецепты. Статус обновится автоматически.</p>
+        <div class="ai-draft__source-preview">{{ draftSourceText }}</div>
+      </div>
+
+      <div v-else-if="step === 'failed'" class="ai-draft__notice ai-draft__notice--error">
+        <p class="ai-draft__title">Не удалось разобрать рецепт</p>
+        <p class="ai-draft__text">{{ failureMessage }}</p>
+        <div v-if="draftSourceText" class="ai-draft__source-preview">{{ draftSourceText }}</div>
+        <button type="button" class="ai-draft__secondary-btn" @click="resetToInput">Попробовать заново</button>
+      </div>
+
+      <div v-else-if="step === 'dish_created'" class="ai-draft__readonly">
+        <div class="ai-draft__notice">
+          <p class="ai-draft__title">Блюдо создано</p>
+          <p class="ai-draft__text">Созданное блюдо уже сохранено. Здесь можно посмотреть данные AI-черновика.</p>
+        </div>
+
+        <div class="detail__section">
+          <div class="detail__dish-header">
+            <h4 class="detail__dish-name">{{ readonlyPayload.name || "Без названия" }}</h4>
+          </div>
+          <p v-if="readonlyCategoryName" class="detail__meta">{{ readonlyCategoryName }}</p>
+          <p v-if="readonlyPayload.recipe" class="detail__recipe">{{ readonlyPayload.recipe }}</p>
+        </div>
+
+        <div v-if="readonlyPayload.ingredients?.length" class="detail__section">
+          <span class="detail__label">Состав</span>
+          <ul class="detail__ingredients">
+            <li v-for="(ingredient, idx) in readonlyPayload.ingredients" :key="idx" class="detail__ingredient">
+              <span class="detail__ingredient-name">{{ ingredientLabel(ingredient) }}</span>
+              <span class="detail__ingredient-right">
+                <span v-if="ingredient.is_optional" class="detail__ingredient-optional">опц.</span>
+                <span class="detail__ingredient-amount">
+                  {{ formatShoppingAmount(ingredient.amount, ingredient.base_unit).display }}
+                </span>
+              </span>
+            </li>
+          </ul>
+        </div>
+
+        <div v-if="draftSourceText" class="detail__section">
+          <button type="button" class="ai-draft__source-toggle" @click="sourceExpanded = !sourceExpanded">
+            {{ sourceToggleLabel }}
+          </button>
+          <div v-if="sourceExpanded" class="ai-draft__source-preview">{{ draftSourceText }}</div>
+        </div>
+      </div>
+
+      <template v-else-if="step === 'parsed'">
+        <div class="ai-draft__intro">
+          <p class="ai-draft__title">Проверьте блюдо</p>
+          <p class="ai-draft__text">Можно поправить название, рецепт, категорию, количество и обязательность ингредиентов.</p>
+        </div>
+
+        <div v-if="draftSourceText" class="ai-draft__source-block">
+          <button type="button" class="ai-draft__source-toggle" @click="sourceExpanded = !sourceExpanded">
+            {{ sourceToggleLabel }}
+          </button>
+          <div v-if="sourceExpanded" class="ai-draft__source-preview">{{ draftSourceText }}</div>
+        </div>
+
+        <label class="form__field">
+          <span class="form__label">Название <span class="form__required">*</span></span>
+          <input v-model="payload.name" type="text" class="form__input" required />
+        </label>
+
+        <label class="form__field">
+          <span class="form__label">Категория <span class="form__required">*</span></span>
+          <select v-model="payload.category" class="form__select" required>
+            <option value="" disabled>Выберите категорию</option>
+            <option v-for="cat in dishCategories" :key="cat.id" :value="cat.id">{{ cat.name }}</option>
+          </select>
+        </label>
+
+        <label class="form__field">
+          <span class="form__label">Рецепт <span class="form__required">*</span></span>
+          <textarea v-model="payload.recipe" class="form__textarea ai-draft__recipe" rows="5" required />
+        </label>
+
+        <div class="form__section">
+          <span class="form__label">Ингредиенты <span class="form__required">*</span></span>
+
+          <template v-for="(ingredient, idx) in payload.ingredients" :key="ingredient.localId">
+            <div v-if="editingIngredientIndex === idx" class="ingredient-amount">
+              <div class="ingredient-amount__header">
+                <span
+                  class="ingredient-amount__mode-badge"
+                  :class="
+                    ingredient.new
+                        ? 'ingredient-amount__mode-badge--new'
+                        : ingredient.ingredient
+                          ? 'ingredient-amount__mode-badge--found'
+                          : null
+                  "
+                >
+                  {{ !ingredient.new && !ingredient.ingredient ? 'Нужна привязка' : ingredient.new ? 'Новый' : 'Найден' }}
+                </span>
+                <span v-if="!ingredient.new && ingredient.ingredient" class="ingredient-amount__name">{{ ingredientLabel(ingredient) }}</span>
+              </div>
+
+              <template v-if="ingredient.new || (!ingredient.new && !ingredient.ingredient)">
+                <label v-if="ingredient.new" class="form__field">
+                  <span class="form__label">Название</span>
+                  <input v-model="ingredient.name" type="text" class="form__input" />
+                </label>
+
+                <button v-if="!inlineReplaceVisible" type="button" class="ingredient-amount__link-btn" @click="openInlineReplace(ingredient)">
+                  Привязать к существующему
+                </button>
+ 
+                <div v-else class="ingredient-amount__inline-replace">
+                  <div class="ai-draft__search-head">
+                    <span class="ingredient-amount__replace-label">Найти и привязать</span>
+                    <button type="button" class="ingredient-amount__cancel-link" @click="closeInlineReplace">Отмена</button>
+                  </div>
+                  <div class="search-field">
+                    <input
+                      v-model="inlineReplaceQuery"
+                      type="search"
+                      class="form__input"
+                      placeholder="Поиск ингредиента..."
+                      @input="searchInlineReplace"
+                    />
+                    <button
+                      v-if="inlineReplaceQuery"
+                      type="button"
+                      class="search-field__clear"
+                      aria-label="Очистить"
+                      @click="inlineReplaceQuery = ''; inlineReplaceResults = []"
+                    >
+                      &times;
+                    </button>
+                  </div>
+                  <div v-if="inlineReplaceLoading" class="ingredient-search__status">
+                    <div class="spinner spinner--sm" />
+                  </div>
+                  <ul v-else-if="inlineReplaceResults.length" class="ingredient-search__list">
+                    <li
+                      v-for="result in inlineReplaceResults"
+                      :key="result.id"
+                      class="ingredient-search__item"
+                      @click="selectInlineReplaceIngredient(idx, result)"
+                    >
+                      {{ result.name }}
+                      <span class="ingredient-search__unit">{{ UNIT_LABELS[result.base_unit] || result.base_unit }}</span>
+                    </li>
+                  </ul>
+                  <div v-else-if="inlineReplaceQuery.trim()" class="ingredient-search__status">Ничего не найдено</div>
+                </div>
+              </template>
+
+              <div v-if="ingredient.base_unit !== 'to_taste'" class="ingredient-amount__row">
+                <input
+                  ref="amountInputRef"
+                  v-model="ingredient.amount"
+                  type="text"
+                  inputmode="decimal"
+                  autocomplete="off"
+                  class="form__input ingredient-amount__input"
+                  placeholder="Например: 200"
+                  @focus="$event.target.select()"
+                  @keydown.enter.prevent="finishIngredientEdit"
+                />
+                <select v-if="ingredient.new" v-model="ingredient.base_unit" class="form__select ingredient-amount__select">
+                  <option v-for="unit in unitOptions" :key="unit.value" :value="unit.value">{{ unit.label }}</option>
+                </select>
+                <span v-else class="ingredient-amount__unit">{{ UNIT_LABELS[ingredient.base_unit] || ingredient.base_unit }}</span>
+              </div>
+              <p v-else class="ingredient-amount__taste-hint">Количество не указывается — добавится как «по вкусу»</p>
+
+              <label v-if="ingredient.new" class="form__field">
+                <span class="form__label">Категория ингредиента</span>
+                <select v-model="ingredient.category" class="form__select">
+                  <option value="" disabled>Выберите категорию</option>
+                  <option v-for="cat in ingredientCategories" :key="cat.id" :value="cat.id">{{ cat.name }}</option>
+                </select>
+              </label>
+
+              <label class="ingredient-amount__optional">
+                <input v-model="ingredient.is_optional" type="checkbox" />
+                Опционально
+              </label>
+
+              <div class="ingredient-amount__actions">
+                <button type="button" class="btn btn--sm" @click="finishIngredientEdit">Сохранить</button>
+                <button type="button" class="btn btn--sm btn--ghost" @click="cancelIngredientEdit">Отмена</button>
+              </div>
+            </div>
+
+            <template v-else>
+              <div
+                class="ingredient-row"
+                :class="{
+                  'ingredient-row--broken': !ingredient.new && !ingredient.ingredient,
+                }"
+              >
+                <span class="ingredient-row__name">{{ ingredientLabel(ingredient) }}</span>
+                <span
+                  class="ai-ingredient__badge"
+                  :class="{
+                    'ai-ingredient__badge--new': ingredient.new,
+                    'ai-ingredient__badge--broken': !ingredient.new && !ingredient.ingredient,
+                  }"
+                >
+                  {{ ingredient.new ? 'создать' : (!ingredient.ingredient ? 'привязать' : 'найден') }}
+                </span>
+                <span v-if="ingredient.is_optional" class="ingredient-row__opt-label">опц.</span>
+                <span class="ingredient-row__amount">{{ formatShoppingAmount(ingredient.amount, ingredient.base_unit).display }}</span>
+                <button type="button" class="ingredient-row__edit" title="Редактировать" @click="startIngredientEdit(idx)">
+                  <IconPencil width="14" height="14" />
+                </button>
+                <button type="button" class="ingredient-row__remove" title="Удалить" @click="removeIngredient(idx)">
+                  <IconClose />
+                </button>
+              </div>
+              <div
+                v-if="ingredient.new && suggestionsMap[ingredient.localId]?.length"
+                class="ingredient-row__suggestions"
+              >
+                <span class="ingredient-row__suggestions-label">Похоже на:</span>
+                <button
+                  v-for="s in suggestionsMap[ingredient.localId]"
+                  :key="s.id"
+                  type="button"
+                  class="ingredient-row__suggestion-chip"
+                  @click="applySuggestion(idx, s)"
+                >{{ s.name }}</button>
+              </div>
+            </template>
+          </template>
+
+          <button
+            type="button"
+            class="ingredient-add__toggle"
+            @click="addIngredientExpanded = !addIngredientExpanded"
+          >
+            {{ addIngredientExpanded ? '− Свернуть' : '+ Добавить ингредиент' }}
+          </button>
+
+          <div v-if="addIngredientExpanded" class="ingredient-search">
+            <div class="search-field">
+              <input
+                v-model="ingredientSearchQuery"
+                type="search"
+                class="form__input"
+                placeholder="Поиск ингредиента..."
+                @input="searchIngredients"
+              />
+              <button
+                v-if="ingredientSearchQuery"
+                type="button"
+                class="search-field__clear"
+                aria-label="Очистить"
+                @click="clearIngredientSearch"
+              >
+                &times;
+              </button>
+            </div>
+            <div v-if="ingredientSearchLoading" class="ingredient-search__status">
+              <div class="spinner spinner--sm" />
+            </div>
+            <ul v-else-if="ingredientSearchResults.length" class="ingredient-search__list">
+              <li
+                v-for="result in ingredientSearchResults"
+                :key="result.id"
+                class="ingredient-search__item"
+                @click="selectExistingIngredient(result)"
+              >
+                {{ result.name }}
+                <span class="ingredient-search__unit">{{ UNIT_LABELS[result.base_unit] || result.base_unit }}</span>
+              </li>
+            </ul>
+            <div v-else-if="ingredientSearchQuery.trim()" class="ingredient-search__status">Ничего не найдено</div>
+            <button type="button" class="dish-search__create" @click="openIngredientForm">
+              + Создать ингредиент
+            </button>
+          </div>
+        </div>
+      </template>
+
+      <div v-if="error" class="form__error">{{ error }}</div>
+    </form>
+
+    <IngredientForm
+      v-model="showIngredientForm"
+      :z-index="zIndex + 10"
+      :initial-name="ingredientFormInitialName"
+      @created="onIngredientCreated"
+    />
+
+    <template #footer>
+      <div v-if="step === 'dish_created'" class="detail__actions">
+        <button
+          type="button"
+          class="detail__btn detail__btn--edit"
+          :disabled="!createdDishId || openingCreatedDish"
+          @click="openCreatedDish"
+        >
+          {{ openingCreatedDish ? "Открываю..." : "Открыть блюдо" }}
+        </button>
+        <button type="button" class="detail__btn detail__btn--cancel" @click="open = false">
+          Закрыть
+        </button>
+      </div>
+      <button
+        v-else-if="canSubmit"
+        type="submit"
+        form="ai-dish-form"
+        class="form__submit"
+        :disabled="submitDisabled"
+      >
+        {{ submitLabel }}
+      </button>
+    </template>
+  </ModalWrapper>
+</template>
+
+<script setup>
+import { computed, nextTick, onUnmounted, ref, watch } from "vue"
+import ModalWrapper from "./ModalWrapper.vue"
+import IngredientForm from "./IngredientForm.vue"
+import IconPencil from "../icons/IconPencil.vue"
+import IconClose from "../icons/IconClose.vue"
+import { createAIDraft, createDishFromAIDraft, fetchAIDraft } from "../../services/aiDraftService"
+import { fetchDish, fetchDishCategories } from "../../services/dishService"
+import { fetchIngredientById, fetchIngredientCategories, fetchIngredients } from "../../services/ingredientService"
+import { formatShoppingAmount } from "../../utils/formatShoppingAmount"
+import { UNIT_LABELS } from "../../utils/unitLabels"
+
+const MIN_SOURCE_LENGTH = 10
+const MAX_SOURCE_LENGTH = 10000
+const POLL_INTERVAL_MS = 7000
+const PROMPT_INJECTION_MESSAGE = "Обнаружены подозрительные данные, похожие на попытку обойти систему. Пожалуйста, измените формулировку и попробуйте снова."
+const NOT_PROCESSABLE_MESSAGE = "Рецепт не может быть обработан. Пожалуйста, проверьте формат и содержание текста."
+
+const props = defineProps({
+  modelValue: { type: Boolean, required: true },
+  zIndex: { type: Number, default: 1010 },
+  draftToOpen: { type: Object, default: null },
+})
+
+const emit = defineEmits(["update:modelValue", "created", "draft-created", "draft-updated", "open-dish"])
+
+const open = ref(props.modelValue)
+const sourceText = ref("")
+const sourceTextRef = ref(null)
+const draft = ref(null)
+const createdDish = ref(null)
+const openingCreatedDish = ref(false)
+const payload = ref(createEmptyPayload())
+const dishCategories = ref([])
+const ingredientCategories = ref([])
+const error = ref("")
+const saving = ref(false)
+const polling = ref(false)
+const sourceExpanded = ref(false)
+const editingIngredientIndex = ref(null)
+const addIngredientExpanded = ref(false)
+const ingredientSearchQuery = ref("")
+const ingredientSearchResults = ref([])
+const ingredientSearchLoading = ref(false)
+const showIngredientForm = ref(false)
+const ingredientFormInitialName = ref("")
+const amountInputRef = ref(null)
+const suggestionsMap = ref({})
+
+const inlineReplaceVisible = ref(false)
+const inlineReplaceQuery = ref("")
+const inlineReplaceResults = ref([])
+const inlineReplaceLoading = ref(false)
+let inlineReplaceTimer = null
+
+let pollTimer = null
+let ingredientSearchTimer = null
+
+const unitOptions = computed(() =>
+  Object.entries(UNIT_LABELS).map(([value, label]) => ({ value, label })),
+)
+
+const sourceTextLength = computed(() => sourceText.value.trim().length)
+const modalTitle = computed(() => (draft.value ? "AI-рецепт" : "Создать с ИИ"))
+const draftSourceText = computed(() => draft.value?.source_text || sourceText.value.trim())
+const step = computed(() => {
+  if (!draft.value) return "input"
+  if (draft.value.status === "parsed") return "parsed"
+  if (draft.value.status === "failed") return "failed"
+  if (draft.value.status === "dish_created") return "dish_created"
+  return "processing"
+})
+const failureMessage = computed(() => formatValidationErrors(draft.value?.validation_errors))
+const submitDisabled = computed(() => saving.value || polling.value || step.value === "processing")
+const canSubmit = computed(() => !["failed", "dish_created"].includes(step.value))
+const readonlyPayload = computed(() => normalizePayload(draft.value?.payload))
+const readonlyCategoryName = computed(() => getCategoryName(readonlyPayload.value.category))
+const createdDishId = computed(() => getCreatedDishId(createdDish.value || draft.value?.created_dish))
+const sourceToggleLabel = computed(() =>
+  sourceExpanded.value ? "Скрыть исходный текст" : "Показать исходный текст",
+)
+const submitLabel = computed(() => {
+  if (saving.value && step.value === "parsed") return "Создание..."
+  if (saving.value) return "Отправка..."
+  if (polling.value || step.value === "processing") return "Подготовка блюда..."
+  if (step.value === "parsed") return "Создать блюдо"
+  return "Подготовить блюдо"
+})
+
+watch(() => props.modelValue, (value) => {
+  open.value = value
+  if (value) {
+    resetState({ keepDraft: Boolean(props.draftToOpen) })
+    loadReferences()
+    if (props.draftToOpen) {
+      applyDraft(props.draftToOpen)
+      return
+    }
+    nextTick(() => sourceTextRef.value?.focus())
+  } else {
+    stopPolling()
+  }
+})
+
+watch(() => props.draftToOpen, (value) => {
+  if (open.value && value) applyDraft(value)
+})
+
+watch(open, (value) => {
+  emit("update:modelValue", value)
+  if (!value) stopPolling()
+})
+
+watch(
+  () => payload.value?.ingredients,
+  (ingredients) => {
+    ingredients?.forEach((ingredient) => {
+      if (ingredient.base_unit === "to_taste") {
+        ingredient.amount = 1
+      }
+    })
+  },
+  { deep: true },
+)
+
+async function loadReferences() {
+  try {
+    const [dishData, ingredientData] = await Promise.all([
+      fetchDishCategories(),
+      fetchIngredientCategories(),
+    ])
+    dishCategories.value = dishData.results ?? []
+    ingredientCategories.value = ingredientData.results ?? []
+  } catch {
+    dishCategories.value = []
+    ingredientCategories.value = []
+  }
+}
+
+function createEmptyPayload() {
+  return {
+    name: "",
+    recipe: "",
+    category: "",
+    ingredients: [],
+  }
+}
+
+function resetState({ keepDraft = false } = {}) {
+  if (!keepDraft) {
+    sourceText.value = ""
+    draft.value = null
+  }
+  createdDish.value = null
+  openingCreatedDish.value = false
+  payload.value = createEmptyPayload()
+  error.value = ""
+  saving.value = false
+  polling.value = false
+  sourceExpanded.value = false
+  suggestionsMap.value = {}
+  addIngredientExpanded.value = false
+  resetIngredientSearch()
+  stopPolling()
+}
+
+function resetToInput() {
+  draft.value = null
+  payload.value = createEmptyPayload()
+  error.value = ""
+  nextTick(() => sourceTextRef.value?.focus())
+}
+
+function applyDraft(nextDraft) {
+  draft.value = nextDraft
+  sourceText.value = nextDraft?.source_text || sourceText.value
+  sourceExpanded.value = false
+  if (nextDraft?.status === "dish_created") {
+    createdDish.value = nextDraft.created_dish || null
+  }
+  resetIngredientSearch()
+  if (nextDraft?.payload) setPayload(nextDraft.payload)
+  if (nextDraft?.status === "processing") schedulePoll(nextDraft.id)
+}
+
+function stopPolling() {
+  if (pollTimer) {
+    clearTimeout(pollTimer)
+    pollTimer = null
+  }
+  polling.value = false
+}
+
+function schedulePoll(id) {
+  if (!open.value) return
+  stopPolling()
+  polling.value = true
+  pollTimer = setTimeout(() => pollDraft(id), POLL_INTERVAL_MS)
+}
+
+async function pollDraft(id) {
+  try {
+    const data = await fetchAIDraft(id)
+    if (!open.value) return
+    draft.value = data
+    emit("draft-updated", data)
+    if (data.status === "parsed") {
+      stopPolling()
+      setPayload(data.payload)
+      return
+    }
+    if (data.status === "failed") {
+      stopPolling()
+      return
+    }
+    schedulePoll(id)
+  } catch (err) {
+    if (!open.value) return
+    stopPolling()
+    error.value = err.message || "Не удалось получить результат разбора."
+  }
+}
+
+function setPayload(data) {
+  const nextPayload = normalizePayload(data)
+  nextPayload.ingredients = (nextPayload.ingredients || []).map((ingredient, index) => ({
+    ...ingredient,
+    localId: `${ingredient.ingredient || ingredient.name || "ingredient"}-${index}`,
+    amount: ingredient.amount ?? 1,
+    suggested_ids: ingredient.suggested_ids ?? [],
+  }))
+  payload.value = nextPayload
+  loadSuggestions(nextPayload.ingredients)
+}
+
+async function loadSuggestions(ingredients) {
+  const map = {}
+  const toLoad = ingredients.filter((ing) => ing.new && ing.suggested_ids?.length)
+  await Promise.allSettled(
+    toLoad.map(async (ing) => {
+      const results = await Promise.allSettled(ing.suggested_ids.map((id) => fetchIngredientById(id)))
+      map[ing.localId] = results
+        .filter((r) => r.status === "fulfilled")
+        .map((r) => r.value)
+    }),
+  )
+  suggestionsMap.value = map
+}
+
+function normalizePayload(data) {
+  return JSON.parse(JSON.stringify(data || createEmptyPayload()))
+}
+
+function getCategoryName(categoryId) {
+  const id = getCategoryId(categoryId)
+  return dishCategories.value.find((category) => category.id === id)?.name || ""
+}
+
+function ingredientLabel(ingredient) {
+  return ingredient.name?.trim() || "Без названия"
+}
+
+function removeIngredient(index) {
+  payload.value.ingredients.splice(index, 1)
+  if (editingIngredientIndex.value === index) {
+    editingIngredientIndex.value = null
+    closeInlineReplace()
+  } else if (editingIngredientIndex.value !== null && editingIngredientIndex.value > index) {
+    editingIngredientIndex.value--
+  }
+}
+
+function startIngredientEdit(index) {
+  closeInlineReplace()
+  editingIngredientIndex.value = index
+  const ingredient = payload.value.ingredients[index]
+  if (ingredient && !ingredient.new && !ingredient.ingredient) {
+    // Broken state: marked as found but no ID — auto-open replace search
+    nextTick(() => openInlineReplace(ingredient))
+  } else {
+    nextTick(() => amountInputRef.value?.focus())
+  }
+}
+
+function finishIngredientEdit() {
+  editingIngredientIndex.value = null
+  closeInlineReplace()
+}
+
+function cancelIngredientEdit() {
+  editingIngredientIndex.value = null
+  closeInlineReplace()
+}
+
+function resetIngredientSearch() {
+  clearTimeout(ingredientSearchTimer)
+  clearTimeout(inlineReplaceTimer)
+  editingIngredientIndex.value = null
+  addIngredientExpanded.value = false
+  ingredientSearchQuery.value = ""
+  ingredientSearchResults.value = []
+  ingredientSearchLoading.value = false
+  closeInlineReplace()
+}
+
+function clearIngredientSearch() {
+  ingredientSearchQuery.value = ""
+  ingredientSearchResults.value = []
+}
+
+function searchIngredients() {
+  clearTimeout(ingredientSearchTimer)
+  const query = ingredientSearchQuery.value.trim()
+  if (!query) {
+    ingredientSearchResults.value = []
+    ingredientSearchLoading.value = false
+    return
+  }
+  ingredientSearchTimer = setTimeout(async () => {
+    ingredientSearchLoading.value = true
+    try {
+      const data = await fetchIngredients({ name__icontains: query })
+      ingredientSearchResults.value = data.results ?? []
+    } catch {
+      ingredientSearchResults.value = []
+    } finally {
+      ingredientSearchLoading.value = false
+    }
+  }, 300)
+}
+
+function selectExistingIngredient(ingredient) {
+  addExistingIngredient(ingredient)
+}
+
+function openIngredientForm() {
+  ingredientFormInitialName.value = ingredientSearchQuery.value.trim()
+  showIngredientForm.value = true
+}
+
+function onIngredientCreated(ingredient) {
+  addExistingIngredient(ingredient)
+}
+
+function addExistingIngredient(ingredient) {
+  const alreadyUsed = payload.value.ingredients.some((item) => item.ingredient === ingredient.id)
+  if (alreadyUsed) {
+    error.value = "Ингредиент уже добавлен."
+    return
+  }
+  payload.value.ingredients.push({
+    localId: `ingredient-${ingredient.id}-${Date.now()}`,
+    ingredient: ingredient.id,
+    name: ingredient.name,
+    category: getCategoryId(ingredient.category),
+    base_unit: ingredient.base_unit,
+    amount: ingredient.base_unit === "to_taste" ? 1 : "",
+    is_optional: false,
+    new: false,
+    suggested_ids: [],
+  })
+  addIngredientExpanded.value = false
+  clearIngredientSearch()
+  error.value = ""
+  editingIngredientIndex.value = payload.value.ingredients.length - 1
+  nextTick(() => amountInputRef.value?.focus())
+}
+
+function setExistingIngredient(index, ingredient) {
+  const current = payload.value.ingredients[index]
+  if (!current) return
+  const alreadyUsed = payload.value.ingredients.some((item, itemIndex) =>
+    itemIndex !== index && item.ingredient === ingredient.id,
+  )
+  if (alreadyUsed) {
+    error.value = "Ингредиент уже добавлен."
+    return
+  }
+  payload.value.ingredients[index] = {
+    ...current,
+    ingredient: ingredient.id,
+    name: ingredient.name,
+    category: getCategoryId(ingredient.category),
+    base_unit: ingredient.base_unit,
+    amount: ingredient.base_unit === "to_taste" ? 1 : current.amount,
+    new: false,
+    suggested_ids: [],
+  }
+  error.value = ""
+}
+
+function getCategoryId(category) {
+  return typeof category === "object" ? category?.id : category
+}
+
+function getCreatedDishId(value) {
+  if (!value) return null
+  return typeof value === "object" ? value.id : value
+}
+
+function formatValidationErrors(errors) {
+  if (!errors || (Array.isArray(errors) && !errors.length)) {
+    return "Попробуйте добавить больше деталей: ингредиенты, количество и шаги приготовления."
+  }
+  const text = formatErrorItem(errors)
+  return text || "Попробуйте добавить больше деталей: ингредиенты, количество и шаги приготовления."
+}
+
+function formatErrorItem(item) {
+  if (!item) return ""
+  if (item === "prompt_injection") return PROMPT_INJECTION_MESSAGE
+  if (item === "not_processable") return NOT_PROCESSABLE_MESSAGE
+  if (typeof item === "string") return item
+  if (Array.isArray(item)) return item.map(formatErrorItem).filter(Boolean).join("\n")
+  if (typeof item !== "object") return String(item)
+  if (item.error_code === "prompt_injection") return PROMPT_INJECTION_MESSAGE
+  if (item.code === "prompt_injection") return PROMPT_INJECTION_MESSAGE
+  if (item.error_code === "not_processable") return NOT_PROCESSABLE_MESSAGE
+  if (item.code === "not_processable") return NOT_PROCESSABLE_MESSAGE
+  if (item.error_message) return formatErrorItem(item.error_message)
+  if (item.message) return formatErrorItem(item.message)
+  if (item.detail) return formatErrorItem(item.detail)
+  return Object.entries(item)
+    .filter(([key]) => key !== "error_code")
+    .map(([field, value]) => {
+      const text = formatErrorItem(value)
+      return text ? `${field}: ${text}` : ""
+    })
+    .filter(Boolean)
+    .join("\n")
+}
+
+function validateSourceText() {
+  const text = sourceText.value.trim()
+  if (text.length < MIN_SOURCE_LENGTH) return "Вставьте рецепт длиной не менее 10 символов."
+  if (text.length > MAX_SOURCE_LENGTH) return `Текст не должен быть длиннее ${MAX_SOURCE_LENGTH} символов.`
+  return null
+}
+
+function validatePayload() {
+  if (!payload.value.name?.trim()) return "Укажите название блюда."
+  if (!payload.value.recipe?.trim()) return "Добавьте текст рецепта."
+  if (!payload.value.category) return "Выберите категорию блюда."
+  if (!payload.value.ingredients.length) return "Оставьте хотя бы один ингредиент."
+  if (payload.value.ingredients.every((ingredient) => ingredient.is_optional)) {
+    return "Хотя бы один ингредиент должен быть обязательным."
+  }
+  for (const ingredient of payload.value.ingredients) {
+    if (!ingredient.name?.trim()) return "Укажите название каждого ингредиента."
+    if (!ingredient.new && !ingredient.ingredient) return "Выберите существующий ингредиент."
+    if (!ingredient.category) return "Выберите категорию для каждого ингредиента."
+    if (!ingredient.base_unit) return "Выберите единицу измерения для каждого ингредиента."
+    const amount = Number(String(ingredient.amount).replace(",", "."))
+    if (!Number.isFinite(amount) || amount <= 0) return "Количество ингредиентов должно быть больше 0."
+  }
+  return null
+}
+
+function buildPayload() {
+  return {
+    name: payload.value.name.trim(),
+    recipe: payload.value.recipe.trim(),
+    category: payload.value.category,
+    ingredients: payload.value.ingredients.map((ingredient) => ({
+      ingredient: ingredient.new ? null : ingredient.ingredient,
+      name: ingredient.name.trim(),
+      category: ingredient.category,
+      base_unit: ingredient.base_unit,
+      amount: Number(String(ingredient.amount).replace(",", ".")),
+      is_optional: Boolean(ingredient.is_optional),
+      new: Boolean(ingredient.new),
+      suggested_ids: ingredient.suggested_ids ?? [],
+    })),
+  }
+}
+
+async function submit() {
+  error.value = ""
+  if (step.value === "input") {
+    error.value = validateSourceText()
+    if (error.value) return
+    saving.value = true
+    try {
+      const data = await createAIDraft({ source_text: sourceText.value.trim() })
+      draft.value = data
+      emit("draft-created", data)
+      schedulePoll(data.id)
+    } catch (err) {
+      error.value = err.message || "Не удалось отправить рецепт на разбор."
+    } finally {
+      saving.value = false
+    }
+    return
+  }
+
+  if (step.value !== "parsed") return
+  error.value = validatePayload()
+  if (error.value) return
+  saving.value = true
+  try {
+    const confirmedPayload = buildPayload()
+    const dish = await createDishFromAIDraft(draft.value.id, confirmedPayload)
+    createdDish.value = dish
+    const updatedDraft = {
+      ...draft.value,
+      status: "dish_created",
+      payload: confirmedPayload,
+      created_dish: getCreatedDishId(dish),
+    }
+    draft.value = updatedDraft
+    emit("draft-updated", updatedDraft)
+    emit("created", dish)
+  } catch (err) {
+    error.value = err.message || "Не удалось создать блюдо."
+  } finally {
+    saving.value = false
+  }
+}
+
+function openInlineReplace(ingredient) {
+  inlineReplaceQuery.value = ingredient.name?.trim() || ""
+  inlineReplaceResults.value = []
+  inlineReplaceVisible.value = true
+  if (inlineReplaceQuery.value) searchInlineReplace()
+}
+
+function closeInlineReplace() {
+  clearTimeout(inlineReplaceTimer)
+  inlineReplaceVisible.value = false
+  inlineReplaceQuery.value = ""
+  inlineReplaceResults.value = []
+  inlineReplaceLoading.value = false
+}
+
+function searchInlineReplace() {
+  clearTimeout(inlineReplaceTimer)
+  const query = inlineReplaceQuery.value.trim()
+  if (!query) {
+    inlineReplaceResults.value = []
+    inlineReplaceLoading.value = false
+    return
+  }
+  inlineReplaceTimer = setTimeout(async () => {
+    inlineReplaceLoading.value = true
+    try {
+      const data = await fetchIngredients({ name__icontains: query })
+      inlineReplaceResults.value = data.results ?? []
+    } catch {
+      inlineReplaceResults.value = []
+    } finally {
+      inlineReplaceLoading.value = false
+    }
+  }, 300)
+}
+
+function selectInlineReplaceIngredient(index, ingredient) {
+  setExistingIngredient(index, ingredient)
+  closeInlineReplace()
+}
+
+function applySuggestion(index, ingredient) {
+  setExistingIngredient(index, ingredient)
+  const localId = payload.value.ingredients[index]?.localId
+  if (localId) {
+    const { [localId]: _, ...rest } = suggestionsMap.value
+    suggestionsMap.value = rest
+  }
+}
+
+async function openCreatedDish() {
+  const id = createdDishId.value
+  if (!id) return
+  openingCreatedDish.value = true
+  error.value = ""
+  try {
+    const dish = typeof createdDish.value === "object" && createdDish.value?.id === id
+      ? createdDish.value
+      : await fetchDish(id)
+    emit("open-dish", dish)
+    open.value = false
+  } catch (err) {
+    error.value = err.message || "Не удалось открыть блюдо."
+  } finally {
+    openingCreatedDish.value = false
+  }
+}
+
+onUnmounted(() => {
+  stopPolling()
+  clearTimeout(ingredientSearchTimer)
+  clearTimeout(inlineReplaceTimer)
+})
+</script>
+
+<style>
+@import '../../styles/detail-sheet.css';
+</style>
+
+<style scoped>
+.ai-draft__intro,
+.ai-draft__notice {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-empty);
+}
+
+.ai-draft__notice-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ai-draft__notice--error {
+  border-color: var(--color-danger-soft);
+  background: var(--color-danger-pale);
+}
+
+.ai-draft__title {
+  margin: 0;
+  color: var(--color-text);
+  font-size: var(--font-md);
+  font-weight: 700;
+}
+
+.ai-draft__text {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--font-sm);
+  line-height: 1.45;
+  white-space: pre-line;
+}
+
+.ai-draft__capabilities {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 4px 0 0;
+  padding-left: 18px;
+  color: var(--color-text-secondary);
+  font-size: var(--font-sm);
+  line-height: 1.4;
+}
+
+.ai-draft__source {
+  min-height: 180px;
+  resize: vertical;
+}
+
+.ai-draft__source-preview {
+  max-height: 180px;
+  overflow-y: auto;
+  padding: 10px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xs);
+  background: var(--color-surface);
+  color: var(--color-text-secondary);
+  font-size: var(--font-sm);
+  line-height: 1.45;
+  white-space: pre-wrap;
+}
+
+.ai-draft__source-block {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ai-draft__source-toggle {
+  align-self: flex-start;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--color-mint);
+  font-size: var(--font-sm);
+  font-weight: 600;
+}
+
+.ai-draft__source-toggle:hover {
+  color: var(--color-mint-hover);
+}
+
+.ai-draft__readonly {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.ai-draft__recipe {
+  min-height: 120px;
+  resize: vertical;
+}
+
+.ai-draft__counter {
+  align-self: flex-end;
+  margin-top: -10px;
+  font-size: var(--font-xs);
+  color: var(--color-text-secondary);
+}
+
+.ai-draft__secondary-btn {
+  align-self: flex-start;
+  margin-top: 8px;
+  padding: 9px 14px;
+  border: 1px solid var(--color-danger-soft);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  color: var(--color-danger-dark);
+  font-size: var(--font-sm);
+  font-weight: 600;
+}
+
+.form__section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  border-top: 1px solid var(--color-border);
+  padding-top: 16px;
+}
+
+.ai-draft__search-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.ai-ingredient__badge {
+  flex-shrink: 0;
+  padding: 2px 6px;
+  border-radius: var(--radius-xs);
+  background: var(--color-info-bg);
+  color: var(--color-info);
+  font-size: var(--font-xs);
+  font-weight: 600;
+}
+
+.ai-ingredient__badge--new {
+  background: var(--color-mint-alpha-10);
+  color: var(--color-mint);
+}
+
+.ai-ingredient__badge--broken {
+  background: var(--color-warning-bg);
+  color: var(--color-warning);
+  border: 1px solid var(--color-warning-border);
+}
+
+.ingredient-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--color-border);
+  font-size: var(--font-sm);
+}
+
+.ingredient-row:last-of-type {
+  border-bottom: none;
+}
+
+.ingredient-row--broken {
+  background: var(--color-warning-bg);
+  border-radius: var(--radius-xs);
+  padding-left: 6px;
+  padding-right: 6px;
+  margin: 0 -6px;
+}
+
+.ingredient-row__name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  color: var(--color-text);
+  font-weight: 500;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ingredient-row__amount {
+  flex-shrink: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--font-sm);
+  white-space: nowrap;
+}
+
+.ingredient-row__opt-label {
+  flex-shrink: 0;
+  padding: 1px 5px;
+  border-radius: var(--radius-xs);
+  background: var(--color-mint-alpha-12);
+  color: var(--color-mint);
+  font-size: var(--font-xs);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.ingredient-row__edit,
+.ingredient-row__remove {
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  border: none;
+  border-radius: var(--radius-xs);
+  background: none;
+  color: var(--color-text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.4;
+  padding: 0;
+  transition: opacity var(--transition-fast), color var(--transition-fast), background var(--transition-fast);
+}
+
+.ingredient-row__edit:hover,
+.ingredient-row:hover .ingredient-row__edit {
+  opacity: 1;
+  color: var(--color-mint);
+  background: var(--color-mint-alpha-10);
+}
+
+.ingredient-row__remove:hover {
+  opacity: 1;
+  background: var(--color-danger-pale);
+  color: var(--color-danger);
+}
+
+.ingredient-amount {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-xs);
+  background: var(--color-empty);
+}
+
+.ingredient-amount__header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ingredient-amount__mode-badge {
+  flex-shrink: 0;
+  padding: 2px 8px;
+  border-radius: var(--radius-xs);
+  font-size: var(--font-xs);
+  font-weight: 600;
+}
+
+.ingredient-amount__mode-badge--new {
+  background: var(--color-mint-alpha-10);
+  color: var(--color-mint);
+}
+
+.ingredient-amount__mode-badge--found {
+  background: var(--color-info-bg);
+  color: var(--color-info);
+}
+
+.ingredient-amount__name {
+  font-size: var(--font-sm);
+  font-weight: 600;
+  color: var(--color-text);
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ingredient-amount__link-btn {
+  align-self: flex-start;
+  padding: 6px 12px;
+  border: 1.5px solid var(--color-mint-alpha-25);
+  border-radius: var(--radius-xs);
+  background: var(--color-mint-alpha-10);
+  color: var(--color-mint);
+  font-size: var(--font-xs);
+  font-weight: 600;
+  cursor: pointer;
+  transition: background var(--transition-fast), border-color var(--transition-fast);
+}
+
+.ingredient-amount__link-btn:hover {
+  background: var(--color-mint-alpha-25);
+  border-color: var(--color-mint);
+}
+
+.ingredient-amount__cancel-link {
+  border: none;
+  background: transparent;
+  color: var(--color-text-secondary);
+  font-size: var(--font-xs);
+  font-weight: 600;
+  cursor: pointer;
+  padding: 2px 0;
+}
+
+.ingredient-amount__cancel-link:hover {
+  color: var(--color-text);
+}
+
+.ingredient-amount__row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ingredient-amount__input {
+  width: 120px;
+}
+
+.ingredient-amount__select {
+  width: min(160px, 100%);
+}
+
+.ingredient-amount__unit {
+  color: var(--color-text-secondary);
+  font-size: var(--font-sm);
+  white-space: nowrap;
+}
+
+.ingredient-amount__taste-hint {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--font-sm);
+  font-style: italic;
+}
+
+.ingredient-amount__optional {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--color-text-secondary);
+  font-size: var(--font-sm);
+}
+
+.ingredient-amount__actions {
+  display: flex;
+  gap: 8px;
+}
+
+.ingredient-search {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 4px;
+}
+
+.ingredient-search__list {
+  max-height: 160px;
+  overflow-y: auto;
+  list-style: none;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+}
+
+.ingredient-search__item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 9px 10px;
+  font-size: var(--font-sm);
+  cursor: pointer;
+}
+
+.ingredient-search__item + .ingredient-search__item {
+  border-top: 1px solid var(--color-border);
+}
+
+.ingredient-search__item:hover {
+  background: var(--color-empty);
+}
+
+.ingredient-search__unit,
+.ingredient-search__status {
+  color: var(--color-text-secondary);
+  font-size: var(--font-xs);
+}
+
+.ingredient-search__status {
+  padding: 4px 0;
+}
+
+.btn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: var(--radius-xs);
+  font-size: var(--font-sm);
+  font-weight: 600;
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.btn--sm {
+  background: var(--color-mint);
+  color: var(--on-primary);
+}
+
+.btn--sm:hover {
+  background: var(--color-mint-hover);
+}
+
+.btn--ghost {
+  background: transparent;
+  color: var(--color-text-secondary);
+}
+
+.btn--ghost:hover {
+  background: var(--color-empty);
+}
+
+.dish-search__create {
+  align-self: flex-start;
+  padding: 8px 16px;
+  border: 1.5px dashed var(--color-border);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-mint-hover);
+  font-size: var(--font-sm);
+  font-weight: 500;
+  transition: background var(--transition-fast), border-color var(--transition-fast);
+}
+
+.dish-search__create:hover {
+  background: var(--color-empty);
+  border-color: var(--color-mint);
+}
+
+.ingredient-add__toggle {
+  align-self: flex-start;
+  padding: 8px 16px;
+  border: 1.5px dashed var(--color-border);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-text-secondary);
+  font-size: var(--font-sm);
+  font-weight: 500;
+  cursor: pointer;
+  transition: background var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast);
+}
+
+.ingredient-add__toggle:hover {
+  background: var(--color-empty);
+  border-color: var(--color-mint);
+  color: var(--color-mint);
+}
+
+.ingredient-amount__inline-replace {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xs);
+  background: var(--color-surface);
+}
+
+.ingredient-amount__replace-label {
+  font-size: var(--font-xs);
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+.ingredient-row__suggestions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 4px 0 8px;
+  margin-top: -4px;
+}
+
+.ingredient-row__suggestions-label {
+  font-size: var(--font-xs);
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+}
+
+.ingredient-row__suggestion-chip {
+  padding: 2px 8px;
+  border: 1px solid var(--color-mint-alpha-25);
+  border-radius: var(--radius-xs);
+  background: var(--color-mint-alpha-10);
+  color: var(--color-mint);
+  font-size: var(--font-xs);
+  font-weight: 600;
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.ingredient-row__suggestion-chip:hover {
+  background: var(--color-mint-alpha-25);
+}
+
+.detail__btn:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+</style>

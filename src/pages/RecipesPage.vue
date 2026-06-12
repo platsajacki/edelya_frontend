@@ -4,10 +4,16 @@
     <div class="recipes-header">
       <h1 class="recipes-header__title">Рецепты</h1>
       <div class="recipes-header__actions">
-        <button class="recipes-header__action-btn" @click="showSortMenu = !showSortMenu" aria-label="Сортировка">
+        <button
+          v-if="!store.isAIDraftsTab"
+          class="recipes-header__action-btn"
+          @click="showSortMenu = !showSortMenu"
+          aria-label="Сортировка"
+        >
           <IconSort />
         </button>
         <button
+          v-if="!store.isAIDraftsTab"
           class="recipes-header__action-btn"
           :class="{ 'recipes-header__action-btn--active': store.hasActiveFilters }"
           @click="showFilters = true"
@@ -44,7 +50,7 @@
         v-model="searchQuery"
         type="search"
         class="search-field__input"
-        placeholder="Поиск блюд..."
+        :placeholder="searchPlaceholder"
         @input="onSearchInput"
       />
       <button
@@ -84,27 +90,62 @@
     </div>
 
     <!-- Initial loading -->
-    <div v-if="store.initialLoading && !store.dishes.length" class="recipes-loading">
+    <div v-if="store.initialLoading && !activeItemsCount" class="recipes-loading">
       <div class="spinner" />
     </div>
 
     <!-- Initial error -->
-    <div v-else-if="store.initialError && !store.dishes.length" class="recipes-error">
+    <div v-else-if="store.initialError && !activeItemsCount" class="recipes-error">
       <p class="recipes-error__text">Не удалось загрузить. Проверьте интернет.</p>
-      <button class="recipes-error__retry" @click="store.loadDishes()">Повторить</button>
+      <button class="recipes-error__retry" @click="store.loadCurrent()">Повторить</button>
     </div>
 
     <!-- Empty state -->
-    <div v-else-if="!store.dishes.length" class="empty-state">
+    <div v-else-if="!activeItemsCount" class="empty-state">
       <p class="empty-state__text">
-        {{ store.filters.ownership === 'own' ? 'У вас пока нет личных блюд' : 'Общих блюд пока нет' }}
+        {{ emptyText }}
       </p>
+      <button v-if="store.isAIDraftsTab" class="empty-state__action" @click="openAICreate()">
+        Создать с ИИ
+      </button>
       <button v-if="store.filters.ownership === 'own'" class="empty-state__action" @click="showCreateForm = true">
         Добавить первое блюдо
       </button>
       <button v-if="store.hasActiveFilters || store.hasNonDefaultSort" class="empty-state__secondary" @click="resetAll">
         Сбросить фильтры
       </button>
+    </div>
+
+    <!-- AI drafts list -->
+    <div v-else-if="store.isAIDraftsTab" class="recipes-list">
+      <div v-if="store.refreshing" class="recipes-refreshing">
+        <div class="spinner spinner--sm" />
+      </div>
+
+      <button
+        v-for="draft in store.aiDrafts"
+        :key="draft.id"
+        type="button"
+        class="ai-draft-card"
+        @click="openAIDraft(draft)"
+      >
+        <span class="ai-draft-card__title">{{ draftTitle(draft) }}</span>
+        <span class="ai-draft-card__meta">
+          <span class="ai-draft-card__status" :class="`ai-draft-card__status--${draft.status}`">
+            {{ draftStatusLabel(draft.status) }}
+          </span>
+          <span>{{ formatDraftDate(draft.updated_at || draft.created_at) }}</span>
+        </span>
+      </button>
+
+      <div v-if="store.loadMoreError" class="recipes-load-more-error">
+        <span class="recipes-load-more-error__text">Не удалось загрузить. Проверьте интернет.</span>
+        <button class="recipes-load-more-error__retry" @click="store.loadMore()">Повторить</button>
+      </div>
+
+      <div ref="sentinelRef" class="recipes-sentinel">
+        <div v-if="store.loadingMore" class="spinner spinner--sm" />
+      </div>
     </div>
 
     <!-- Dish list -->
@@ -134,7 +175,7 @@
     </div>
 
     <!-- FAB: create new dish -->
-    <FabButton @click="showCreateForm = true" aria-label="Создать блюдо">
+    <FabButton @click="onFabClick" :aria-label="fabLabel">
       <IconPlus />
     </FabButton>
 
@@ -160,6 +201,15 @@
       @created="onDishCreated"
     />
 
+    <AIDishDraftForm
+      v-model="showAIForm"
+      :draft-to-open="selectedAIDraft"
+      @created="onDishCreated"
+      @draft-created="onAIDraftCreated"
+      @draft-updated="onAIDraftUpdated"
+      @open-dish="onOpenDish"
+    />
+
     <!-- Toast -->
     <Toast :message="store.toast" @dismiss="store.toast = null" />
   </div>
@@ -168,10 +218,12 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted, watch } from "vue"
 import { useRecipesStore, SORT_OPTIONS } from "../store/recipes"
+import { useSubscriptionStore } from "../store/subscription"
 import RecipeDishCard from "../components/RecipeDishCard.vue"
 import RecipeFilterPanel from "../components/RecipeFilterPanel.vue"
 import RecipeDishDetail from "../components/RecipeDishDetail.vue"
 import DishForm from "../components/forms/DishForm.vue"
+import AIDishDraftForm from "../components/forms/AIDishDraftForm.vue"
 import IconFilter from "../components/icons/IconFilter.vue"
 import IconSearch from "../components/icons/IconSearch.vue"
 import IconSort from "../components/icons/IconSort.vue"
@@ -182,14 +234,33 @@ import Toast from "../components/Toast.vue"
 defineOptions({ name: "RecipesPage" })
 
 const store = useRecipesStore()
+const subscription = useSubscriptionStore()
 
 // --- Ownership tabs ---
-const tabs = [
+const tabs = computed(() => [
   { value: "own", label: "Личные" },
   { value: "global", label: "Общие" },
-]
+  ...(subscription.canCreateAIRecipes ? [{ value: "ai", label: "AI-рецепты" }] : []),
+])
+
+const searchPlaceholder = computed(() =>
+  store.isAIDraftsTab ? "Поиск AI-рецептов..." : "Поиск блюд...",
+)
+
+const activeItemsCount = computed(() =>
+  store.isAIDraftsTab ? store.aiDrafts.length : store.dishes.length,
+)
+
+const emptyText = computed(() => {
+  if (store.isAIDraftsTab) return "AI-рецептов пока нет"
+  return store.filters.ownership === "own" ? "У вас пока нет личных блюд" : "Общих блюд пока нет"
+})
+
+const fabLabel = computed(() => store.isAIDraftsTab ? "Создать с ИИ" : "Создать блюдо")
 
 function switchTab(value) {
+  showSortMenu.value = false
+  showFilters.value = false
   store.setFilter("ownership", value)
 }
 
@@ -219,6 +290,7 @@ function applySorting(value) {
 
 // --- Filter chips ---
 const activeChips = computed(() => {
+  if (store.isAIDraftsTab) return []
   const chips = []
   if (store.filters.categoryId) {
     const cat = store.categories.find((c) => c.id === store.filters.categoryId)
@@ -266,9 +338,64 @@ function onDishUpdated() {
 
 // --- Create ---
 const showCreateForm = ref(false)
+const showAIForm = ref(false)
+const selectedAIDraft = ref(null)
+
+function openAICreate() {
+  selectedAIDraft.value = null
+  showAIForm.value = true
+}
+
+function openAIDraft(draft) {
+  selectedAIDraft.value = draft
+  showAIForm.value = true
+}
+
+function onFabClick() {
+  if (store.isAIDraftsTab) {
+    openAICreate()
+    return
+  }
+  showCreateForm.value = true
+}
 
 function onDishCreated() {
+  if (store.isAIDraftsTab) {
+    store.showToast("Блюдо создано")
+    return
+  }
   store.onDishCreated()
+}
+
+function onAIDraftCreated(draft) {
+  store.onAIDraftCreated(draft)
+}
+
+function onAIDraftUpdated(draft) {
+  store.upsertAIDraft(draft)
+}
+
+function onOpenDish(dish) {
+  detailDish.value = dish
+  showDetail.value = true
+}
+
+function draftTitle(draft) {
+  return draft.payload?.name || draft.source_text?.trim().split("\n")[0] || "AI-рецепт"
+}
+
+function draftStatusLabel(status) {
+  return {
+    processing: "Разбор",
+    parsed: "Распознан",
+    failed: "Ошибка",
+    dish_created: "Создано",
+  }[status] || status
+}
+
+function formatDraftDate(value) {
+  if (!value) return ""
+  return new Date(value).toLocaleDateString("ru-RU", { day: "2-digit", month: "2-digit" })
 }
 
 // --- Infinite scroll ---
@@ -288,9 +415,32 @@ onMounted(() => {
   // Load data only on first mount (KeepAlive preserves state on revisit)
   if (!store.dishes.length && !store.initialLoading) {
     store.loadCategories()
-    store.loadDishes()
+    store.loadCurrent()
   }
 })
+
+let aiPollTimer = null
+
+watch(
+  () => store.isAIDraftsTab,
+  (isAIDraftsTab) => {
+    clearInterval(aiPollTimer)
+    aiPollTimer = null
+    if (!isAIDraftsTab) return
+    store.loadAIDrafts()
+    aiPollTimer = setInterval(() => {
+      store.refreshProcessingAIDrafts()
+    }, 7000)
+  },
+  { immediate: true },
+)
+
+watch(
+  () => subscription.canCreateAIRecipes,
+  (canCreateAIRecipes) => {
+    if (!canCreateAIRecipes && store.isAIDraftsTab) store.setFilter("ownership", "own")
+  },
+)
 
 watch(sentinelRef, (el) => {
   if (el && observer) observer.observe(el)
@@ -299,6 +449,7 @@ watch(sentinelRef, (el) => {
 onUnmounted(() => {
   observer?.disconnect()
   clearTimeout(searchTimer)
+  clearInterval(aiPollTimer)
 })
 </script>
 
@@ -521,6 +672,72 @@ onUnmounted(() => {
   display: flex;
   flex-direction: column;
   gap: 8px;
+}
+
+.ai-draft-card {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  padding: 14px 16px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  color: var(--color-text);
+  text-align: left;
+  box-shadow: var(--shadow-card);
+  transition: background var(--transition-fast), transform var(--transition-fast);
+}
+
+.ai-draft-card:active {
+  transform: scale(var(--press-scale-sm));
+  background: var(--color-empty);
+}
+
+.ai-draft-card__title {
+  width: 100%;
+  font-size: var(--font-md);
+  font-weight: 700;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ai-draft-card__meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: var(--font-xs);
+  color: var(--color-text-secondary);
+}
+
+.ai-draft-card__status {
+  padding: 2px 6px;
+  border-radius: var(--radius-xs);
+  background: var(--color-empty);
+  color: var(--color-text-secondary);
+  font-weight: 600;
+}
+
+.ai-draft-card__status--processing {
+  background: var(--color-mint-alpha-10);
+  color: var(--color-mint);
+}
+
+.ai-draft-card__status--parsed {
+  background: var(--color-info-bg);
+  color: var(--color-info);
+}
+
+.ai-draft-card__status--failed {
+  background: var(--color-danger-pale);
+  color: var(--color-danger);
+}
+
+.ai-draft-card__status--dish_created {
+  background: var(--color-success-bg);
+  color: var(--color-success);
 }
 
 .recipes-sentinel {

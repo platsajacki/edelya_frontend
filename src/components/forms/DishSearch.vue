@@ -38,6 +38,9 @@
       <button type="button" class="dish-search__create" @click="$emit('create', query.trim())">
         + Создать новое блюдо
       </button>
+      <button v-if="canCreateAi" type="button" class="dish-search__ai" @click="$emit('create-ai')">
+        Создать с ИИ
+      </button>
     </div>
 
     <DishPickerSheet v-model="showPicker" @select="onPickerSelect" />
@@ -51,7 +54,11 @@ import { isDishOwn } from "../../utils/dishOwnership"
 import OwnershipBadge from "../OwnershipBadge.vue"
 import DishPickerSheet from "../DishPickerSheet.vue"
 
-const emit = defineEmits(["select", "create"])
+defineProps({
+  canCreateAi: { type: Boolean, default: false },
+})
+
+const emit = defineEmits(["select", "create", "create-ai"])
 
 const showPicker = ref(false)
 
@@ -197,7 +204,8 @@ function clearQuery() {
   border-color: var(--color-mint);
 }
 
-.dish-search__create {
+.dish-search__create,
+.dish-search__ai {
   flex: 1;
   padding: 9px 16px;
   border: 1.5px dashed var(--color-border);
@@ -215,5 +223,18 @@ function clearQuery() {
   background: var(--color-empty);
   border-color: var(--color-mint);
   color: var(--color-mint);
+}
+
+.dish-search__ai {
+  border-style: solid;
+  border-color: var(--color-mint-alpha-25);
+  background: var(--color-mint-alpha-10);
+  color: var(--color-mint);
+  font-weight: 600;
+}
+
+.dish-search__ai:hover {
+  background: var(--color-mint-alpha-25);
+  border-color: var(--color-mint);
 }
 </style>
