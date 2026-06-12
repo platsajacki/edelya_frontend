@@ -14,6 +14,11 @@
           </ul>
         </div>
 
+        <AIRecipeUsageBadge
+          :usage="subscription.aiRecipeUsage"
+          :limit="subscription.aiRecipeLimit"
+        />
+
         <label class="form__field">
           <span class="form__label">Что приготовить <span class="form__required">*</span></span>
           <textarea
@@ -358,8 +363,10 @@
 import { computed, nextTick, onUnmounted, ref, watch } from "vue"
 import ModalWrapper from "./ModalWrapper.vue"
 import IngredientForm from "./IngredientForm.vue"
+import AIRecipeUsageBadge from "../AIRecipeUsageBadge.vue"
 import IconPencil from "../icons/IconPencil.vue"
 import IconClose from "../icons/IconClose.vue"
+import { useSubscriptionStore } from "../../store/subscription"
 import { createAIDraft, createDishFromAIDraft, fetchAIDraft } from "../../services/aiDraftService"
 import { fetchDish, fetchDishCategories } from "../../services/dishService"
 import { fetchIngredientById, fetchIngredientCategories, fetchIngredients } from "../../services/ingredientService"
@@ -380,6 +387,7 @@ const props = defineProps({
 
 const emit = defineEmits(["update:modelValue", "created", "draft-created", "draft-updated", "open-dish"])
 
+const subscription = useSubscriptionStore()
 const open = ref(props.modelValue)
 const sourceText = ref("")
 const sourceTextRef = ref(null)
@@ -427,7 +435,12 @@ const step = computed(() => {
   return "processing"
 })
 const failureMessage = computed(() => formatValidationErrors(draft.value?.validation_errors))
-const submitDisabled = computed(() => saving.value || polling.value || step.value === "processing")
+const submitDisabled = computed(() =>
+  saving.value ||
+  polling.value ||
+  step.value === "processing" ||
+  (step.value === "input" && subscription.isAIRecipeLimitExceeded),
+)
 const canSubmit = computed(() => !["failed", "dish_created"].includes(step.value))
 const readonlyPayload = computed(() => normalizePayload(draft.value?.payload))
 const readonlyCategoryName = computed(() => getCategoryName(readonlyPayload.value.category))
@@ -436,6 +449,7 @@ const sourceToggleLabel = computed(() =>
   sourceExpanded.value ? "Скрыть исходный текст" : "Показать исходный текст",
 )
 const submitLabel = computed(() => {
+  if (step.value === "input" && subscription.isAIRecipeLimitExceeded) return "Лимит исчерпан"
   if (saving.value && step.value === "parsed") return "Создание..."
   if (saving.value) return "Отправка..."
   if (polling.value || step.value === "processing") return "Подготовка блюда..."
@@ -833,6 +847,10 @@ function buildPayload() {
 async function submit() {
   error.value = ""
   if (step.value === "input") {
+    if (subscription.isAIRecipeLimitExceeded) {
+      error.value = "Лимит AI-рецептов на текущий период исчерпан."
+      return
+    }
     error.value = validateSourceText()
     if (error.value) return
     saving.value = true

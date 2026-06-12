@@ -89,6 +89,12 @@
       </button>
     </div>
 
+    <AIRecipeUsageBadge
+      v-if="store.isAIDraftsTab"
+      :usage="subscription.aiRecipeUsage"
+      :limit="subscription.aiRecipeLimit"
+    />
+
     <!-- Initial loading -->
     <div v-if="store.initialLoading && !activeItemsCount" class="recipes-loading">
       <div class="spinner" />
@@ -105,7 +111,11 @@
       <p class="empty-state__text">
         {{ emptyText }}
       </p>
-      <button v-if="store.isAIDraftsTab" class="empty-state__action" @click="openAICreate()">
+      <button
+        v-if="store.isAIDraftsTab"
+        class="empty-state__action"
+        @click="openAICreate()"
+      >
         Создать с ИИ
       </button>
       <button v-if="store.filters.ownership === 'own'" class="empty-state__action" @click="showCreateForm = true">
@@ -224,6 +234,7 @@ import RecipeFilterPanel from "../components/RecipeFilterPanel.vue"
 import RecipeDishDetail from "../components/RecipeDishDetail.vue"
 import DishForm from "../components/forms/DishForm.vue"
 import AIDishDraftForm from "../components/forms/AIDishDraftForm.vue"
+import AIRecipeUsageBadge from "../components/AIRecipeUsageBadge.vue"
 import IconFilter from "../components/icons/IconFilter.vue"
 import IconSearch from "../components/icons/IconSearch.vue"
 import IconSort from "../components/icons/IconSort.vue"
@@ -235,6 +246,7 @@ defineOptions({ name: "RecipesPage" })
 
 const store = useRecipesStore()
 const subscription = useSubscriptionStore()
+const AI_LIMIT_EXCEEDED_MESSAGE = "Лимит AI-рецептов на текущий период исчерпан."
 
 // --- Ownership tabs ---
 const tabs = computed(() => [
@@ -342,6 +354,10 @@ const showAIForm = ref(false)
 const selectedAIDraft = ref(null)
 
 function openAICreate() {
+  if (subscription.isAIRecipeLimitExceeded) {
+    store.showToast(AI_LIMIT_EXCEEDED_MESSAGE)
+    return
+  }
   selectedAIDraft.value = null
   showAIForm.value = true
 }
@@ -369,6 +385,7 @@ function onDishCreated() {
 
 function onAIDraftCreated(draft) {
   store.onAIDraftCreated(draft)
+  subscription.loadAIRecipeUsage().catch(() => {})
 }
 
 function onAIDraftUpdated(draft) {
@@ -428,6 +445,8 @@ watch(
     aiPollTimer = null
     if (!isAIDraftsTab) return
     store.loadAIDrafts()
+    subscription.loadSubscriptionDictionary().catch(() => {})
+    subscription.loadAIRecipeUsage().catch(() => {})
     aiPollTimer = setInterval(() => {
       store.refreshProcessingAIDrafts()
     }, 7000)

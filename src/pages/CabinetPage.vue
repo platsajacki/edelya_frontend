@@ -37,6 +37,12 @@
       </template>
     </section>
 
+    <AIRecipeUsageBadge
+      v-if="sub.canCreateAIRecipes"
+      :usage="sub.aiRecipeUsage"
+      :limit="sub.aiRecipeLimit"
+    />
+
     <!-- Tariff change confirmation sheet -->
     <ConfirmTariffSheet
       v-if="confirmSheetScenario"
@@ -114,7 +120,7 @@
         <p class="cabinet__tariff-price">{{ formatPrice(tariff) }}</p>
         <p v-if="tariff.description" class="cabinet__tariff-desc">{{ tariff.description }}</p>
         <ul class="cabinet__tariff-features">
-          <li v-if="tariff.can_create_ai_recipes">AI рецепты</li>
+          <li v-if="tariff.can_create_ai_recipes">{{ aiRecipeFeatureText }}</li>
           <li v-if="tariff.can_have_common_space">Общее пространство</li>
         </ul>
         <!-- Current tariff: subtle cancel with inline confirmation -->
@@ -184,6 +190,7 @@ import IconWarning from "../components/icons/IconWarning.vue"
 import IconCheck from "../components/icons/IconCheck.vue"
 import ConfirmTariffSheet from "../components/ConfirmTariffSheet.vue"
 import Toast from "../components/Toast.vue"
+import AIRecipeUsageBadge from "../components/AIRecipeUsageBadge.vue"
 
 const router = useRouter()
 const route = useRoute()
@@ -226,15 +233,26 @@ const greeting = computed(() => {
 
 onMounted(async () => {
   const isPaymentReturn = !!route.query.payment_return
-  const promises = [sub.loadMySubscription(), sub.loadTariffs(), sub.loadPaymentMethod()]
+  const promises = [
+    sub.loadMySubscription(),
+    sub.loadTariffs(),
+    sub.loadPaymentMethod(),
+    sub.loadSubscriptionDictionary(),
+  ]
   if (!sub.hasSubscription && sub.trialDays === null) {
     promises.push(sub.loadTrialDuration())
   }
   await Promise.allSettled(promises)
+  if (sub.canCreateAIRecipes) {
+    await sub.loadAIRecipeUsage().catch(() => {})
+  }
 
   // Returned from YooKassa redirect — refresh subscription and card, then clear query param
   if (isPaymentReturn) {
     await Promise.allSettled([sub.loadMySubscription(), sub.loadPaymentMethod()])
+    if (sub.canCreateAIRecipes) {
+      await sub.loadAIRecipeUsage().catch(() => {})
+    }
     router.replace({ query: {} })
     showToast("Подписка обновлена")
   }
@@ -268,6 +286,11 @@ const pendingActivationText = computed(() => {
   if (s.cancelled_at) return "Тариф не может быть подключён, пока подписка отменена. Возобновите подписку."
   if (s.status === "trial") return "Будет подключён после окончания пробного периода"
   return "Будет подключён с началом следующего расчётного периода"
+})
+
+const aiRecipeFeatureText = computed(() => {
+  const limit = sub.aiRecipeLimit
+  return limit === null ? "AI рецепты" : `AI рецепты: ${limit} за период`
 })
 
 const showTariffs = computed(() => {
