@@ -11,7 +11,13 @@
           </button>
           <button type="button" class="selected-dish__replace" @click="selectedDish = null">Заменить</button>
         </div>
-        <DishSearch v-else @select="onDishSelect" @create="onCreateDish" />
+        <DishSearch
+          v-else
+          :can-create-ai="subscription.canCreateAIRecipes"
+          @select="onDishSelect"
+          @create="onCreateDish"
+          @create-ai="onCreateAIDish"
+        />
       </div>
 
       <label class="form__field">
@@ -63,6 +69,12 @@
       @created="onCloneCreated"
     />
 
+    <AIDishDraftForm
+      v-model="showAIForm"
+      :z-index="1030"
+      @created="onDishCreated"
+    />
+
     <template #footer>
       <button type="submit" form="cooking-event-form" class="form__submit" :disabled="saving || !selectedDish">
         {{ saving ? "Сохранение..." : (isEdit ? "Сохранить" : "Создать готовку") }}
@@ -76,9 +88,11 @@ import { ref, computed, watch, nextTick } from "vue"
 import ModalWrapper from "./ModalWrapper.vue"
 import DishSearch from "./DishSearch.vue"
 import DishForm from "./DishForm.vue"
+import AIDishDraftForm from "./AIDishDraftForm.vue"
 import DateInput from "./DateInput.vue"
 import MultiDayPicker from "./MultiDayPicker.vue"
 import { usePlanningStore } from "../../store/planning"
+import { useSubscriptionStore } from "../../store/subscription"
 import IconPencil from "../icons/IconPencil.vue"
 import { isDishOwn } from "../../utils/dishOwnership"
 
@@ -91,6 +105,7 @@ const props = defineProps({
 const emit = defineEmits(["update:modelValue"])
 
 const planning = usePlanningStore()
+const subscription = useSubscriptionStore()
 
 const isEdit = computed(() => !!props.editItem)
 
@@ -113,6 +128,7 @@ const editDish = ref(null)
 const initialDishName = ref("")
 const showCloneConfirm = ref(false)
 const showCloneForm = ref(false)
+const showAIForm = ref(false)
 const dishToClone = ref(null)
 
 watch(() => props.modelValue, (v) => {
@@ -186,6 +202,10 @@ function onCreateDish(searchQuery) {
   editDish.value = null
   initialDishName.value = searchQuery || ""
   showDishForm.value = true
+}
+
+function onCreateAIDish() {
+  showAIForm.value = true
 }
 
 function validate() {

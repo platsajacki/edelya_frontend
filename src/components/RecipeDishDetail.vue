@@ -84,10 +84,8 @@ import ModalWrapper from "./forms/ModalWrapper.vue"
 import DishForm from "./forms/DishForm.vue"
 import OwnershipBadge from "./OwnershipBadge.vue"
 import { fetchDish } from "../services/dishService"
-import { formatAmount } from "../utils/formatAmount"
 import { formatShoppingAmount } from "../utils/formatShoppingAmount"
 import { isDishOwn } from "../utils/dishOwnership"
-import { UNIT_LABELS } from "../utils/unitLabels"
 
 const props = defineProps({
   modelValue: { type: Boolean, required: true },
@@ -114,7 +112,6 @@ const dish = computed(() => fullDish.value || props.dish)
 watch(() => props.modelValue, async (v) => {
   if (v) {
     confirming.value = false
-    showCloneConfirm.value = false
     fullDish.value = null
 
     if (!props.dish.dish_ingredients?.length && props.dish.id) {
@@ -129,10 +126,6 @@ watch(() => props.modelValue, async (v) => {
     }
   }
 })
-
-function unitLabel(unit) {
-  return UNIT_LABELS[unit] || unit || ""
-}
 
 function handleDishEdit() {
   if (isOwn.value) {

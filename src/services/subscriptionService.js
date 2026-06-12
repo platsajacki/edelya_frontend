@@ -17,6 +17,14 @@ export function getTrialDuration() {
   return api("/api/v1/subscriptions/tariffs/trial-duration/")
 }
 
+export function getSubscriptionDictionary() {
+  return api("/api/v1/subscriptions/dictionary/")
+}
+
+export function getAIRecipeUsage() {
+  return api("/api/v1/subscriptions/ai-recipe-usage/")
+}
+
 export function fetchTariffs() {
   return api("/api/v1/subscriptions/tariffs/")
 }

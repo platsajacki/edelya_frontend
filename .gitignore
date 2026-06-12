@@ -8,6 +8,7 @@ pnpm-debug.log*
 lerna-debug.log*
 ui_plan.md
 *.README.md
+.agents
 
 node_modules
 dist

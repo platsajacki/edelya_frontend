@@ -6,6 +6,10 @@ export function fetchIngredients(params = {}) {
   return api(url)
 }
 
+export function fetchIngredientById(id) {
+  return api(`/api/v1/ingredients/${id}/`)
+}
+
 export function createIngredient(payload) {
   return api(`/api/v1/ingredients/`, {
     method: "POST",
