@@ -119,6 +119,9 @@
         </div>
         <p class="cabinet__tariff-price">{{ formatPrice(tariff) }}</p>
         <p v-if="tariff.description" class="cabinet__tariff-desc">{{ tariff.description }}</p>
+        <ul v-if="tariff.description_items?.length" class="cabinet__tariff-description">
+          <li v-for="item in tariff.description_items" :key="item">{{ item }}</li>
+        </ul>
         <ul class="cabinet__tariff-features">
           <li v-if="tariff.can_create_ai_recipes">{{ aiRecipeFeatureText }}</li>
           <li v-if="tariff.can_have_common_space">Общее пространство</li>
@@ -290,7 +293,7 @@ const pendingActivationText = computed(() => {
 
 const aiRecipeFeatureText = computed(() => {
   const limit = sub.aiRecipeLimit
-  return limit === null ? "AI рецепты" : `AI рецепты: ${limit} за период`
+  return limit === null ? "AI рецепты" : `${limit} AI-рецептов в месяц`
 })
 
 const showTariffs = computed(() => {
@@ -823,10 +826,22 @@ async function handleDeletePaymentMethod() {
 }
 
 .cabinet__tariff-desc {
-  font-size: var(--font-sm);
+  margin: 0 0 8px;
   color: var(--color-text-secondary);
-  margin-bottom: 8px;
+  font-size: var(--font-sm);
   line-height: 1.4;
+}
+
+.cabinet__tariff-description {
+  margin: 0 0 10px;
+  padding-left: 18px;
+  color: var(--color-text-secondary);
+  font-size: var(--font-sm);
+  line-height: 1.45;
+}
+
+.cabinet__tariff-description li + li {
+  margin-top: 4px;
 }
 
 .cabinet__tariff-features {
