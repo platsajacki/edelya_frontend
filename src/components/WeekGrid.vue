@@ -349,9 +349,10 @@ async function loadNext() {
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 100%;
   min-height: 44px;
   padding: 10px 16px;
-  margin: 4px 16px 0;
+  margin: 4px 0 0;
   border: 1px dashed var(--color-border);
   border-radius: var(--radius-md);
   background: transparent;

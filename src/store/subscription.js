@@ -2,6 +2,8 @@ import { defineStore } from "pinia"
 import {
   getMySubscription,
   getTrialDuration,
+  getSubscriptionDictionary,
+  getAIRecipeUsage,
   startTrial as apiStartTrial,
   fetchTariffs as apiFetchTariffs,
   selectTariff as apiSelectTariff,
@@ -12,11 +14,20 @@ import {
   resumeSubscription as apiResumeSubscription,
 } from "../services/subscriptionService"
 
+const DICTIONARY_CACHE_KEY = "subscription_dictionary_cache"
+const DICTIONARY_CACHE_TTL_MS = 24 * 60 * 60 * 1000
+
 export const useSubscriptionStore = defineStore("subscription", {
   state: () => ({
     errorCode: null,
     message: null,
     trialDays: null,
+    dictionary: null,
+    dictionaryLoading: false,
+    dictionaryError: null,
+    aiRecipeUsage: null,
+    aiRecipeUsageLoading: false,
+    aiRecipeUsageError: null,
     subscription: null,
     tariffs: [],
     paymentMethod: null,
@@ -29,6 +40,17 @@ export const useSubscriptionStore = defineStore("subscription", {
       state.subscription?.status === "trial" &&
       state.subscription?.is_active === true &&
       state.subscription?.tariff?.is_trial_tariff === true,
+
+    canCreateAIRecipes: (state) =>
+      state.subscription?.tariff?.can_create_ai_recipes === true,
+
+    aiRecipeLimit: (state) =>
+      state.aiRecipeUsage?.limit ?? state.dictionary?.ai_recipe_limit_per_period ?? null,
+
+    isAIRecipeLimitExceeded: (state) =>
+      state.aiRecipeUsage?.remaining !== undefined &&
+      state.aiRecipeUsage?.remaining !== null &&
+      Number(state.aiRecipeUsage.remaining) <= 0,
 
     daysLeft: (state) => {
       const sub = state.subscription
@@ -63,6 +85,44 @@ export const useSubscriptionStore = defineStore("subscription", {
     async loadTrialDuration() {
       const data = await getTrialDuration()
       this.trialDays = data?.trial_duration ?? null
+    },
+
+    async loadSubscriptionDictionary({ force = false } = {}) {
+      this.dictionaryError = null
+      if (!force) {
+        const cached = readDictionaryCache()
+        if (cached) {
+          this.dictionary = cached
+          return cached
+        }
+      }
+      this.dictionaryLoading = true
+      try {
+        const data = await getSubscriptionDictionary()
+        this.dictionary = data
+        writeDictionaryCache(data)
+        return data
+      } catch (err) {
+        this.dictionaryError = err.message ?? "Не удалось загрузить параметры подписки."
+        throw err
+      } finally {
+        this.dictionaryLoading = false
+      }
+    },
+
+    async loadAIRecipeUsage() {
+      this.aiRecipeUsageLoading = true
+      this.aiRecipeUsageError = null
+      try {
+        const data = await getAIRecipeUsage()
+        this.aiRecipeUsage = data
+        return data
+      } catch (err) {
+        this.aiRecipeUsageError = err.message ?? "Не удалось загрузить лимит AI-рецептов."
+        throw err
+      } finally {
+        this.aiRecipeUsageLoading = false
+      }
     },
 
     async loadTariffs() {
@@ -111,3 +171,30 @@ export const useSubscriptionStore = defineStore("subscription", {
     },
   },
 })
+
+function readDictionaryCache() {
+  try {
+    const raw = localStorage.getItem(DICTIONARY_CACHE_KEY)
+    if (!raw) return null
+    const cache = JSON.parse(raw)
+    if (!cache?.expiresAt || Date.now() > cache.expiresAt) {
+      localStorage.removeItem(DICTIONARY_CACHE_KEY)
+      return null
+    }
+    return cache.data ?? null
+  } catch {
+    localStorage.removeItem(DICTIONARY_CACHE_KEY)
+    return null
+  }
+}
+
+function writeDictionaryCache(data) {
+  try {
+    localStorage.setItem(DICTIONARY_CACHE_KEY, JSON.stringify({
+      data,
+      expiresAt: Date.now() + DICTIONARY_CACHE_TTL_MS,
+    }))
+  } catch {
+    // Cache is optional; UI can work with in-memory data only.
+  }
+}

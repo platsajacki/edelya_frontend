@@ -1,4 +1,4 @@
-<!-- Open book for BottomNav "Блюда" tab -->
+<!-- Open book for BottomNav "Рецепты" tab -->
 <template>
   <svg :width="width" :height="height" viewBox="0 0 24 24" fill="none"
     stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">

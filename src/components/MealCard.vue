@@ -1,7 +1,7 @@
 <template>
   <button
     class="meal-card"
-    :class="{ 'meal-card--shared': !isOwn && !isManual, 'meal-card--manual': isManual }"
+    :class="{ 'meal-card--shared': !isOwn && !isManual, 'meal-card--manual': isManual, 'meal-card--saving': isPending }"
     :style="cardStyle"
     type="button"
     :data-id="item.id"
@@ -14,6 +14,7 @@
 <script setup>
 import { computed } from "vue"
 import { isDishOwn } from "../utils/dishOwnership"
+import { usePlanningStore } from "../store/planning"
 
 const props = defineProps({
   item: {
@@ -26,6 +27,9 @@ defineEmits(["tap"])
 
 const isOwn = computed(() => isDishOwn(props.item.dish))
 const isManual = computed(() => props.item.is_manual === true)
+
+const planning = usePlanningStore()
+const isPending = computed(() => planning.savingItemIds.includes(props.item.id))
 
 function hexToRgba(hex, alpha) {
   const r = parseInt(hex.slice(1, 3), 16)
@@ -104,9 +108,18 @@ const cardStyle = computed(() => {
   transition: none;
 }
 
+.meal-card--saving {
+  opacity: 0.65;
+  pointer-events: none;
+}
+
 .meal-card__name {
   font-weight: 500;
   line-height: 1.3;
   color: var(--color-text);
+  min-width: 0;
+  -webkit-hyphens: auto;
+  hyphens: auto;
+  overflow-wrap: break-word;
 }
 </style>

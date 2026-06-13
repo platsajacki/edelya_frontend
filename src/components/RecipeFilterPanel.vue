@@ -1,7 +1,7 @@
 <template>
   <Teleport to="body">
     <Transition name="filter-panel">
-      <div v-if="modelValue" class="filter-overlay" @mousedown.self="close">
+      <div v-if="modelValue" class="filter-overlay" :style="zIndex ? { zIndex } : {}" @mousedown.self="close">
         <div class="filter-panel">
           <div class="filter-panel__header">
             <h3 class="filter-panel__title">Фильтры</h3>
@@ -65,7 +65,8 @@ import { ref, computed, watch } from "vue"
 const props = defineProps({
   modelValue: { type: Boolean, required: true },
   categories: { type: Array, default: () => [] },
-  currentCategoryId: { type: String, default: null },
+  currentCategoryId: { type: [String, Number], default: null },
+  zIndex: { type: Number, default: null },
 })
 
 const emit = defineEmits(["update:modelValue", "apply"])

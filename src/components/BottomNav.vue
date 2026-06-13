@@ -26,7 +26,7 @@ const route = useRoute()
 
 const tabs = [
   { to: "/", label: "Еделя", icon: IconNavPlanner },
-  { to: "/recipes", label: "Блюда", icon: IconNavRecipes },
+  { to: "/recipes", label: "Рецепты", icon: IconNavRecipes },
   { to: "/shopping", label: "Покупки", icon: IconShoppingBag },
   { to: "/cabinet", label: "Кабинет", icon: IconProfile },
 ]
@@ -49,6 +49,17 @@ function isActive(to) {
   border-top: 1px solid var(--color-border);
   padding: 6px 0 calc(6px + env(safe-area-inset-bottom, 0px));
   z-index: var(--z-nav);
+}
+
+@media (min-width: 600px) {
+  .bottom-nav {
+    width: 100%;
+    max-width: 540px;
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%);
+    border-radius: var(--radius-md) var(--radius-md) 0 0;
+  }
 }
 
 .bottom-nav__tab {

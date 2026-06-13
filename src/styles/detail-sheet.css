@@ -158,7 +158,7 @@
 
 .detail__btn--delete {
   background: var(--color-danger-pale);
-  color: var(--color-danger-muted);
+  color: var(--color-danger-dark);
 }
 
 .detail__btn--delete:hover {
@@ -181,7 +181,7 @@
 .detail__confirm-text {
   font-size: var(--font-base);
   font-weight: 600;
-  color: var(--color-danger-muted);
+  color: var(--color-danger-dark);
   margin: 0;
 }
 

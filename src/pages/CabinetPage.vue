@@ -19,7 +19,7 @@
         <h2 class="cabinet__card-heading">{{ subscriptionCard.title }}</h2>
         <p class="cabinet__card-text">{{ subscriptionCard.description }}</p>
         <p v-if="subscriptionCard.actionText" class="cabinet__recurring-notice">
-          На время пробного периода все функции сервиса доступны бесплатно.
+          На время пробного периода все функции сервиса доступны бесплатно.<br>
           Далее от 99 руб./месяц.
         </p>
         <button
@@ -36,6 +36,12 @@
         <p class="cabinet__card-text">Загрузка...</p>
       </template>
     </section>
+
+    <AIRecipeUsageBadge
+      v-if="sub.canCreateAIRecipes"
+      :usage="sub.aiRecipeUsage"
+      :limit="sub.aiRecipeLimit"
+    />
 
     <!-- Tariff change confirmation sheet -->
     <ConfirmTariffSheet
@@ -107,14 +113,14 @@
       >
         <div class="cabinet__tariff-header">
           <span class="cabinet__tariff-name">{{ tariff.name }}</span>
-          <span v-if="tariff.soon" class="cabinet__tariff-badge">Скоро</span>
+          <span v-if="tariff.soon" class="cabinet__tariff-badge cabinet__tariff-badge--soon">Скоро</span>
           <span v-if="isCurrent(tariff)" class="cabinet__tariff-badge cabinet__tariff-badge--current">Текущий</span>
           <span v-if="isPending(tariff)" class="cabinet__tariff-badge cabinet__tariff-badge--pending">Запланирован</span>
         </div>
         <p class="cabinet__tariff-price">{{ formatPrice(tariff) }}</p>
         <p v-if="tariff.description" class="cabinet__tariff-desc">{{ tariff.description }}</p>
         <ul class="cabinet__tariff-features">
-          <li v-if="tariff.can_create_ai_recipes">AI рецепты</li>
+          <li v-if="tariff.can_create_ai_recipes">{{ aiRecipeFeatureText }}</li>
           <li v-if="tariff.can_have_common_space">Общее пространство</li>
         </ul>
         <!-- Current tariff: subtle cancel with inline confirmation -->
@@ -184,6 +190,7 @@ import IconWarning from "../components/icons/IconWarning.vue"
 import IconCheck from "../components/icons/IconCheck.vue"
 import ConfirmTariffSheet from "../components/ConfirmTariffSheet.vue"
 import Toast from "../components/Toast.vue"
+import AIRecipeUsageBadge from "../components/AIRecipeUsageBadge.vue"
 
 const router = useRouter()
 const route = useRoute()
@@ -226,15 +233,26 @@ const greeting = computed(() => {
 
 onMounted(async () => {
   const isPaymentReturn = !!route.query.payment_return
-  const promises = [sub.loadMySubscription(), sub.loadTariffs(), sub.loadPaymentMethod()]
+  const promises = [
+    sub.loadMySubscription(),
+    sub.loadTariffs(),
+    sub.loadPaymentMethod(),
+    sub.loadSubscriptionDictionary(),
+  ]
   if (!sub.hasSubscription && sub.trialDays === null) {
     promises.push(sub.loadTrialDuration())
   }
   await Promise.allSettled(promises)
+  if (sub.canCreateAIRecipes) {
+    await sub.loadAIRecipeUsage().catch(() => {})
+  }
 
   // Returned from YooKassa redirect — refresh subscription and card, then clear query param
   if (isPaymentReturn) {
     await Promise.allSettled([sub.loadMySubscription(), sub.loadPaymentMethod()])
+    if (sub.canCreateAIRecipes) {
+      await sub.loadAIRecipeUsage().catch(() => {})
+    }
     router.replace({ query: {} })
     showToast("Подписка обновлена")
   }
@@ -268,6 +286,11 @@ const pendingActivationText = computed(() => {
   if (s.cancelled_at) return "Тариф не может быть подключён, пока подписка отменена. Возобновите подписку."
   if (s.status === "trial") return "Будет подключён после окончания пробного периода"
   return "Будет подключён с началом следующего расчётного периода"
+})
+
+const aiRecipeFeatureText = computed(() => {
+  const limit = sub.aiRecipeLimit
+  return limit === null ? "AI рецепты" : `AI рецепты: ${limit} за период`
 })
 
 const showTariffs = computed(() => {
@@ -679,7 +702,7 @@ async function handleDeletePaymentMethod() {
 }
 
 .cabinet__card-icon--ok {
-  color: var(--color-mint);
+  color: var(--color-success);
 }
 
 .cabinet__card-heading {
@@ -780,6 +803,16 @@ async function handleDeletePaymentMethod() {
 .cabinet__tariff-badge--current {
   background: var(--color-mint-alpha-10, color-mix(in srgb, var(--color-mint) 10%, transparent));
   color: var(--color-mint);
+}
+
+.cabinet__tariff-badge--pending {
+  background: var(--color-mint-alpha-10, color-mix(in srgb, var(--color-mint) 10%, transparent));
+  color: var(--color-mint);
+}
+
+.cabinet__tariff-badge--soon {
+  background: var(--color-warning-bg);
+  color: var(--color-warning);
 }
 
 .cabinet__tariff-price {

@@ -4,7 +4,7 @@
       <h1 class="legal-page__title">Политика обработки персональных данных сервиса «Еделя»</h1>
     </header>
     <div class="legal-page__body">
-      <p v-if="loading" class="legal-page__placeholder">Загрузка…</p>
+      <div v-if="loading" class="legal-page__loading"><div class="spinner" /></div>
       <div v-else class="legal-page__prose" v-html="html" />
     </div>
   </div>
@@ -32,7 +32,7 @@ onMounted(async () => {
 
 <style scoped>
 .legal-page {
-  max-width: 720px;
+  max-width: 540px;
   margin: 0 auto;
   padding: 24px 16px 40px;
 }
@@ -54,8 +54,10 @@ onMounted(async () => {
   line-height: 1.7;
 }
 
-.legal-page__placeholder {
-  color: var(--color-text-secondary);
+.legal-page__loading {
+  display: flex;
+  justify-content: center;
+  padding: 40px 0;
 }
 
 .legal-page__prose :deep(h1),

@@ -198,6 +198,8 @@ function cancelEdit() {
   font-size: var(--font-base);
   font-weight: 500;
   color: var(--color-text);
+  word-break: break-word;
+  overflow-wrap: break-word;
 }
 
 .item-row--checked .item-row__name {

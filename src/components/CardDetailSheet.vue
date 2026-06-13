@@ -1,42 +1,23 @@
 <template>
   <ModalWrapper v-model="open" :title="title" :z-index="990">
     <div class="detail">
-      <!-- Dish info -->
+      <!-- 1. Dish header: name + category -->
       <div class="detail__section">
         <div class="detail__dish-header">
           <div class="detail__dish-title-row">
             <h4 class="detail__dish-name">{{ dish.name }}</h4>
             <OwnershipBadge :is-own="isOwn" />
           </div>
-          <button type="button" class="detail__dish-edit" :title="isOwn ? 'Редактировать блюдо' : 'Создать копию'" @click="handleDishEdit">
+          <button type="button" class="detail__dish-edit" :title="isOwn ? 'Редактировать рецепт' : 'Создать личную копию'" @click="handleDishEdit">
             <IconPencil />
           </button>
         </div>
         <p v-if="dish.category?.name" class="detail__meta">
           {{ dish.category.name }}
         </p>
-        <p v-if="dish.recipe" class="detail__recipe">
-          {{ dish.recipe }}
-        </p>
       </div>
 
-      <!-- Ingredients -->
-      <div v-if="dish.dish_ingredients?.length" class="detail__section">
-        <span class="detail__label">Состав</span>
-        <ul class="detail__ingredients">
-          <li v-for="di in dish.dish_ingredients" :key="di.id" class="detail__ingredient">
-            <span class="detail__ingredient-name">{{ di.ingredient?.name ?? di.name }}</span>
-            <span class="detail__ingredient-right">
-              <span v-if="di.is_optional" class="detail__ingredient-optional">опц.</span>
-              <span class="detail__ingredient-amount">
-                {{ formatShoppingAmount(di.amount, di.ingredient?.base_unit ?? di.base_unit).display }}
-              </span>
-            </span>
-          </li>
-        </ul>
-      </div>
-
-      <!-- Type-specific info -->
+      <!-- 2. Dates + source (type-specific) -->
       <div v-if="type === 'cooking'" class="detail__section">
         <div class="detail__row">
           <span class="detail__label">Дата готовки</span>
@@ -73,12 +54,34 @@
           <span v-else class="detail__value detail__value--muted">Ручной ввод</span>
         </div>
       </div>
+
+      <!-- 3. Ingredients -->
+      <div v-if="dish.dish_ingredients?.length" class="detail__section">
+        <span class="detail__label">Состав</span>
+        <ul class="detail__ingredients">
+          <li v-for="di in dish.dish_ingredients" :key="di.id" class="detail__ingredient">
+            <span class="detail__ingredient-name">{{ di.ingredient?.name ?? di.name }}</span>
+            <span class="detail__ingredient-right">
+              <span v-if="di.is_optional" class="detail__ingredient-optional">опц.</span>
+              <span class="detail__ingredient-amount">
+                {{ formatShoppingAmount(di.amount, di.ingredient?.base_unit ?? di.base_unit).display }}
+              </span>
+            </span>
+          </li>
+        </ul>
+      </div>
+
+      <!-- 4. Recipe text -->
+      <div v-if="dish.recipe" class="detail__section">
+        <span class="detail__label">Рецепт</span>
+        <p class="detail__recipe">{{ dish.recipe }}</p>
+      </div>
     </div>
 
     <template #footer>
       <div class="detail__actions">
         <button class="detail__btn detail__btn--edit" @click="$emit('edit')">
-          Редактировать
+          {{ type === 'cooking' ? 'Редактировать готовку' : 'Редактировать' }}
         </button>
         <button class="detail__btn detail__btn--delete" @click="confirming = true">
           Удалить
@@ -92,14 +95,14 @@
 
   <!-- Delete confirmation modal -->
   <ModalWrapper v-model="confirming" title="Подтверждение" :z-index="1050">
-    <p class="detail__confirm-text">Удалить этот элемент?</p>
+    <p class="detail__confirm-text">Удалить {{ type === 'cooking' ? 'готовку' : 'приём пищи' }} «{{ dish.name }}»?</p>
     <template #footer>
       <div class="detail__confirm-actions">
         <button class="detail__btn detail__btn--delete" @click="confirming = false; open = false; $emit('delete')">
-          Да, удаляем
+          Удалить
         </button>
         <button class="detail__btn detail__btn--cancel" @click="confirming = false">
-          Нет
+          Отмена
         </button>
       </div>
     </template>
@@ -111,24 +114,6 @@
     :edit-dish="dish"
     @updated="onDishUpdated"
   />
-
-  <!-- Clone confirmation modal -->
-  <ModalWrapper v-model="showCloneConfirm" title="Общее блюдо" :z-index="1050">
-    <p class="detail__clone-text">
-      Это общее блюдо, его нельзя редактировать.
-      Вы можете создать личную копию и настроить её под себя.
-    </p>
-    <template #footer>
-      <div class="detail__confirm-actions">
-        <button class="detail__btn detail__btn--edit" @click="startClone">
-          Создать копию
-        </button>
-        <button class="detail__btn detail__btn--cancel" @click="showCloneConfirm = false">
-          Отмена
-        </button>
-      </div>
-    </template>
-  </ModalWrapper>
 
   <!-- Clone DishForm -->
   <DishForm
@@ -150,16 +135,7 @@ import { formatAmount } from "../utils/formatAmount"
 import { formatShoppingAmount } from "../utils/formatShoppingAmount"
 import { usePlanningStore } from "../store/planning"
 import { isDishOwn } from "../utils/dishOwnership"
-
-const UNIT_LABELS = {
-  gram: "г",
-  kilogram: "кг",
-  milliliter: "мл",
-  liter: "л",
-  piece: "шт",
-  tablespoon: "ст. л.",
-  teaspoon: "ч. л.",
-}
+import { UNIT_LABELS } from "../utils/unitLabels"
 
 const props = defineProps({
   modelValue: { type: Boolean, required: true },
@@ -177,7 +153,6 @@ watch(open, (v) => { emit("update:modelValue", v) })
 
 const confirming = ref(false)
 const showDishForm = ref(false)
-const showCloneConfirm = ref(false)
 const showCloneForm = ref(false)
 
 const isOwn = computed(() => isDishOwn(dish.value))
@@ -185,7 +160,6 @@ const isOwn = computed(() => isDishOwn(dish.value))
 watch(() => props.modelValue, (v) => {
   if (v) {
     confirming.value = false
-    showCloneConfirm.value = false
   }
 })
 
@@ -219,17 +193,20 @@ function handleDishEdit() {
   if (isOwn.value) {
     showDishForm.value = true
   } else {
-    showCloneConfirm.value = true
+    showCloneForm.value = true
   }
 }
 
-function startClone() {
-  showCloneConfirm.value = false
-  showCloneForm.value = true
-}
-
-async function onCloneCreated() {
+async function onCloneCreated(dish) {
   showCloneForm.value = false
+  if (props.type === "cooking" && props.item?.id) {
+    await planning.editCookingEvent(props.item.id, {
+      dish: dish.id,
+      cooking_date: props.item.cooking_date,
+      eat_dates: eatDates.value,
+      notes: props.item.notes || undefined,
+    })
+  }
   await planning.loadWeek()
   open.value = false
 }

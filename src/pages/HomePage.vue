@@ -53,7 +53,7 @@ const botUrl = `https://t.me/${botUsername}`
 }
 
 .home-landing__title {
-  font-size: 2rem;
+  font-size: var(--font-display);
   font-weight: 700;
   color: var(--color-text);
   margin: 0;
@@ -75,7 +75,7 @@ const botUrl = `https://t.me/${botUsername}`
   color: var(--on-primary);
   font-size: var(--font-body);
   font-weight: 600;
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   text-decoration: none;
   transition: background 0.15s;
 }

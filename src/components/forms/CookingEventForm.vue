@@ -6,12 +6,18 @@
         <span class="form__label">Блюдо <span class="form__required">*</span></span>
         <div v-if="selectedDish" class="selected-dish">
           <span class="selected-dish__name">{{ selectedDish.name }}</span>
-          <button type="button" class="selected-dish__edit" :title="isDishOwn(selectedDish) ? 'Редактировать блюдо' : 'Создать копию'" @click="onEditDishClick">
+          <button type="button" class="selected-dish__edit" :title="isDishOwn(selectedDish) ? 'Редактировать рецепт' : 'Создать личную копию'" @click="onEditDishClick">
             <IconPencil width="14" height="14" />
           </button>
-          <button type="button" class="selected-dish__clear" @click="selectedDish = null">&times;</button>
+          <button type="button" class="selected-dish__replace" @click="selectedDish = null">Заменить</button>
         </div>
-        <DishSearch v-else @select="onDishSelect" @create="onCreateDish" />
+        <DishSearch
+          v-else
+          :can-create-ai="subscription.canCreateAIRecipes"
+          @select="onDishSelect"
+          @create="onCreateDish"
+          @create-ai="onCreateAIDish"
+        />
       </div>
 
       <label class="form__field">
@@ -29,7 +35,7 @@
         <textarea v-model="notes" class="form__textarea" rows="2" />
       </label>
 
-      <div v-if="error" class="form__error">{{ error }}</div>
+      <div v-if="error" ref="errorRef" class="form__error">{{ error }}</div>
 
     </form>
 
@@ -45,8 +51,8 @@
     <!-- Clone confirmation for global dishes -->
     <ModalWrapper v-model="showCloneConfirm" title="Общее блюдо" :z-index="1020">
       <p class="clone-confirm__text">
-        Это общее блюдо, его нельзя редактировать.
-        Создать личную копию и открыть для редактирования?
+        Это общий рецепт, его нельзя редактировать.
+        Создать личную копию и использовать её в этой готовке?
       </p>
       <template #footer>
         <div class="clone-confirm__actions">
@@ -63,6 +69,12 @@
       @created="onCloneCreated"
     />
 
+    <AIDishDraftForm
+      v-model="showAIForm"
+      :z-index="1030"
+      @created="onDishCreated"
+    />
+
     <template #footer>
       <button type="submit" form="cooking-event-form" class="form__submit" :disabled="saving || !selectedDish">
         {{ saving ? "Сохранение..." : (isEdit ? "Сохранить" : "Создать готовку") }}
@@ -72,13 +84,15 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from "vue"
+import { ref, computed, watch, nextTick } from "vue"
 import ModalWrapper from "./ModalWrapper.vue"
 import DishSearch from "./DishSearch.vue"
 import DishForm from "./DishForm.vue"
+import AIDishDraftForm from "./AIDishDraftForm.vue"
 import DateInput from "./DateInput.vue"
 import MultiDayPicker from "./MultiDayPicker.vue"
 import { usePlanningStore } from "../../store/planning"
+import { useSubscriptionStore } from "../../store/subscription"
 import IconPencil from "../icons/IconPencil.vue"
 import { isDishOwn } from "../../utils/dishOwnership"
 
@@ -91,6 +105,7 @@ const props = defineProps({
 const emit = defineEmits(["update:modelValue"])
 
 const planning = usePlanningStore()
+const subscription = useSubscriptionStore()
 
 const isEdit = computed(() => !!props.editItem)
 
@@ -104,11 +119,16 @@ const eatDates = ref([])
 const notes = ref("")
 const saving = ref(false)
 const error = ref("")
+const errorRef = ref(null)
+watch(error, (val) => {
+  if (val) nextTick(() => errorRef.value?.scrollIntoView({ behavior: 'smooth', block: 'nearest' }))
+})
 const showDishForm = ref(false)
 const editDish = ref(null)
 const initialDishName = ref("")
 const showCloneConfirm = ref(false)
 const showCloneForm = ref(false)
+const showAIForm = ref(false)
 const dishToClone = ref(null)
 
 watch(() => props.modelValue, (v) => {
@@ -182,6 +202,10 @@ function onCreateDish(searchQuery) {
   editDish.value = null
   initialDishName.value = searchQuery || ""
   showDishForm.value = true
+}
+
+function onCreateAIDish() {
+  showAIForm.value = true
 }
 
 function validate() {

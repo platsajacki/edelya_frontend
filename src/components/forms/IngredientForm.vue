@@ -26,7 +26,7 @@
         </select>
       </label>
 
-      <div v-if="error" class="form__error">{{ error }}</div>
+      <div v-if="error" ref="errorRef" class="form__error">{{ error }}</div>
 
     </form>
 
@@ -39,7 +39,7 @@
 </template>
 
 <script setup>
-import { ref, watch } from "vue"
+import { ref, watch, nextTick } from "vue"
 import ModalWrapper from "./ModalWrapper.vue"
 import { createIngredient, fetchIngredientCategories } from "../../services/ingredientService"
 
@@ -80,6 +80,10 @@ const baseUnit = ref("")
 const categories = ref([])
 const saving = ref(false)
 const error = ref("")
+const errorRef = ref(null)
+watch(error, (val) => {
+  if (val) nextTick(() => errorRef.value?.scrollIntoView({ behavior: 'smooth', block: 'nearest' }))
+})
 
 watch(() => props.modelValue, async (v) => {
   if (v) {

@@ -132,8 +132,8 @@ export const useShoppingStore = defineStore("shopping", {
     async loadItems(listId) {
       this.loadingItems = true
       try {
-        const data = await fetchShoppingListItems(listId)
-        this.items = data.results ?? []
+        const data = await fetchShoppingListItems(listId, { page_size: 500 })
+        this.items = data.results ?? (Array.isArray(data) ? data : [])
       } catch {
         this.items = []
         this.showToast("Не удалось загрузить позиции")

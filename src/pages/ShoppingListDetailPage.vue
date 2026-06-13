@@ -496,7 +496,7 @@ async function doDeleteList() {
 }
 
 .confirm-panel__btn--danger:hover {
-  background: var(--color-danger-muted);
+  background: var(--color-danger-dark);
 }
 
 .confirm-panel__btn:disabled {

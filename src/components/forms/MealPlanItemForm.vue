@@ -6,12 +6,17 @@
         <span class="form__label">Блюдо <span class="form__required">*</span></span>
         <div v-if="selectedDish" class="selected-dish">
           <span class="selected-dish__name">{{ selectedDish.name }}</span>
-          <button type="button" class="selected-dish__edit" @click="editDish = selectedDish; showDishForm = true" title="Редактировать блюдо">
-            <IconPencil />
-          </button>
-          <button type="button" class="selected-dish__clear" @click="selectedDish = null">&times;</button>
+          <template v-if="!isDishLocked">
+            <button type="button" class="selected-dish__edit" :title="isDishOwn(selectedDish) ? 'Редактировать блюдо' : 'Создать копию'" @click="onEditDishClick">
+              <IconPencil />
+            </button>
+            <button type="button" class="selected-dish__clear" @click="selectedDish = null">&times;</button>
+          </template>
         </div>
-        <DishSearch v-else @select="onDishSelect" @create="onCreateDish" />
+        <template v-else>
+          <DishSearch @select="onDishSelect" @create="onCreateDish" />
+        </template>
+        <p v-if="isDishLocked" class="form__hint">Блюдо привязано к готовке и не может быть изменено</p>
       </div>
 
       <label v-if="isEdit" class="form__field">
@@ -24,7 +29,7 @@
         <MultiDayPicker v-model="eatDates" :start-date="initialDate" />
       </div>
 
-      <div v-if="error" class="form__error">{{ error }}</div>
+      <div v-if="error" ref="errorRef" class="form__error">{{ error }}</div>
 
     </form>
 
@@ -37,6 +42,13 @@
       @updated="onDishUpdated"
     />
 
+    <DishForm
+      v-model="showCloneForm"
+      :z-index="1020"
+      :clone-dish="dishToClone"
+      @created="onCloneCreated"
+    />
+
     <template #footer>
       <button type="submit" form="meal-plan-form" class="form__submit" :disabled="saving || !selectedDish">
         {{ saving ? "Сохранение..." : (isEdit ? "Сохранить" : "Добавить") }}
@@ -46,7 +58,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from "vue"
+import { ref, computed, watch, nextTick } from "vue"
 import ModalWrapper from "./ModalWrapper.vue"
 import DishSearch from "./DishSearch.vue"
 import DishForm from "./DishForm.vue"
@@ -54,6 +66,7 @@ import DateInput from "./DateInput.vue"
 import MultiDayPicker from "./MultiDayPicker.vue"
 import { usePlanningStore } from "../../store/planning"
 import IconPencil from "../icons/IconPencil.vue"
+import { isDishOwn } from "../../utils/dishOwnership"
 
 const props = defineProps({
   modelValue: { type: Boolean, required: true },
@@ -66,6 +79,7 @@ const emit = defineEmits(["update:modelValue"])
 const planning = usePlanningStore()
 
 const isEdit = computed(() => !!props.editItem)
+const isDishLocked = computed(() => isEdit.value && !!props.editItem?.cooking_event)
 
 const open = ref(props.modelValue)
 watch(() => props.modelValue, (v) => { open.value = v })
@@ -76,9 +90,15 @@ const mealDate = ref("")
 const eatDates = ref([])
 const saving = ref(false)
 const error = ref("")
+const errorRef = ref(null)
+watch(error, (val) => {
+  if (val) nextTick(() => errorRef.value?.scrollIntoView({ behavior: 'smooth', block: 'nearest' }))
+})
 const showDishForm = ref(false)
 const editDish = ref(null)
 const initialDishName = ref("")
+const showCloneForm = ref(false)
+const dishToClone = ref(null)
 
 watch(() => props.modelValue, (v) => {
   if (v && props.editItem) {
@@ -115,6 +135,22 @@ function onCreateDish(searchQuery) {
   showDishForm.value = true
 }
 
+function onEditDishClick() {
+  if (isDishOwn(selectedDish.value)) {
+    editDish.value = selectedDish.value
+    showDishForm.value = true
+  } else {
+    dishToClone.value = selectedDish.value
+    showCloneForm.value = true
+  }
+}
+
+function onCloneCreated(dish) {
+  selectedDish.value = dish
+  showCloneForm.value = false
+  error.value = ""
+}
+
 function validate() {
   if (!selectedDish.value) return "Выберите блюдо."
   if (isEdit.value && !mealDate.value) return "Укажите дату."
@@ -148,4 +184,40 @@ async function submit() {
 </script>
 
 <style scoped>
+.clone-confirm__text {
+  font-size: var(--font-sm);
+  color: var(--color-text);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.clone-confirm__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form__cancel {
+  width: 100%;
+  padding: 12px;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: var(--font-base);
+  font-weight: 600;
+  background: var(--color-empty);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.form__hint {
+  margin: 4px 0 0;
+  font-size: var(--font-sm);
+  color: var(--color-text-secondary);
+  line-height: 1.4;
+}
+
+.form__cancel:hover {
+  background: var(--color-border);
+}
 </style>

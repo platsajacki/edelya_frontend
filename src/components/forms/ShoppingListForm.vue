@@ -2,6 +2,11 @@
   <ModalWrapper v-model="open" :title="isEdit ? 'Редактировать список' : 'Новый список покупок'" :z-index="zIndex">
     <form id="shopping-list-form" class="form" @submit.prevent="submit">
       <label class="form__field">
+        <span class="form__label">Название <span class="form__required">*</span></span>
+        <input v-model="name" type="text" class="form__input" required placeholder="Например: Продукты на неделю" @input="onNameInput" />
+      </label>
+
+      <label class="form__field">
         <span class="form__label">Начало периода <span class="form__required">*</span></span>
         <DateInput v-model="dateFrom" />
       </label>
@@ -11,17 +16,12 @@
         <DateInput v-model="dateTo" />
       </label>
 
-      <label class="form__field">
-        <span class="form__label">Название <span class="form__required">*</span></span>
-        <input v-model="name" type="text" class="form__input" required placeholder="Например: Продукты на неделю" @input="onNameInput" />
-      </label>
-
       <div v-if="isEdit && datesChanged" class="form__warning">
         <IconWarning width="14" height="14" />
         При сохранении список покупок будет пересчитан на основе готовок за новый период.
       </div>
 
-      <div v-if="error" class="form__error">{{ error }}</div>
+      <div v-if="error" ref="errorRef" class="form__error">{{ error }}</div>
 
     </form>
 
@@ -34,7 +34,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from "vue"
+import { ref, computed, watch, nextTick } from "vue"
 import ModalWrapper from "./ModalWrapper.vue"
 import DateInput from "./DateInput.vue"
 import { useShoppingStore } from "../../store/shopping"
@@ -64,6 +64,10 @@ const dateFrom = ref("")
 const dateTo = ref("")
 const saving = ref(false)
 const error = ref("")
+const errorRef = ref(null)
+watch(error, (val) => {
+  if (val) nextTick(() => errorRef.value?.scrollIntoView({ behavior: 'smooth', block: 'nearest' }))
+})
 const nameManuallyEdited = ref(false)
 
 function todayISO() {

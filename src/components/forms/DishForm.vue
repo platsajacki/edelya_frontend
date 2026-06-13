@@ -1,6 +1,11 @@
 <template>
   <ModalWrapper v-model="open" :title="isEdit ? 'Редактировать блюдо' : isClone ? 'Создать личную копию' : 'Новое блюдо'" :z-index="zIndex">
     <form id="dish-form" class="form" @submit.prevent="submit">
+      <!-- Clone notice -->
+      <div v-if="isClone" class="dish-form__clone-notice">
+        Это личная копия общего блюда — вы можете изменить её под себя.
+      </div>
+
       <label class="form__field">
         <span class="form__label">Название <span class="form__required">*</span></span>
         <input v-model="name" type="text" class="form__input" required />
@@ -18,7 +23,7 @@
 
       <label class="form__field">
         <span class="form__label">Рецепт</span>
-        <textarea v-model="recipe" class="form__textarea" rows="2" />
+        <textarea ref="recipeRef" v-model="recipe" class="form__textarea form__textarea--auto" rows="2" @input="autoResize($event.target)" />
       </label>
 
       <!-- Ingredients -->
@@ -34,6 +39,7 @@
             </div>
             <div v-if="pendingIngredient.base_unit !== 'to_taste'" class="ingredient-amount__row">
               <input
+                ref="amountInputRef"
                 v-model="pendingAmount"
                 type="text"
                 inputmode="decimal"
@@ -78,6 +84,7 @@
           </div>
           <div v-if="pendingIngredient.base_unit !== 'to_taste'" class="ingredient-amount__row">
             <input
+              ref="amountInputRef"
               v-model="pendingAmount"
               type="text"
               inputmode="decimal"
@@ -130,7 +137,14 @@
         </div>
       </div>
 
-      <div v-if="error" class="form__error">{{ error }}</div>
+      <div v-if="error" ref="errorRef" class="form__error">{{ error }}</div>
+
+      <div v-if="duplicateActions" class="form__duplicate-actions">
+        <button type="button" class="form__duplicate-use" :disabled="loadingExisting" @click="useExistingDish">
+          {{ loadingExisting ? 'Поиск...' : 'Использовать существующее' }}
+        </button>
+        <span class="form__duplicate-hint">или переименуйте выше</span>
+      </div>
 
     </form>
 
@@ -150,34 +164,17 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from "vue"
+import { ref, computed, watch, nextTick } from "vue"
 import ModalWrapper from "./ModalWrapper.vue"
 import IngredientForm from "./IngredientForm.vue"
 import IconPencil from "../icons/IconPencil.vue"
 import IconClose from "../icons/IconClose.vue"
-import { createDish, updateDish, fetchDishCategories } from "../../services/dishService"
+import { createDish, updateDish, fetchDishCategories, fetchDishes } from "../../services/dishService"
+import { isDishOwn } from "../../utils/dishOwnership"
 import { fetchIngredients } from "../../services/ingredientService"
 import { formatAmount } from "../../utils/formatAmount"
 import { formatShoppingAmount } from "../../utils/formatShoppingAmount"
-
-const UNIT_LABELS = {
-  gram: "г",
-  kilogram: "кг",
-  milligram: "мг",
-  liter: "л",
-  milliliter: "мл",
-  piece: "шт",
-  slice: "ломт.",
-  teaspoon: "ч.л.",
-  tablespoon: "ст.л.",
-  glass: "стак.",
-  cup: "чашка",
-  bunch: "пучок",
-  can: "банка",
-  pinch: "щеп.",
-  clove: "зубч.",
-  to_taste: "по вкусу",
-}
+import { UNIT_LABELS } from "../../utils/unitLabels"
 
 const props = defineProps({
   modelValue: { type: Boolean, required: true },
@@ -203,6 +200,11 @@ const categories = ref([])
 const ingredients = ref([])
 const saving = ref(false)
 const error = ref("")
+const duplicateActions = ref(false)
+const loadingExisting = ref(false)
+watch(error, (val) => {
+  if (val) nextTick(() => errorRef.value?.scrollIntoView({ behavior: 'smooth', block: 'nearest' }))
+})
 
 // Ingredient search state
 const ingredientQuery = ref("")
@@ -216,12 +218,21 @@ const pendingAmount = ref("")
 const pendingOptional = ref(false)
 const amountError = ref("")
 const editingIdx = ref(null)
+const amountInputRef = ref(null)
+const recipeRef = ref(null)
+const errorRef = ref(null)
+
+function autoResize(el) {
+  el.style.height = 'auto'
+  el.style.height = el.scrollHeight + 'px'
+}
 
 let ingredientSearchTimer = null
 
 watch(() => props.modelValue, async (v) => {
   if (v) {
     error.value = ""
+    duplicateActions.value = false
     resetIngredientSearch()
     try {
       const data = await fetchDishCategories()
@@ -259,6 +270,8 @@ watch(() => props.modelValue, async (v) => {
       recipe.value = ""
       ingredients.value = []
     }
+    await nextTick()
+    if (recipeRef.value) autoResize(recipeRef.value)
   }
 })
 
@@ -309,6 +322,7 @@ function selectIngredient(ing) {
   ingredientResults.value = []
   amountError.value = ""
   editingIdx.value = null
+  nextTick(() => amountInputRef.value?.focus())
 }
 
 function startEditIngredient(idx) {
@@ -324,6 +338,7 @@ function startEditIngredient(idx) {
   amountError.value = ""
   ingredientQuery.value = ""
   ingredientResults.value = []
+  nextTick(() => amountInputRef.value?.focus())
 }
 
 function removeIngredient(idx) {
@@ -381,7 +396,7 @@ function onIngredientCreated(ingredient) {
 }
 
 function validate() {
-  if (!name.value.trim()) return "Укажите название блюда."
+  if (!name.value.trim()) return "Укажите название рецепта."
   if (!categoryId.value) return "Выберите категорию."
   if (!ingredients.value.length) return "Добавьте хотя бы один ингредиент."
   const ids = ingredients.value.map((i) => i.ingredient)
@@ -418,13 +433,84 @@ async function submit() {
     open.value = false
   } catch (err) {
     error.value = err.message || "Не удалось создать блюдо"
+    if (isClone.value && err.message?.includes('уже существует')) {
+      duplicateActions.value = true
+    }
   } finally {
     saving.value = false
+  }
+}
+
+async function useExistingDish() {
+  loadingExisting.value = true
+  try {
+    const data = await fetchDishes({ name__icontains: name.value.trim(), only_owned: true })
+    const found = (data.results ?? []).find(
+      (d) => isDishOwn(d) && d.name.toLowerCase() === name.value.trim().toLowerCase()
+    )
+    if (!found) {
+      error.value = "Не удалось найти блюдо. Переименуйте и попробуйте снова."
+      duplicateActions.value = false
+      return
+    }
+    emit("created", found)
+    open.value = false
+  } catch {
+    error.value = "Ошибка при поиске блюда."
+  } finally {
+    loadingExisting.value = false
   }
 }
 </script>
 
 <style scoped>
+.dish-form__clone-notice {
+  padding: 10px 12px;
+  background: var(--color-mint-alpha-08);
+  border: 1px solid var(--color-mint-alpha-25);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-sm);
+  color: var(--color-text-secondary);
+  line-height: 1.45;
+}
+
+.form__duplicate-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  background: var(--color-mint-alpha-10);
+  border: 1.5px solid var(--color-mint-alpha-25);
+  border-radius: var(--radius-sm);
+}
+
+.form__duplicate-use {
+  flex-shrink: 0;
+  padding: 7px 14px;
+  border: 1.5px solid var(--color-mint);
+  border-radius: var(--radius-sm);
+  background: var(--color-mint);
+  color: var(--on-primary);
+  font-size: var(--font-sm);
+  font-weight: 600;
+  cursor: pointer;
+  transition: background var(--transition-fast), opacity var(--transition-fast);
+}
+
+.form__duplicate-use:hover {
+  background: var(--color-mint-hover);
+}
+
+.form__duplicate-use:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.form__duplicate-hint {
+  font-size: var(--font-sm);
+  color: var(--color-text-secondary);
+}
+
 .form__section {
   display: flex;
   flex-direction: column;

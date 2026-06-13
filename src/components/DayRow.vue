@@ -189,6 +189,7 @@ useSortable(eatRef, makeSortableOptions('meals'))
   flex-direction: column;
   position: relative;
   padding-left: 8px;
+  min-width: 0;
 }
 
 .day-row__eat::before {
@@ -206,6 +207,7 @@ useSortable(eatRef, makeSortableOptions('meals'))
   --card-accent: var(--color-cook);
   display: flex;
   flex-direction: column;
+  min-width: 0;
 }
 
 .day-row__items {

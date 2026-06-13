@@ -1,6 +1,7 @@
 :root {
   /* ─── Colors: backgrounds & surfaces ─── */
   --color-bg: #f8f7f3;
+  --color-bg-secondary: #efede8;
   --color-surface: #ffffff;
   --color-surface-muted: #eeeae5;
   --color-text: #252520;
@@ -11,8 +12,6 @@
   /* ─── Colors: primary (mint / lavender) ─── */
   --color-mint: #8A63B5;
   --color-mint-hover: #7D56A9;
-  --color-mint-dark: #5C3A8E;
-  --color-mint-dark-hover: #4D2E7C;
   --on-primary: #ffffff;
 
   /* ─── Colors: semantic (eat / cook) ─── */
@@ -32,10 +31,22 @@
 
   /* ─── Colors: danger ─── */
   --color-danger: #D64545;
-  --color-danger-muted: #B91C1C;
+  --color-danger-dark: #B91C1C;
   --color-danger-bg: #FEE2E2;
   --color-danger-soft: #FECACA;
   --color-danger-pale: #FEF2F2;
+  --color-error: var(--color-danger);
+
+  /* ─── Colors: success ─── */
+  --color-success: #3D8C3D;
+  --color-success-bg: rgba(61, 140, 61, 0.10);
+
+  /* ─── Colors: info ─── */
+  --color-info: #2563EB;
+  --color-info-bg: rgba(37, 99, 235, 0.10);
+
+  /* ─── Colors: focus ─── */
+  --color-focus: var(--color-mint);
 
   /* ─── Colors: warning ─── */
   --color-warning: #92661a;
@@ -71,6 +82,7 @@
   --radius-pill: 9999px;
 
   /* ─── Typography ─── */
+  --font-display: 2rem;
   --font-lg: 18px;
   --font-md: 16px;
   --font-base: 15px;
@@ -118,20 +130,46 @@ input[type="search"]::-webkit-search-results-decoration {
   display: none;
 }
 
-/* ─── Search field with clear button ─── */
+/* ─── Search field with icon + clear button ─── */
 .search-field {
   position: relative;
+  display: flex;
+  align-items: center;
 }
 
-.search-field input {
-  padding-right: 36px;
+.search-field__icon {
+  position: absolute;
+  left: 12px;
+  color: var(--color-text-secondary);
+  pointer-events: none;
+}
+
+.search-field__input {
+  width: 100%;
+  padding: 10px 36px 10px 36px;
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-md);
+  font-family: inherit;
+  background: var(--color-surface);
+  color: var(--color-text);
+  outline: none;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.search-field__input:focus {
+  border-color: var(--color-mint-alpha-25);
+  box-shadow: 0 0 0 3px var(--color-mint-alpha-10);
+}
+
+.search-field__input::placeholder {
+  color: var(--color-text-secondary);
+  opacity: 0.6;
 }
 
 .search-field__clear {
   position: absolute;
   right: 4px;
-  top: 50%;
-  transform: translateY(-50%);
   width: 28px;
   height: 28px;
   border: none;
@@ -221,6 +259,12 @@ textarea {
 
 .form__textarea {
   resize: vertical;
+}
+
+.form__textarea--auto {
+  resize: none;
+  overflow: hidden;
+  min-height: 64px;
 }
 
 .form__input:focus,
@@ -450,6 +494,24 @@ textarea {
 .selected-dish__clear:hover {
   background: var(--color-border);
   color: var(--color-danger);
+}
+
+.selected-dish__replace {
+  flex-shrink: 0;
+  border: none;
+  background: none;
+  font-size: var(--font-sm);
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  padding: 2px 4px;
+  border-radius: var(--radius-xs);
+  cursor: pointer;
+  transition: color var(--transition-fast), background var(--transition-fast);
+}
+
+.selected-dish__replace:hover {
+  color: var(--color-danger);
+  background: var(--color-danger-pale);
 }
 
 /* ─── Shared ingredient search (forms) ────────────────────── */
