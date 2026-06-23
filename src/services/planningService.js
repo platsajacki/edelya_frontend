@@ -54,8 +54,6 @@ export function deleteMealPlanItem(id) {
 
 export function batchUpdateMealPositions(items) {
   return Promise.all(
-    items.map((item) =>
-      updateMealPlanItem(item.id, { date: item.date, position: item.position })
-    )
+    items.map((item) => updateMealPlanItem(item.id, { date: item.date, position: item.position }))
   )
 }

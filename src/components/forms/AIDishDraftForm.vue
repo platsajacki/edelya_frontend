@@ -5,7 +5,8 @@
         <div class="ai-draft__intro">
           <p class="ai-draft__title">Введите рецепт, продукты или идею блюда</p>
           <p class="ai-draft__text">
-            ИИ подготовит блюдо с названием, рецептом и ингредиентами. Перед сохранением вы сможете всё проверить и поправить.
+            ИИ подготовит блюдо с названием, рецептом и ингредиентами. Перед сохранением вы сможете
+            всё проверить и поправить.
           </p>
           <ul class="ai-draft__capabilities">
             <li>Готовый рецепт — вставьте ингредиенты и шаги приготовления.</li>
@@ -42,7 +43,9 @@
           <div class="spinner spinner--sm" />
           <p class="ai-draft__title">Рецепт в обработке</p>
         </div>
-        <p class="ai-draft__text">Черновик доступен во вкладке AI-рецепты. Статус обновится автоматически.</p>
+        <p class="ai-draft__text">
+          Черновик доступен во вкладке AI-рецепты. Статус обновится автоматически.
+        </p>
         <div class="ai-draft__source-preview">{{ draftSourceText }}</div>
       </div>
 
@@ -50,13 +53,17 @@
         <p class="ai-draft__title">Не удалось разобрать рецепт</p>
         <p class="ai-draft__text">{{ failureMessage }}</p>
         <div v-if="draftSourceText" class="ai-draft__source-preview">{{ draftSourceText }}</div>
-        <button type="button" class="ai-draft__secondary-btn" @click="resetToInput">Попробовать заново</button>
+        <button type="button" class="ai-draft__secondary-btn" @click="resetToInput">
+          Попробовать заново
+        </button>
       </div>
 
       <div v-else-if="step === 'dish_created'" class="ai-draft__readonly">
         <div class="ai-draft__notice">
           <p class="ai-draft__title">Блюдо создано</p>
-          <p class="ai-draft__text">Созданное блюдо уже сохранено. Здесь можно посмотреть данные AI-черновика.</p>
+          <p class="ai-draft__text">
+            Созданное блюдо уже сохранено. Здесь можно посмотреть данные AI-черновика.
+          </p>
         </div>
 
         <div class="detail__section">
@@ -70,7 +77,11 @@
         <div v-if="readonlyPayload.ingredients?.length" class="detail__section">
           <span class="detail__label">Состав</span>
           <ul class="detail__ingredients">
-            <li v-for="(ingredient, idx) in readonlyPayload.ingredients" :key="idx" class="detail__ingredient">
+            <li
+              v-for="(ingredient, idx) in readonlyPayload.ingredients"
+              :key="idx"
+              class="detail__ingredient"
+            >
               <span class="detail__ingredient-name">{{ ingredientLabel(ingredient) }}</span>
               <span class="detail__ingredient-right">
                 <span v-if="ingredient.is_optional" class="detail__ingredient-optional">опц.</span>
@@ -83,7 +94,11 @@
         </div>
 
         <div v-if="draftSourceText" class="detail__section">
-          <button type="button" class="ai-draft__source-toggle" @click="sourceExpanded = !sourceExpanded">
+          <button
+            type="button"
+            class="ai-draft__source-toggle"
+            @click="sourceExpanded = !sourceExpanded"
+          >
             {{ sourceToggleLabel }}
           </button>
           <div v-if="sourceExpanded" class="ai-draft__source-preview">{{ draftSourceText }}</div>
@@ -93,11 +108,17 @@
       <template v-else-if="step === 'parsed'">
         <div class="ai-draft__intro">
           <p class="ai-draft__title">Проверьте блюдо</p>
-          <p class="ai-draft__text">Можно поправить название, рецепт, категорию, количество и обязательность ингредиентов.</p>
+          <p class="ai-draft__text">
+            Можно поправить название, рецепт, категорию, количество и обязательность ингредиентов.
+          </p>
         </div>
 
         <div v-if="draftSourceText" class="ai-draft__source-block">
-          <button type="button" class="ai-draft__source-toggle" @click="sourceExpanded = !sourceExpanded">
+          <button
+            type="button"
+            class="ai-draft__source-toggle"
+            @click="sourceExpanded = !sourceExpanded"
+          >
             {{ sourceToggleLabel }}
           </button>
           <div v-if="sourceExpanded" class="ai-draft__source-preview">{{ draftSourceText }}</div>
@@ -112,13 +133,20 @@
           <span class="form__label">Категория <span class="form__required">*</span></span>
           <select v-model="payload.category" class="form__select" required>
             <option value="" disabled>Выберите категорию</option>
-            <option v-for="cat in dishCategories" :key="cat.id" :value="cat.id">{{ cat.name }}</option>
+            <option v-for="cat in dishCategories" :key="cat.id" :value="cat.id">
+              {{ cat.name }}
+            </option>
           </select>
         </label>
 
         <label class="form__field">
           <span class="form__label">Рецепт <span class="form__required">*</span></span>
-          <textarea v-model="payload.recipe" class="form__textarea ai-draft__recipe" rows="5" required />
+          <textarea
+            v-model="payload.recipe"
+            class="form__textarea ai-draft__recipe"
+            rows="5"
+            required
+          />
         </label>
 
         <div class="form__section">
@@ -131,15 +159,25 @@
                   class="ingredient-amount__mode-badge"
                   :class="
                     ingredient.new
-                        ? 'ingredient-amount__mode-badge--new'
-                        : ingredient.ingredient
-                          ? 'ingredient-amount__mode-badge--found'
-                          : null
+                      ? 'ingredient-amount__mode-badge--new'
+                      : ingredient.ingredient
+                        ? 'ingredient-amount__mode-badge--found'
+                        : null
                   "
                 >
-                  {{ !ingredient.new && !ingredient.ingredient ? 'Нужна привязка' : ingredient.new ? 'Новый' : 'Найден' }}
+                  {{
+                    !ingredient.new && !ingredient.ingredient
+                      ? "Нужна привязка"
+                      : ingredient.new
+                        ? "Новый"
+                        : "Найден"
+                  }}
                 </span>
-                <span v-if="!ingredient.new && ingredient.ingredient" class="ingredient-amount__name">{{ ingredientLabel(ingredient) }}</span>
+                <span
+                  v-if="!ingredient.new && ingredient.ingredient"
+                  class="ingredient-amount__name"
+                  >{{ ingredientLabel(ingredient) }}</span
+                >
               </div>
 
               <template v-if="ingredient.new || (!ingredient.new && !ingredient.ingredient)">
@@ -148,14 +186,25 @@
                   <input v-model="ingredient.name" type="text" class="form__input" />
                 </label>
 
-                <button v-if="!inlineReplaceVisible" type="button" class="ingredient-amount__link-btn" @click="openInlineReplace(ingredient)">
+                <button
+                  v-if="!inlineReplaceVisible"
+                  type="button"
+                  class="ingredient-amount__link-btn"
+                  @click="openInlineReplace(ingredient)"
+                >
                   Привязать к существующему
                 </button>
- 
+
                 <div v-else class="ingredient-amount__inline-replace">
                   <div class="ai-draft__search-head">
                     <span class="ingredient-amount__replace-label">Найти и привязать</span>
-                    <button type="button" class="ingredient-amount__cancel-link" @click="closeInlineReplace">Отмена</button>
+                    <button
+                      type="button"
+                      class="ingredient-amount__cancel-link"
+                      @click="closeInlineReplace"
+                    >
+                      Отмена
+                    </button>
                   </div>
                   <div class="search-field">
                     <input
@@ -170,7 +219,12 @@
                       type="button"
                       class="search-field__clear"
                       aria-label="Очистить"
-                      @click="inlineReplaceQuery = ''; inlineReplaceResults = []"
+                      @click="
+                        () => {
+                          inlineReplaceQuery = ''
+                          inlineReplaceResults = []
+                        }
+                      "
                     >
                       &times;
                     </button>
@@ -186,10 +240,14 @@
                       @click="selectInlineReplaceIngredient(idx, result)"
                     >
                       {{ result.name }}
-                      <span class="ingredient-search__unit">{{ UNIT_LABELS[result.base_unit] || result.base_unit }}</span>
+                      <span class="ingredient-search__unit">{{
+                        UNIT_LABELS[result.base_unit] || result.base_unit
+                      }}</span>
                     </li>
                   </ul>
-                  <div v-else-if="inlineReplaceQuery.trim()" class="ingredient-search__status">Ничего не найдено</div>
+                  <div v-else-if="inlineReplaceQuery.trim()" class="ingredient-search__status">
+                    Ничего не найдено
+                  </div>
                 </div>
               </template>
 
@@ -205,18 +263,30 @@
                   @focus="$event.target.select()"
                   @keydown.enter.prevent="finishIngredientEdit"
                 />
-                <select v-if="ingredient.new" v-model="ingredient.base_unit" class="form__select ingredient-amount__select">
-                  <option v-for="unit in unitOptions" :key="unit.value" :value="unit.value">{{ unit.label }}</option>
+                <select
+                  v-if="ingredient.new"
+                  v-model="ingredient.base_unit"
+                  class="form__select ingredient-amount__select"
+                >
+                  <option v-for="unit in unitOptions" :key="unit.value" :value="unit.value">
+                    {{ unit.label }}
+                  </option>
                 </select>
-                <span v-else class="ingredient-amount__unit">{{ UNIT_LABELS[ingredient.base_unit] || ingredient.base_unit }}</span>
+                <span v-else class="ingredient-amount__unit">{{
+                  UNIT_LABELS[ingredient.base_unit] || ingredient.base_unit
+                }}</span>
               </div>
-              <p v-else class="ingredient-amount__taste-hint">Количество не указывается — добавится как «по вкусу»</p>
+              <p v-else class="ingredient-amount__taste-hint">
+                Количество не указывается — добавится как «по вкусу»
+              </p>
 
               <label v-if="ingredient.new" class="form__field">
                 <span class="form__label">Категория ингредиента</span>
                 <select v-model="ingredient.category" class="form__select">
                   <option value="" disabled>Выберите категорию</option>
-                  <option v-for="cat in ingredientCategories" :key="cat.id" :value="cat.id">{{ cat.name }}</option>
+                  <option v-for="cat in ingredientCategories" :key="cat.id" :value="cat.id">
+                    {{ cat.name }}
+                  </option>
                 </select>
               </label>
 
@@ -226,8 +296,12 @@
               </label>
 
               <div class="ingredient-amount__actions">
-                <button type="button" class="btn btn--sm" @click="finishIngredientEdit">Сохранить</button>
-                <button type="button" class="btn btn--sm btn--ghost" @click="cancelIngredientEdit">Отмена</button>
+                <button type="button" class="btn btn--sm" @click="finishIngredientEdit">
+                  Сохранить
+                </button>
+                <button type="button" class="btn btn--sm btn--ghost" @click="cancelIngredientEdit">
+                  Отмена
+                </button>
               </div>
             </div>
 
@@ -246,14 +320,26 @@
                     'ai-ingredient__badge--broken': !ingredient.new && !ingredient.ingredient,
                   }"
                 >
-                  {{ ingredient.new ? 'создать' : (!ingredient.ingredient ? 'привязать' : 'найден') }}
+                  {{ ingredient.new ? "создать" : !ingredient.ingredient ? "привязать" : "найден" }}
                 </span>
                 <span v-if="ingredient.is_optional" class="ingredient-row__opt-label">опц.</span>
-                <span class="ingredient-row__amount">{{ formatShoppingAmount(ingredient.amount, ingredient.base_unit).display }}</span>
-                <button type="button" class="ingredient-row__edit" title="Редактировать" @click="startIngredientEdit(idx)">
+                <span class="ingredient-row__amount">{{
+                  formatShoppingAmount(ingredient.amount, ingredient.base_unit).display
+                }}</span>
+                <button
+                  type="button"
+                  class="ingredient-row__edit"
+                  title="Редактировать"
+                  @click="startIngredientEdit(idx)"
+                >
                   <IconPencil width="14" height="14" />
                 </button>
-                <button type="button" class="ingredient-row__remove" title="Удалить" @click="removeIngredient(idx)">
+                <button
+                  type="button"
+                  class="ingredient-row__remove"
+                  title="Удалить"
+                  @click="removeIngredient(idx)"
+                >
                   <IconClose />
                 </button>
               </div>
@@ -268,7 +354,9 @@
                   type="button"
                   class="ingredient-row__suggestion-chip"
                   @click="applySuggestion(idx, s)"
-                >{{ s.name }}</button>
+                >
+                  {{ s.name }}
+                </button>
               </div>
             </template>
           </template>
@@ -278,7 +366,7 @@
             class="ingredient-add__toggle"
             @click="addIngredientExpanded = !addIngredientExpanded"
           >
-            {{ addIngredientExpanded ? '− Свернуть' : '+ Добавить ингредиент' }}
+            {{ addIngredientExpanded ? "− Свернуть" : "+ Добавить ингредиент" }}
           </button>
 
           <div v-if="addIngredientExpanded" class="ingredient-search">
@@ -311,10 +399,14 @@
                 @click="selectExistingIngredient(result)"
               >
                 {{ result.name }}
-                <span class="ingredient-search__unit">{{ UNIT_LABELS[result.base_unit] || result.base_unit }}</span>
+                <span class="ingredient-search__unit">{{
+                  UNIT_LABELS[result.base_unit] || result.base_unit
+                }}</span>
               </li>
             </ul>
-            <div v-else-if="ingredientSearchQuery.trim()" class="ingredient-search__status">Ничего не найдено</div>
+            <div v-else-if="ingredientSearchQuery.trim()" class="ingredient-search__status">
+              Ничего не найдено
+            </div>
             <button type="button" class="dish-search__create" @click="openIngredientForm">
               + Создать ингредиент
             </button>
@@ -369,16 +461,23 @@ import IconClose from "../icons/IconClose.vue"
 import { useSubscriptionStore } from "../../store/subscription"
 import { createAIDraft, createDishFromAIDraft, fetchAIDraft } from "../../services/aiDraftService"
 import { fetchDish, fetchDishCategories } from "../../services/dishService"
-import { fetchIngredientById, fetchIngredientCategories, fetchIngredients } from "../../services/ingredientService"
+import {
+  fetchIngredientById,
+  fetchIngredientCategories,
+  fetchIngredients,
+} from "../../services/ingredientService"
 import { formatShoppingAmount } from "../../utils/formatShoppingAmount"
 import { UNIT_LABELS } from "../../utils/unitLabels"
 
 const MIN_SOURCE_LENGTH = 10
 const MAX_SOURCE_LENGTH = 10000
 const POLL_INTERVAL_MS = 7000
-const PROMPT_INJECTION_MESSAGE = "Обнаружены подозрительные данные, похожие на попытку обойти систему. Пожалуйста, измените формулировку и попробуйте снова."
-const NOT_PROCESSABLE_MESSAGE = "Рецепт не может быть обработан. Пожалуйста, проверьте формат и содержание текста."
-const DEFAULT_PARSE_FAILURE_MESSAGE = "Попробуйте добавить больше деталей: ингредиенты, количество и шаги приготовления."
+const PROMPT_INJECTION_MESSAGE =
+  "Обнаружены подозрительные данные, похожие на попытку обойти систему. Пожалуйста, измените формулировку и попробуйте снова."
+const NOT_PROCESSABLE_MESSAGE =
+  "Рецепт не может быть обработан. Пожалуйста, проверьте формат и содержание текста."
+const DEFAULT_PARSE_FAILURE_MESSAGE =
+  "Попробуйте добавить больше деталей: ингредиенты, количество и шаги приготовления."
 
 const props = defineProps({
   modelValue: { type: Boolean, required: true },
@@ -386,7 +485,13 @@ const props = defineProps({
   draftToOpen: { type: Object, default: null },
 })
 
-const emit = defineEmits(["update:modelValue", "created", "draft-created", "draft-updated", "open-dish"])
+const emit = defineEmits([
+  "update:modelValue",
+  "created",
+  "draft-created",
+  "draft-updated",
+  "open-dish",
+])
 
 const subscription = useSubscriptionStore()
 const open = ref(props.modelValue)
@@ -422,7 +527,7 @@ let pollTimer = null
 let ingredientSearchTimer = null
 
 const unitOptions = computed(() =>
-  Object.entries(UNIT_LABELS).map(([value, label]) => ({ value, label })),
+  Object.entries(UNIT_LABELS).map(([value, label]) => ({ value, label }))
 )
 
 const sourceTextLength = computed(() => sourceText.value.trim().length)
@@ -436,18 +541,21 @@ const step = computed(() => {
   return "processing"
 })
 const failureMessage = computed(() => formatValidationErrors(draft.value?.validation_errors))
-const submitDisabled = computed(() =>
-  saving.value ||
-  polling.value ||
-  step.value === "processing" ||
-  (step.value === "input" && subscription.isAIRecipeLimitExceeded),
+const submitDisabled = computed(
+  () =>
+    saving.value ||
+    polling.value ||
+    step.value === "processing" ||
+    (step.value === "input" && subscription.isAIRecipeLimitExceeded)
 )
 const canSubmit = computed(() => !["failed", "dish_created"].includes(step.value))
 const readonlyPayload = computed(() => normalizePayload(draft.value?.payload))
 const readonlyCategoryName = computed(() => getCategoryName(readonlyPayload.value.category))
-const createdDishId = computed(() => getCreatedDishId(createdDish.value || draft.value?.created_dish))
+const createdDishId = computed(() =>
+  getCreatedDishId(createdDish.value || draft.value?.created_dish)
+)
 const sourceToggleLabel = computed(() =>
-  sourceExpanded.value ? "Скрыть исходный текст" : "Показать исходный текст",
+  sourceExpanded.value ? "Скрыть исходный текст" : "Показать исходный текст"
 )
 const submitLabel = computed(() => {
   if (step.value === "input" && subscription.isAIRecipeLimitExceeded) return "Лимит исчерпан"
@@ -458,24 +566,30 @@ const submitLabel = computed(() => {
   return "Подготовить блюдо"
 })
 
-watch(() => props.modelValue, (value) => {
-  open.value = value
-  if (value) {
-    resetState({ keepDraft: Boolean(props.draftToOpen) })
-    loadReferences()
-    if (props.draftToOpen) {
-      applyDraft(props.draftToOpen)
-      return
+watch(
+  () => props.modelValue,
+  (value) => {
+    open.value = value
+    if (value) {
+      resetState({ keepDraft: Boolean(props.draftToOpen) })
+      loadReferences()
+      if (props.draftToOpen) {
+        applyDraft(props.draftToOpen)
+        return
+      }
+      nextTick(() => sourceTextRef.value?.focus())
+    } else {
+      stopPolling()
     }
-    nextTick(() => sourceTextRef.value?.focus())
-  } else {
-    stopPolling()
   }
-})
+)
 
-watch(() => props.draftToOpen, (value) => {
-  if (open.value && value) applyDraft(value)
-})
+watch(
+  () => props.draftToOpen,
+  (value) => {
+    if (open.value && value) applyDraft(value)
+  }
+)
 
 watch(open, (value) => {
   emit("update:modelValue", value)
@@ -491,7 +605,7 @@ watch(
       }
     })
   },
-  { deep: true },
+  { deep: true }
 )
 
 async function loadReferences() {
@@ -609,11 +723,11 @@ async function loadSuggestions(ingredients) {
   const toLoad = ingredients.filter((ing) => ing.new && ing.suggested_ids?.length)
   await Promise.allSettled(
     toLoad.map(async (ing) => {
-      const results = await Promise.allSettled(ing.suggested_ids.map((id) => fetchIngredientById(id)))
-      map[ing.localId] = results
-        .filter((r) => r.status === "fulfilled")
-        .map((r) => r.value)
-    }),
+      const results = await Promise.allSettled(
+        ing.suggested_ids.map((id) => fetchIngredientById(id))
+      )
+      map[ing.localId] = results.filter((r) => r.status === "fulfilled").map((r) => r.value)
+    })
   )
   suggestionsMap.value = map
 }
@@ -740,8 +854,8 @@ function addExistingIngredient(ingredient) {
 function setExistingIngredient(index, ingredient) {
   const current = payload.value.ingredients[index]
   if (!current) return
-  const alreadyUsed = payload.value.ingredients.some((item, itemIndex) =>
-    itemIndex !== index && item.ingredient === ingredient.id,
+  const alreadyUsed = payload.value.ingredients.some(
+    (item, itemIndex) => itemIndex !== index && item.ingredient === ingredient.id
   )
   if (alreadyUsed) {
     error.value = "Ингредиент уже добавлен."
@@ -804,7 +918,8 @@ function formatErrorItem(item) {
 function validateSourceText() {
   const text = sourceText.value.trim()
   if (text.length < MIN_SOURCE_LENGTH) return "Вставьте рецепт длиной не менее 10 символов."
-  if (text.length > MAX_SOURCE_LENGTH) return `Текст не должен быть длиннее ${MAX_SOURCE_LENGTH} символов.`
+  if (text.length > MAX_SOURCE_LENGTH)
+    return `Текст не должен быть длиннее ${MAX_SOURCE_LENGTH} символов.`
   return null
 }
 
@@ -822,7 +937,8 @@ function validatePayload() {
     if (!ingredient.category) return "Выберите категорию для каждого ингредиента."
     if (!ingredient.base_unit) return "Выберите единицу измерения для каждого ингредиента."
     const amount = Number(String(ingredient.amount).replace(",", "."))
-    if (!Number.isFinite(amount) || amount <= 0) return "Количество ингредиентов должно быть больше 0."
+    if (!Number.isFinite(amount) || amount <= 0)
+      return "Количество ингредиентов должно быть больше 0."
   }
   return null
 }
@@ -948,9 +1064,10 @@ async function openCreatedDish() {
   openingCreatedDish.value = true
   error.value = ""
   try {
-    const dish = typeof createdDish.value === "object" && createdDish.value?.id === id
-      ? createdDish.value
-      : await fetchDish(id)
+    const dish =
+      typeof createdDish.value === "object" && createdDish.value?.id === id
+        ? createdDish.value
+        : await fetchDish(id)
     emit("open-dish", dish)
     open.value = false
   } catch (err) {
@@ -968,7 +1085,7 @@ onUnmounted(() => {
 </script>
 
 <style>
-@import '../../styles/detail-sheet.css';
+@import "../../styles/detail-sheet.css";
 </style>
 
 <style scoped>
@@ -1187,7 +1304,10 @@ onUnmounted(() => {
   justify-content: center;
   opacity: 0.4;
   padding: 0;
-  transition: opacity var(--transition-fast), color var(--transition-fast), background var(--transition-fast);
+  transition:
+    opacity var(--transition-fast),
+    color var(--transition-fast),
+    background var(--transition-fast);
 }
 
 .ingredient-row__edit:hover,
@@ -1258,7 +1378,9 @@ onUnmounted(() => {
   font-size: var(--font-xs);
   font-weight: 600;
   cursor: pointer;
-  transition: background var(--transition-fast), border-color var(--transition-fast);
+  transition:
+    background var(--transition-fast),
+    border-color var(--transition-fast);
 }
 
 .ingredient-amount__link-btn:hover {
@@ -1400,7 +1522,9 @@ onUnmounted(() => {
   color: var(--color-mint-hover);
   font-size: var(--font-sm);
   font-weight: 500;
-  transition: background var(--transition-fast), border-color var(--transition-fast);
+  transition:
+    background var(--transition-fast),
+    border-color var(--transition-fast);
 }
 
 .dish-search__create:hover {
@@ -1418,7 +1542,10 @@ onUnmounted(() => {
   font-size: var(--font-sm);
   font-weight: 500;
   cursor: pointer;
-  transition: background var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast);
+  transition:
+    background var(--transition-fast),
+    border-color var(--transition-fast),
+    color var(--transition-fast);
 }
 
 .ingredient-add__toggle:hover {

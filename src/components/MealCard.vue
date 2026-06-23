@@ -1,7 +1,11 @@
 <template>
   <button
     class="meal-card"
-    :class="{ 'meal-card--shared': !isOwn && !isManual, 'meal-card--manual': isManual, 'meal-card--saving': isPending }"
+    :class="{
+      'meal-card--shared': !isOwn && !isManual,
+      'meal-card--manual': isManual,
+      'meal-card--saving': isPending,
+    }"
     :style="cardStyle"
     type="button"
     :data-id="item.id"
@@ -41,8 +45,8 @@ function hexToRgba(hex, alpha) {
 const cardStyle = computed(() => {
   if (!props.item.color) return {}
   return {
-    '--card-accent': props.item.color,
-    '--card-bg': hexToRgba(props.item.color, 0.2),
+    "--card-accent": props.item.color,
+    "--card-bg": hexToRgba(props.item.color, 0.2),
   }
 })
 </script>
@@ -62,7 +66,9 @@ const cardStyle = computed(() => {
   font-size: var(--font-sm);
   text-align: left;
   cursor: pointer;
-  transition: box-shadow var(--transition-fast), transform var(--transition-fast);
+  transition:
+    box-shadow var(--transition-fast),
+    transform var(--transition-fast);
   -webkit-user-select: none;
   user-select: none;
   -webkit-touch-callout: none;

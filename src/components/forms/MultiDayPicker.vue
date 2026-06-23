@@ -84,7 +84,12 @@ function toggle(iso) {
   border-radius: var(--radius-sm);
   background: var(--color-surface);
   cursor: pointer;
-  transition: background var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast), transform var(--transition-fast), box-shadow var(--transition-fast);
+  transition:
+    background var(--transition-fast),
+    border-color var(--transition-fast),
+    color var(--transition-fast),
+    transform var(--transition-fast),
+    box-shadow var(--transition-fast);
 }
 
 .multi-day-picker__chip:hover:not(:disabled) {
@@ -107,7 +112,6 @@ function toggle(iso) {
   transform: scale(1.05);
   box-shadow: 0 2px 8px var(--color-mint-alpha-25);
 }
-
 
 .multi-day-picker__weekday {
   font-size: var(--font-xs);

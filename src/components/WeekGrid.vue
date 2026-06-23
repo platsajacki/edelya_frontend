@@ -21,10 +21,18 @@
       <svg
         class="week-grid__past-chevron"
         :class="{ 'week-grid__past-chevron--open': showPast }"
-        width="16" height="16" viewBox="0 0 20 20" fill="none"
+        width="16"
+        height="16"
+        viewBox="0 0 20 20"
+        fill="none"
       >
-        <path d="M7.5 5L12.5 10L7.5 15"
-          stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+        <path
+          d="M7.5 5L12.5 10L7.5 15"
+          stroke="currentColor"
+          stroke-width="1.8"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
       </svg>
       <span class="week-grid__past-label">Прошедшие дни · {{ pastLabel }}</span>
     </button>
@@ -83,7 +91,9 @@
         :disabled="planning.loadingNextWeek"
         @click="loadNext"
       >
-        <span v-if="planning.loadingNextWeek" class="week-grid__next-spinner"><span class="spinner spinner--sm" /></span>
+        <span v-if="planning.loadingNextWeek" class="week-grid__next-spinner"
+          ><span class="spinner spinner--sm"
+        /></span>
         <span v-else class="week-grid__next-text">Показать следующую неделю</span>
       </button>
     </template>
@@ -124,7 +134,6 @@ import DayRow from "./DayRow.vue"
 import IconPot from "./icons/IconPot.vue"
 import IconFork from "./icons/IconFork.vue"
 
-
 const planning = usePlanningStore()
 
 const props = defineProps({
@@ -132,19 +141,28 @@ const props = defineProps({
     type: Object,
     required: true,
   },
-
 })
 
-const emit = defineEmits(['add-cooking', 'add-meal', 'tap-cooking', 'tap-meal', 'drag-end', 'create-shopping-day'])
+const emit = defineEmits([
+  "add-cooking",
+  "add-meal",
+  "tap-cooking",
+  "tap-meal",
+  "drag-end",
+  "create-shopping-day",
+])
 
 const showPast = ref(false)
 const showNextWeek = ref(false)
 
 // Reset collapse state when week changes
-watch(() => props.weekData.start_week, () => {
-  showPast.value = false
-  showNextWeek.value = false
-})
+watch(
+  () => props.weekData.start_week,
+  () => {
+    showPast.value = false
+    showNextWeek.value = false
+  }
+)
 
 const days = computed(() => {
   const start = new Date(props.weekData.start_week + "T00:00:00")
@@ -153,14 +171,13 @@ const days = computed(() => {
   for (let i = 0; i < 7; i++) {
     const d = new Date(start)
     d.setDate(start.getDate() + i)
-    const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+    const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`
 
     const meals = props.weekData.meal_plan_items
       .filter((m) => m.date === dateStr)
       .sort((a, b) => a.position - b.position)
 
-    const cookingEvents = props.weekData.cooking_events
-      .filter((e) => e.cooking_date === dateStr)
+    const cookingEvents = props.weekData.cooking_events.filter((e) => e.cooking_date === dateStr)
 
     result.push({
       rawDate: dateStr,
@@ -180,22 +197,21 @@ const visibleDays = computed(() => split.value.visibleDays)
 const pastLabel = computed(() => pastDaysLabel(pastDays.value))
 
 const nextInfo = computed(() => getNextWeekInfo(props.weekData.start_week))
-const nextWeekLabel = 'Следующая неделя'
+const nextWeekLabel = "Следующая неделя"
 
 const nextWeekDays = computed(() => {
   const data = planning.nextWeekData
   if (!data) return []
-  const start = new Date(data.start_week + 'T00:00:00')
+  const start = new Date(data.start_week + "T00:00:00")
   const result = []
   for (let i = 0; i < 7; i++) {
     const d = new Date(start)
     d.setDate(start.getDate() + i)
-    const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+    const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`
     const meals = data.meal_plan_items
       .filter((m) => m.date === dateStr)
       .sort((a, b) => a.position - b.position)
-    const cookingEvents = data.cooking_events
-      .filter((e) => e.cooking_date === dateStr)
+    const cookingEvents = data.cooking_events.filter((e) => e.cooking_date === dateStr)
     result.push({
       rawDate: dateStr,
       date: formatYMDtoDDMMYYYY(dateStr),
@@ -259,7 +275,9 @@ async function loadNext() {
   border-radius: var(--radius-sm);
   background: var(--color-empty);
   cursor: pointer;
-  transition: background var(--transition-fast), border-color var(--transition-fast);
+  transition:
+    background var(--transition-fast),
+    border-color var(--transition-fast);
   -webkit-tap-highlight-color: transparent;
 }
 
@@ -315,12 +333,16 @@ async function loadNext() {
 
 /* ── Expand/collapse transition ── */
 .past-expand-enter-active {
-  transition: opacity var(--transition-normal), max-height 0.35s ease;
+  transition:
+    opacity var(--transition-normal),
+    max-height 0.35s ease;
   overflow: hidden;
 }
 
 .past-expand-leave-active {
-  transition: opacity var(--transition-fast), max-height 0.25s ease;
+  transition:
+    opacity var(--transition-fast),
+    max-height 0.25s ease;
   overflow: hidden;
 }
 
@@ -357,7 +379,9 @@ async function loadNext() {
   border-radius: var(--radius-md);
   background: transparent;
   cursor: pointer;
-  transition: background var(--transition-fast), border-color var(--transition-fast);
+  transition:
+    background var(--transition-fast),
+    border-color var(--transition-fast);
 }
 
 .week-grid__next-toggle:active {

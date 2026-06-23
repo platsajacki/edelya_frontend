@@ -147,7 +147,10 @@ export const useRecipesStore = defineStore("recipes", {
       this.loadMoreError = null
       this.page++
       try {
-        const params = { ...(this.isAIDraftsTab ? this.aiQueryParams : this.queryParams), page: this.page }
+        const params = {
+          ...(this.isAIDraftsTab ? this.aiQueryParams : this.queryParams),
+          page: this.page,
+        }
         const data = this.isAIDraftsTab ? await fetchAIDrafts(params) : await fetchDishes(params)
         if (this.isAIDraftsTab) {
           this.aiDrafts.push(...(data.results ?? []))
@@ -235,11 +238,13 @@ export const useRecipesStore = defineStore("recipes", {
     },
 
     async refreshProcessingAIDrafts() {
-      const processingDrafts = this.aiDrafts.filter((draft) =>
-        draft.status === "processing" && isFreshAIDraft(draft),
+      const processingDrafts = this.aiDrafts.filter(
+        (draft) => draft.status === "processing" && isFreshAIDraft(draft)
       )
       if (!processingDrafts.length) return
-      const drafts = await Promise.allSettled(processingDrafts.map((draft) => fetchAIDraft(draft.id)))
+      const drafts = await Promise.allSettled(
+        processingDrafts.map((draft) => fetchAIDraft(draft.id))
+      )
       drafts.forEach((result) => {
         if (result.status === "fulfilled") this.upsertAIDraft(result.value)
       })

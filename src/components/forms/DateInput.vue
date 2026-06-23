@@ -91,7 +91,9 @@ function onPickerInput(e) {
   background: var(--color-surface);
   color: var(--color-text);
   outline: none;
-  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+  transition:
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast);
   box-sizing: border-box;
 }
 

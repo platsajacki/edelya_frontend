@@ -4,8 +4,7 @@
   </button>
 </template>
 
-<script setup>
-</script>
+<script setup></script>
 
 <style scoped>
 .fab {
@@ -23,7 +22,9 @@
   align-items: center;
   justify-content: center;
   z-index: var(--z-fab);
-  transition: background var(--transition-fast), transform var(--transition-fast);
+  transition:
+    background var(--transition-fast),
+    transform var(--transition-fast);
   -webkit-tap-highlight-color: transparent;
 }
 

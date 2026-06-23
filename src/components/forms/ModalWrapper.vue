@@ -5,7 +5,7 @@
         <div class="modal-panel" @mousedown.stop @focusin="onFocusIn">
           <div class="modal-header">
             <h3 class="modal-title">{{ title }}</h3>
-            <button class="modal-close" @click="close" aria-label="Закрыть">&times;</button>
+            <button class="modal-close" aria-label="Закрыть" @click="close">&times;</button>
           </div>
           <div class="modal-body">
             <slot />
@@ -36,12 +36,12 @@ function close() {
 
 function onFocusIn(e) {
   const el = e.target
-  if (el.tagName !== 'INPUT' && el.tagName !== 'TEXTAREA' && el.tagName !== 'SELECT') return
+  if (el.tagName !== "INPUT" && el.tagName !== "TEXTAREA" && el.tagName !== "SELECT") return
 
   requestAnimationFrame(() => {
     window.scrollTo(0, 0)
 
-    const scrollParent = el.closest('.modal-body')
+    const scrollParent = el.closest(".modal-body")
     if (!scrollParent) return
     const elRect = el.getBoundingClientRect()
     const parentRect = scrollParent.getBoundingClientRect()
@@ -66,7 +66,7 @@ watch(
     } else {
       document.body.style.overflow = savedOverflow
     }
-  },
+  }
 )
 
 onUnmounted(() => {

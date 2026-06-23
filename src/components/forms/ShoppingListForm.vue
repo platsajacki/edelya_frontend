@@ -1,9 +1,20 @@
 <template>
-  <ModalWrapper v-model="open" :title="isEdit ? 'Редактировать список' : 'Новый список покупок'" :z-index="zIndex">
+  <ModalWrapper
+    v-model="open"
+    :title="isEdit ? 'Редактировать список' : 'Новый список покупок'"
+    :z-index="zIndex"
+  >
     <form id="shopping-list-form" class="form" @submit.prevent="submit">
       <label class="form__field">
         <span class="form__label">Название <span class="form__required">*</span></span>
-        <input v-model="name" type="text" class="form__input" required placeholder="Например: Продукты на неделю" @input="onNameInput" />
+        <input
+          v-model="name"
+          type="text"
+          class="form__input"
+          required
+          placeholder="Например: Продукты на неделю"
+          @input="onNameInput"
+        />
       </label>
 
       <label class="form__field">
@@ -22,12 +33,11 @@
       </div>
 
       <div v-if="error" ref="errorRef" class="form__error">{{ error }}</div>
-
     </form>
 
     <template #footer>
       <button type="submit" form="shopping-list-form" class="form__submit" :disabled="saving">
-        {{ saving ? "Сохранение..." : (isEdit ? "Сохранить" : "Создать") }}
+        {{ saving ? "Сохранение..." : isEdit ? "Сохранить" : "Создать" }}
       </button>
     </template>
   </ModalWrapper>
@@ -56,8 +66,15 @@ const datesChanged = computed(() => {
 })
 
 const open = ref(props.modelValue)
-watch(() => props.modelValue, (v) => { open.value = v })
-watch(open, (v) => { emit("update:modelValue", v) })
+watch(
+  () => props.modelValue,
+  (v) => {
+    open.value = v
+  }
+)
+watch(open, (v) => {
+  emit("update:modelValue", v)
+})
 
 const name = ref("")
 const dateFrom = ref("")
@@ -66,7 +83,7 @@ const saving = ref(false)
 const error = ref("")
 const errorRef = ref(null)
 watch(error, (val) => {
-  if (val) nextTick(() => errorRef.value?.scrollIntoView({ behavior: 'smooth', block: 'nearest' }))
+  if (val) nextTick(() => errorRef.value?.scrollIntoView({ behavior: "smooth", block: "nearest" }))
 })
 const nameManuallyEdited = ref(false)
 
@@ -90,21 +107,24 @@ function generateName(from, to) {
   return ""
 }
 
-watch(() => props.modelValue, (v) => {
-  if (v) {
-    error.value = ""
-    nameManuallyEdited.value = false
-    if (props.editList) {
-      name.value = props.editList.name || ""
-      dateFrom.value = props.editList.date_from || ""
-      dateTo.value = props.editList.date_to || ""
-    } else {
-      dateFrom.value = todayISO()
-      dateTo.value = ""
-      name.value = generateName(dateFrom.value, dateTo.value)
+watch(
+  () => props.modelValue,
+  (v) => {
+    if (v) {
+      error.value = ""
+      nameManuallyEdited.value = false
+      if (props.editList) {
+        name.value = props.editList.name || ""
+        dateFrom.value = props.editList.date_from || ""
+        dateTo.value = props.editList.date_to || ""
+      } else {
+        dateFrom.value = todayISO()
+        dateTo.value = ""
+        name.value = generateName(dateFrom.value, dateTo.value)
+      }
     }
   }
-})
+)
 
 watch([dateFrom, dateTo], ([from, to]) => {
   if (!isEdit.value && !nameManuallyEdited.value) {

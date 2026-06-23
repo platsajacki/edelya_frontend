@@ -1,22 +1,23 @@
 <template>
-  <ModalWrapper
-    :model-value="modelValue"
-    :title="scenario.title"
-    @update:model-value="onClose"
-  >
+  <ModalWrapper :model-value="modelValue" :title="scenario.title" @update:model-value="onClose">
     <div class="tariff-confirm">
       <p class="tariff-confirm__description">{{ scenario.description }}</p>
 
-      <div v-if="scenario.type === 'upgrade' && scenario.proration > 0" class="tariff-confirm__proration">
+      <div
+        v-if="scenario.type === 'upgrade' && scenario.proration > 0"
+        class="tariff-confirm__proration"
+      >
         <IconWarning class="tariff-confirm__proration-icon" />
-        <span>Будет списано <strong>{{ scenario.proration }} ₽</strong></span>
+        <span
+          >Будет списано <strong>{{ scenario.proration }} ₽</strong></span
+        >
       </div>
     </div>
 
     <template #footer>
       <p class="tariff-confirm__recurring-notice">
-        Подписка продлевается автоматически каждый месяц.
-        Автопродление можно отключить в любой момент.
+        Подписка продлевается автоматически каждый месяц. Автопродление можно отключить в любой
+        момент.
       </p>
       <div class="tariff-confirm__actions">
         <button
@@ -47,8 +48,8 @@ import IconWarning from "./icons/IconWarning.vue"
 
 const props = defineProps({
   modelValue: { type: Boolean, required: true },
-  scenario:   { type: Object,  required: true },
-  loading:    { type: Boolean, default: false },
+  scenario: { type: Object, required: true },
+  loading: { type: Boolean, default: false },
 })
 
 const emit = defineEmits(["update:modelValue", "confirm"])

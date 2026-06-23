@@ -22,7 +22,9 @@
             <span class="detail__ingredient-right">
               <span v-if="di.is_optional" class="detail__ingredient-optional">опц.</span>
               <span class="detail__ingredient-amount">
-                {{ formatShoppingAmount(di.amount, di.ingredient?.base_unit ?? di.base_unit).display }}
+                {{
+                  formatShoppingAmount(di.amount, di.ingredient?.base_unit ?? di.base_unit).display
+                }}
               </span>
             </span>
           </li>
@@ -36,14 +38,12 @@
     <template #footer>
       <div class="detail__actions">
         <button class="detail__btn detail__btn--edit" @click="handleDishEdit">
-          {{ isOwn ? 'Редактировать рецепт' : 'Создать личную копию' }}
+          {{ isOwn ? "Редактировать рецепт" : "Создать личную копию" }}
         </button>
         <button v-if="isOwn" class="detail__btn detail__btn--delete" @click="confirming = true">
           Удалить
         </button>
-        <button class="detail__btn detail__btn--cancel" @click="open = false">
-          Закрыть
-        </button>
+        <button class="detail__btn detail__btn--cancel" @click="open = false">Закрыть</button>
       </div>
     </template>
   </ModalWrapper>
@@ -52,30 +52,16 @@
   <ModalWrapper v-model="confirming" title="Подтверждение" :z-index="1050">
     <p class="detail__confirm-text">Удалить блюдо «{{ dish.name }}»?</p>
     <div class="detail__confirm-actions">
-      <button class="detail__btn detail__btn--delete" @click="confirmDelete">
-        Удалить
-      </button>
-      <button class="detail__btn detail__btn--cancel" @click="confirming = false">
-        Отмена
-      </button>
+      <button class="detail__btn detail__btn--delete" @click="confirmDelete">Удалить</button>
+      <button class="detail__btn detail__btn--cancel" @click="confirming = false">Отмена</button>
     </div>
   </ModalWrapper>
 
   <!-- Edit DishForm (own dishes) -->
-  <DishForm
-    v-model="showDishForm"
-    :z-index="1020"
-    :edit-dish="dish"
-    @updated="onDishUpdated"
-  />
+  <DishForm v-model="showDishForm" :z-index="1020" :edit-dish="dish" @updated="onDishUpdated" />
 
   <!-- Clone DishForm -->
-  <DishForm
-    v-model="showCloneForm"
-    :z-index="1020"
-    :clone-dish="dish"
-    @created="onCloneCreated"
-  />
+  <DishForm v-model="showCloneForm" :z-index="1020" :clone-dish="dish" @created="onCloneCreated" />
 </template>
 
 <script setup>
@@ -95,8 +81,15 @@ const props = defineProps({
 const emit = defineEmits(["update:modelValue", "deleted", "updated"])
 
 const open = ref(props.modelValue)
-watch(() => props.modelValue, (v) => { open.value = v })
-watch(open, (v) => { emit("update:modelValue", v) })
+watch(
+  () => props.modelValue,
+  (v) => {
+    open.value = v
+  }
+)
+watch(open, (v) => {
+  emit("update:modelValue", v)
+})
 
 const confirming = ref(false)
 const showDishForm = ref(false)
@@ -109,23 +102,26 @@ const isOwn = computed(() => isDishOwn(dish.value))
 const dish = computed(() => fullDish.value || props.dish)
 
 // When opening, fetch full dish data if ingredients are missing
-watch(() => props.modelValue, async (v) => {
-  if (v) {
-    confirming.value = false
-    fullDish.value = null
+watch(
+  () => props.modelValue,
+  async (v) => {
+    if (v) {
+      confirming.value = false
+      fullDish.value = null
 
-    if (!props.dish.dish_ingredients?.length && props.dish.id) {
-      loadingFull.value = true
-      try {
-        fullDish.value = await fetchDish(props.dish.id)
-      } catch {
-        // Use partial data
-      } finally {
-        loadingFull.value = false
+      if (!props.dish.dish_ingredients?.length && props.dish.id) {
+        loadingFull.value = true
+        try {
+          fullDish.value = await fetchDish(props.dish.id)
+        } catch {
+          // Use partial data
+        } finally {
+          loadingFull.value = false
+        }
       }
     }
   }
-})
+)
 
 function handleDishEdit() {
   if (isOwn.value) {
@@ -155,7 +151,7 @@ function onCloneCreated() {
 </script>
 
 <style>
-@import '../styles/detail-sheet.css';
+@import "../styles/detail-sheet.css";
 </style>
 
 <style scoped>

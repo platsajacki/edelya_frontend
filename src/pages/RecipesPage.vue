@@ -7,8 +7,8 @@
         <button
           v-if="!store.isAIDraftsTab"
           class="recipes-header__action-btn"
-          @click="showSortMenu = !showSortMenu"
           aria-label="Сортировка"
+          @click="showSortMenu = !showSortMenu"
         >
           <IconSort />
         </button>
@@ -16,8 +16,8 @@
           v-if="!store.isAIDraftsTab"
           class="recipes-header__action-btn"
           :class="{ 'recipes-header__action-btn--active': store.hasActiveFilters }"
-          @click="showFilters = true"
           aria-label="Фильтры"
+          @click="showFilters = true"
         >
           <IconFilter />
           <span v-if="store.hasActiveFilters" class="recipes-header__filter-dot" />
@@ -56,8 +56,8 @@
       <button
         v-if="searchQuery"
         class="search-field__clear"
-        @click="clearSearch"
         aria-label="Очистить"
+        @click="clearSearch"
       >
         &times;
       </button>
@@ -111,17 +111,21 @@
       <p class="empty-state__text">
         {{ emptyText }}
       </p>
-      <button
-        v-if="store.isAIDraftsTab"
-        class="empty-state__action"
-        @click="openAICreate()"
-      >
+      <button v-if="store.isAIDraftsTab" class="empty-state__action" @click="openAICreate()">
         Создать с ИИ
       </button>
-      <button v-if="store.filters.ownership === 'own'" class="empty-state__action" @click="showCreateForm = true">
+      <button
+        v-if="store.filters.ownership === 'own'"
+        class="empty-state__action"
+        @click="showCreateForm = true"
+      >
         Добавить первое блюдо
       </button>
-      <button v-if="store.hasActiveFilters || store.hasNonDefaultSort" class="empty-state__secondary" @click="resetAll">
+      <button
+        v-if="store.hasActiveFilters || store.hasNonDefaultSort"
+        class="empty-state__secondary"
+        @click="resetAll"
+      >
         Сбросить фильтры
       </button>
     </div>
@@ -165,12 +169,7 @@
         <div class="spinner spinner--sm" />
       </div>
 
-      <RecipeDishCard
-        v-for="dish in store.dishes"
-        :key="dish.id"
-        :dish="dish"
-        @tap="openDetail"
-      />
+      <RecipeDishCard v-for="dish in store.dishes" :key="dish.id" :dish="dish" @tap="openDetail" />
 
       <!-- Load more error -->
       <div v-if="store.loadMoreError" class="recipes-load-more-error">
@@ -185,7 +184,7 @@
     </div>
 
     <!-- FAB: create new dish -->
-    <FabButton @click="onFabClick" :aria-label="fabLabel">
+    <FabButton :aria-label="fabLabel" @click="onFabClick">
       <IconPlus />
     </FabButton>
 
@@ -206,10 +205,7 @@
     />
 
     <!-- Create dish form -->
-    <DishForm
-      v-model="showCreateForm"
-      @created="onDishCreated"
-    />
+    <DishForm v-model="showCreateForm" @created="onDishCreated" />
 
     <AIDishDraftForm
       v-model="showAIForm"
@@ -256,11 +252,11 @@ const tabs = computed(() => [
 ])
 
 const searchPlaceholder = computed(() =>
-  store.isAIDraftsTab ? "Поиск AI-рецептов..." : "Поиск блюд...",
+  store.isAIDraftsTab ? "Поиск AI-рецептов..." : "Поиск блюд..."
 )
 
 const activeItemsCount = computed(() =>
-  store.isAIDraftsTab ? store.aiDrafts.length : store.dishes.length,
+  store.isAIDraftsTab ? store.aiDrafts.length : store.dishes.length
 )
 
 const emptyText = computed(() => {
@@ -268,7 +264,7 @@ const emptyText = computed(() => {
   return store.filters.ownership === "own" ? "У вас пока нет личных блюд" : "Общих блюд пока нет"
 })
 
-const fabLabel = computed(() => store.isAIDraftsTab ? "Создать с ИИ" : "Создать блюдо")
+const fabLabel = computed(() => (store.isAIDraftsTab ? "Создать с ИИ" : "Создать блюдо"))
 
 function switchTab(value) {
   showSortMenu.value = false
@@ -402,12 +398,14 @@ function draftTitle(draft) {
 }
 
 function draftStatusLabel(status) {
-  return {
-    processing: "Разбор",
-    parsed: "Распознан",
-    failed: "Ошибка",
-    dish_created: "Создано",
-  }[status] || status
+  return (
+    {
+      processing: "Разбор",
+      parsed: "Распознан",
+      failed: "Ошибка",
+      dish_created: "Создано",
+    }[status] || status
+  )
 }
 
 function formatDraftDate(value) {
@@ -422,11 +420,16 @@ let observer = null
 onMounted(() => {
   observer = new IntersectionObserver(
     (entries) => {
-      if (entries[0]?.isIntersecting && store.hasMore && !store.initialLoading && !store.loadingMore) {
+      if (
+        entries[0]?.isIntersecting &&
+        store.hasMore &&
+        !store.initialLoading &&
+        !store.loadingMore
+      ) {
         store.loadMore()
       }
     },
-    { rootMargin: "200px" },
+    { rootMargin: "200px" }
   )
 
   // Load data only on first mount (KeepAlive preserves state on revisit)
@@ -451,19 +454,23 @@ watch(
       store.refreshProcessingAIDrafts()
     }, 7000)
   },
-  { immediate: true },
+  { immediate: true }
 )
 
 watch(
   () => subscription.canCreateAIRecipes,
   (canCreateAIRecipes) => {
     if (!canCreateAIRecipes && store.isAIDraftsTab) store.setFilter("ownership", "own")
-  },
+  }
 )
 
-watch(sentinelRef, (el) => {
-  if (el && observer) observer.observe(el)
-}, { flush: "post" })
+watch(
+  sentinelRef,
+  (el) => {
+    if (el && observer) observer.observe(el)
+  },
+  { flush: "post" }
+)
 
 onUnmounted(() => {
   observer?.disconnect()
@@ -706,7 +713,9 @@ onUnmounted(() => {
   color: var(--color-text);
   text-align: left;
   box-shadow: var(--shadow-card);
-  transition: background var(--transition-fast), transform var(--transition-fast);
+  transition:
+    background var(--transition-fast),
+    transform var(--transition-fast);
 }
 
 .ai-draft-card:active {
@@ -769,7 +778,9 @@ onUnmounted(() => {
 /* Dropdown transition */
 .dropdown-enter-active,
 .dropdown-leave-active {
-  transition: opacity var(--transition-fast), transform var(--transition-fast);
+  transition:
+    opacity var(--transition-fast),
+    transform var(--transition-fast);
   transform-origin: top right;
 }
 

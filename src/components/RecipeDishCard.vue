@@ -4,9 +4,7 @@
       <span class="dish-card__name">{{ dish.name }}</span>
       <span class="dish-card__meta">
         <span v-if="dish.category?.name" class="dish-card__category">{{ dish.category.name }}</span>
-        <span class="dish-card__ingredients">
-          {{ ingredientCount }} {{ ingredientWord }}
-        </span>
+        <span class="dish-card__ingredients"> {{ ingredientCount }} {{ ingredientWord }} </span>
       </span>
     </div>
   </button>
@@ -47,7 +45,11 @@ const ingredientWord = computed(() => {
   border-radius: var(--radius-sm);
   text-align: left;
   cursor: pointer;
-  transition: background var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast), transform var(--transition-fast);
+  transition:
+    background var(--transition-fast),
+    box-shadow var(--transition-fast),
+    border-color var(--transition-fast),
+    transform var(--transition-fast);
   -webkit-tap-highlight-color: transparent;
 }
 

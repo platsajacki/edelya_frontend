@@ -3,9 +3,8 @@ name: CI/CD Pipeline
 on:
   push:
     tags:
-      - 'dev*'
-      - 'v*'
-
+      - "dev*"
+      - "v*"
 
 jobs:
   # check:

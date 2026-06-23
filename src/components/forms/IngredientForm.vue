@@ -27,7 +27,6 @@
       </label>
 
       <div v-if="error" ref="errorRef" class="form__error">{{ error }}</div>
-
     </form>
 
     <template #footer>
@@ -71,8 +70,15 @@ const props = defineProps({
 const emit = defineEmits(["update:modelValue", "created"])
 
 const open = ref(props.modelValue)
-watch(() => props.modelValue, (v) => { open.value = v })
-watch(open, (v) => { emit("update:modelValue", v) })
+watch(
+  () => props.modelValue,
+  (v) => {
+    open.value = v
+  }
+)
+watch(open, (v) => {
+  emit("update:modelValue", v)
+})
 
 const name = ref("")
 const categoryId = ref("")
@@ -82,23 +88,26 @@ const saving = ref(false)
 const error = ref("")
 const errorRef = ref(null)
 watch(error, (val) => {
-  if (val) nextTick(() => errorRef.value?.scrollIntoView({ behavior: 'smooth', block: 'nearest' }))
+  if (val) nextTick(() => errorRef.value?.scrollIntoView({ behavior: "smooth", block: "nearest" }))
 })
 
-watch(() => props.modelValue, async (v) => {
-  if (v) {
-    error.value = ""
-    name.value = props.initialName || ""
-    categoryId.value = ""
-    baseUnit.value = ""
-    try {
-      const data = await fetchIngredientCategories()
-      categories.value = data.results ?? []
-    } catch {
-      categories.value = []
+watch(
+  () => props.modelValue,
+  async (v) => {
+    if (v) {
+      error.value = ""
+      name.value = props.initialName || ""
+      categoryId.value = ""
+      baseUnit.value = ""
+      try {
+        const data = await fetchIngredientCategories()
+        categories.value = data.results ?? []
+      } catch {
+        categories.value = []
+      }
     }
   }
-})
+)
 
 function validate() {
   if (!name.value.trim()) return "Укажите название ингредиента."
@@ -126,5 +135,3 @@ async function submit() {
   }
 }
 </script>
-
-

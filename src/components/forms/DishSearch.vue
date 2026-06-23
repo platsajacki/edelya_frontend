@@ -9,7 +9,15 @@
         placeholder="Поиск рецепта..."
         @input="onInput"
       />
-      <button v-if="query" type="button" class="search-field__clear" aria-label="Очистить" @click="clearQuery">&times;</button>
+      <button
+        v-if="query"
+        type="button"
+        class="search-field__clear"
+        aria-label="Очистить"
+        @click="clearQuery"
+      >
+        &times;
+      </button>
     </div>
 
     <div v-if="loading" class="dish-search__status"><div class="spinner spinner--sm" /></div>
@@ -25,7 +33,7 @@
           <span class="dish-search__name">{{ dish.name }}</span>
           <span class="dish-search__category">{{ dish.category?.name }}</span>
         </div>
-          <OwnershipBadge :is-own="isDishOwn(dish)" short />
+        <OwnershipBadge :is-own="isDishOwn(dish)" short />
       </li>
     </ul>
 
@@ -122,7 +130,9 @@ function clearQuery() {
   background: var(--color-surface);
   color: var(--color-text);
   outline: none;
-  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+  transition:
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast);
 }
 
 .dish-search__input:focus {
@@ -195,7 +205,9 @@ function clearQuery() {
   font-weight: 600;
   color: var(--color-mint);
   cursor: pointer;
-  transition: background var(--transition-fast), border-color var(--transition-fast);
+  transition:
+    background var(--transition-fast),
+    border-color var(--transition-fast);
   white-space: nowrap;
 }
 
@@ -215,7 +227,9 @@ function clearQuery() {
   font-weight: 500;
   color: var(--color-text-secondary);
   cursor: pointer;
-  transition: background var(--transition-fast), border-color var(--transition-fast);
+  transition:
+    background var(--transition-fast),
+    border-color var(--transition-fast);
   white-space: nowrap;
 }
 

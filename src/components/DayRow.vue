@@ -1,58 +1,66 @@
 <template>
-    <div class="day-row" :class="{ 'day-row--muted': muted }">
-        <div class="day-row__label">
-          <div class="day-row__label-text">
-            <span class="day-row__day">{{ day }}</span>
-            <span class="day-row__date">{{ date.slice(0, 2) }}</span>
-          </div>
-          <button
-            v-if="cookingEvents.length > 0"
-            type="button"
-            class="day-row__shopping-btn"
-            :title="`Список покупок на ${day} ${date.slice(0, 2)}`"
-            @click.stop="$emit('create-shopping-day', { rawDate, dayLabel: day })"
-          >
-            <IconCartPlus :width="16" :height="16" />
-          </button>
-        </div>
-
-        <div class="day-row__cook">
-          <div ref="cookRef" class="day-row__items" :data-date="rawDate">
-            <MealCard
-              v-for="event in cookingEvents"
-              :key="event.id"
-              :item="event"
-              @tap="$emit('tap-cooking', $event)"
-            />
-          </div>
-          <button type="button" class="day-row__add day-row__add--cook" @click="$emit('add-cooking', rawDate)">
-            <span class="day-row__add-icon">+</span>
-            <span class="day-row__add-text">Добавить</span>
-          </button>
-        </div>
-
-        <div class="day-row__eat">
-          <div ref="eatRef" class="day-row__items" :data-date="rawDate">
-            <MealCard
-              v-for="item in meals"
-              :key="item.id"
-              :item="item"
-              @tap="$emit('tap-meal', $event)"
-            />
-          </div>
-          <button type="button" class="day-row__add day-row__add--eat" @click="$emit('add-meal', rawDate)">
-            <span class="day-row__add-icon">+</span>
-            <span class="day-row__add-text">Добавить</span>
-          </button>
-        </div>
+  <div class="day-row" :class="{ 'day-row--muted': muted }">
+    <div class="day-row__label">
+      <div class="day-row__label-text">
+        <span class="day-row__day">{{ day }}</span>
+        <span class="day-row__date">{{ date.slice(0, 2) }}</span>
+      </div>
+      <button
+        v-if="cookingEvents.length > 0"
+        type="button"
+        class="day-row__shopping-btn"
+        :title="`Список покупок на ${day} ${date.slice(0, 2)}`"
+        @click.stop="$emit('create-shopping-day', { rawDate, dayLabel: day })"
+      >
+        <IconCartPlus :width="16" :height="16" />
+      </button>
     </div>
+
+    <div class="day-row__cook">
+      <div ref="cookRef" class="day-row__items" :data-date="rawDate">
+        <MealCard
+          v-for="event in cookingEvents"
+          :key="event.id"
+          :item="event"
+          @tap="$emit('tap-cooking', $event)"
+        />
+      </div>
+      <button
+        type="button"
+        class="day-row__add day-row__add--cook"
+        @click="$emit('add-cooking', rawDate)"
+      >
+        <span class="day-row__add-icon">+</span>
+        <span class="day-row__add-text">Добавить</span>
+      </button>
+    </div>
+
+    <div class="day-row__eat">
+      <div ref="eatRef" class="day-row__items" :data-date="rawDate">
+        <MealCard
+          v-for="item in meals"
+          :key="item.id"
+          :item="item"
+          @tap="$emit('tap-meal', $event)"
+        />
+      </div>
+      <button
+        type="button"
+        class="day-row__add day-row__add--eat"
+        @click="$emit('add-meal', rawDate)"
+      >
+        <span class="day-row__add-icon">+</span>
+        <span class="day-row__add-text">Добавить</span>
+      </button>
+    </div>
+  </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import MealCard from './MealCard.vue'
-import IconCartPlus from './icons/IconCartPlus.vue'
-import { useSortable } from '../composables/useSortable'
+import { ref } from "vue"
+import MealCard from "./MealCard.vue"
+import IconCartPlus from "./icons/IconCartPlus.vue"
+import { useSortable } from "../composables/useSortable"
 
 const props = defineProps({
   day: { type: String, required: true },
@@ -63,7 +71,14 @@ const props = defineProps({
   muted: { type: Boolean, default: false },
 })
 
-const emit = defineEmits(["tap-cooking", "tap-meal", "add-cooking", "add-meal", "drag-end", "create-shopping-day"])
+const emit = defineEmits([
+  "tap-cooking",
+  "tap-meal",
+  "add-cooking",
+  "add-meal",
+  "drag-end",
+  "create-shopping-day",
+])
 
 const cookRef = ref(null)
 const eatRef = ref(null)
@@ -71,10 +86,10 @@ const eatRef = ref(null)
 function makeSortableOptions(type) {
   return {
     group: type,
-    draggable: '.meal-card',
-    ghostClass: 'meal-card--ghost',
-    chosenClass: 'meal-card--chosen',
-    dragClass: 'meal-card--drag',
+    draggable: ".meal-card",
+    ghostClass: "meal-card--ghost",
+    chosenClass: "meal-card--chosen",
+    dragClass: "meal-card--drag",
     animation: 150,
     delay: 150,
     delayOnTouchOnly: true,
@@ -93,17 +108,26 @@ function makeSortableOptions(type) {
         const { from, item } = evt
         if (item.parentNode) item.parentNode.removeChild(item)
         from.insertBefore(item, from.children[oldIndex] || null)
-      } catch { /* Vue re-render will reconcile */ }
+      } catch {
+        /* Vue re-render will reconcile */
+      }
 
       if (fromDate === toDate && oldDraggableIndex === newDraggableIndex) return
 
-      emit('drag-end', { itemId, fromDate, toDate, oldIndex: oldDraggableIndex, newIndex: newDraggableIndex, type })
+      emit("drag-end", {
+        itemId,
+        fromDate,
+        toDate,
+        oldIndex: oldDraggableIndex,
+        newIndex: newDraggableIndex,
+        type,
+      })
     },
   }
 }
 
-useSortable(cookRef, makeSortableOptions('cooking'))
-useSortable(eatRef, makeSortableOptions('meals'))
+useSortable(cookRef, makeSortableOptions("cooking"))
+useSortable(eatRef, makeSortableOptions("meals"))
 </script>
 
 <style scoped>
@@ -155,7 +179,9 @@ useSortable(eatRef, makeSortableOptions('meals'))
   color: var(--color-text-secondary);
   cursor: pointer;
   flex-shrink: 0;
-  transition: color var(--transition-fast), background var(--transition-fast);
+  transition:
+    color var(--transition-fast),
+    background var(--transition-fast);
   -webkit-tap-highlight-color: transparent;
 }
 
@@ -193,7 +219,7 @@ useSortable(eatRef, makeSortableOptions('meals'))
 }
 
 .day-row__eat::before {
-  content: '';
+  content: "";
   position: absolute;
   left: -6px;
   top: 0;

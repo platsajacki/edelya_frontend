@@ -34,7 +34,7 @@ onMounted(async () => {
     await auth.init()
     if (auth.user) {
       await subscription.loadMySubscription().catch(() => {})
-      if (router.currentRoute.value.path === '/') {
+      if (router.currentRoute.value.path === "/") {
         router.push("/")
       }
     }

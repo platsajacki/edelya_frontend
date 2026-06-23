@@ -2,7 +2,7 @@
   <div class="page-layout detail-page">
     <!-- Header -->
     <div class="detail-header">
-      <button class="detail-header__back" @click="goBack" aria-label="Назад">
+      <button class="detail-header__back" aria-label="Назад" @click="goBack">
         <IconChevronLeft />
       </button>
       <div class="detail-header__info">
@@ -10,13 +10,28 @@
         <span class="detail-header__dates">{{ dateRange }}</span>
       </div>
       <div class="detail-header__actions">
-        <button class="detail-header__btn" @click="showEditForm = true" aria-label="Редактировать" title="Редактировать">
+        <button
+          class="detail-header__btn"
+          aria-label="Редактировать"
+          title="Редактировать"
+          @click="showEditForm = true"
+        >
           <IconPencil width="18" height="18" />
         </button>
-        <button class="detail-header__btn" @click="confirmRecalculate" aria-label="Пересчитать" title="Пересчитать">
+        <button
+          class="detail-header__btn"
+          aria-label="Пересчитать"
+          title="Пересчитать"
+          @click="confirmRecalculate"
+        >
           <IconRefresh />
         </button>
-        <button class="detail-header__btn detail-header__btn--danger" @click="confirmDeleteList" aria-label="Удалить" title="Удалить">
+        <button
+          class="detail-header__btn detail-header__btn--danger"
+          aria-label="Удалить"
+          title="Удалить"
+          @click="confirmDeleteList"
+        >
           <IconTrash />
         </button>
       </div>
@@ -36,7 +51,6 @@
           <span v-if="tab.count != null" class="tabs__count">{{ tab.count }}</span>
         </button>
       </div>
-
     </div>
 
     <!-- Loading items -->
@@ -74,7 +88,7 @@
     </div>
 
     <!-- FAB: add item -->
-    <FabButton @click="showAddItem = true" aria-label="Добавить позицию">
+    <FabButton aria-label="Добавить позицию" @click="showAddItem = true">
       <IconPlus />
     </FabButton>
 
@@ -101,10 +115,19 @@
             <h3 class="confirm-panel__title">{{ confirmDialog.title }}</h3>
             <p class="confirm-panel__text">{{ confirmDialog.text }}</p>
             <div class="confirm-panel__actions">
-              <button class="confirm-panel__btn confirm-panel__btn--cancel" @click="confirmDialog = null">Отмена</button>
+              <button
+                class="confirm-panel__btn confirm-panel__btn--cancel"
+                @click="confirmDialog = null"
+              >
+                Отмена
+              </button>
               <button
                 class="confirm-panel__btn"
-                :class="confirmDialog.danger ? 'confirm-panel__btn--danger' : 'confirm-panel__btn--primary'"
+                :class="
+                  confirmDialog.danger
+                    ? 'confirm-panel__btn--danger'
+                    : 'confirm-panel__btn--primary'
+                "
                 :disabled="confirmBusy"
                 @click="confirmDialog.action"
               >
@@ -179,7 +202,8 @@ const filteredGroups = computed(() => {
 })
 
 const emptyText = computed(() => {
-  if (store.items.length === 0) return "В этом списке пока нет позиций. Проверьте, что на эти дни есть готовки. Добавьте вручную или выполните пересчёт."
+  if (store.items.length === 0)
+    return "В этом списке пока нет позиций. Проверьте, что на эти дни есть готовки. Добавьте вручную или выполните пересчёт."
   if (activeFilter.value === "checked") return "Нет купленных позиций"
   if (activeFilter.value === "unchecked") return "Все позиции уже куплены!"
   return "Нет позиций"
@@ -356,7 +380,9 @@ async function doDeleteList() {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: background var(--transition-fast), color var(--transition-fast);
+  transition:
+    background var(--transition-fast),
+    color var(--transition-fast);
   -webkit-tap-highlight-color: transparent;
 }
 
@@ -375,8 +401,6 @@ async function doDeleteList() {
   gap: 8px;
 }
 
-
-
 /* ---- Loading ---- */
 .detail-loading {
   display: flex;
@@ -384,7 +408,6 @@ async function doDeleteList() {
   justify-content: center;
   padding: 40px 0;
 }
-
 
 /* ---- Groups ---- */
 .detail-groups {

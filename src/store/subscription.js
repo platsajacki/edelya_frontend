@@ -41,8 +41,7 @@ export const useSubscriptionStore = defineStore("subscription", {
       state.subscription?.is_active === true &&
       state.subscription?.tariff?.is_trial_tariff === true,
 
-    canCreateAIRecipes: (state) =>
-      state.subscription?.tariff?.can_create_ai_recipes === true,
+    canCreateAIRecipes: (state) => state.subscription?.tariff?.can_create_ai_recipes === true,
 
     aiRecipeLimit: (state) =>
       state.aiRecipeUsage?.limit ?? state.dictionary?.ai_recipe_limit_per_period ?? null,
@@ -190,10 +189,13 @@ function readDictionaryCache() {
 
 function writeDictionaryCache(data) {
   try {
-    localStorage.setItem(DICTIONARY_CACHE_KEY, JSON.stringify({
-      data,
-      expiresAt: Date.now() + DICTIONARY_CACHE_TTL_MS,
-    }))
+    localStorage.setItem(
+      DICTIONARY_CACHE_KEY,
+      JSON.stringify({
+        data,
+        expiresAt: Date.now() + DICTIONARY_CACHE_TTL_MS,
+      })
+    )
   } catch {
     // Cache is optional; UI can work with in-memory data only.
   }

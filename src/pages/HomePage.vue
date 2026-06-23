@@ -4,7 +4,7 @@
     <div class="home-landing__card">
       <img src="/edelya.svg" alt="Еделя" class="home-landing__logo" />
       <h1 class="home-landing__title">Еделя</h1>
-      <p class="home-landing__subtitle">Планировщик питания.<br>Доступен в Telegram Mini App</p>
+      <p class="home-landing__subtitle">Планировщик питания.<br />Доступен в Telegram Mini App</p>
       <a :href="botUrl" target="_blank" rel="noopener noreferrer" class="home-landing__bot-link">
         @edelya_plan_bot
       </a>
@@ -12,7 +12,9 @@
     <footer class="home-landing__footer">
       <router-link to="/terms" class="home-landing__legal-link">Условия использования</router-link>
       <span class="home-landing__footer-sep">·</span>
-      <router-link to="/privacy" class="home-landing__legal-link">Политика конфиденциальности</router-link>
+      <router-link to="/privacy" class="home-landing__legal-link"
+        >Политика конфиденциальности</router-link
+      >
     </footer>
   </main>
 </template>

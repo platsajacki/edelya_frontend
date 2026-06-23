@@ -19,7 +19,7 @@
         <h2 class="cabinet__card-heading">{{ subscriptionCard.title }}</h2>
         <p class="cabinet__card-text">{{ subscriptionCard.description }}</p>
         <p v-if="subscriptionCard.actionText" class="cabinet__recurring-notice">
-          На время пробного периода все функции сервиса доступны бесплатно.<br>
+          На время пробного периода все функции сервиса доступны бесплатно.<br />
           Далее от 99 руб./месяц.
         </p>
         <button
@@ -80,10 +80,20 @@
         <div v-else class="cabinet__cancel-confirm">
           <p class="cabinet__cancel-text">Удалить привязанную карту?</p>
           <div class="cabinet__cancel-actions">
-            <button class="cabinet__btn cabinet__btn--cancel-confirm" :disabled="paymentLoading" @click="handleDeletePaymentMethod">
+            <button
+              class="cabinet__btn cabinet__btn--cancel-confirm"
+              :disabled="paymentLoading"
+              @click="handleDeletePaymentMethod"
+            >
               {{ paymentLoading ? "Загрузка..." : "Да, удалить" }}
             </button>
-            <button class="cabinet__btn cabinet__btn--cancel-dismiss" :disabled="paymentLoading" @click="deleteCardConfirm = false">Нет</button>
+            <button
+              class="cabinet__btn cabinet__btn--cancel-dismiss"
+              :disabled="paymentLoading"
+              @click="deleteCardConfirm = false"
+            >
+              Нет
+            </button>
           </div>
         </div>
       </template>
@@ -91,11 +101,7 @@
         <p class="cabinet__payment-warning">
           ⚠ Карта не привязана. Для автоматического списания необходимо привязать карту.
         </p>
-        <button
-          class="cabinet__btn"
-          :disabled="paymentLoading"
-          @click="handleBindPaymentMethod"
-        >
+        <button class="cabinet__btn" :disabled="paymentLoading" @click="handleBindPaymentMethod">
           {{ paymentLoading ? "Загрузка..." : "Привязать карту" }}
         </button>
       </template>
@@ -109,13 +115,26 @@
         v-for="tariff in sub.tariffs"
         :key="tariff.id"
         class="cabinet__tariff"
-        :class="{ 'cabinet__tariff--current': isCurrent(tariff), 'cabinet__tariff--pending': isPending(tariff) }"
+        :class="{
+          'cabinet__tariff--current': isCurrent(tariff),
+          'cabinet__tariff--pending': isPending(tariff),
+        }"
       >
         <div class="cabinet__tariff-header">
           <span class="cabinet__tariff-name">{{ tariff.name }}</span>
-          <span v-if="tariff.soon" class="cabinet__tariff-badge cabinet__tariff-badge--soon">Скоро</span>
-          <span v-if="isCurrent(tariff)" class="cabinet__tariff-badge cabinet__tariff-badge--current">Текущий</span>
-          <span v-if="isPending(tariff)" class="cabinet__tariff-badge cabinet__tariff-badge--pending">Запланирован</span>
+          <span v-if="tariff.soon" class="cabinet__tariff-badge cabinet__tariff-badge--soon"
+            >Скоро</span
+          >
+          <span
+            v-if="isCurrent(tariff)"
+            class="cabinet__tariff-badge cabinet__tariff-badge--current"
+            >Текущий</span
+          >
+          <span
+            v-if="isPending(tariff)"
+            class="cabinet__tariff-badge cabinet__tariff-badge--pending"
+            >Запланирован</span
+          >
         </div>
         <p class="cabinet__tariff-price">{{ formatPrice(tariff) }}</p>
         <p v-if="tariff.description" class="cabinet__tariff-desc">{{ tariff.description }}</p>
@@ -141,10 +160,7 @@
             </button>
           </template>
           <template v-else-if="sub.subscription?.status === 'expired'">
-            <button
-              class="cabinet__btn cabinet__btn--tariff"
-              @click="selectTariff(tariff)"
-            >
+            <button class="cabinet__btn cabinet__btn--tariff" @click="selectTariff(tariff)">
               Возобновить подписку
             </button>
           </template>
@@ -156,10 +172,20 @@
           <div v-else class="cabinet__cancel-confirm">
             <p class="cabinet__cancel-text">Вы уверены? Отменить подписку?</p>
             <div class="cabinet__cancel-actions">
-              <button class="cabinet__btn cabinet__btn--cancel-confirm" :disabled="cancelLoading" @click="cancelTariff">
+              <button
+                class="cabinet__btn cabinet__btn--cancel-confirm"
+                :disabled="cancelLoading"
+                @click="cancelTariff"
+              >
                 {{ cancelLoading ? "Загрузка..." : "Да, отменить" }}
               </button>
-              <button class="cabinet__btn cabinet__btn--cancel-dismiss" :disabled="cancelLoading" @click="cancelConfirmId = null">Нет</button>
+              <button
+                class="cabinet__btn cabinet__btn--cancel-dismiss"
+                :disabled="cancelLoading"
+                @click="cancelConfirmId = null"
+              >
+                Нет
+              </button>
             </div>
           </div>
         </template>
@@ -170,11 +196,7 @@
             <p class="cabinet__tariff-pending-text">{{ pendingActivationText }}</p>
           </div>
           <!-- Selectable: primary CTA -->
-          <button
-            v-else
-            class="cabinet__btn cabinet__btn--tariff"
-            @click="selectTariff(tariff)"
-          >
+          <button v-else class="cabinet__btn cabinet__btn--tariff" @click="selectTariff(tariff)">
             {{ sub.hasSubscription && !sub.isTrialActive ? "Сменить тариф" : "Выбрать тариф" }}
           </button>
         </template>
@@ -212,7 +234,9 @@ let toastTimer = null
 function showToast(message) {
   toast.value = message
   clearTimeout(toastTimer)
-  toastTimer = setTimeout(() => { toast.value = null }, 3500)
+  toastTimer = setTimeout(() => {
+    toast.value = null
+  }, 3500)
 }
 
 const showConfirmSheet = ref(false)
@@ -228,10 +252,10 @@ const userName = computed(() => auth.user?.first_name ?? null)
 
 const greeting = computed(() => {
   const h = new Date().getHours()
-  if (h >= 5 && h < 12) return 'Доброе утро'
-  if (h >= 12 && h < 18) return 'Добрый день'
-  if (h >= 18 && h < 23) return 'Добрый вечер'
-  return 'Доброй ночи'
+  if (h >= 5 && h < 12) return "Доброе утро"
+  if (h >= 12 && h < 18) return "Добрый день"
+  if (h >= 18 && h < 23) return "Добрый вечер"
+  return "Доброй ночи"
 })
 
 onMounted(async () => {
@@ -286,7 +310,8 @@ function isPending(tariff) {
 const pendingActivationText = computed(() => {
   const s = sub.subscription
   if (!s) return ""
-  if (s.cancelled_at) return "Тариф не может быть подключён, пока подписка отменена. Возобновите подписку."
+  if (s.cancelled_at)
+    return "Тариф не может быть подключён, пока подписка отменена. Возобновите подписку."
   if (s.status === "trial") return "Будет подключён после окончания пробного периода"
   return "Будет подключён с началом следующего расчётного периода"
 })
@@ -348,7 +373,8 @@ const subscriptionCard = computed(() => {
         icon: IconWarning,
         iconClass: "cabinet__card-icon--warning",
         title: "Пробный период отменён",
-        description: "Автоматический переход на платный тариф отключён. Доступ сохраняется до конца пробного периода.",
+        description:
+          "Автоматический переход на платный тариф отключён. Доступ сохраняется до конца пробного периода.",
         actionText: null,
       }
     }
@@ -359,9 +385,10 @@ const subscriptionCard = computed(() => {
       icon: IconCheck,
       iconClass: "cabinet__card-icon--ok",
       title: "Пробный период",
-      description: (sub.daysLeft !== null
-        ? `Все функции сервиса доступны. Осталось ${sub.daysLeft} ${dayWord(sub.daysLeft)}.`
-        : "Пробный период активен — все функции сервиса доступны") + pendingNote,
+      description:
+        (sub.daysLeft !== null
+          ? `Все функции сервиса доступны. Осталось ${sub.daysLeft} ${dayWord(sub.daysLeft)}.`
+          : "Пробный период активен — все функции сервиса доступны") + pendingNote,
       actionText: null,
     }
   }
@@ -395,9 +422,10 @@ const subscriptionCard = computed(() => {
       icon: IconCheck,
       iconClass: "cabinet__card-icon--ok",
       title: `Тариф: ${s.tariff?.name}`,
-      description: (s.current_period_end
-        ? `Активен до ${formatDate(s.current_period_end)}.`
-        : "Подписка активна.") + pendingNote,
+      description:
+        (s.current_period_end
+          ? `Активен до ${formatDate(s.current_period_end)}.`
+          : "Подписка активна.") + pendingNote,
       actionText: null,
     }
   }
@@ -562,7 +590,8 @@ const CONFLICT_MESSAGES = {
   "You are already subscribed to this tariff": "Вы уже подписаны на этот тариф.",
   "You have a pending subscription to this tariff": "Этот тариф уже запланирован.",
   "Upgrade payment was canceled": "Платёж был отменён. Попробуйте ещё раз.",
-  "Active payment method required to upgrade. Please update your payment info.": "Требуется активный способ оплаты. Обновите платёжные данные.",
+  "Active payment method required to upgrade. Please update your payment info.":
+    "Требуется активный способ оплаты. Обновите платёжные данные.",
 }
 
 async function onConfirmTariff() {
@@ -575,12 +604,15 @@ async function onConfirmTariff() {
     if (result.action === "redirect") {
       window.location.href = result.confirmation_url
     } else {
-      showToast(TARIFF_RESULT_DESCRIPTIONS[result.description] ?? result.description ?? "Тариф изменён.")
+      showToast(
+        TARIFF_RESULT_DESCRIPTIONS[result.description] ?? result.description ?? "Тариф изменён."
+      )
     }
   } catch (err) {
     showConfirmSheet.value = false
     confirmSheetTariff.value = null
-    const message = CONFLICT_MESSAGES[err.body?.detail] ?? err.message ?? "Не удалось сменить тариф."
+    const message =
+      CONFLICT_MESSAGES[err.body?.detail] ?? err.message ?? "Не удалось сменить тариф."
     showToast(message)
   } finally {
     tariffLoading.value = false
@@ -593,7 +625,8 @@ const resumeLoading = ref(false)
 const CANCEL_ERROR_MESSAGES = {
   "Subscription is already cancelled.": "Подписка уже отменена.",
   "Subscription is already in the process of cancellation.": "Отмена уже в процессе.",
-  "Subscription cannot be cancelled in current status.": "Подписку невозможно отменить в текущем статусе.",
+  "Subscription cannot be cancelled in current status.":
+    "Подписку невозможно отменить в текущем статусе.",
 }
 
 async function cancelTariff() {
@@ -604,7 +637,8 @@ async function cancelTariff() {
     showToast("Подписка отменена")
   } catch (err) {
     cancelConfirmId.value = null
-    const message = CANCEL_ERROR_MESSAGES[err.body?.detail] ?? err.message ?? "Не удалось отменить подписку."
+    const message =
+      CANCEL_ERROR_MESSAGES[err.body?.detail] ?? err.message ?? "Не удалось отменить подписку."
     showToast(message)
   } finally {
     cancelLoading.value = false
@@ -613,7 +647,8 @@ async function cancelTariff() {
 
 const RESUME_ERROR_MESSAGES = {
   "Subscription is not pending cancellation.": "Подписка не находится в процессе отмены.",
-  "Subscription cannot be resumed in current status.": "Подписку невозможно возобновить в текущем статусе.",
+  "Subscription cannot be resumed in current status.":
+    "Подписку невозможно возобновить в текущем статусе.",
 }
 
 async function resumeTariff() {
@@ -622,7 +657,8 @@ async function resumeTariff() {
     await sub.resumeSubscription()
     showToast("Подписка возобновлена")
   } catch (err) {
-    const message = RESUME_ERROR_MESSAGES[err.body?.detail] ?? err.message ?? "Не удалось возобновить подписку."
+    const message =
+      RESUME_ERROR_MESSAGES[err.body?.detail] ?? err.message ?? "Не удалось возобновить подписку."
     showToast(message)
   } finally {
     resumeLoading.value = false
@@ -731,7 +767,9 @@ async function handleDeletePaymentMethod() {
   font-weight: 600;
   color: var(--on-primary);
   background: var(--color-mint);
-  transition: background var(--transition-fast), transform var(--transition-fast);
+  transition:
+    background var(--transition-fast),
+    transform var(--transition-fast);
 }
 
 .cabinet__btn:active {
@@ -876,7 +914,9 @@ async function handleDeletePaymentMethod() {
   font-weight: 500;
   color: var(--color-text-secondary);
   background: transparent;
-  transition: background var(--transition-fast), color var(--transition-fast);
+  transition:
+    background var(--transition-fast),
+    color var(--transition-fast);
 }
 
 .cabinet__btn--cancel:active {

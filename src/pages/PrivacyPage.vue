@@ -69,9 +69,15 @@ onMounted(async () => {
   line-height: 1.3;
 }
 
-.legal-page__prose :deep(h1) { font-size: var(--font-lg); }
-.legal-page__prose :deep(h2) { font-size: 1.05rem; }
-.legal-page__prose :deep(h3) { font-size: 1rem; }
+.legal-page__prose :deep(h1) {
+  font-size: var(--font-lg);
+}
+.legal-page__prose :deep(h2) {
+  font-size: 1.05rem;
+}
+.legal-page__prose :deep(h3) {
+  font-size: 1rem;
+}
 
 .legal-page__prose :deep(p) {
   margin: 0 0 0.8em;

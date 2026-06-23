@@ -65,7 +65,9 @@ export function getNextWeekInfo(startWeek) {
   const nextMonday = new Date(monday)
   nextMonday.setDate(monday.getDate() + 7)
   // Use ISO week calculation
-  const d = new Date(Date.UTC(nextMonday.getFullYear(), nextMonday.getMonth(), nextMonday.getDate()))
+  const d = new Date(
+    Date.UTC(nextMonday.getFullYear(), nextMonday.getMonth(), nextMonday.getDate())
+  )
   d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7))
   const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1))
   const week = Math.ceil(((d - yearStart) / 86400000 + 1) / 7)

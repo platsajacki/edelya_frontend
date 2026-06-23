@@ -5,11 +5,7 @@
 
       <div class="consent__checkboxes">
         <label class="consent__label">
-          <input
-            v-model="termsAccepted"
-            type="checkbox"
-            class="consent__checkbox"
-          />
+          <input v-model="termsAccepted" type="checkbox" class="consent__checkbox" />
           <span class="consent__text">
             Я принимаю
             <a href="/terms" target="_blank" class="consent__link">Условия использования</a>
@@ -19,24 +15,14 @@
         </label>
 
         <label class="consent__label">
-          <input
-            v-model="marketingAccepted"
-            type="checkbox"
-            class="consent__checkbox"
-          />
-          <span class="consent__text">
-            Хочу получать новости и специальные предложения
-          </span>
+          <input v-model="marketingAccepted" type="checkbox" class="consent__checkbox" />
+          <span class="consent__text"> Хочу получать новости и специальные предложения </span>
         </label>
       </div>
 
       <p v-if="error" class="consent__error">{{ error }}</p>
 
-      <button
-        class="consent__btn"
-        :disabled="!termsAccepted || loading"
-        @click="submit"
-      >
+      <button class="consent__btn" :disabled="!termsAccepted || loading" @click="submit">
         <span v-if="loading" class="spinner spinner--sm" />
         <span v-else>Продолжить</span>
       </button>

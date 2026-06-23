@@ -1,5 +1,9 @@
 <template>
-  <ModalWrapper v-model="open" :title="isEdit ? 'Редактировать приём пищи' : 'Добавить приём пищи'" :z-index="1000">
+  <ModalWrapper
+    v-model="open"
+    :title="isEdit ? 'Редактировать приём пищи' : 'Добавить приём пищи'"
+    :z-index="1000"
+  >
     <form id="meal-plan-form" class="form" @submit.prevent="submit">
       <!-- Dish selection -->
       <div class="form__field">
@@ -7,16 +11,25 @@
         <div v-if="selectedDish" class="selected-dish">
           <span class="selected-dish__name">{{ selectedDish.name }}</span>
           <template v-if="!isDishLocked">
-            <button type="button" class="selected-dish__edit" :title="isDishOwn(selectedDish) ? 'Редактировать блюдо' : 'Создать копию'" @click="onEditDishClick">
+            <button
+              type="button"
+              class="selected-dish__edit"
+              :title="isDishOwn(selectedDish) ? 'Редактировать блюдо' : 'Создать копию'"
+              @click="onEditDishClick"
+            >
               <IconPencil />
             </button>
-            <button type="button" class="selected-dish__clear" @click="selectedDish = null">&times;</button>
+            <button type="button" class="selected-dish__clear" @click="selectedDish = null">
+              &times;
+            </button>
           </template>
         </div>
         <template v-else>
           <DishSearch @select="onDishSelect" @create="onCreateDish" />
         </template>
-        <p v-if="isDishLocked" class="form__hint">Блюдо привязано к готовке и не может быть изменено</p>
+        <p v-if="isDishLocked" class="form__hint">
+          Блюдо привязано к готовке и не может быть изменено
+        </p>
       </div>
 
       <label v-if="isEdit" class="form__field">
@@ -30,7 +43,6 @@
       </div>
 
       <div v-if="error" ref="errorRef" class="form__error">{{ error }}</div>
-
     </form>
 
     <DishForm
@@ -50,8 +62,13 @@
     />
 
     <template #footer>
-      <button type="submit" form="meal-plan-form" class="form__submit" :disabled="saving || !selectedDish">
-        {{ saving ? "Сохранение..." : (isEdit ? "Сохранить" : "Добавить") }}
+      <button
+        type="submit"
+        form="meal-plan-form"
+        class="form__submit"
+        :disabled="saving || !selectedDish"
+      >
+        {{ saving ? "Сохранение..." : isEdit ? "Сохранить" : "Добавить" }}
       </button>
     </template>
   </ModalWrapper>
@@ -82,8 +99,15 @@ const isEdit = computed(() => !!props.editItem)
 const isDishLocked = computed(() => isEdit.value && !!props.editItem?.cooking_event)
 
 const open = ref(props.modelValue)
-watch(() => props.modelValue, (v) => { open.value = v })
-watch(open, (v) => { emit("update:modelValue", v) })
+watch(
+  () => props.modelValue,
+  (v) => {
+    open.value = v
+  }
+)
+watch(open, (v) => {
+  emit("update:modelValue", v)
+})
 
 const selectedDish = ref(null)
 const mealDate = ref("")
@@ -92,7 +116,7 @@ const saving = ref(false)
 const error = ref("")
 const errorRef = ref(null)
 watch(error, (val) => {
-  if (val) nextTick(() => errorRef.value?.scrollIntoView({ behavior: 'smooth', block: 'nearest' }))
+  if (val) nextTick(() => errorRef.value?.scrollIntoView({ behavior: "smooth", block: "nearest" }))
 })
 const showDishForm = ref(false)
 const editDish = ref(null)
@@ -100,19 +124,22 @@ const initialDishName = ref("")
 const showCloneForm = ref(false)
 const dishToClone = ref(null)
 
-watch(() => props.modelValue, (v) => {
-  if (v && props.editItem) {
-    selectedDish.value = props.editItem.dish
-    mealDate.value = props.editItem.date
-    eatDates.value = []
-    error.value = ""
-  } else if (v) {
-    selectedDish.value = null
-    mealDate.value = ""
-    eatDates.value = props.initialDate ? [props.initialDate] : []
-    error.value = ""
+watch(
+  () => props.modelValue,
+  (v) => {
+    if (v && props.editItem) {
+      selectedDish.value = props.editItem.dish
+      mealDate.value = props.editItem.date
+      eatDates.value = []
+      error.value = ""
+    } else if (v) {
+      selectedDish.value = null
+      mealDate.value = ""
+      eatDates.value = props.initialDate ? [props.initialDate] : []
+      error.value = ""
+    }
   }
-})
+)
 
 function onDishSelect(dish) {
   selectedDish.value = dish

@@ -19,7 +19,9 @@ const props = defineProps({
 const resolvedLimit = computed(() => props.usage?.limit ?? props.limit)
 const hasUsage = computed(() => props.usage?.used !== undefined && props.usage?.used !== null)
 const visible = computed(() => hasUsage.value || resolvedLimit.value !== null)
-const isEmpty = computed(() => props.usage?.remaining !== undefined && Number(props.usage.remaining) <= 0)
+const isEmpty = computed(
+  () => props.usage?.remaining !== undefined && Number(props.usage.remaining) <= 0
+)
 
 const usageText = computed(() => {
   if (hasUsage.value && resolvedLimit.value !== null) {

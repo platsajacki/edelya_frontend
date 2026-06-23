@@ -7,23 +7,19 @@
     <div class="confirm__dates">
       <div class="confirm__date-field">
         <label class="confirm__label">С</label>
-        <DateInput
-          :model-value="dateFrom"
-          @update:model-value="$emit('update:dateFrom', $event)"
-        />
+        <DateInput :model-value="dateFrom" @update:model-value="$emit('update:dateFrom', $event)" />
       </div>
       <div class="confirm__date-field">
         <label class="confirm__label">По</label>
-        <DateInput
-          :model-value="dateTo"
-          @update:model-value="$emit('update:dateTo', $event)"
-        />
+        <DateInput :model-value="dateTo" @update:model-value="$emit('update:dateTo', $event)" />
       </div>
     </div>
 
     <div v-if="noItems" class="confirm__empty">
       <IconWarning class="confirm__empty-icon" />
-      <p class="confirm__message">Сначала добавь рецепт в готовку на эти дни — список покупок строится на их основе.</p>
+      <p class="confirm__message">
+        Сначала добавь рецепт в готовку на эти дни — список покупок строится на их основе.
+      </p>
     </div>
     <div v-else class="confirm__name">
       <label class="confirm__name-label" for="shopping-name">Название</label>
@@ -79,24 +75,26 @@ import { formatDateRuShort } from "../utils/formatDate"
 
 const props = defineProps({
   modelValue: { type: Boolean, required: true },
-  dateFrom:   { type: String,  default: '' },
-  dateTo:     { type: String,  default: '' },
-  loading:    { type: Boolean, default: false },
-  noItems:    { type: Boolean, default: false },
+  dateFrom: { type: String, default: "" },
+  dateTo: { type: String, default: "" },
+  loading: { type: Boolean, default: false },
+  noItems: { type: Boolean, default: false },
 })
 
-defineEmits(['update:modelValue', 'update:dateFrom', 'update:dateTo', 'confirm'])
+defineEmits(["update:modelValue", "update:dateFrom", "update:dateTo", "confirm"])
 
 const listName = computed(() => {
   const from = props.dateFrom
-  const to   = props.dateTo
-  if (!from) return ''
+  const to = props.dateTo
+  if (!from) return ""
   if (!to || from === to) return `Продукты на ${formatDateRuShort(from)}`
   return `Продукты на неделю ${formatDateRuShort(from)}–${formatDateRuShort(to)}`
 })
 
 const editableName = ref(listName.value)
-watch(listName, (val) => { editableName.value = val })
+watch(listName, (val) => {
+  editableName.value = val
+})
 </script>
 
 <style scoped>
@@ -142,7 +140,9 @@ watch(listName, (val) => { editableName.value = val })
   color: var(--color-text);
   outline: none;
   box-sizing: border-box;
-  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+  transition:
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast);
 }
 
 .confirm__name-input:focus {

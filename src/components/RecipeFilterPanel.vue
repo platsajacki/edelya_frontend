@@ -1,11 +1,16 @@
 <template>
   <Teleport to="body">
     <Transition name="filter-panel">
-      <div v-if="modelValue" class="filter-overlay" :style="zIndex ? { zIndex } : {}" @mousedown.self="close">
+      <div
+        v-if="modelValue"
+        class="filter-overlay"
+        :style="zIndex ? { zIndex } : {}"
+        @mousedown.self="close"
+      >
         <div class="filter-panel">
           <div class="filter-panel__header">
             <h3 class="filter-panel__title">Фильтры</h3>
-            <button class="filter-panel__close" @click="close" aria-label="Закрыть">&times;</button>
+            <button class="filter-panel__close" aria-label="Закрыть" @click="close">&times;</button>
           </div>
 
           <div class="filter-panel__body">
@@ -49,9 +54,7 @@
             <button class="filter-panel__clear" :disabled="!hasChanges" @click="clearAll">
               Очистить
             </button>
-            <button class="filter-panel__apply" @click="apply">
-              Применить
-            </button>
+            <button class="filter-panel__apply" @click="apply">Применить</button>
           </div>
         </div>
       </div>
@@ -73,11 +76,14 @@ const emit = defineEmits(["update:modelValue", "apply"])
 
 const categoryId = ref(props.currentCategoryId)
 
-watch(() => props.modelValue, (v) => {
-  if (v) {
-    categoryId.value = props.currentCategoryId
+watch(
+  () => props.modelValue,
+  (v) => {
+    if (v) {
+      categoryId.value = props.currentCategoryId
+    }
   }
-})
+)
 
 const hasChanges = computed(() => categoryId.value !== null)
 
@@ -265,7 +271,9 @@ function close() {
   color: var(--on-primary);
   font-size: var(--font-body);
   font-weight: 600;
-  transition: background var(--transition-fast), transform var(--transition-fast);
+  transition:
+    background var(--transition-fast),
+    transform var(--transition-fast);
 }
 
 .filter-panel__apply:hover {

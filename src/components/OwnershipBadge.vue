@@ -1,6 +1,8 @@
 <template>
   <span class="ownership-badge" :class="isOwn ? 'ownership-badge--own' : 'ownership-badge--shared'">
-    {{ isOwn ? (short ? '👤 Личное' : '👤 Личный рецепт') : (short ? '🌐 Общее' : '🌐 Общий рецепт') }}
+    {{
+      isOwn ? (short ? "👤 Личное" : "👤 Личный рецепт") : short ? "🌐 Общее" : "🌐 Общий рецепт"
+    }}
   </span>
 </template>
 

@@ -6,7 +6,7 @@
           <!-- Header -->
           <div class="picker-header">
             <h3 class="picker-title">Выбрать блюдо</h3>
-            <button class="picker-close" @click="close" aria-label="Закрыть">&times;</button>
+            <button class="picker-close" aria-label="Закрыть" @click="close">&times;</button>
           </div>
 
           <!-- Search -->
@@ -20,7 +20,14 @@
               placeholder="Поиск рецепта..."
               @input="onQueryInput"
             />
-            <button v-if="query" class="picker-search__clear" @click="clearQuery" aria-label="Очистить">&times;</button>
+            <button
+              v-if="query"
+              class="picker-search__clear"
+              aria-label="Очистить"
+              @click="clearQuery"
+            >
+              &times;
+            </button>
           </div>
 
           <!-- Tabs -->
@@ -38,23 +45,39 @@
 
           <!-- Filter chips row -->
           <div class="picker-filter-row">
-            <button class="picker-filter-btn" @click="showFilters = true" :class="{ 'picker-filter-btn--active': categoryId !== null }">
+            <button
+              class="picker-filter-btn"
+              :class="{ 'picker-filter-btn--active': categoryId !== null }"
+              @click="showFilters = true"
+            >
               <IconFilter />
               <span>Фильтры</span>
               <span v-if="categoryId !== null" class="picker-filter-btn__dot" />
             </button>
-            <button v-if="categoryId !== null" class="picker-chip" @click="categoryId = null; reload()">
+            <button
+              v-if="categoryId !== null"
+              class="picker-chip"
+              @click="
+                () => {
+                  categoryId = null
+                  reload()
+                }
+              "
+            >
               {{ activeCategoryName }} &times;
             </button>
           </div>
 
           <!-- List -->
-          <div class="picker-body" ref="listEl">
+          <div ref="listEl" class="picker-body">
             <div v-if="initialLoading && !dishes.length" class="picker-status">
               <div class="spinner" />
             </div>
 
-            <div v-else-if="initialError && !dishes.length" class="picker-status picker-status--error">
+            <div
+              v-else-if="initialError && !dishes.length"
+              class="picker-status picker-status--error"
+            >
               <p>{{ initialError }}</p>
               <button class="picker-retry" @click="reload">Повторить</button>
             </div>
@@ -72,7 +95,9 @@
               >
                 <div class="picker-item__info">
                   <span class="picker-item__name">{{ dish.name }}</span>
-                  <span v-if="dish.category?.name" class="picker-item__category">{{ dish.category.name }}</span>
+                  <span v-if="dish.category?.name" class="picker-item__category">{{
+                    dish.category.name
+                  }}</span>
                 </div>
                 <OwnershipBadge :is-own="isDishOwn(dish)" short />
               </li>
@@ -100,29 +125,47 @@
   <!-- Dish preview sheet -->
   <Teleport to="body">
     <Transition name="modal">
-      <div v-if="showPreview" class="picker-overlay" :style="{ zIndex: zIndex + 20 }" @click.self="showPreview = false">
+      <div
+        v-if="showPreview"
+        class="picker-overlay"
+        :style="{ zIndex: zIndex + 20 }"
+        @click.self="showPreview = false"
+      >
         <div class="picker-panel picker-panel--preview">
           <div class="picker-header">
             <h3 class="picker-title">{{ previewDish?.name }}</h3>
-            <button class="picker-close" @click="showPreview = false" aria-label="Закрыть">&times;</button>
+            <button class="picker-close" aria-label="Закрыть" @click="showPreview = false">
+              &times;
+            </button>
           </div>
 
           <div class="picker-body picker-preview-body">
             <div v-if="previewLoading" class="picker-status"><div class="spinner" /></div>
             <template v-else-if="previewDish">
               <div class="preview-section">
-                <p v-if="previewDish.category?.name" class="preview-meta">{{ previewDish.category.name }}</p>
+                <p v-if="previewDish.category?.name" class="preview-meta">
+                  {{ previewDish.category.name }}
+                </p>
                 <OwnershipBadge :is-own="isDishOwn(previewDish)" />
               </div>
 
               <div v-if="previewDish.dish_ingredients?.length" class="preview-section">
                 <span class="preview-label">Состав</span>
                 <ul class="preview-ingredients">
-                  <li v-for="di in previewDish.dish_ingredients" :key="di.id" class="preview-ingredient">
-                    <span class="preview-ingredient__name">{{ di.ingredient?.name ?? di.name }}</span>
+                  <li
+                    v-for="di in previewDish.dish_ingredients"
+                    :key="di.id"
+                    class="preview-ingredient"
+                  >
+                    <span class="preview-ingredient__name">{{
+                      di.ingredient?.name ?? di.name
+                    }}</span>
                     <span class="preview-ingredient__right">
                       <span v-if="di.is_optional" class="preview-ingredient__opt">опц.</span>
-                      <span class="preview-ingredient__amount">{{ formatShoppingAmount(di.amount, di.ingredient?.base_unit ?? di.base_unit).display }}</span>
+                      <span class="preview-ingredient__amount">{{
+                        formatShoppingAmount(di.amount, di.ingredient?.base_unit ?? di.base_unit)
+                          .display
+                      }}</span>
                     </span>
                   </li>
                 </ul>
@@ -136,7 +179,9 @@
           </div>
 
           <div class="picker-preview-footer">
-            <button class="picker-select-btn" @click="selectDish(previewDish)">Выбрать этот рецепт</button>
+            <button class="picker-select-btn" @click="selectDish(previewDish)">
+              Выбрать этот рецепт
+            </button>
           </div>
         </div>
       </div>
@@ -303,7 +348,9 @@ watch(
       showFilters.value = false
       if (!categories.value.length) {
         fetchDishCategories()
-          .then((data) => { categories.value = data.results ?? data })
+          .then((data) => {
+            categories.value = data.results ?? data
+          })
           .catch(() => {})
       }
       await loadFirst()
@@ -312,18 +359,23 @@ watch(
       document.body.style.overflow = savedOverflow
       destroyObserver()
     }
-  },
+  }
 )
 
 function setupObserver() {
   destroyObserver()
   observer = new IntersectionObserver(
     (entries) => {
-      if (entries[0]?.isIntersecting && hasMore.value && !initialLoading.value && !loadingMore.value) {
+      if (
+        entries[0]?.isIntersecting &&
+        hasMore.value &&
+        !initialLoading.value &&
+        !loadingMore.value
+      ) {
         loadMore()
       }
     },
-    { root: listEl.value, rootMargin: "120px" },
+    { root: listEl.value, rootMargin: "120px" }
   )
   if (sentinelEl.value) observer.observe(sentinelEl.value)
 }
@@ -334,9 +386,13 @@ function destroyObserver() {
 }
 
 // Re-attach observer when sentinel mounts
-watch(sentinelEl, (el) => {
-  if (el && props.modelValue) setupObserver()
-}, { flush: "post" })
+watch(
+  sentinelEl,
+  (el) => {
+    if (el && props.modelValue) setupObserver()
+  },
+  { flush: "post" }
+)
 
 onUnmounted(() => {
   clearTimeout(debounceTimer)
@@ -432,7 +488,9 @@ onUnmounted(() => {
   background: var(--color-empty);
   color: var(--color-text);
   outline: none;
-  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+  transition:
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast);
 }
 
 .picker-search__input:focus {
@@ -472,7 +530,9 @@ onUnmounted(() => {
   color: var(--color-text-secondary);
   cursor: pointer;
   border-bottom: 2px solid transparent;
-  transition: color var(--transition-fast), border-color var(--transition-fast);
+  transition:
+    color var(--transition-fast),
+    border-color var(--transition-fast);
 }
 
 .picker-tabs__item--active {
@@ -503,7 +563,9 @@ onUnmounted(() => {
   color: var(--color-text-secondary);
   cursor: pointer;
   position: relative;
-  transition: border-color var(--transition-fast), color var(--transition-fast);
+  transition:
+    border-color var(--transition-fast),
+    color var(--transition-fast);
 }
 
 .picker-filter-btn--active {

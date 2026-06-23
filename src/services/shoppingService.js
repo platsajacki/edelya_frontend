@@ -38,9 +38,7 @@ export function recalculateShoppingList(id) {
 
 export function fetchShoppingListItems(listId, params = {}) {
   const query = new URLSearchParams(params).toString()
-  const url = query
-    ? `${BASE}/${listId}/items/?${query}`
-    : `${BASE}/${listId}/items/`
+  const url = query ? `${BASE}/${listId}/items/?${query}` : `${BASE}/${listId}/items/`
   return api(url)
 }
 

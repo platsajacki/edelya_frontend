@@ -132,10 +132,12 @@ export const usePlanningStore = defineStore("planning", {
     async _refreshAfterMutation() {
       const refreshes = [this.loadWeek()]
       if (this.nextWeekData) {
-        const { year, week } = getISOWeek(new Date(this.nextWeekData.start_week + 'T00:00:00'))
+        const { year, week } = getISOWeek(new Date(this.nextWeekData.start_week + "T00:00:00"))
         refreshes.push(
           fetchWeek(year, week)
-            .then((data) => { this.nextWeekData = data })
+            .then((data) => {
+              this.nextWeekData = data
+            })
             .catch(() => {})
         )
       }
@@ -214,7 +216,7 @@ export const usePlanningStore = defineStore("planning", {
       const nextSnapshot = this.nextWeekData ? JSON.parse(JSON.stringify(this.nextWeekData)) : null
       const currentInvolved =
         (fromDate >= this.weekData.start_week && fromDate <= this.weekData.end_week) ||
-        (toDate   >= this.weekData.start_week && toDate   <= this.weekData.end_week)
+        (toDate >= this.weekData.start_week && toDate <= this.weekData.end_week)
       const nextInvolved = !!this.nextWeekData
 
       if (!this.savingItemIds.includes(itemId)) {
@@ -222,9 +224,9 @@ export const usePlanningStore = defineStore("planning", {
       }
 
       try {
-        if (type === 'meals') {
+        if (type === "meals") {
           await this._handleMealDrag(itemId, fromDate, toDate, oldIndex, newIndex)
-        } else if (type === 'cooking') {
+        } else if (type === "cooking") {
           await this._handleCookingDrag(itemId, fromDate, toDate)
         }
         if (opId === _opCounter) {
@@ -249,7 +251,7 @@ export const usePlanningStore = defineStore("planning", {
           fetches.push(fetchWeek(this.year, this.week))
         }
         if (includeNext && this.nextWeekData) {
-          const { year, week } = getISOWeek(new Date(this.nextWeekData.start_week + 'T00:00:00'))
+          const { year, week } = getISOWeek(new Date(this.nextWeekData.start_week + "T00:00:00"))
           fetches.push(fetchWeek(year, week))
         }
         const results = await Promise.all(fetches)
@@ -272,18 +274,22 @@ export const usePlanningStore = defineStore("planning", {
     },
 
     _mealItemsForDate(date) {
-      if (this.nextWeekData &&
-          date >= this.nextWeekData.start_week &&
-          date <= this.nextWeekData.end_week) {
+      if (
+        this.nextWeekData &&
+        date >= this.nextWeekData.start_week &&
+        date <= this.nextWeekData.end_week
+      ) {
         return this.nextWeekData.meal_plan_items
       }
       return this.weekData.meal_plan_items
     },
 
     _cookingEventsForDate(date) {
-      if (this.nextWeekData &&
-          date >= this.nextWeekData.start_week &&
-          date <= this.nextWeekData.end_week) {
+      if (
+        this.nextWeekData &&
+        date >= this.nextWeekData.start_week &&
+        date <= this.nextWeekData.end_week
+      ) {
         return this.nextWeekData.cooking_events
       }
       return this.weekData.cooking_events
@@ -387,7 +393,8 @@ export const usePlanningStore = defineStore("planning", {
 
       // Compute day shift delta (backend shifts linked meal_plan_items by the same amount)
       const deltaDays = Math.round(
-        (new Date(toDate + 'T00:00:00').getTime() - new Date(fromDate + 'T00:00:00').getTime()) / 86400000
+        (new Date(toDate + "T00:00:00").getTime() - new Date(fromDate + "T00:00:00").getTime()) /
+          86400000
       )
 
       // Optimistically update cooking event date
@@ -397,13 +404,13 @@ export const usePlanningStore = defineStore("planning", {
       const linkedItems = [
         ...this.weekData.meal_plan_items,
         ...(this.nextWeekData ? this.nextWeekData.meal_plan_items : []),
-      ].filter(m => m.cooking_event === itemId)
+      ].filter((m) => m.cooking_event === itemId)
 
       for (const item of linkedItems) {
         const oldDate = item.date
-        const d = new Date(oldDate + 'T00:00:00')
+        const d = new Date(oldDate + "T00:00:00")
         d.setDate(d.getDate() + deltaDays)
-        const newDate = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+        const newDate = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`
 
         if (this.nextWeekData) {
           const nextStart = this.nextWeekData.start_week
@@ -430,7 +437,7 @@ export const usePlanningStore = defineStore("planning", {
           ...(this.nextWeekData ? this.nextWeekData.meal_plan_items : []),
         ]
         for (const serverItem of response.meal_plan_items) {
-          const local = allItems.find(m => m.id === serverItem.id)
+          const local = allItems.find((m) => m.id === serverItem.id)
           if (local) {
             local.date = serverItem.date
             local.position = serverItem.position

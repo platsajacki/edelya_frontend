@@ -21,9 +21,7 @@
 
     <div v-if="planning.loadError" class="planner__error">
       <span>Не удалось загрузить неделю</span>
-      <button class="planner__error-retry" @click="planning.loadWeek()">
-        Повторить
-      </button>
+      <button class="planner__error-retry" @click="planning.loadWeek()">Повторить</button>
     </div>
 
     <!-- Create / Edit forms -->
@@ -66,8 +64,16 @@
       :date-to="pendingShoppingPayload?.date_to ?? ''"
       :loading="shoppingCreating"
       :no-items="shoppingNoItems"
-      @update:date-from="val => { if (pendingShoppingPayload) pendingShoppingPayload.date_from = val }"
-      @update:date-to="val => { if (pendingShoppingPayload) pendingShoppingPayload.date_to = val }"
+      @update:date-from="
+        (val) => {
+          if (pendingShoppingPayload) pendingShoppingPayload.date_from = val
+        }
+      "
+      @update:date-to="
+        (val) => {
+          if (pendingShoppingPayload) pendingShoppingPayload.date_to = val
+        }
+      "
       @confirm="onConfirmShopping"
     />
   </div>
@@ -101,8 +107,8 @@ const shopping = useShoppingStore()
 const router = useRouter()
 
 // --- Shopping confirm ---
-const showShoppingConfirm    = ref(false)
-const shoppingCreating       = ref(false)
+const showShoppingConfirm = ref(false)
+const shoppingCreating = ref(false)
 const pendingShoppingPayload = ref(null)
 
 const shoppingNoItems = computed(() => {
@@ -113,33 +119,37 @@ const shoppingNoItems = computed(() => {
 })
 
 const weekEndDate = computed(() => {
-  const start = new Date(planning.weekData.start_week + 'T00:00:00')
+  const start = new Date(planning.weekData.start_week + "T00:00:00")
   start.setDate(start.getDate() + 6)
-  return `${start.getFullYear()}-${String(start.getMonth() + 1).padStart(2, '0')}-${String(start.getDate()).padStart(2, '0')}`
+  return `${start.getFullYear()}-${String(start.getMonth() + 1).padStart(2, "0")}-${String(start.getDate()).padStart(2, "0")}`
 })
 
 function hasCookingInRange(dateFrom, dateTo) {
   const sources = [planning.weekData, planning.nextWeekData].filter(Boolean)
-  return sources.some(data =>
-    data.cooking_events.some(e => e.cooking_date >= dateFrom && e.cooking_date <= dateTo)
+  return sources.some((data) =>
+    data.cooking_events.some((e) => e.cooking_date >= dateFrom && e.cooking_date <= dateTo)
   )
 }
 
 function handleCreateShoppingDay({ rawDate }) {
   pendingShoppingPayload.value = {
     date_from: rawDate,
-    date_to:   rawDate,
+    date_to: rawDate,
   }
   showShoppingConfirm.value = true
 }
 
 function handleCreateShoppingWeek({ dateFrom, dateTo } = {}) {
   const today = getTodayISO()
-  const from = dateFrom || (today >= planning.weekData.start_week && today <= weekEndDate.value ? today : planning.weekData.start_week)
+  const from =
+    dateFrom ||
+    (today >= planning.weekData.start_week && today <= weekEndDate.value
+      ? today
+      : planning.weekData.start_week)
   const to = dateTo || weekEndDate.value
   pendingShoppingPayload.value = {
     date_from: from,
-    date_to:   to,
+    date_to: to,
   }
   showShoppingConfirm.value = true
 }
@@ -147,9 +157,11 @@ function handleCreateShoppingWeek({ dateFrom, dateTo } = {}) {
 async function onConfirmShopping(name) {
   if (!pendingShoppingPayload.value) return
   const { date_from, date_to } = pendingShoppingPayload.value
-  const resolvedName = name || ((!date_to || date_from === date_to)
-    ? `Продукты на ${formatDateRuShort(date_from)}`
-    : `Продукты на неделю ${formatDateRuShort(date_from)}–${formatDateRuShort(date_to)}`)
+  const resolvedName =
+    name ||
+    (!date_to || date_from === date_to
+      ? `Продукты на ${formatDateRuShort(date_from)}`
+      : `Продукты на неделю ${formatDateRuShort(date_from)}–${formatDateRuShort(date_to)}`)
   shoppingCreating.value = true
   try {
     const list = await shopping.createList({ name: resolvedName, date_from, date_to })
@@ -197,18 +209,18 @@ function openMealDetail(item) {
 }
 
 async function onViewCookingFromMeal(cookingEventId) {
-    showMealDetail.value = false
-    let event = planning.weekData.cooking_events.find((e) => e.id === cookingEventId)
-    if (!event) {
-      try {
-        event = await fetchCookingEvent(cookingEventId)
-      } catch {
-        planning.showToast("Не удалось загрузить готовку")
-        return
-      }
+  showMealDetail.value = false
+  let event = planning.weekData.cooking_events.find((e) => e.id === cookingEventId)
+  if (!event) {
+    try {
+      event = await fetchCookingEvent(cookingEventId)
+    } catch {
+      planning.showToast("Не удалось загрузить готовку")
+      return
     }
-    detailItem.value = event
-    showCookingDetail.value = true
+  }
+  detailItem.value = event
+  showCookingDetail.value = true
 }
 
 // --- Edit from detail ---

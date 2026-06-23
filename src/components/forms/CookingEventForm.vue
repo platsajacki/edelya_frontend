@@ -1,15 +1,26 @@
 <template>
-  <ModalWrapper v-model="open" :title="isEdit ? 'Редактировать готовку' : 'Новая готовка'" :z-index="1000">
+  <ModalWrapper
+    v-model="open"
+    :title="isEdit ? 'Редактировать готовку' : 'Новая готовка'"
+    :z-index="1000"
+  >
     <form id="cooking-event-form" class="form" @submit.prevent="submit">
       <!-- Dish selection -->
       <div class="form__field">
         <span class="form__label">Блюдо <span class="form__required">*</span></span>
         <div v-if="selectedDish" class="selected-dish">
           <span class="selected-dish__name">{{ selectedDish.name }}</span>
-          <button type="button" class="selected-dish__edit" :title="isDishOwn(selectedDish) ? 'Редактировать рецепт' : 'Создать личную копию'" @click="onEditDishClick">
+          <button
+            type="button"
+            class="selected-dish__edit"
+            :title="isDishOwn(selectedDish) ? 'Редактировать рецепт' : 'Создать личную копию'"
+            @click="onEditDishClick"
+          >
             <IconPencil width="14" height="14" />
           </button>
-          <button type="button" class="selected-dish__replace" @click="selectedDish = null">Заменить</button>
+          <button type="button" class="selected-dish__replace" @click="selectedDish = null">
+            Заменить
+          </button>
         </div>
         <DishSearch
           v-else
@@ -36,7 +47,6 @@
       </label>
 
       <div v-if="error" ref="errorRef" class="form__error">{{ error }}</div>
-
     </form>
 
     <DishForm
@@ -51,13 +61,15 @@
     <!-- Clone confirmation for global dishes -->
     <ModalWrapper v-model="showCloneConfirm" title="Общее блюдо" :z-index="1020">
       <p class="clone-confirm__text">
-        Это общий рецепт, его нельзя редактировать.
-        Создать личную копию и использовать её в этой готовке?
+        Это общий рецепт, его нельзя редактировать. Создать личную копию и использовать её в этой
+        готовке?
       </p>
       <template #footer>
         <div class="clone-confirm__actions">
           <button class="form__submit" type="button" @click="startClone">Создать копию</button>
-          <button class="form__cancel" type="button" @click="showCloneConfirm = false">Отмена</button>
+          <button class="form__cancel" type="button" @click="showCloneConfirm = false">
+            Отмена
+          </button>
         </div>
       </template>
     </ModalWrapper>
@@ -69,15 +81,16 @@
       @created="onCloneCreated"
     />
 
-    <AIDishDraftForm
-      v-model="showAIForm"
-      :z-index="1030"
-      @created="onDishCreated"
-    />
+    <AIDishDraftForm v-model="showAIForm" :z-index="1030" @created="onDishCreated" />
 
     <template #footer>
-      <button type="submit" form="cooking-event-form" class="form__submit" :disabled="saving || !selectedDish">
-        {{ saving ? "Сохранение..." : (isEdit ? "Сохранить" : "Создать готовку") }}
+      <button
+        type="submit"
+        form="cooking-event-form"
+        class="form__submit"
+        :disabled="saving || !selectedDish"
+      >
+        {{ saving ? "Сохранение..." : isEdit ? "Сохранить" : "Создать готовку" }}
       </button>
     </template>
   </ModalWrapper>
@@ -110,8 +123,15 @@ const subscription = useSubscriptionStore()
 const isEdit = computed(() => !!props.editItem)
 
 const open = ref(props.modelValue)
-watch(() => props.modelValue, (v) => { open.value = v })
-watch(open, (v) => { emit("update:modelValue", v) })
+watch(
+  () => props.modelValue,
+  (v) => {
+    open.value = v
+  }
+)
+watch(open, (v) => {
+  emit("update:modelValue", v)
+})
 
 const selectedDish = ref(null)
 const cookingDate = ref("")
@@ -121,7 +141,7 @@ const saving = ref(false)
 const error = ref("")
 const errorRef = ref(null)
 watch(error, (val) => {
-  if (val) nextTick(() => errorRef.value?.scrollIntoView({ behavior: 'smooth', block: 'nearest' }))
+  if (val) nextTick(() => errorRef.value?.scrollIntoView({ behavior: "smooth", block: "nearest" }))
 })
 const showDishForm = ref(false)
 const editDish = ref(null)
@@ -131,21 +151,24 @@ const showCloneForm = ref(false)
 const showAIForm = ref(false)
 const dishToClone = ref(null)
 
-watch(() => props.modelValue, (v) => {
-  if (v && props.editItem) {
-    selectedDish.value = props.editItem.dish
-    cookingDate.value = props.editItem.cooking_date
-    eatDates.value = (props.editItem.meal_plan_items || []).map((m) => m.date)
-    notes.value = props.editItem.notes || ""
-    error.value = ""
-  } else if (v) {
-    selectedDish.value = null
-    cookingDate.value = props.initialDate || ""
-    eatDates.value = []
-    notes.value = ""
-    error.value = ""
+watch(
+  () => props.modelValue,
+  (v) => {
+    if (v && props.editItem) {
+      selectedDish.value = props.editItem.dish
+      cookingDate.value = props.editItem.cooking_date
+      eatDates.value = (props.editItem.meal_plan_items || []).map((m) => m.date)
+      notes.value = props.editItem.notes || ""
+      error.value = ""
+    } else if (v) {
+      selectedDish.value = null
+      cookingDate.value = props.initialDate || ""
+      eatDates.value = []
+      notes.value = ""
+      error.value = ""
+    }
   }
-})
+)
 
 watch(cookingDate, (newVal, oldVal) => {
   if (!oldVal || !newVal) return

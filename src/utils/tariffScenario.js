@@ -79,13 +79,15 @@ export function getTariffChangeScenario(subscription, newTariff, paymentMethod =
     const isUpgrade = Number(newTariff.price) > Number(currentTariff.price)
 
     if (!isUpgrade) {
-      const periodEnd = current_period_end ? formatDate(current_period_end) : "начала следующего периода"
+      const periodEnd = current_period_end
+        ? formatDate(current_period_end)
+        : "начала следующего периода"
       return {
         type: "downgrade",
         title: "Смена тарифа",
         description:
-            `Тариф «${newTariff.name}» (${formatPrice(newTariff)}) будет активирован с ${periodEnd}. ` +
-            `До этого момента действует тариф «${currentTariff.name}». ` +
+          `Тариф «${newTariff.name}» (${formatPrice(newTariff)}) будет активирован с ${periodEnd}. ` +
+          `До этого момента действует тариф «${currentTariff.name}». ` +
           `Возврат средств за оставшиеся дни не производится.`,
         confirmLabel: "Запланировать смену",
         proration: null,
@@ -93,9 +95,10 @@ export function getTariffChangeScenario(subscription, newTariff, paymentMethod =
     }
 
     const proration = calcProration(subscription, newTariff)
-    const proratedText = proration > 0
-      ? `С вашей карты спишется пропорциональная сумма за оставшиеся дни текущего периода: ${proration} ₽.`
-      : `Пропорциональное списание не требуется.`
+    const proratedText =
+      proration > 0
+        ? `С вашей карты спишется пропорциональная сумма за оставшиеся дни текущего периода: ${proration} ₽.`
+        : `Пропорциональное списание не требуется.`
     return {
       type: "upgrade",
       title: "Повышение тарифа",

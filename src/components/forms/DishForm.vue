@@ -1,5 +1,9 @@
 <template>
-  <ModalWrapper v-model="open" :title="isEdit ? 'Редактировать блюдо' : isClone ? 'Создать личную копию' : 'Новое блюдо'" :z-index="zIndex">
+  <ModalWrapper
+    v-model="open"
+    :title="isEdit ? 'Редактировать блюдо' : isClone ? 'Создать личную копию' : 'Новое блюдо'"
+    :z-index="zIndex"
+  >
     <form id="dish-form" class="form" @submit.prevent="submit">
       <!-- Clone notice -->
       <div v-if="isClone" class="dish-form__clone-notice">
@@ -23,7 +27,13 @@
 
       <label class="form__field">
         <span class="form__label">Рецепт</span>
-        <textarea ref="recipeRef" v-model="recipe" class="form__textarea form__textarea--auto" rows="2" @input="autoResize($event.target)" />
+        <textarea
+          ref="recipeRef"
+          v-model="recipe"
+          class="form__textarea form__textarea--auto"
+          rows="2"
+          @input="autoResize($event.target)"
+        />
       </label>
 
       <!-- Ingredients -->
@@ -49,28 +59,52 @@
                 @focus="$event.target.select()"
                 @keydown.enter.prevent="confirmIngredient"
               />
-              <span class="ingredient-amount__unit">{{ UNIT_LABELS[pendingIngredient.base_unit] || pendingIngredient.base_unit }}</span>
+              <span class="ingredient-amount__unit">{{
+                UNIT_LABELS[pendingIngredient.base_unit] || pendingIngredient.base_unit
+              }}</span>
             </div>
-            <p v-else class="ingredient-amount__taste-hint">Количество не указывается — добавится как «по вкусу»</p>
+            <p v-else class="ingredient-amount__taste-hint">
+              Количество не указывается — добавится как «по вкусу»
+            </p>
             <label class="ingredient-amount__optional">
               <input v-model="pendingOptional" type="checkbox" />
               Опционально
             </label>
             <div v-if="amountError" class="form__error">{{ amountError }}</div>
             <div class="ingredient-amount__actions">
-              <button type="button" class="btn btn--sm" @click="confirmIngredient">Сохранить</button>
-              <button type="button" class="btn btn--sm btn--ghost" @click="cancelIngredient">Отмена</button>
+              <button type="button" class="btn btn--sm" @click="confirmIngredient">
+                Сохранить
+              </button>
+              <button type="button" class="btn btn--sm btn--ghost" @click="cancelIngredient">
+                Отмена
+              </button>
             </div>
           </div>
           <!-- Normal row -->
-          <div v-else class="ingredient-row" :class="{ 'ingredient-row--optional': ing.is_optional }">
+          <div
+            v-else
+            class="ingredient-row"
+            :class="{ 'ingredient-row--optional': ing.is_optional }"
+          >
             <span class="ingredient-row__name">{{ ing.ingredientName }}</span>
             <span v-if="ing.is_optional" class="ingredient-row__opt-label">опц.</span>
-            <span class="ingredient-row__amount">{{ formatShoppingAmount(ing.amount, ing.base_unit).display }}</span>
-            <button type="button" class="ingredient-row__edit" @click="startEditIngredient(idx)" title="Редактировать">
+            <span class="ingredient-row__amount">{{
+              formatShoppingAmount(ing.amount, ing.base_unit).display
+            }}</span>
+            <button
+              type="button"
+              class="ingredient-row__edit"
+              title="Редактировать"
+              @click="startEditIngredient(idx)"
+            >
               <IconPencil width="14" height="14" />
             </button>
-            <button type="button" class="ingredient-row__remove" @click="removeIngredient(idx)" title="Удалить">
+            <button
+              type="button"
+              class="ingredient-row__remove"
+              title="Удалить"
+              @click="removeIngredient(idx)"
+            >
               <IconClose />
             </button>
           </div>
@@ -94,9 +128,13 @@
               @focus="$event.target.select()"
               @keydown.enter.prevent="confirmIngredient"
             />
-            <span class="ingredient-amount__unit">{{ UNIT_LABELS[pendingIngredient.base_unit] || pendingIngredient.base_unit }}</span>
+            <span class="ingredient-amount__unit">{{
+              UNIT_LABELS[pendingIngredient.base_unit] || pendingIngredient.base_unit
+            }}</span>
           </div>
-          <p v-else class="ingredient-amount__taste-hint">Количество не указывается — добавится как «по вкусу»</p>
+          <p v-else class="ingredient-amount__taste-hint">
+            Количество не указывается — добавится как «по вкусу»
+          </p>
           <label class="ingredient-amount__optional">
             <input v-model="pendingOptional" type="checkbox" />
             Опционально
@@ -104,7 +142,9 @@
           <div v-if="amountError" class="form__error">{{ amountError }}</div>
           <div class="ingredient-amount__actions">
             <button type="button" class="btn btn--sm" @click="confirmIngredient">Добавить</button>
-            <button type="button" class="btn btn--sm btn--ghost" @click="cancelIngredient">Отмена</button>
+            <button type="button" class="btn btn--sm btn--ghost" @click="cancelIngredient">
+              Отмена
+            </button>
           </div>
         </div>
 
@@ -118,7 +158,15 @@
               placeholder="Поиск ингредиента..."
               @input="searchIngredients"
             />
-            <button v-if="ingredientQuery" type="button" class="search-field__clear" aria-label="Очистить" @click="clearIngredientQuery">&times;</button>
+            <button
+              v-if="ingredientQuery"
+              type="button"
+              class="search-field__clear"
+              aria-label="Очистить"
+              @click="clearIngredientQuery"
+            >
+              &times;
+            </button>
           </div>
           <ul v-if="ingredientResults.length" class="ingredient-search__list">
             <li
@@ -128,7 +176,9 @@
               @click="selectIngredient(ing)"
             >
               {{ ing.name }}
-              <span class="ingredient-search__unit">{{ UNIT_LABELS[ing.base_unit] || ing.base_unit }}</span>
+              <span class="ingredient-search__unit">{{
+                UNIT_LABELS[ing.base_unit] || ing.base_unit
+              }}</span>
             </li>
           </ul>
           <button type="button" class="dish-search__create" @click="openIngredientForm">
@@ -140,12 +190,16 @@
       <div v-if="error" ref="errorRef" class="form__error">{{ error }}</div>
 
       <div v-if="duplicateActions" class="form__duplicate-actions">
-        <button type="button" class="form__duplicate-use" :disabled="loadingExisting" @click="useExistingDish">
-          {{ loadingExisting ? 'Поиск...' : 'Использовать существующее' }}
+        <button
+          type="button"
+          class="form__duplicate-use"
+          :disabled="loadingExisting"
+          @click="useExistingDish"
+        >
+          {{ loadingExisting ? "Поиск..." : "Использовать существующее" }}
         </button>
         <span class="form__duplicate-hint">или переименуйте выше</span>
       </div>
-
     </form>
 
     <IngredientForm
@@ -157,7 +211,7 @@
 
     <template #footer>
       <button type="submit" form="dish-form" class="form__submit" :disabled="saving">
-        {{ saving ? "Сохранение..." : (isEdit ? "Сохранить" : "Создать блюдо") }}
+        {{ saving ? "Сохранение..." : isEdit ? "Сохранить" : "Создать блюдо" }}
       </button>
     </template>
   </ModalWrapper>
@@ -169,7 +223,12 @@ import ModalWrapper from "./ModalWrapper.vue"
 import IngredientForm from "./IngredientForm.vue"
 import IconPencil from "../icons/IconPencil.vue"
 import IconClose from "../icons/IconClose.vue"
-import { createDish, updateDish, fetchDishCategories, fetchDishes } from "../../services/dishService"
+import {
+  createDish,
+  updateDish,
+  fetchDishCategories,
+  fetchDishes,
+} from "../../services/dishService"
 import { isDishOwn } from "../../utils/dishOwnership"
 import { fetchIngredients } from "../../services/ingredientService"
 import { formatAmount } from "../../utils/formatAmount"
@@ -190,8 +249,15 @@ const isEdit = computed(() => !!props.editDish)
 const isClone = computed(() => !props.editDish && !!props.cloneDish)
 
 const open = ref(props.modelValue)
-watch(() => props.modelValue, (v) => { open.value = v })
-watch(open, (v) => { emit("update:modelValue", v) })
+watch(
+  () => props.modelValue,
+  (v) => {
+    open.value = v
+  }
+)
+watch(open, (v) => {
+  emit("update:modelValue", v)
+})
 
 const name = ref("")
 const categoryId = ref("")
@@ -203,7 +269,7 @@ const error = ref("")
 const duplicateActions = ref(false)
 const loadingExisting = ref(false)
 watch(error, (val) => {
-  if (val) nextTick(() => errorRef.value?.scrollIntoView({ behavior: 'smooth', block: 'nearest' }))
+  if (val) nextTick(() => errorRef.value?.scrollIntoView({ behavior: "smooth", block: "nearest" }))
 })
 
 // Ingredient search state
@@ -223,57 +289,60 @@ const recipeRef = ref(null)
 const errorRef = ref(null)
 
 function autoResize(el) {
-  el.style.height = 'auto'
-  el.style.height = el.scrollHeight + 'px'
+  el.style.height = "auto"
+  el.style.height = el.scrollHeight + "px"
 }
 
 let ingredientSearchTimer = null
 
-watch(() => props.modelValue, async (v) => {
-  if (v) {
-    error.value = ""
-    duplicateActions.value = false
-    resetIngredientSearch()
-    try {
-      const data = await fetchDishCategories()
-      categories.value = data.results ?? []
-    } catch {
-      categories.value = []
+watch(
+  () => props.modelValue,
+  async (v) => {
+    if (v) {
+      error.value = ""
+      duplicateActions.value = false
+      resetIngredientSearch()
+      try {
+        const data = await fetchDishCategories()
+        categories.value = data.results ?? []
+      } catch {
+        categories.value = []
+      }
+      if (props.editDish) {
+        name.value = props.editDish.name || ""
+        categoryId.value = props.editDish.category?.id || ""
+        recipe.value = props.editDish.recipe || ""
+        ingredients.value = (props.editDish.dish_ingredients || []).map((di) => ({
+          ingredient: di.ingredient?.id ?? di.ingredient,
+          ingredientName: di.ingredient?.name ?? di.name ?? "",
+          amount: formatAmount(di.amount),
+          base_unit: di.ingredient?.base_unit ?? "",
+          unitLabel: UNIT_LABELS[di.ingredient?.base_unit] || di.ingredient?.base_unit || "",
+          is_optional: di.is_optional ?? false,
+        }))
+      } else if (props.cloneDish) {
+        name.value = props.cloneDish.name || ""
+        categoryId.value = props.cloneDish.category?.id || ""
+        recipe.value = props.cloneDish.recipe || ""
+        ingredients.value = (props.cloneDish.dish_ingredients || []).map((di) => ({
+          ingredient: di.ingredient?.id ?? di.ingredient,
+          ingredientName: di.ingredient?.name ?? di.name ?? "",
+          amount: formatAmount(di.amount),
+          base_unit: di.ingredient?.base_unit ?? "",
+          unitLabel: UNIT_LABELS[di.ingredient?.base_unit] || di.ingredient?.base_unit || "",
+          is_optional: di.is_optional ?? false,
+        }))
+      } else {
+        name.value = props.initialName || ""
+        categoryId.value = ""
+        recipe.value = ""
+        ingredients.value = []
+      }
+      await nextTick()
+      if (recipeRef.value) autoResize(recipeRef.value)
     }
-    if (props.editDish) {
-      name.value = props.editDish.name || ""
-      categoryId.value = props.editDish.category?.id || ""
-      recipe.value = props.editDish.recipe || ""
-      ingredients.value = (props.editDish.dish_ingredients || []).map((di) => ({
-        ingredient: di.ingredient?.id ?? di.ingredient,
-        ingredientName: di.ingredient?.name ?? di.name ?? "",
-        amount: formatAmount(di.amount),
-        base_unit: di.ingredient?.base_unit ?? '',
-        unitLabel: UNIT_LABELS[di.ingredient?.base_unit] || di.ingredient?.base_unit || '',
-        is_optional: di.is_optional ?? false,
-      }))
-    } else if (props.cloneDish) {
-      name.value = props.cloneDish.name || ""
-      categoryId.value = props.cloneDish.category?.id || ""
-      recipe.value = props.cloneDish.recipe || ""
-      ingredients.value = (props.cloneDish.dish_ingredients || []).map((di) => ({
-        ingredient: di.ingredient?.id ?? di.ingredient,
-        ingredientName: di.ingredient?.name ?? di.name ?? "",
-        amount: formatAmount(di.amount),
-        base_unit: di.ingredient?.base_unit ?? '',
-        unitLabel: UNIT_LABELS[di.ingredient?.base_unit] || di.ingredient?.base_unit || '',
-        is_optional: di.is_optional ?? false,
-      }))
-    } else {
-      name.value = props.initialName || ""
-      categoryId.value = ""
-      recipe.value = ""
-      ingredients.value = []
-    }
-    await nextTick()
-    if (recipeRef.value) autoResize(recipeRef.value)
   }
-})
+)
 
 function openIngredientForm() {
   ingredientFormInitialName.value = ingredientQuery.value.trim()
@@ -312,7 +381,7 @@ function searchIngredients() {
 }
 
 function selectIngredient(ing) {
-  const alreadyAdded = ingredients.value.some(i => i.ingredient === ing.id)
+  const alreadyAdded = ingredients.value.some((i) => i.ingredient === ing.id)
   if (alreadyAdded) {
     amountError.value = "Ингредиент уже добавлен."
     return
@@ -332,7 +401,7 @@ function startEditIngredient(idx) {
     name: ing.ingredientName,
     base_unit: ing.base_unit,
   }
-  pendingAmount.value = ing.base_unit === 'to_taste' ? '' : formatAmount(ing.amount)
+  pendingAmount.value = ing.base_unit === "to_taste" ? "" : formatAmount(ing.amount)
   pendingOptional.value = ing.is_optional
   editingIdx.value = idx
   amountError.value = ""
@@ -352,10 +421,10 @@ function removeIngredient(idx) {
 
 function confirmIngredient() {
   if (!pendingIngredient.value) return
-  const isToTaste = pendingIngredient.value.base_unit === 'to_taste'
+  const isToTaste = pendingIngredient.value.base_unit === "to_taste"
   let finalAmount = "1"
   if (!isToTaste) {
-    const raw = pendingAmount.value.trim().replace(',', '.')
+    const raw = pendingAmount.value.trim().replace(",", ".")
     const num = Number(raw)
     if (!raw || isNaN(num) || num <= 0) {
       amountError.value = "Введите количество больше 0."
@@ -369,7 +438,8 @@ function confirmIngredient() {
     ingredientName: pendingIngredient.value.name,
     amount: finalAmount,
     base_unit: pendingIngredient.value.base_unit,
-    unitLabel: UNIT_LABELS[pendingIngredient.value.base_unit] || pendingIngredient.value.base_unit || '',
+    unitLabel:
+      UNIT_LABELS[pendingIngredient.value.base_unit] || pendingIngredient.value.base_unit || "",
     is_optional: pendingOptional.value,
   }
   if (editingIdx.value !== null) {
@@ -433,7 +503,7 @@ async function submit() {
     open.value = false
   } catch (err) {
     error.value = err.message || "Не удалось создать блюдо"
-    if (isClone.value && err.message?.includes('уже существует')) {
+    if (isClone.value && err.message?.includes("уже существует")) {
       duplicateActions.value = true
     }
   } finally {
@@ -494,7 +564,9 @@ async function useExistingDish() {
   font-size: var(--font-sm);
   font-weight: 600;
   cursor: pointer;
-  transition: background var(--transition-fast), opacity var(--transition-fast);
+  transition:
+    background var(--transition-fast),
+    opacity var(--transition-fast);
 }
 
 .form__duplicate-use:hover {
@@ -576,7 +648,10 @@ async function useExistingDish() {
   align-items: center;
   justify-content: center;
   opacity: 0.4;
-  transition: opacity var(--transition-fast), color var(--transition-fast), background var(--transition-fast);
+  transition:
+    opacity var(--transition-fast),
+    color var(--transition-fast),
+    background var(--transition-fast);
   padding: 0;
 }
 
@@ -697,7 +772,9 @@ async function useExistingDish() {
   font-size: var(--font-sm);
   font-weight: 500;
   color: var(--color-mint-hover);
-  transition: background var(--transition-fast), border-color var(--transition-fast);
+  transition:
+    background var(--transition-fast),
+    border-color var(--transition-fast);
 }
 
 .dish-search__create:hover {

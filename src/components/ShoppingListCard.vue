@@ -39,7 +39,11 @@ const dateRange = computed(() => {
   border-radius: var(--radius-sm);
   text-align: left;
   cursor: pointer;
-  transition: background var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast), transform var(--transition-fast);
+  transition:
+    background var(--transition-fast),
+    box-shadow var(--transition-fast),
+    border-color var(--transition-fast),
+    transform var(--transition-fast);
   -webkit-tap-highlight-color: transparent;
 }
 

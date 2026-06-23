@@ -50,7 +50,9 @@
   color: var(--color-text-secondary);
   border-radius: var(--radius-xs);
   flex-shrink: 0;
-  transition: background var(--transition-fast), color var(--transition-fast);
+  transition:
+    background var(--transition-fast),
+    color var(--transition-fast);
 }
 
 .detail__dish-edit:hover {
@@ -140,7 +142,10 @@
   border-radius: var(--radius-sm);
   font-size: var(--font-base);
   font-weight: 600;
-  transition: background var(--transition-fast), opacity var(--transition-fast), transform var(--transition-fast);
+  transition:
+    background var(--transition-fast),
+    opacity var(--transition-fast),
+    transform var(--transition-fast);
 }
 
 .detail__btn--edit {

@@ -6,7 +6,7 @@ const API = window.__APP_CONFIG__?.apiUrl ?? import.meta.env.VITE_API
 export async function login(username, password) {
   const tokens = await api("/api/v1/auth/token/login/", {
     method: "POST",
-    body: JSON.stringify({ username, password })
+    body: JSON.stringify({ username, password }),
   })
   saveTokens(tokens)
   return tokens
@@ -21,7 +21,7 @@ export async function login(username, password) {
 export async function telegramLogin(initData) {
   const response = await fetch(API + "/api/v1/auth/token/telegram/", {
     method: "POST",
-    headers: { "X-TG-INIT-DATA": initData }
+    headers: { "X-TG-INIT-DATA": initData },
   })
 
   if (response.ok) {
@@ -50,12 +50,12 @@ export async function telegramLoginWithConsent(initData, terms, marketing) {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "X-TG-INIT-DATA": initData
+      "X-TG-INIT-DATA": initData,
     },
     body: JSON.stringify({
       terms_of_service_and_privacy_policy: terms,
-      marketing_communications: marketing
-    })
+      marketing_communications: marketing,
+    }),
   })
 
   if (response.ok) {

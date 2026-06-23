@@ -1,1 +1,1 @@
-window.__APP_CONFIG__ = null;
+window.__APP_CONFIG__ = null

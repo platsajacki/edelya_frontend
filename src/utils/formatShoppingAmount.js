@@ -1,9 +1,9 @@
 import { getUnitLabel } from "./unitSteps"
 
 const CONVERSION_RULES = [
-  { from: "gram",       to: "кг", threshold: 1000, divisor: 1000 },
-  { from: "milliliter",  to: "л",  threshold: 1000, divisor: 1000 },
-  { from: "milligram",   to: "г",  threshold: 1000, divisor: 1000 },
+  { from: "gram", to: "кг", threshold: 1000, divisor: 1000 },
+  { from: "milliliter", to: "л", threshold: 1000, divisor: 1000 },
+  { from: "milligram", to: "г", threshold: 1000, divisor: 1000 },
 ]
 
 function stripTrailingZeros(num) {

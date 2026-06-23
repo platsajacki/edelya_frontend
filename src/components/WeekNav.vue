@@ -62,7 +62,9 @@ defineEmits(["prev", "next", "create-shopping-week"])
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background var(--transition-fast), border-color var(--transition-fast);
+  transition:
+    background var(--transition-fast),
+    border-color var(--transition-fast);
 }
 
 .week-nav__btn:active {
@@ -103,7 +105,9 @@ defineEmits(["prev", "next", "create-shopping-week"])
   color: var(--color-text-secondary);
   cursor: pointer;
   flex-shrink: 0;
-  transition: color var(--transition-fast), background var(--transition-fast);
+  transition:
+    color var(--transition-fast),
+    background var(--transition-fast);
   -webkit-tap-highlight-color: transparent;
 }
 

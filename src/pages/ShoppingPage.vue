@@ -9,7 +9,7 @@
         @click="sortAsc = !sortAsc"
       >
         <IconSort :ascending="sortAsc" />
-        {{ sortAsc ? 'Сначала новые' : 'Сначала старые' }}
+        {{ sortAsc ? "Сначала новые" : "Сначала старые" }}
       </button>
     </div>
 
@@ -26,8 +26,8 @@
       <button
         v-if="searchQuery"
         class="search-field__clear"
-        @click="clearSearch"
         aria-label="Очистить"
+        @click="clearSearch"
       >
         &times;
       </button>
@@ -48,31 +48,21 @@
     <div v-else-if="!store.lists.length" class="empty-state">
       <IconShoppingBag class="empty-state__icon" width="48" height="48" />
       <p class="empty-state__text">Нет списков покупок</p>
-      <button class="empty-state__action" @click="showForm = true">
-        + Создать список
-      </button>
+      <button class="empty-state__action" @click="showForm = true">+ Создать список</button>
     </div>
 
     <!-- Lists -->
     <div v-else class="shopping-list">
-      <ShoppingListCard
-        v-for="list in sortedLists"
-        :key="list.id"
-        :list="list"
-        @tap="openList"
-      />
+      <ShoppingListCard v-for="list in sortedLists" :key="list.id" :list="list" @tap="openList" />
     </div>
 
     <!-- FAB -->
-    <FabButton @click="showForm = true" aria-label="Создать список">
+    <FabButton aria-label="Создать список" @click="showForm = true">
       <IconPlus />
     </FabButton>
 
     <!-- Create form -->
-    <ShoppingListForm
-      v-model="showForm"
-      @created="onListCreated"
-    />
+    <ShoppingListForm v-model="showForm" @created="onListCreated" />
 
     <!-- Toast -->
     <Toast :message="store.toast" @dismiss="store.toast = null" />
@@ -162,7 +152,9 @@ function onListCreated(list) {
   font-size: var(--font-xs);
   color: var(--color-text-secondary);
   cursor: pointer;
-  transition: border-color var(--transition-fast), color var(--transition-fast);
+  transition:
+    border-color var(--transition-fast),
+    color var(--transition-fast);
   -webkit-tap-highlight-color: transparent;
 }
 

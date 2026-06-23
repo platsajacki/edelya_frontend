@@ -12,9 +12,19 @@
             placeholder="Поиск ингредиента..."
             @input="onSearch"
           />
-          <button v-if="query" type="button" class="search-field__clear" aria-label="Очистить" @click="clearQuery">&times;</button>
+          <button
+            v-if="query"
+            type="button"
+            class="search-field__clear"
+            aria-label="Очистить"
+            @click="clearQuery"
+          >
+            &times;
+          </button>
         </div>
-        <div v-if="searching" class="add-item-form__status"><div class="spinner spinner--sm" /></div>
+        <div v-if="searching" class="add-item-form__status">
+          <div class="spinner spinner--sm" />
+        </div>
         <ul v-if="results.length" class="ingredient-search__list">
           <li
             v-for="ing in results"
@@ -26,7 +36,9 @@
             <span class="ingredient-search__unit">{{ unitLabel(ing.base_unit) }}</span>
           </li>
         </ul>
-        <div v-else-if="searched && !searching" class="add-item-form__status">Ничего не найдено</div>
+        <div v-else-if="searched && !searching" class="add-item-form__status">
+          Ничего не найдено
+        </div>
         <button type="button" class="add-item-form__create" @click="openIngredientForm">
           + Создать ингредиент
         </button>
@@ -36,7 +48,9 @@
       <div v-else class="amount-step">
         <div class="amount-step__header">
           <span class="amount-step__name">{{ selectedIngredient.name }}</span>
-          <button type="button" class="amount-step__change" @click="clearSelection">Изменить</button>
+          <button type="button" class="amount-step__change" @click="clearSelection">
+            Изменить
+          </button>
         </div>
 
         <template v-if="!confirmDuplicate">
@@ -63,12 +77,7 @@
 
           <div v-if="error" ref="errorRef" class="form__error">{{ error }}</div>
 
-          <button
-            type="button"
-            class="form__submit"
-            :disabled="saving"
-            @click="submit"
-          >
+          <button type="button" class="form__submit" :disabled="saving" @click="submit">
             {{ saving ? "Добавление..." : "Добавить" }}
           </button>
         </template>
@@ -79,8 +88,8 @@
             В списке уже есть
             <strong>{{ selectedIngredient.name }}</strong>
             <template v-if="existingItem && selectedIngredient.base_unit !== 'to_taste'">
-              ({{ existingItem.amount }} {{ unitLabel(selectedIngredient.base_unit) }})
-            </template>.
+              ({{ existingItem.amount }} {{ unitLabel(selectedIngredient.base_unit) }}) </template
+            >.
             <template v-if="selectedIngredient.base_unit !== 'to_taste'">
               Добавить ещё {{ amount }} {{ unitLabel(selectedIngredient.base_unit) }}?
             </template>
@@ -93,12 +102,7 @@
             >
               Нет
             </button>
-            <button
-              type="button"
-              class="form__submit"
-              :disabled="saving"
-              @click="confirmAdd"
-            >
+            <button type="button" class="form__submit" :disabled="saving" @click="confirmAdd">
               {{ saving ? "Добавление..." : "Да, добавить" }}
             </button>
           </div>
@@ -132,8 +136,15 @@ const props = defineProps({
 const emit = defineEmits(["update:modelValue", "created"])
 
 const open = ref(props.modelValue)
-watch(() => props.modelValue, (v) => { open.value = v })
-watch(open, (v) => { emit("update:modelValue", v) })
+watch(
+  () => props.modelValue,
+  (v) => {
+    open.value = v
+  }
+)
+watch(open, (v) => {
+  emit("update:modelValue", v)
+})
 
 const query = ref("")
 const results = ref([])
@@ -148,7 +159,7 @@ const saving = ref(false)
 const error = ref("")
 const errorRef = ref(null)
 watch(error, (val) => {
-  if (val) nextTick(() => errorRef.value?.scrollIntoView({ behavior: 'smooth', block: 'nearest' }))
+  if (val) nextTick(() => errorRef.value?.scrollIntoView({ behavior: "smooth", block: "nearest" }))
 })
 const showIngredientForm = ref(false)
 const ingredientFormInitialName = ref("")
@@ -166,12 +177,15 @@ function unitLabel(unit) {
   return getUnitLabel(unit)
 }
 
-watch(() => props.modelValue, (v) => {
-  if (v) {
-    reset()
-    setTimeout(() => searchInput.value?.focus(), 360)
+watch(
+  () => props.modelValue,
+  (v) => {
+    if (v) {
+      reset()
+      setTimeout(() => searchInput.value?.focus(), 360)
+    }
   }
-})
+)
 
 function reset() {
   query.value = ""
@@ -239,11 +253,11 @@ function clearSelection() {
 }
 
 async function submit() {
-  const isToTaste = selectedIngredient.value?.base_unit === 'to_taste'
+  const isToTaste = selectedIngredient.value?.base_unit === "to_taste"
 
   let finalAmount = "0"
   if (!isToTaste) {
-    const raw = amount.value.trim().replace(',', '.')
+    const raw = amount.value.trim().replace(",", ".")
     const num = Number(raw)
     if (!raw || isNaN(num) || num <= 0) {
       error.value = "Введите количество больше 0."
@@ -263,9 +277,10 @@ async function submit() {
     emit("created", data)
     open.value = false
   } catch (err) {
-    if (DUPLICATE_MESSAGES.has(err.message) && selectedIngredient.value?.base_unit !== 'to_taste') {
+    if (DUPLICATE_MESSAGES.has(err.message) && selectedIngredient.value?.base_unit !== "to_taste") {
       const store = useShoppingStore()
-      existingItem.value = store.items.find((i) => i.ingredient?.id === selectedIngredient.value?.id) ?? null
+      existingItem.value =
+        store.items.find((i) => i.ingredient?.id === selectedIngredient.value?.id) ?? null
       confirmDuplicate.value = true
     } else {
       error.value = err.message || "Не удалось добавить позицию"
@@ -280,7 +295,7 @@ async function confirmAdd() {
   const item = existingItem.value
   if (!item) return
 
-  const raw = amount.value.trim().replace(',', '.')
+  const raw = amount.value.trim().replace(",", ".")
   const newAmount = String(Number(item.amount) + Number(raw))
 
   saving.value = true
@@ -327,7 +342,9 @@ async function confirmAdd() {
   font-size: var(--font-sm);
   font-weight: 500;
   color: var(--color-mint-hover);
-  transition: background var(--transition-fast), border-color var(--transition-fast);
+  transition:
+    background var(--transition-fast),
+    border-color var(--transition-fast);
 }
 
 .add-item-form__create:hover {
@@ -402,7 +419,9 @@ async function confirmAdd() {
   background: var(--color-surface);
   color: var(--color-text);
   outline: none;
-  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+  transition:
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast);
 }
 
 .form__input:focus {
