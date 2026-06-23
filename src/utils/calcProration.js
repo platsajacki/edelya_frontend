@@ -26,7 +26,7 @@ export function calcProration(subscription, newTariff) {
   const newPrice = Number(newTariff.price)
   const currentPrice = Number(currentTariff.price)
 
-  const proration =
-    Math.round((remainingDays / totalDays) * (newPrice - currentPrice) * 100) / 100
-  return proration > 0 && proration < 1 ? 1 : proration
+  const proration = (remainingDays / totalDays) * (newPrice - currentPrice)
+  const amount = Math.round(proration * 100) / 100
+  return proration > 0 && amount < 1 ? 1 : amount
 }
