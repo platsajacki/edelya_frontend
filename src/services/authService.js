@@ -1,7 +1,7 @@
 import { api } from "../api/client"
 import { saveTokens } from "../storage/tokenStorage"
 
-const API = import.meta.env.VITE_API
+const API = window.__APP_CONFIG__?.apiUrl ?? import.meta.env.VITE_API
 
 export async function login(username, password) {
   const tokens = await api("/api/v1/auth/token/login/", {

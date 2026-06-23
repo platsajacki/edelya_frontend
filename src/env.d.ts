@@ -5,3 +5,10 @@ declare module "*.vue" {
   const component: DefineComponent
   export default component
 }
+
+interface Window {
+  __APP_CONFIG__?: {
+    apiUrl?: string
+    telegramBot?: string
+  }
+}
