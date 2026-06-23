@@ -4,6 +4,7 @@
  *
  * Python timedelta.days returns integer floor-division, so we use Math.floor here.
  * Final result is rounded to 2 decimal places (same as Decimal.quantize('0.01')).
+ * A positive charge is at least 1 ruble.
  *
  * @param {object} subscription - current subscription object from the store
  * @param {object} newTariff    - the tariff the user wants to switch to
@@ -26,5 +27,6 @@ export function calcProration(subscription, newTariff) {
   const currentPrice = Number(currentTariff.price)
 
   const proration = (remainingDays / totalDays) * (newPrice - currentPrice)
-  return Math.round(proration * 100) / 100
+  const amount = Math.round(proration * 100) / 100
+  return proration > 0 && amount < 1 ? 1 : amount
 }
