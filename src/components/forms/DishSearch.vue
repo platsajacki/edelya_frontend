@@ -95,7 +95,7 @@ function onInput() {
   debounceTimer = setTimeout(async () => {
     loading.value = true
     try {
-      const data = await fetchDishes({ name__icontains: q })
+      const data = await fetchDishes({ search: q })
       results.value = data.results ?? []
     } catch {
       results.value = []
