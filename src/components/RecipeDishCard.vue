@@ -35,7 +35,7 @@ const ingredientWord = computed(() => {
 })
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .dish-card {
   display: flex;
   align-items: center;
@@ -54,46 +54,45 @@ const ingredientWord = computed(() => {
     border-color var(--transition-fast),
     transform var(--transition-fast);
   -webkit-tap-highlight-color: transparent;
-}
 
-.dish-card:hover {
-  box-shadow: var(--shadow-card);
-  border-color: var(--color-mint-alpha-10);
-}
+  &:hover {
+    box-shadow: var(--shadow-card);
+    border-color: var(--color-mint-alpha-10);
+  }
 
-.dish-card:active {
-  transform: scale(var(--press-scale-sm));
-}
+  &:active {
+    transform: scale(var(--press-scale-sm));
+  }
 
-.dish-card__main {
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-  min-width: 0;
-}
+  &__main {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
+  }
 
-.dish-card__name {
-  font-size: var(--font-base);
-  font-weight: 600;
-  color: var(--color-text);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
+  &__name {
+    font-size: var(--font-base);
+    font-weight: 600;
+    color: var(--color-text);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
 
-.dish-card__meta {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: var(--font-xs);
-  color: var(--color-text-secondary);
-}
+  &__meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: var(--font-xs);
+    color: var(--color-text-secondary);
+  }
 
-.dish-card__category {
-  font-weight: 500;
-}
-
-.dish-card__ingredients {
-  opacity: 0.7;
+  &__category {
+    font-weight: 500;
+  }
+  &__ingredients {
+    opacity: 0.7;
+  }
 }
 </style>

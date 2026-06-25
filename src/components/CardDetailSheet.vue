@@ -236,60 +236,62 @@ async function onCloneCreated(newDish: DTODish) {
 @import "../styles/detail-sheet.scss";
 </style>
 
-<style scoped>
-.detail__row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 8px;
-}
+<style lang="scss" scoped>
+.detail {
+  &__row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
 
-.detail__row--col {
-  flex-direction: column;
-  align-items: flex-start;
-}
+    &--col {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+  }
 
-.detail__eat-dates {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
+  &__eat-dates {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
 
-.detail__eat-date {
-  font-size: var(--font-sm);
-  font-weight: 400;
-  color: var(--color-text-secondary);
-}
+  &__eat-date {
+    font-size: var(--font-sm);
+    font-weight: 400;
+    color: var(--color-text-secondary);
+  }
 
-.detail__link {
-  border: none;
-  background: none;
-  font-size: var(--font-sm);
-  font-weight: 600;
-  color: var(--color-mint);
-  cursor: pointer;
-  padding: 0;
-  text-decoration: underline;
-  text-underline-offset: 3px;
-  transition:
-    color var(--transition-fast),
-    text-decoration-thickness var(--transition-fast);
-}
+  &__link {
+    border: none;
+    background: none;
+    font-size: var(--font-sm);
+    font-weight: 600;
+    color: var(--color-mint);
+    cursor: pointer;
+    padding: 0;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    transition:
+      color var(--transition-fast),
+      text-decoration-thickness var(--transition-fast);
 
-.detail__link:hover {
-  color: var(--color-mint-hover);
-  text-decoration-thickness: 2px;
-}
+    &:hover {
+      color: var(--color-mint-hover);
+      text-decoration-thickness: 2px;
+    }
+  }
 
-.detail__value {
-  font-size: var(--font-base);
-  font-weight: 500;
-  color: var(--color-text);
-}
+  &__value {
+    font-size: var(--font-base);
+    font-weight: 500;
+    color: var(--color-text);
 
-.detail__value--muted {
-  color: var(--color-text-secondary);
-  font-weight: 400;
-  font-size: var(--font-sm);
+    &--muted {
+      color: var(--color-text-secondary);
+      font-weight: 400;
+      font-size: var(--font-sm);
+    }
+  }
 }
 </style>

@@ -82,7 +82,7 @@ onUnmounted(() => {
 })
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .modal-overlay {
   position: fixed;
   inset: 0;
@@ -97,6 +97,11 @@ onUnmounted(() => {
   overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
+
+  @media (min-width: 600px) {
+    align-items: center;
+    padding: 16px;
+  }
 }
 
 .modal-panel {
@@ -111,6 +116,11 @@ onUnmounted(() => {
   flex-direction: column;
   overflow: hidden;
   flex-shrink: 0;
+
+  @media (min-width: 600px) {
+    border-radius: var(--radius-md);
+    margin: auto 0;
+  }
 }
 
 .modal-header {
@@ -141,10 +151,10 @@ onUnmounted(() => {
   color: var(--color-text-secondary);
   border-radius: var(--radius-xs);
   transition: background var(--transition-fast);
-}
 
-.modal-close:hover {
-  background: var(--color-empty);
+  &:hover {
+    background: var(--color-empty);
+  }
 }
 
 .modal-body {
@@ -160,50 +170,33 @@ onUnmounted(() => {
   flex-shrink: 0;
 }
 
-/* Transitions */
 .modal-enter-active,
 .modal-leave-active {
   transition: opacity var(--transition-normal);
 }
 
-.modal-enter-active .modal-panel {
-  transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1);
+.modal-enter-active {
+  .modal-panel {
+    transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1);
+  }
 }
 
-.modal-leave-active .modal-panel {
-  transition: transform var(--transition-normal);
+.modal-leave-active {
+  .modal-panel {
+    transition: transform var(--transition-normal);
+  }
 }
 
 .modal-enter-from,
 .modal-leave-to {
   opacity: 0;
-}
-
-.modal-enter-from .modal-panel {
-  transform: translateY(100%);
-}
-
-.modal-leave-to .modal-panel {
-  transform: translateY(100%);
-}
-
-@media (min-width: 600px) {
-  .modal-overlay {
-    align-items: center;
-    padding: 16px;
-  }
 
   .modal-panel {
-    border-radius: var(--radius-md);
-    margin: auto 0;
-  }
+    transform: translateY(100%);
 
-  .modal-enter-from .modal-panel {
-    transform: scale(0.95);
-  }
-
-  .modal-leave-to .modal-panel {
-    transform: scale(0.95);
+    @media (min-width: 600px) {
+      transform: scale(0.95);
+    }
   }
 }
 </style>

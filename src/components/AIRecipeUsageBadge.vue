@@ -41,7 +41,7 @@ const remainingText = computed(() => {
 })
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .ai-usage {
   display: flex;
   align-items: center;
@@ -53,52 +53,50 @@ const remainingText = computed(() => {
   background: var(--color-surface);
   box-shadow: var(--shadow-card);
   color: var(--color-text);
-}
 
-.ai-usage--empty {
-  background: var(--color-warning-bg);
-  border-color: var(--color-warning-border);
-}
-
-.ai-usage__main {
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.ai-usage__title {
-  font-size: var(--font-xs);
-  font-weight: 700;
-  color: var(--color-text-secondary);
-}
-
-.ai-usage--empty .ai-usage__title {
-  color: var(--color-warning);
-}
-
-.ai-usage__value,
-.ai-usage__remaining {
-  font-size: var(--font-sm);
-  line-height: 1.35;
-}
-
-.ai-usage__value {
-  color: var(--color-text);
-  font-weight: 600;
-}
-
-.ai-usage__remaining {
-  flex-shrink: 0;
-  color: var(--color-text);
-  font-weight: 600;
-}
-
-@media (max-width: 360px) {
-  .ai-usage {
+  @media (max-width: 360px) {
     align-items: flex-start;
     flex-direction: column;
     gap: 6px;
+  }
+
+  &--empty {
+    background: var(--color-warning-bg);
+    border-color: var(--color-warning-border);
+
+    .ai-usage__title {
+      color: var(--color-warning);
+    }
+  }
+
+  &__main {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  &__title {
+    font-size: var(--font-xs);
+    font-weight: 700;
+    color: var(--color-text-secondary);
+  }
+
+  &__value,
+  &__remaining {
+    font-size: var(--font-sm);
+    line-height: 1.35;
+  }
+
+  &__value {
+    color: var(--color-text);
+    font-weight: 600;
+  }
+
+  &__remaining {
+    flex-shrink: 0;
+    color: var(--color-text);
+    font-weight: 600;
   }
 }
 </style>

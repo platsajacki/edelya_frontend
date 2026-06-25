@@ -47,7 +47,7 @@ onMounted(async () => {
 })
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .app-loading {
   display: flex;
   align-items: center;

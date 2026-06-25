@@ -238,108 +238,145 @@ async function loadNext() {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .week-grid {
   display: flex;
   flex-direction: column;
   gap: 12px;
+
+  &__header {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: 12px;
+    padding: 0 16px;
+  }
+
+  &__header-col {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 5px;
+    font-size: var(--font-2xs);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding: 4px 0;
+    border-bottom: 2px solid currentColor;
+
+    &--eat {
+      color: var(--color-eat);
+    }
+    &--cook {
+      color: var(--color-cook);
+    }
+  }
+
+  &__past-toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    background: var(--color-empty);
+    cursor: pointer;
+    transition:
+      background var(--transition-fast),
+      border-color var(--transition-fast);
+    -webkit-tap-highlight-color: transparent;
+
+    &:active {
+      background: var(--color-border);
+    }
+  }
+
+  &__past-chevron {
+    flex-shrink: 0;
+    color: var(--color-text-secondary);
+    transition: transform var(--transition-normal);
+
+    &--open {
+      transform: rotate(90deg);
+    }
+  }
+
+  &__past-label {
+    font-size: var(--font-sm);
+    font-weight: 500;
+    color: var(--color-text-secondary);
+  }
+
+  &__past-days {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  &__today-divider,
+  &__section-divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 0 16px;
+  }
+
+  &__today-line,
+  &__section-line {
+    flex: 1;
+    height: 1px;
+    background: var(--color-border);
+  }
+
+  &__today-badge,
+  &__section-badge {
+    font-size: var(--font-xs);
+    font-weight: 600;
+    color: var(--color-mint);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    white-space: nowrap;
+  }
+
+  &__next-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-height: 44px;
+    padding: 10px 16px;
+    margin: 4px 0 0;
+    border: 1px dashed var(--color-border);
+    border-radius: var(--radius-md);
+    background: transparent;
+    cursor: pointer;
+    transition:
+      background var(--transition-fast),
+      border-color var(--transition-fast);
+
+    &:active {
+      background: var(--color-bg-secondary);
+    }
+    &:disabled {
+      opacity: 0.6;
+      cursor: default;
+    }
+  }
+
+  &__next-text {
+    font-size: var(--font-sm);
+    font-weight: 500;
+    color: var(--color-text-secondary);
+  }
+
+  &__next-spinner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+  }
 }
 
-.week-grid__header {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  column-gap: 12px;
-  padding: 0 16px;
-}
-
-.week-grid__header-col {
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 5px;
-  font-size: var(--font-2xs);
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  padding: 4px 0;
-  border-bottom: 2px solid currentColor;
-}
-
-.week-grid__header-col--eat {
-  color: var(--color-eat);
-}
-
-.week-grid__header-col--cook {
-  color: var(--color-cook);
-}
-
-/* ── Past days toggle ── */
-.week-grid__past-toggle {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 16px;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  background: var(--color-empty);
-  cursor: pointer;
-  transition:
-    background var(--transition-fast),
-    border-color var(--transition-fast);
-  -webkit-tap-highlight-color: transparent;
-}
-
-.week-grid__past-toggle:active {
-  background: var(--color-border);
-}
-
-.week-grid__past-chevron {
-  flex-shrink: 0;
-  color: var(--color-text-secondary);
-  transition: transform var(--transition-normal);
-}
-
-.week-grid__past-chevron--open {
-  transform: rotate(90deg);
-}
-
-.week-grid__past-label {
-  font-size: var(--font-sm);
-  font-weight: 500;
-  color: var(--color-text-secondary);
-}
-
-/* ── Past days container ── */
-.week-grid__past-days {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-/* ── "Сегодня" divider ── */
-.week-grid__today-divider {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 0 16px;
-}
-
-.week-grid__today-line {
-  flex: 1;
-  height: 1px;
-  background: var(--color-border);
-}
-
-.week-grid__today-badge {
-  font-size: var(--font-xs);
-  font-weight: 600;
-  color: var(--color-mint);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  white-space: nowrap;
-}
-
-/* ── Expand/collapse transition ── */
 .past-expand-enter-active {
   transition:
     opacity var(--transition-normal),
@@ -358,83 +395,16 @@ async function loadNext() {
   opacity: 0;
   max-height: 0;
 }
-
 .past-expand-enter-to {
   opacity: 1;
   max-height: 2000px;
 }
-
 .past-expand-leave-from {
   opacity: 1;
   max-height: 2000px;
 }
-
 .past-expand-leave-to {
   opacity: 0;
   max-height: 0;
-}
-
-/* ── Next week toggle button ── */
-.week-grid__next-toggle {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  min-height: 44px;
-  padding: 10px 16px;
-  margin: 4px 0 0;
-  border: 1px dashed var(--color-border);
-  border-radius: var(--radius-md);
-  background: transparent;
-  cursor: pointer;
-  transition:
-    background var(--transition-fast),
-    border-color var(--transition-fast);
-}
-
-.week-grid__next-toggle:active {
-  background: var(--color-bg-secondary);
-}
-
-.week-grid__next-toggle:disabled {
-  opacity: 0.6;
-  cursor: default;
-}
-
-.week-grid__next-text {
-  font-size: var(--font-sm);
-  font-weight: 500;
-  color: var(--color-text-secondary);
-}
-
-.week-grid__next-spinner {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 20px;
-  height: 20px;
-}
-
-/* ── Next week divider (same as today but secondary color) ── */
-.week-grid__section-divider {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 0 16px;
-}
-
-.week-grid__section-line {
-  flex: 1;
-  height: 1px;
-  background: var(--color-border);
-}
-
-.week-grid__section-badge {
-  font-size: var(--font-xs);
-  font-weight: 600;
-  color: var(--color-mint);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  white-space: nowrap;
 }
 </style>

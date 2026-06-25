@@ -110,112 +110,112 @@ watch(listName, (val) => {
 })
 </script>
 
-<style scoped>
-.confirm__dates {
-  display: flex;
-  gap: 12px;
-  margin-bottom: 12px;
-}
+<style lang="scss" scoped>
+.confirm {
+  &__dates {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
 
-.confirm__date-field {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
+  &__date-field {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
 
-.confirm__label {
-  font-size: var(--font-sm);
-  font-weight: 500;
-  color: var(--color-text-secondary);
-}
+  &__label {
+    font-size: var(--font-sm);
+    font-weight: 500;
+    color: var(--color-text-secondary);
+  }
 
-.confirm__name {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
+  &__name {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
 
-.confirm__name-label {
-  font-size: var(--font-sm);
-  font-weight: 500;
-  color: var(--color-text-secondary);
-}
+    &-label {
+      font-size: var(--font-sm);
+      font-weight: 500;
+      color: var(--color-text-secondary);
+    }
 
-.confirm__name-input {
-  width: 100%;
-  padding: 10px 12px;
-  border: 1.5px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  font-size: var(--font-md);
-  font-family: inherit;
-  background: var(--color-surface);
-  color: var(--color-text);
-  outline: none;
-  box-sizing: border-box;
-  transition:
-    border-color var(--transition-fast),
-    box-shadow var(--transition-fast);
-}
+    &-input {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1.5px solid var(--color-border);
+      border-radius: var(--radius-sm);
+      font-size: var(--font-md);
+      font-family: inherit;
+      background: var(--color-surface);
+      color: var(--color-text);
+      outline: none;
+      box-sizing: border-box;
+      transition:
+        border-color var(--transition-fast),
+        box-shadow var(--transition-fast);
 
-.confirm__name-input:focus {
-  border-color: var(--color-mint-alpha-25);
-  box-shadow: 0 0 0 3px var(--color-mint-alpha-10);
-}
+      &:focus {
+        border-color: var(--color-mint-alpha-25);
+        box-shadow: 0 0 0 3px var(--color-mint-alpha-10);
+      }
+    }
+  }
 
-.confirm__message {
-  margin: 0;
-  font-size: var(--font-body);
-  color: var(--color-text);
-  line-height: 1.5;
-}
+  &__message {
+    margin: 0;
+    font-size: var(--font-body);
+    color: var(--color-text);
+    line-height: 1.5;
+  }
 
-.confirm__empty {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 12px;
-  text-align: center;
-  padding: 8px 0;
-}
+  &__empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    text-align: center;
+    padding: 8px 0;
 
-.confirm__empty-icon {
-  color: var(--color-text-secondary);
-  width: 32px;
-  height: 32px;
-}
+    &-icon {
+      color: var(--color-text-secondary);
+      width: 32px;
+      height: 32px;
+    }
+  }
 
-.confirm__actions {
-  display: flex;
-  gap: 8px;
-}
+  &__actions {
+    display: flex;
+    gap: 8px;
+  }
 
-.confirm__btn {
-  flex: 1;
-  padding: 12px 16px;
-  border: none;
-  border-radius: var(--radius-sm);
-  font-size: var(--font-sm);
-  font-weight: 600;
-  cursor: pointer;
-  transition: opacity var(--transition-fast);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
+  &__btn {
+    flex: 1;
+    padding: 12px 16px;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-size: var(--font-sm);
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity var(--transition-fast);
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
-.confirm__btn:disabled {
-  opacity: 0.6;
-  cursor: default;
-}
-
-.confirm__btn--cancel {
-  background: var(--color-empty);
-  color: var(--color-text-secondary);
-}
-
-.confirm__btn--create {
-  background: var(--color-mint);
-  color: var(--on-primary);
+    &:disabled {
+      opacity: 0.6;
+      cursor: default;
+    }
+    &--cancel {
+      background: var(--color-empty);
+      color: var(--color-text-secondary);
+    }
+    &--create {
+      background: var(--color-mint);
+      color: var(--on-primary);
+    }
+  }
 }
 </style>

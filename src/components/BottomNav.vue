@@ -36,7 +36,7 @@ function isActive(to: string): boolean {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .bottom-nav {
   position: fixed;
   bottom: 0;
@@ -49,10 +49,8 @@ function isActive(to: string): boolean {
   border-top: 1px solid var(--color-border);
   padding: 6px 0 calc(6px + env(safe-area-inset-bottom, 0px));
   z-index: var(--z-nav);
-}
 
-@media (min-width: 600px) {
-  .bottom-nav {
+  @media (min-width: 600px) {
     width: 100%;
     max-width: 540px;
     left: 50%;
@@ -60,60 +58,59 @@ function isActive(to: string): boolean {
     transform: translateX(-50%);
     border-radius: var(--radius-md) var(--radius-md) 0 0;
   }
-}
 
-.bottom-nav__tab {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 2px;
-  padding: 4px 8px;
-  text-decoration: none;
-  color: var(--color-text-secondary);
-  transition: color var(--transition-fast);
-  -webkit-tap-highlight-color: transparent;
-  min-width: 0;
-}
+  &__tab {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    padding: 4px 8px;
+    text-decoration: none;
+    color: var(--color-text-secondary);
+    transition: color var(--transition-fast);
+    -webkit-tap-highlight-color: transparent;
+    min-width: 0;
 
-.bottom-nav__tab-inner {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 2px;
-  padding: 4px 14px;
-  border-radius: var(--radius-sm);
-  transition: background var(--transition-fast);
-}
+    &:hover:not(&--active) .bottom-nav__tab-inner {
+      background: var(--color-empty);
+    }
 
-.bottom-nav__tab:hover:not(.bottom-nav__tab--active) .bottom-nav__tab-inner {
-  background: var(--color-empty);
-}
+    &--active {
+      color: var(--color-mint);
 
-.bottom-nav__tab--active {
-  color: var(--color-mint);
-}
+      .bottom-nav__tab-inner {
+        background: var(--color-mint-alpha-10);
+      }
+      .bottom-nav__label {
+        font-weight: 700;
+      }
+    }
+  }
 
-.bottom-nav__tab--active .bottom-nav__tab-inner {
-  background: var(--color-mint-alpha-10);
-}
+  &__tab-inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    padding: 4px 14px;
+    border-radius: var(--radius-sm);
+    transition: background var(--transition-fast);
+  }
 
-.bottom-nav__tab--active .bottom-nav__label {
-  font-weight: 700;
-}
+  &__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+  }
 
-.bottom-nav__icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 24px;
-  height: 24px;
-}
-
-.bottom-nav__label {
-  font-size: var(--font-xs);
-  font-weight: 600;
-  letter-spacing: 0.01em;
+  &__label {
+    font-size: var(--font-xs);
+    font-weight: 600;
+    letter-spacing: 0.01em;
+  }
 }
 </style>

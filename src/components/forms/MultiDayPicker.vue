@@ -73,62 +73,64 @@ function toggle(iso: string) {
 }
 </script>
 
-<style scoped>
-.multi-day-picker__chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
+<style lang="scss" scoped>
+.multi-day-picker {
+  &__chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
 
-.multi-day-picker__chip {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 2px;
-  padding: 8px 12px;
-  min-width: 48px;
-  border: 1.5px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  background: var(--color-surface);
-  cursor: pointer;
-  transition:
-    background var(--transition-fast),
-    border-color var(--transition-fast),
-    color var(--transition-fast),
-    transform var(--transition-fast),
-    box-shadow var(--transition-fast);
-}
+  &__chip {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    padding: 8px 12px;
+    min-width: 48px;
+    border: 1.5px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    background: var(--color-surface);
+    cursor: pointer;
+    transition:
+      background var(--transition-fast),
+      border-color var(--transition-fast),
+      color var(--transition-fast),
+      transform var(--transition-fast),
+      box-shadow var(--transition-fast);
 
-.multi-day-picker__chip:hover:not(:disabled) {
-  background: var(--color-mint-alpha-06);
-  border-color: var(--color-mint);
-}
+    &:hover:not(:disabled) {
+      background: var(--color-mint-alpha-06);
+      border-color: var(--color-mint);
+    }
 
-.multi-day-picker__chip--selected {
-  background: var(--color-mint);
-  border-color: var(--color-mint);
-  color: var(--on-primary);
-  transform: scale(1.05);
-  box-shadow: 0 2px 8px var(--color-mint-alpha-25);
-}
+    &--selected {
+      background: var(--color-mint);
+      border-color: var(--color-mint);
+      color: var(--on-primary);
+      transform: scale(1.05);
+      box-shadow: 0 2px 8px var(--color-mint-alpha-25);
 
-.multi-day-picker__chip--selected:hover:not(:disabled) {
-  background: var(--color-mint-hover);
-  border-color: var(--color-mint-hover);
-  color: var(--on-primary);
-  transform: scale(1.05);
-  box-shadow: 0 2px 8px var(--color-mint-alpha-25);
-}
+      &:hover:not(:disabled) {
+        background: var(--color-mint-hover);
+        border-color: var(--color-mint-hover);
+        color: var(--on-primary);
+        transform: scale(1.05);
+        box-shadow: 0 2px 8px var(--color-mint-alpha-25);
+      }
+    }
+  }
 
-.multi-day-picker__weekday {
-  font-size: var(--font-xs);
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
-}
+  &__weekday {
+    font-size: var(--font-xs);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
 
-.multi-day-picker__date {
-  font-size: var(--font-sm);
-  font-weight: 500;
+  &__date {
+    font-size: var(--font-sm);
+    font-weight: 500;
+  }
 }
 </style>

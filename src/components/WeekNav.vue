@@ -42,7 +42,7 @@ defineEmits<{
 }>()
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .week-nav {
   display: flex;
   align-items: center;
@@ -53,73 +53,72 @@ defineEmits<{
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-card);
   min-height: 52px;
-}
 
-.week-nav__btn {
-  width: 36px;
-  height: 36px;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  background: var(--color-bg);
-  color: var(--color-text);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition:
-    background var(--transition-fast),
-    border-color var(--transition-fast);
-}
+  &__btn {
+    width: 36px;
+    height: 36px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    background: var(--color-bg);
+    color: var(--color-text);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition:
+      background var(--transition-fast),
+      border-color var(--transition-fast);
 
-.week-nav__btn:active {
-  background: var(--color-border);
-}
+    &:active {
+      background: var(--color-border);
+    }
+    &:disabled {
+      opacity: 0.5;
+      cursor: default;
+      pointer-events: none;
+    }
+  }
 
-.week-nav__btn:disabled {
-  opacity: 0.5;
-  cursor: default;
-  pointer-events: none;
-}
+  &__center {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex: 1;
+    justify-content: center;
+  }
 
-.week-nav__center {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  flex: 1;
-  justify-content: center;
-}
+  &__label {
+    font-size: var(--font-lg);
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    text-align: center;
+  }
 
-.week-nav__label {
-  font-size: var(--font-lg);
-  font-weight: 600;
-  letter-spacing: -0.01em;
-  text-align: center;
-}
+  &__shopping-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    border: none;
+    background: none;
+    border-radius: var(--radius-xs);
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    flex-shrink: 0;
+    transition:
+      color var(--transition-fast),
+      background var(--transition-fast);
+    -webkit-tap-highlight-color: transparent;
 
-.week-nav__shopping-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  padding: 0;
-  border: none;
-  background: none;
-  border-radius: var(--radius-xs);
-  color: var(--color-text-secondary);
-  cursor: pointer;
-  flex-shrink: 0;
-  transition:
-    color var(--transition-fast),
-    background var(--transition-fast);
-  -webkit-tap-highlight-color: transparent;
-}
+    &:hover {
+      color: var(--color-mint);
+      background: color-mix(in srgb, var(--color-mint) 10%, transparent);
+    }
 
-.week-nav__shopping-btn:hover {
-  color: var(--color-mint);
-  background: color-mix(in srgb, var(--color-mint) 10%, transparent);
-}
-
-.week-nav__shopping-btn:active {
-  background: var(--color-empty);
+    &:active {
+      background: var(--color-empty);
+    }
+  }
 }
 </style>

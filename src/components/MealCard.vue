@@ -53,7 +53,7 @@ const cardStyle = computed(() => {
 })
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .meal-card {
   display: flex;
   align-items: center;
@@ -75,59 +75,59 @@ const cardStyle = computed(() => {
   user-select: none;
   -webkit-touch-callout: none;
   touch-action: manipulation;
-}
 
-.meal-card--shared {
-  border-left-color: var(--card-accent, var(--color-shared-accent));
-}
+  &--shared {
+    border-left-color: var(--card-accent, var(--color-shared-accent));
+  }
 
-.meal-card--manual {
-  border-left-color: var(--card-accent, var(--color-manual-meal));
-  background: var(--color-manual-meal-bg);
-}
+  &--manual {
+    border-left-color: var(--card-accent, var(--color-manual-meal));
+    background: var(--color-manual-meal-bg);
+  }
 
-.meal-card:hover {
-  box-shadow: var(--shadow-card);
-  border-color: var(--color-mint-alpha-10);
-}
+  &:hover {
+    box-shadow: var(--shadow-card);
+    border-color: var(--color-mint-alpha-10);
+  }
 
-.meal-card--ghost {
-  opacity: 0.5;
-  border: 2px dashed var(--card-accent, var(--color-mint));
-  background: var(--card-bg, var(--color-empty));
-}
+  &--ghost {
+    opacity: 0.5;
+    border: 2px dashed var(--card-accent, var(--color-mint));
+    background: var(--card-bg, var(--color-empty));
+  }
 
-.meal-card--chosen {
-  box-shadow: var(--shadow-elevated);
-  transform: scale(1.02);
-  cursor: grabbing;
-  transition: none;
-}
+  &--chosen {
+    box-shadow: var(--shadow-elevated);
+    transform: scale(1.02);
+    cursor: grabbing;
+    transition: none;
+  }
 
-.meal-card--drag {
-  opacity: 0.9;
-  transform: rotate(2deg);
-  box-shadow: var(--shadow-drag);
-  transition: none;
+  &--drag {
+    opacity: 0.9;
+    transform: rotate(2deg);
+    box-shadow: var(--shadow-drag);
+    transition: none;
+  }
+
+  &--saving {
+    opacity: 0.65;
+    pointer-events: none;
+  }
+
+  &__name {
+    font-weight: 500;
+    line-height: 1.3;
+    color: var(--color-text);
+    min-width: 0;
+    -webkit-hyphens: auto;
+    hyphens: auto;
+    overflow-wrap: break-word;
+  }
 }
 
 .sortable-fallback {
   touch-action: none;
   transition: none;
-}
-
-.meal-card--saving {
-  opacity: 0.65;
-  pointer-events: none;
-}
-
-.meal-card__name {
-  font-weight: 500;
-  line-height: 1.3;
-  color: var(--color-text);
-  min-width: 0;
-  -webkit-hyphens: auto;
-  hyphens: auto;
-  overflow-wrap: break-word;
 }
 </style>

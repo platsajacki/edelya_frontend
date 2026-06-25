@@ -21,7 +21,7 @@ defineEmits<{
 }>()
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .toast {
   position: fixed;
   bottom: 80px;

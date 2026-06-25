@@ -18,7 +18,7 @@ withDefaults(
 )
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .ownership-badge {
   display: inline-flex;
   align-items: center;
@@ -29,15 +29,14 @@ withDefaults(
   white-space: nowrap;
   flex-shrink: 0;
   width: fit-content;
-}
 
-.ownership-badge--own {
-  background: var(--color-mint-alpha-12);
-  color: var(--color-mint);
-}
-
-.ownership-badge--shared {
-  background: var(--color-shared-bg);
-  color: var(--color-shared);
+  &--own {
+    background: var(--color-mint-alpha-12);
+    color: var(--color-mint);
+  }
+  &--shared {
+    background: var(--color-shared-bg);
+    color: var(--color-shared);
+  }
 }
 </style>

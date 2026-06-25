@@ -185,23 +185,25 @@ async function submit() {
 }
 </script>
 
-<style scoped>
-.form__warning {
-  display: flex;
-  align-items: flex-start;
-  gap: 7px;
-  font-size: var(--font-sm);
-  color: var(--color-warning);
-  background: var(--color-warning-bg);
-  border: 1px solid var(--color-warning-border);
-  border-radius: var(--radius-sm);
-  padding: 9px 12px;
-  line-height: 1.45;
-}
+<style lang="scss" scoped>
+.form {
+  &__warning {
+    display: flex;
+    align-items: flex-start;
+    gap: 7px;
+    font-size: var(--font-sm);
+    color: var(--color-warning);
+    background: var(--color-warning-bg);
+    border: 1px solid var(--color-warning-border);
+    border-radius: var(--radius-sm);
+    padding: 9px 12px;
+    line-height: 1.45;
 
-.form__warning svg {
-  flex-shrink: 0;
-  margin-top: 1px;
-  color: var(--color-warning-icon);
+    svg {
+      flex-shrink: 0;
+      margin-top: 1px;
+      color: var(--color-warning-icon);
+    }
+  }
 }
 </style>

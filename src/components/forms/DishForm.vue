@@ -556,65 +556,67 @@ async function useExistingDish() {
 }
 </script>
 
-<style scoped>
-.dish-form__clone-notice {
-  padding: 10px 12px;
-  background: var(--color-mint-alpha-08);
-  border: 1px solid var(--color-mint-alpha-25);
-  border-radius: var(--radius-sm);
-  font-size: var(--font-sm);
-  color: var(--color-text-secondary);
-  line-height: 1.45;
+<style lang="scss" scoped>
+.dish-form {
+  &__clone-notice {
+    padding: 10px 12px;
+    background: var(--color-mint-alpha-08);
+    border: 1px solid var(--color-mint-alpha-25);
+    border-radius: var(--radius-sm);
+    font-size: var(--font-sm);
+    color: var(--color-text-secondary);
+    line-height: 1.45;
+  }
 }
 
-.form__duplicate-actions {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 12px;
-  background: var(--color-mint-alpha-10);
-  border: 1.5px solid var(--color-mint-alpha-25);
-  border-radius: var(--radius-sm);
+.form {
+  &__duplicate-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    background: var(--color-mint-alpha-10);
+    border: 1.5px solid var(--color-mint-alpha-25);
+    border-radius: var(--radius-sm);
+  }
+
+  &__duplicate-use {
+    flex-shrink: 0;
+    padding: 7px 14px;
+    border: 1.5px solid var(--color-mint);
+    border-radius: var(--radius-sm);
+    background: var(--color-mint);
+    color: var(--on-primary);
+    font-size: var(--font-sm);
+    font-weight: 600;
+    cursor: pointer;
+    transition:
+      background var(--transition-fast),
+      opacity var(--transition-fast);
+
+    &:hover {
+      background: var(--color-mint-hover);
+    }
+    &:disabled {
+      opacity: 0.6;
+      cursor: default;
+    }
+  }
+
+  &__duplicate-hint {
+    font-size: var(--font-sm);
+    color: var(--color-text-secondary);
+  }
+
+  &__section {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    border-top: 1px solid var(--color-border);
+    padding-top: 16px;
+  }
 }
 
-.form__duplicate-use {
-  flex-shrink: 0;
-  padding: 7px 14px;
-  border: 1.5px solid var(--color-mint);
-  border-radius: var(--radius-sm);
-  background: var(--color-mint);
-  color: var(--on-primary);
-  font-size: var(--font-sm);
-  font-weight: 600;
-  cursor: pointer;
-  transition:
-    background var(--transition-fast),
-    opacity var(--transition-fast);
-}
-
-.form__duplicate-use:hover {
-  background: var(--color-mint-hover);
-}
-
-.form__duplicate-use:disabled {
-  opacity: 0.6;
-  cursor: default;
-}
-
-.form__duplicate-hint {
-  font-size: var(--font-sm);
-  color: var(--color-text-secondary);
-}
-
-.form__section {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  border-top: 1px solid var(--color-border);
-  padding-top: 16px;
-}
-
-/* Ingredient rows */
 .ingredient-row {
   display: flex;
   align-items: center;
@@ -622,78 +624,83 @@ async function useExistingDish() {
   padding: 8px 0;
   border-bottom: 1px solid var(--color-border);
   font-size: var(--font-sm);
+
+  &:last-of-type {
+    border-bottom: none;
+  }
+  &--optional {
+    opacity: 0.75;
+  }
+
+  &__name {
+    flex: 1;
+    font-weight: 500;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__amount {
+    flex-shrink: 0;
+    font-size: var(--font-sm);
+    color: var(--color-text-secondary);
+    white-space: nowrap;
+  }
+
+  &__opt-label {
+    font-size: var(--font-xs);
+    color: var(--color-mint);
+    background: var(--color-mint-alpha-12);
+    border-radius: var(--radius-xs);
+    padding: 1px 5px;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+
+  &__edit,
+  &__remove {
+    flex-shrink: 0;
+    width: 22px;
+    height: 22px;
+    border: none;
+    background: none;
+    color: var(--color-text-secondary);
+    border-radius: var(--radius-xs);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.4;
+    transition:
+      opacity var(--transition-fast),
+      color var(--transition-fast),
+      background var(--transition-fast);
+    padding: 0;
+  }
+
+  &__edit {
+    &:hover {
+      opacity: 1;
+      color: var(--color-mint);
+      background: var(--color-mint-alpha-10);
+    }
+  }
+
+  &:hover &__edit {
+    opacity: 1;
+    color: var(--color-mint);
+    background: var(--color-mint-alpha-10);
+  }
+
+  &__remove {
+    &:hover {
+      opacity: 1;
+      color: var(--color-danger);
+      background: var(--color-danger-pale);
+    }
+  }
 }
 
-.ingredient-row:last-of-type {
-  border-bottom: none;
-}
-
-.ingredient-row--optional {
-  opacity: 0.75;
-}
-
-.ingredient-row__name {
-  flex: 1;
-  font-weight: 500;
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.ingredient-row__amount {
-  flex-shrink: 0;
-  font-size: var(--font-sm);
-  color: var(--color-text-secondary);
-  white-space: nowrap;
-}
-
-.ingredient-row__opt-label {
-  font-size: var(--font-xs);
-  color: var(--color-mint);
-  background: var(--color-mint-alpha-12);
-  border-radius: var(--radius-xs);
-  padding: 1px 5px;
-  font-weight: 500;
-  white-space: nowrap;
-}
-
-.ingredient-row__edit,
-.ingredient-row__remove {
-  flex-shrink: 0;
-  width: 22px;
-  height: 22px;
-  border: none;
-  background: none;
-  color: var(--color-text-secondary);
-  border-radius: var(--radius-xs);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  opacity: 0.4;
-  transition:
-    opacity var(--transition-fast),
-    color var(--transition-fast),
-    background var(--transition-fast);
-  padding: 0;
-}
-
-.ingredient-row__edit:hover,
-.ingredient-row:hover .ingredient-row__edit {
-  opacity: 1;
-  color: var(--color-mint);
-  background: var(--color-mint-alpha-10);
-}
-
-.ingredient-row__remove:hover {
-  opacity: 1;
-  color: var(--color-danger);
-  background: var(--color-danger-pale);
-}
-
-/* Ingredient search */
-
-/* Pending ingredient amount */
 .ingredient-amount {
   display: flex;
   flex-direction: column;
@@ -702,62 +709,61 @@ async function useExistingDish() {
   background: var(--color-empty);
   border-radius: var(--radius-xs);
   border: 1.5px solid var(--color-border);
+
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  &__name {
+    font-size: var(--font-sm);
+    font-weight: 600;
+  }
+
+  &__mode {
+    font-size: var(--font-xs);
+    color: var(--color-text-secondary);
+    font-style: italic;
+  }
+
+  &__row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  &__input {
+    width: 120px;
+  }
+
+  &__unit {
+    font-size: var(--font-sm);
+    color: var(--color-text-secondary);
+    white-space: nowrap;
+  }
+
+  &__taste-hint {
+    font-size: var(--font-sm);
+    color: var(--color-text-secondary);
+    font-style: italic;
+    margin: 0;
+  }
+
+  &__optional {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: var(--font-sm);
+    color: var(--color-text-secondary);
+  }
+
+  &__actions {
+    display: flex;
+    gap: 8px;
+  }
 }
 
-.ingredient-amount__header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.ingredient-amount__name {
-  font-size: var(--font-sm);
-  font-weight: 600;
-}
-
-.ingredient-amount__mode {
-  font-size: var(--font-xs);
-  color: var(--color-text-secondary);
-  font-style: italic;
-}
-
-.ingredient-amount__row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.ingredient-amount__input {
-  width: 120px;
-}
-
-.ingredient-amount__unit {
-  font-size: var(--font-sm);
-  color: var(--color-text-secondary);
-  white-space: nowrap;
-}
-
-.ingredient-amount__taste-hint {
-  font-size: var(--font-sm);
-  color: var(--color-text-secondary);
-  font-style: italic;
-  margin: 0;
-}
-
-.ingredient-amount__optional {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: var(--font-sm);
-  color: var(--color-text-secondary);
-}
-
-.ingredient-amount__actions {
-  display: flex;
-  gap: 8px;
-}
-
-/* Buttons */
 .btn {
   padding: 8px 16px;
   border: none;
@@ -766,42 +772,44 @@ async function useExistingDish() {
   font-weight: 600;
   cursor: pointer;
   transition: background var(--transition-fast);
+
+  &--sm {
+    background: var(--color-mint);
+    color: var(--on-primary);
+
+    &:hover {
+      background: var(--color-mint-hover);
+    }
+  }
+
+  &--ghost {
+    background: transparent;
+    color: var(--color-text-secondary);
+
+    &:hover {
+      background: var(--color-empty);
+    }
+  }
 }
 
-.btn--sm {
-  background: var(--color-mint);
-  color: var(--on-primary);
-}
+.dish-search {
+  &__create {
+    align-self: flex-start;
+    padding: 8px 16px;
+    border: 1.5px dashed var(--color-border);
+    border-radius: var(--radius-sm);
+    background: transparent;
+    font-size: var(--font-sm);
+    font-weight: 500;
+    color: var(--color-mint-hover);
+    transition:
+      background var(--transition-fast),
+      border-color var(--transition-fast);
 
-.btn--sm:hover {
-  background: var(--color-mint-hover);
-}
-
-.btn--ghost {
-  background: transparent;
-  color: var(--color-text-secondary);
-}
-
-.btn--ghost:hover {
-  background: var(--color-empty);
-}
-
-.dish-search__create {
-  align-self: flex-start;
-  padding: 8px 16px;
-  border: 1.5px dashed var(--color-border);
-  border-radius: var(--radius-sm);
-  background: transparent;
-  font-size: var(--font-sm);
-  font-weight: 500;
-  color: var(--color-mint-hover);
-  transition:
-    background var(--transition-fast),
-    border-color var(--transition-fast);
-}
-
-.dish-search__create:hover {
-  background: var(--color-empty);
-  border-color: var(--color-mint);
+    &:hover {
+      background: var(--color-empty);
+      border-color: var(--color-mint);
+    }
+  }
 }
 </style>

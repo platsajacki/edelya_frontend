@@ -270,34 +270,38 @@ async function submit() {
 }
 </script>
 
-<style scoped>
-.clone-confirm__text {
-  font-size: var(--font-sm);
-  color: var(--color-text);
-  line-height: 1.5;
-  margin: 0;
+<style lang="scss" scoped>
+.clone-confirm {
+  &__text {
+    font-size: var(--font-sm);
+    color: var(--color-text);
+    line-height: 1.5;
+    margin: 0;
+  }
+
+  &__actions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
 }
 
-.clone-confirm__actions {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
+.form {
+  &__cancel {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-size: var(--font-base);
+    font-weight: 600;
+    background: var(--color-empty);
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    transition: background var(--transition-fast);
 
-.form__cancel {
-  width: 100%;
-  padding: 12px;
-  border: none;
-  border-radius: var(--radius-sm);
-  font-size: var(--font-base);
-  font-weight: 600;
-  background: var(--color-empty);
-  color: var(--color-text-secondary);
-  cursor: pointer;
-  transition: background var(--transition-fast);
-}
-
-.form__cancel:hover {
-  background: var(--color-border);
+    &:hover {
+      background: var(--color-border);
+    }
+  }
 }
 </style>

@@ -270,44 +270,42 @@ onMounted(() => {
 })
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .planner {
   padding: 12px 16px var(--nav-height);
   position: relative;
-}
 
-.planner__grid--loading {
-  opacity: 0.5;
-  transition: opacity var(--transition-normal);
-  pointer-events: none;
-}
-
-.planner__error {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  padding: 14px 16px;
-  background: var(--color-danger-pale);
-  border: 1px solid var(--color-danger-soft);
-  border-radius: var(--radius-sm);
-  font-size: var(--font-body);
-  color: var(--color-danger-dark);
-}
-
-.planner__error-retry {
-  padding: 6px 16px;
-  border: none;
-  border-radius: var(--radius-sm);
-  background: var(--color-danger);
-  color: var(--on-primary);
-  font-size: var(--font-sm);
-  font-weight: 600;
-}
-
-@media (min-width: 600px) {
-  .planner {
+  @media (min-width: 600px) {
     padding: 16px 24px 88px;
+  }
+
+  &__grid--loading {
+    opacity: 0.5;
+    transition: opacity var(--transition-normal);
+    pointer-events: none;
+  }
+
+  &__error {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 14px 16px;
+    background: var(--color-danger-pale);
+    border: 1px solid var(--color-danger-soft);
+    border-radius: var(--radius-sm);
+    font-size: var(--font-body);
+    color: var(--color-danger-dark);
+
+    &-retry {
+      padding: 6px 16px;
+      border: none;
+      border-radius: var(--radius-sm);
+      background: var(--color-danger);
+      color: var(--on-primary);
+      font-size: var(--font-sm);
+      font-weight: 600;
+    }
   }
 }
 </style>

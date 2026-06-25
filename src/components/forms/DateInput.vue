@@ -80,64 +80,64 @@ function onPickerInput(e: Event) {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .date-input {
   position: relative;
-}
 
-.date-input__text {
-  width: 100%;
-  padding: 10px 36px 10px 12px;
-  border: 1.5px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  font-size: var(--font-md);
-  font-family: inherit;
-  background: var(--color-surface);
-  color: var(--color-text);
-  outline: none;
-  transition:
-    border-color var(--transition-fast),
-    box-shadow var(--transition-fast);
-  box-sizing: border-box;
-}
+  &__text {
+    width: 100%;
+    padding: 10px 36px 10px 12px;
+    border: 1.5px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    font-size: var(--font-md);
+    font-family: inherit;
+    background: var(--color-surface);
+    color: var(--color-text);
+    outline: none;
+    transition:
+      border-color var(--transition-fast),
+      box-shadow var(--transition-fast);
+    box-sizing: border-box;
 
-.date-input__text:focus {
-  border-color: var(--color-mint-alpha-25);
-  box-shadow: 0 0 0 3px var(--color-mint-alpha-10);
-}
+    &:focus {
+      border-color: var(--color-mint-alpha-25);
+      box-shadow: 0 0 0 3px var(--color-mint-alpha-10);
+    }
+  }
 
-.date-input__btn {
-  position: absolute;
-  right: 4px;
-  top: 50%;
-  transform: translateY(-50%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  padding: 0;
-  border: none;
-  background: none;
-  cursor: pointer;
-  color: var(--color-text-secondary);
-  overflow: hidden;
-}
+  &__btn {
+    position: absolute;
+    right: 4px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    border: none;
+    background: none;
+    cursor: pointer;
+    color: var(--color-text-secondary);
+    overflow: hidden;
 
-.date-input__btn svg {
-  width: 18px;
-  height: 18px;
-  pointer-events: none;
-}
+    svg {
+      width: 18px;
+      height: 18px;
+      pointer-events: none;
+    }
+  }
 
-.date-input__picker {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  opacity: 0;
-  border: none;
-  padding: 0;
-  cursor: pointer;
+  &__picker {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+  }
 }
 </style>

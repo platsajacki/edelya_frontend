@@ -157,11 +157,13 @@ function onCloneCreated() {
 @import "../styles/detail-sheet.scss";
 </style>
 
-<style scoped>
-.detail__loading {
-  text-align: center;
-  font-size: var(--font-sm);
-  color: var(--color-text-secondary);
-  padding: 12px 0;
+<style lang="scss" scoped>
+.detail {
+  &__loading {
+    text-align: center;
+    font-size: var(--font-sm);
+    color: var(--color-text-secondary);
+    padding: 12px 0;
+  }
 }
 </style>
