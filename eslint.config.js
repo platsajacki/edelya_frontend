@@ -13,7 +13,9 @@ export default [
       "no-undef": "off",
       "vue/multi-word-component-names": "off",
       "no-irregular-whitespace": "off",
+      "@typescript-eslint/no-unused-expressions": "off",
       "@typescript-eslint/no-unused-vars": "warn",
+      "@typescript-eslint/no-explicit-any": "warn",
     },
   },
   {

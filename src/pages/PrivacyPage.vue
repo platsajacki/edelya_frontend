@@ -5,12 +5,13 @@
     </header>
     <div class="legal-page__body">
       <div v-if="loading" class="legal-page__loading"><div class="spinner" /></div>
-      <div v-else class="legal-page__prose" v-html="html" />
+      <div v-else v-purify="html" class="legal-page__prose" />
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
+import { vPurify } from "@/directives/purify"
 import { ref, onMounted } from "vue"
 import { marked } from "marked"
 import { fetchPrivacyLatest } from "../services/legalService"
