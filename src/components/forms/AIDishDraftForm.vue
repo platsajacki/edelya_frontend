@@ -25,6 +25,7 @@
           <textarea
             ref="sourceTextRef"
             v-model="sourceText"
+            v-autofocus
             class="form__textarea ai-draft__source"
             rows="8"
             :maxlength="MAX_SOURCE_LENGTH"
@@ -255,12 +256,12 @@
                 <input
                   ref="amountInputRef"
                   v-model="ingredient.amount"
+                  v-autofocus.select
                   type="text"
                   inputmode="decimal"
                   autocomplete="off"
                   class="form__input ingredient-amount__input"
                   placeholder="Например: 200"
-                  @focus="($event.target as HTMLInputElement).select()"
                   @keydown.enter.prevent="finishIngredientEdit"
                 />
                 <select
@@ -452,15 +453,16 @@
 </template>
 
 <script lang="ts" setup>
+import { AutoFocusDirective as vAutofocus } from "@/directives/autofocus"
 import { computed, nextTick, onUnmounted, ref, watch } from "vue"
 import ModalWrapper from "./ModalWrapper.vue"
 import IngredientForm from "./IngredientForm.vue"
 import AIRecipeUsageBadge from "../AIRecipeUsageBadge.vue"
 import IconPencil from "../icons/IconPencil.vue"
 import IconClose from "../icons/IconClose.vue"
-import { useSubscriptionStore } from "../../store/subscription"
-import { createAIDraft, createDishFromAIDraft, fetchAIDraft } from "../../services/aiDraftService"
-import { fetchDish, fetchDishCategories } from "../../services/dishService"
+import { useSubscriptionStore } from "@/store/subscription.ts"
+import { createAIDraft, createDishFromAIDraft, fetchAIDraft } from "@/services/aiDraftService.ts"
+import { fetchDish, fetchDishCategories } from "@/services/dishService.ts"
 import {
   fetchIngredientById,
   fetchIngredientCategories,
@@ -601,7 +603,6 @@ watch(
         applyDraft(props.draftToOpen)
         return
       }
-      nextTick(() => sourceTextRef.value?.focus())
     } else {
       stopPolling()
     }

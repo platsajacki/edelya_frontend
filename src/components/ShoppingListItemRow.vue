@@ -38,8 +38,8 @@
       <div class="item-row__step-center" @click="startEdit">
         <input
           v-if="editing"
-          ref="editInput"
           v-model="editValue"
+          v-autofocus.select
           type="text"
           inputmode="decimal"
           autocomplete="off"
@@ -77,7 +77,8 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, nextTick } from "vue"
+import { AutoFocusDirective as vAutofocus } from "@/directives/autofocus"
+import { computed, ref } from "vue"
 import IconCheck from "./icons/IconCheck.vue"
 import IconClose from "./icons/IconClose.vue"
 import { formatShoppingAmount } from "../utils/formatShoppingAmount"
@@ -97,7 +98,6 @@ const emit = defineEmits<{
 const toggling = ref(false)
 const editing = ref(false)
 const editValue = ref("")
-const editInput = ref<HTMLInputElement | null>(null)
 
 const baseUnit = computed(() => props.item.ingredient?.base_unit ?? "piece")
 const step = computed(() => getUnitStep(baseUnit.value))
@@ -109,10 +109,6 @@ const formatted = computed(() => formatShoppingAmount(props.item.amount, baseUni
 function startEdit() {
   editValue.value = formatted.value.number || ""
   editing.value = true
-  nextTick(() => {
-    editInput.value?.focus()
-    editInput.value?.select()
-  })
 }
 
 // Display-to-raw multipliers (mirror of formatShoppingAmount CONVERSION_RULES)

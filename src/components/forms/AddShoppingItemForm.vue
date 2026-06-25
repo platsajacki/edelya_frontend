@@ -7,6 +7,7 @@
           <input
             ref="searchInput"
             v-model="query"
+            v-autofocus
             type="search"
             class="form__input"
             placeholder="Поиск ингредиента..."
@@ -63,12 +64,12 @@
               <input
                 ref="amountInput"
                 v-model="amount"
+                v-autofocus
                 type="text"
                 inputmode="decimal"
                 autocomplete="off"
                 class="form__input amount-step__input"
                 :placeholder="'Например: 100'"
-                @focus="($event.target as HTMLInputElement).select()"
                 @keydown.enter.prevent="submit"
               />
               <span class="amount-step__unit">{{ unitLabel(selectedIngredient.base_unit) }}</span>
@@ -120,12 +121,13 @@
 </template>
 
 <script lang="ts" setup>
+import { AutoFocusDirective as vAutofocus } from "@/directives/autofocus"
 import { ref, watch, nextTick } from "vue"
 import ModalWrapper from "./ModalWrapper.vue"
 import IngredientForm from "./IngredientForm.vue"
-import { fetchIngredients } from "../../services/ingredientService"
-import { getUnitLabel } from "../../utils/unitSteps"
-import { useShoppingStore } from "../../store/shopping"
+import { fetchIngredients } from "@/services/ingredientService.ts"
+import { getUnitLabel } from "@/utils/unitSteps.ts"
+import { useShoppingStore } from "@/store/shopping.ts"
 import type { DTOIngredient, DTOShoppingListItem } from "@/types/shopping"
 import type { DTOBaseUnit } from "@/types/dish"
 
@@ -192,7 +194,6 @@ watch(
   (v) => {
     if (v) {
       reset()
-      setTimeout(() => searchInput.value?.focus(), 360)
     }
   }
 )

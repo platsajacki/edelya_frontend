@@ -57,8 +57,8 @@
 
 <script lang="ts" setup>
 import { ref } from "vue"
-import { fetchDishes } from "../../services/dishService"
-import { isDishOwn } from "../../utils/dishOwnership"
+import { fetchDishes } from "@/services/dishService.ts"
+import { isDishOwn } from "@/utils/dishOwnership.ts"
 import OwnershipBadge from "../OwnershipBadge.vue"
 import DishPickerSheet from "../DishPickerSheet.vue"
 import type { DTODish } from "@/types/dish"

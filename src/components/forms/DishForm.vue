@@ -51,12 +51,12 @@
               <input
                 ref="amountInputRef"
                 v-model="pendingAmount"
+                v-autofocus.select
                 type="text"
                 inputmode="decimal"
                 autocomplete="off"
                 class="form__input ingredient-amount__input"
                 placeholder="Например: 200"
-                @focus="($event.target as HTMLInputElement).select()"
                 @keydown.enter.prevent="confirmIngredient"
               />
               <span class="ingredient-amount__unit">{{
@@ -120,12 +120,12 @@
             <input
               ref="amountInputRef"
               v-model="pendingAmount"
+              v-autofocus.select
               type="text"
               inputmode="decimal"
               autocomplete="off"
               class="form__input ingredient-amount__input"
               placeholder="Например: 200"
-              @focus="($event.target as HTMLInputElement).select()"
               @keydown.enter.prevent="confirmIngredient"
             />
             <span class="ingredient-amount__unit">{{
@@ -218,22 +218,18 @@
 </template>
 
 <script lang="ts" setup>
+import { AutoFocusDirective as vAutofocus } from "@/directives/autofocus"
 import { ref, computed, watch, nextTick } from "vue"
 import ModalWrapper from "./ModalWrapper.vue"
 import IngredientForm from "./IngredientForm.vue"
 import IconPencil from "../icons/IconPencil.vue"
 import IconClose from "../icons/IconClose.vue"
-import {
-  createDish,
-  updateDish,
-  fetchDishCategories,
-  fetchDishes,
-} from "../../services/dishService"
-import { isDishOwn } from "../../utils/dishOwnership"
-import { fetchIngredients } from "../../services/ingredientService"
-import { formatAmount } from "../../utils/formatAmount"
-import { formatShoppingAmount } from "../../utils/formatShoppingAmount"
-import { UNIT_LABELS } from "../../utils/unitLabels"
+import { createDish, updateDish, fetchDishCategories, fetchDishes } from "@/services/dishService.ts"
+import { isDishOwn } from "@/utils/dishOwnership.ts"
+import { fetchIngredients } from "@/services/ingredientService.ts"
+import { formatAmount } from "@/utils/formatAmount.ts"
+import { formatShoppingAmount } from "@/utils/formatShoppingAmount.ts"
+import { UNIT_LABELS } from "@/utils/unitLabels.ts"
 import type { DTOBaseUnit, DTODish, DTODishCategory } from "@/types/dish"
 import type { DTOIngredient } from "@/types/shopping"
 
