@@ -237,7 +237,7 @@ function onSearch() {
   debounceTimer = setTimeout(async () => {
     searching.value = true
     try {
-      const data = await fetchIngredients({ name__icontains: q })
+      const data = await fetchIngredients({ search: q })
       results.value = data.results ?? []
     } catch {
       results.value = []

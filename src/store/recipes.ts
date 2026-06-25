@@ -47,7 +47,7 @@ export const useRecipesStore = defineStore("recipes", {
       if (state.filters.ownership === "own") params.only_owned = true
       if (state.filters.ownership === "global") params.only_global = true
       if (state.filters.categoryId) params.category = state.filters.categoryId
-      if (state.filters.search.trim()) params.name__icontains = state.filters.search.trim()
+      if (state.filters.search.trim()) params.search = state.filters.search.trim()
       return params
     },
 

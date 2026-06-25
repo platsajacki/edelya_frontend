@@ -396,7 +396,7 @@ function searchIngredients() {
   }
   ingredientSearchTimer = setTimeout(async () => {
     try {
-      const data = await fetchIngredients({ name__icontains: q })
+      const data = await fetchIngredients({ search: q })
       ingredientResults.value = data.results ?? []
     } catch {
       ingredientResults.value = []

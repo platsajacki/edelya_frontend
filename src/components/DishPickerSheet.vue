@@ -270,7 +270,7 @@ function buildParams(p = 1): Record<string, unknown> {
   if (ownership.value === "own") params.only_owned = true
   if (ownership.value === "global") params.only_global = true
   if (categoryId.value) params.category = categoryId.value
-  if (query.value.trim()) params.name__icontains = query.value.trim()
+  if (query.value.trim()) params.search = query.value.trim()
   return params
 }
 

@@ -827,7 +827,7 @@ function searchIngredients() {
   ingredientSearchTimer = setTimeout(async () => {
     ingredientSearchLoading.value = true
     try {
-      const data = await fetchIngredients({ name__icontains: query })
+      const data = await fetchIngredients({ search: query })
       ingredientSearchResults.value = data.results ?? []
     } catch {
       ingredientSearchResults.value = []
@@ -1058,7 +1058,7 @@ function searchInlineReplace() {
   inlineReplaceTimer = setTimeout(async () => {
     inlineReplaceLoading.value = true
     try {
-      const data = await fetchIngredients({ name__icontains: query })
+      const data = await fetchIngredients({ search: query })
       inlineReplaceResults.value = data.results ?? []
     } catch {
       inlineReplaceResults.value = []
