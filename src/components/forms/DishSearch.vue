@@ -55,35 +55,40 @@
   </div>
 </template>
 
-<script setup>
+<script lang="ts" setup>
 import { ref } from "vue"
 import { fetchDishes } from "../../services/dishService"
 import { isDishOwn } from "../../utils/dishOwnership"
 import OwnershipBadge from "../OwnershipBadge.vue"
 import DishPickerSheet from "../DishPickerSheet.vue"
+import type { DTODish } from "@/types/dish"
 
-defineProps({
-  canCreateAi: { type: Boolean, default: false },
-})
+defineProps<{
+  canCreateAi?: boolean
+}>()
 
-const emit = defineEmits(["select", "create", "create-ai"])
+const emit = defineEmits<{
+  (e: "select", dish: DTODish): void
+  (e: "create", query: string): void
+  (e: "create-ai"): void
+}>()
 
 const showPicker = ref(false)
 
-function onPickerSelect(dish) {
+function onPickerSelect(dish: DTODish) {
   emit("select", dish)
 }
 
 const query = ref("")
-const results = ref([])
+const results = ref<DTODish[]>([])
 const loading = ref(false)
 const searched = ref(false)
-const inputEl = ref(null)
+const inputEl = ref<HTMLInputElement | null>(null)
 
-let debounceTimer = null
+let debounceTimer: ReturnType<typeof setTimeout> | null = null
 
 function onInput() {
-  clearTimeout(debounceTimer)
+  clearTimeout(debounceTimer ?? undefined)
   const q = query.value.trim()
 
   if (!q) {

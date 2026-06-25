@@ -4,7 +4,10 @@
     "types": ["vite/client"],
     "paths": {
       "@/*": ["./src/*"]
-    }
+    },
+    "useUnknownInCatchVariables": false,
+    "noImplicitAny": false,
+    "strictNullChecks": false
   },
   "include": ["."],
   "exclude": ["dist", "build", "node_modules"]

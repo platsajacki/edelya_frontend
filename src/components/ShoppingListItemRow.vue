@@ -9,7 +9,7 @@
       aria-label="Отметить как купленное"
       @click="$emit('toggle-checked', item)"
     >
-      <IconCheck v-if="item.is_checked" width="10" height="10" />
+      <IconCheck v-if="item.is_checked" :width="10" :height="10" />
     </button>
 
     <!-- Name + sub-line -->
@@ -71,28 +71,33 @@
       aria-label="Удалить"
       @click="$emit('delete', item)"
     >
-      <IconClose width="10" height="10" />
+      <IconClose :width="10" :height="10" />
     </button>
   </div>
 </template>
 
-<script setup>
+<script lang="ts" setup>
 import { computed, ref, nextTick } from "vue"
 import IconCheck from "./icons/IconCheck.vue"
 import IconClose from "./icons/IconClose.vue"
 import { formatShoppingAmount } from "../utils/formatShoppingAmount"
 import { getUnitStep } from "../utils/unitSteps"
+import type { DTOShoppingListItem } from "@/types/shopping"
 
-const props = defineProps({
-  item: { type: Object, required: true },
-})
+const props = defineProps<{
+  item: DTOShoppingListItem
+}>()
 
-const emit = defineEmits(["toggle-checked", "adjust", "delete"])
+const emit = defineEmits<{
+  (e: "toggle-checked", item: DTOShoppingListItem): void
+  (e: "adjust", item: DTOShoppingListItem, delta: number): void
+  (e: "delete", item: DTOShoppingListItem): void
+}>()
 
 const toggling = ref(false)
 const editing = ref(false)
 const editValue = ref("")
-const editInput = ref(null)
+const editInput = ref<HTMLInputElement | null>(null)
 
 const baseUnit = computed(() => props.item.ingredient?.base_unit ?? "piece")
 const step = computed(() => getUnitStep(baseUnit.value))

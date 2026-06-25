@@ -66,22 +66,35 @@
   </ModalWrapper>
 </template>
 
-<script setup>
+<script lang="ts" setup>
 import { computed, ref, watch } from "vue"
 import ModalWrapper from "./forms/ModalWrapper.vue"
 import DateInput from "./forms/DateInput.vue"
 import IconWarning from "./icons/IconWarning.vue"
 import { formatDateRuShort } from "../utils/formatDate"
 
-const props = defineProps({
-  modelValue: { type: Boolean, required: true },
-  dateFrom: { type: String, default: "" },
-  dateTo: { type: String, default: "" },
-  loading: { type: Boolean, default: false },
-  noItems: { type: Boolean, default: false },
-})
+const props = withDefaults(
+  defineProps<{
+    modelValue: boolean
+    dateFrom?: string
+    dateTo?: string
+    loading?: boolean
+    noItems?: boolean
+  }>(),
+  {
+    dateFrom: "",
+    dateTo: "",
+    loading: false,
+    noItems: false,
+  }
+)
 
-defineEmits(["update:modelValue", "update:dateFrom", "update:dateTo", "confirm"])
+defineEmits<{
+  (e: "update:modelValue", value: boolean): void
+  (e: "update:dateFrom", value: string): void
+  (e: "update:dateTo", value: string): void
+  (e: "confirm", name: string): void
+}>()
 
 const listName = computed(() => {
   const from = props.dateFrom

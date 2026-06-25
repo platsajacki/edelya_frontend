@@ -6,11 +6,16 @@
   </span>
 </template>
 
-<script setup>
-defineProps({
-  isOwn: { type: Boolean, required: true },
-  short: { type: Boolean, default: false },
-})
+<script lang="ts" setup>
+withDefaults(
+  defineProps<{
+    isOwn: boolean
+    short?: boolean
+  }>(),
+  {
+    short: false,
+  }
+)
 </script>
 
 <style scoped>

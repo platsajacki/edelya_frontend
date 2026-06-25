@@ -17,10 +17,12 @@ export const UNIT_CONFIG = {
   to_taste: { step: 0, label: "", shortLabel: "" },
 }
 
-export function getUnitStep(baseUnit) {
-  return UNIT_CONFIG[baseUnit]?.step ?? 1
+export type UnitKey = keyof typeof UNIT_CONFIG
+
+export function getUnitStep(baseUnit: string): number {
+  return UNIT_CONFIG[baseUnit as UnitKey]?.step ?? 1
 }
 
-export function getUnitLabel(baseUnit) {
-  return UNIT_CONFIG[baseUnit]?.label ?? baseUnit
+export function getUnitLabel(baseUnit: string): string {
+  return UNIT_CONFIG[baseUnit as UnitKey]?.label ?? baseUnit
 }

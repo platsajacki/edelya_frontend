@@ -19,23 +19,31 @@
   </Teleport>
 </template>
 
-<script setup>
+<script lang="ts" setup>
 import { watch, onUnmounted } from "vue"
 
-const props = defineProps({
-  modelValue: { type: Boolean, required: true },
-  title: { type: String, default: "" },
-  zIndex: { type: Number, default: 1000 },
-})
+const props = withDefaults(
+  defineProps<{
+    modelValue: boolean
+    title?: string
+    zIndex?: number
+  }>(),
+  {
+    title: "",
+    zIndex: 1000,
+  }
+)
 
-const emit = defineEmits(["update:modelValue"])
+const emit = defineEmits<{
+  (e: "update:modelValue", value: boolean): void
+}>()
 
 function close() {
   emit("update:modelValue", false)
 }
 
-function onFocusIn(e) {
-  const el = e.target
+function onFocusIn(e: FocusEvent) {
+  const el = e.target as HTMLElement
   if (el.tagName !== "INPUT" && el.tagName !== "TEXTAREA" && el.tagName !== "SELECT") return
 
   requestAnimationFrame(() => {

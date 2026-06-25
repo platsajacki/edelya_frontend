@@ -79,9 +79,10 @@
   </div>
 </template>
 
-<script setup>
+<script lang="ts" setup>
 import { onMounted, ref, computed } from "vue"
 import { useRouter } from "vue-router"
+import type { WebAppUser } from "@twa-dev/types"
 import WeekNav from "./WeekNav.vue"
 import WeekGrid from "./WeekGrid.vue"
 import CookingEventForm from "./forms/CookingEventForm.vue"
@@ -94,13 +95,11 @@ import { fetchCookingEvent } from "../services/planningService"
 import { formatDateRuShort } from "../utils/formatDate"
 import { getTodayISO } from "../utils/weekDays"
 import Toast from "./Toast.vue"
+import type { DTOCookingEvent, DTOMealPlanItem } from "@/types/planning"
 
-defineProps({
-  user: {
-    type: Object,
-    required: true,
-  },
-})
+defineProps<{
+  user: WebAppUser
+}>()
 
 const planning = usePlanningStore()
 const shopping = useShoppingStore()
@@ -109,7 +108,7 @@ const router = useRouter()
 // --- Shopping confirm ---
 const showShoppingConfirm = ref(false)
 const shoppingCreating = ref(false)
-const pendingShoppingPayload = ref(null)
+const pendingShoppingPayload = ref<{ date_from: string; date_to: string } | null>(null)
 
 const shoppingNoItems = computed(() => {
   if (!pendingShoppingPayload.value) return false
@@ -124,14 +123,14 @@ const weekEndDate = computed(() => {
   return `${start.getFullYear()}-${String(start.getMonth() + 1).padStart(2, "0")}-${String(start.getDate()).padStart(2, "0")}`
 })
 
-function hasCookingInRange(dateFrom, dateTo) {
+function hasCookingInRange(dateFrom: string, dateTo: string): boolean {
   const sources = [planning.weekData, planning.nextWeekData].filter(Boolean)
   return sources.some((data) =>
     data.cooking_events.some((e) => e.cooking_date >= dateFrom && e.cooking_date <= dateTo)
   )
 }
 
-function handleCreateShoppingDay({ rawDate }) {
+function handleCreateShoppingDay({ rawDate }: { rawDate: string }) {
   pendingShoppingPayload.value = {
     date_from: rawDate,
     date_to: rawDate,
@@ -139,7 +138,10 @@ function handleCreateShoppingDay({ rawDate }) {
   showShoppingConfirm.value = true
 }
 
-function handleCreateShoppingWeek({ dateFrom, dateTo } = {}) {
+function handleCreateShoppingWeek({
+  dateFrom,
+  dateTo,
+}: { dateFrom?: string; dateTo?: string } = {}) {
   const today = getTodayISO()
   const from =
     dateFrom ||
@@ -154,7 +156,7 @@ function handleCreateShoppingWeek({ dateFrom, dateTo } = {}) {
   showShoppingConfirm.value = true
 }
 
-async function onConfirmShopping(name) {
+async function onConfirmShopping(name: string) {
   if (!pendingShoppingPayload.value) return
   const { date_from, date_to } = pendingShoppingPayload.value
   const resolvedName =
@@ -175,19 +177,19 @@ async function onConfirmShopping(name) {
 // --- Create flow ---
 const showCookingForm = ref(false)
 const showMealForm = ref(false)
-const editCookingItem = ref(null)
-const editMealItem = ref(null)
+const editCookingItem = ref<DTOCookingEvent | null>(null)
+const editMealItem = ref<DTOMealPlanItem | null>(null)
 
 const initialCookingDate = ref("")
 const initialMealDate = ref("")
 
-function openCookingForm(date) {
+function openCookingForm(date: string) {
   editCookingItem.value = null
   initialCookingDate.value = date || ""
   showCookingForm.value = true
 }
 
-function openMealForm(date) {
+function openMealForm(date: string) {
   editMealItem.value = null
   initialMealDate.value = date || ""
   showMealForm.value = true
@@ -196,19 +198,19 @@ function openMealForm(date) {
 // --- Detail flow ---
 const showCookingDetail = ref(false)
 const showMealDetail = ref(false)
-const detailItem = ref(null)
+const detailItem = ref<DTOCookingEvent | DTOMealPlanItem | null>(null)
 
-function openCookingDetail(item) {
+function openCookingDetail(item: DTOCookingEvent) {
   detailItem.value = item
   showCookingDetail.value = true
 }
 
-function openMealDetail(item) {
+function openMealDetail(item: DTOMealPlanItem) {
   detailItem.value = item
   showMealDetail.value = true
 }
 
-async function onViewCookingFromMeal(cookingEventId) {
+async function onViewCookingFromMeal(cookingEventId: string) {
   showMealDetail.value = false
   let event = planning.weekData.cooking_events.find((e) => e.id === cookingEventId)
   if (!event) {
@@ -225,14 +227,14 @@ async function onViewCookingFromMeal(cookingEventId) {
 
 // --- Edit from detail ---
 function onEditCooking() {
-  const item = detailItem.value
+  const item = detailItem.value as DTOCookingEvent
   showCookingDetail.value = false
   editCookingItem.value = item
   showCookingForm.value = true
 }
 
 function onEditMeal() {
-  const item = detailItem.value
+  const item = detailItem.value as DTOMealPlanItem
   showMealDetail.value = false
   editMealItem.value = item
   showMealForm.value = true
@@ -259,7 +261,7 @@ async function onDeleteMeal() {
   }
 }
 
-function onDragEnd(data) {
+function onDragEnd(data: Parameters<typeof planning.handleDragEnd>[0]) {
   planning.handleDragEnd(data)
 }
 

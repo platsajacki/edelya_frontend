@@ -221,8 +221,9 @@
   </div>
 </template>
 
-<script setup>
+<script lang="ts" setup>
 import { ref, computed, onMounted, onUnmounted, watch } from "vue"
+import type { DTODish } from "@/types/dish"
 import { useRecipesStore, SORT_OPTIONS } from "../store/recipes"
 import { useSubscriptionStore } from "../store/subscription"
 import RecipeDishCard from "../components/RecipeDishCard.vue"
@@ -329,9 +330,9 @@ function onApplyFilters({ categoryId }) {
 
 // --- Detail ---
 const showDetail = ref(false)
-const detailDish = ref({})
+const detailDish = ref<DTODish | null>(null)
 
-function openDetail(dish) {
+function openDetail(dish: DTODish) {
   detailDish.value = dish
   showDetail.value = true
 }
@@ -388,7 +389,7 @@ function onAIDraftUpdated(draft) {
   store.upsertAIDraft(draft)
 }
 
-function onOpenDish(dish) {
+function onOpenDish(dish: DTODish) {
   detailDish.value = dish
   showDetail.value = true
 }

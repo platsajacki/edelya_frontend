@@ -16,7 +16,7 @@
           title="Редактировать"
           @click="showEditForm = true"
         >
-          <IconPencil width="18" height="18" />
+          <IconPencil :width="18" :height="18" />
         </button>
         <button
           class="detail-header__btn"
@@ -144,7 +144,7 @@
   </div>
 </template>
 
-<script setup>
+<script lang="ts" setup>
 import { ref, computed, onMounted, watch } from "vue"
 import { useRoute, useRouter } from "vue-router"
 import { useShoppingStore } from "../store/shopping"
@@ -171,7 +171,7 @@ const showAddItem = ref(false)
 const confirmDialog = ref(null)
 const confirmBusy = ref(false)
 
-const listId = computed(() => route.params.id)
+const listId = computed(() => route.params.id as string)
 
 const dateRange = computed(() => {
   if (!store.currentList) return ""

@@ -22,7 +22,7 @@
           v-for="event in cookingEvents"
           :key="event.id"
           :item="event"
-          @tap="$emit('tap-cooking', $event)"
+          @tap="$emit('tap-cooking', event)"
         />
       </div>
       <button
@@ -41,7 +41,7 @@
           v-for="item in meals"
           :key="item.id"
           :item="item"
-          @tap="$emit('tap-meal', $event)"
+          @tap="$emit('tap-meal', item)"
         />
       </div>
       <button
@@ -56,34 +56,52 @@
   </div>
 </template>
 
-<script setup>
+<script lang="ts" setup>
 import { ref } from "vue"
 import MealCard from "./MealCard.vue"
 import IconCartPlus from "./icons/IconCartPlus.vue"
 import { useSortable } from "../composables/useSortable"
+import type { DTOMealPlanItem, DTOCookingEvent } from "@/types/planning"
 
-const props = defineProps({
-  day: { type: String, required: true },
-  date: { type: String, required: true },
-  rawDate: { type: String, required: true },
-  meals: { type: Array, default: () => [] },
-  cookingEvents: { type: Array, default: () => [] },
-  muted: { type: Boolean, default: false },
-})
+withDefaults(
+  defineProps<{
+    day: string
+    date: string
+    rawDate: string
+    meals?: DTOMealPlanItem[]
+    cookingEvents?: DTOCookingEvent[]
+    muted?: boolean
+  }>(),
+  {
+    meals: () => [],
+    cookingEvents: () => [],
+    muted: false,
+  }
+)
 
-const emit = defineEmits([
-  "tap-cooking",
-  "tap-meal",
-  "add-cooking",
-  "add-meal",
-  "drag-end",
-  "create-shopping-day",
-])
+const emit = defineEmits<{
+  (e: "tap-cooking", event: DTOCookingEvent): void
+  (e: "tap-meal", event: DTOMealPlanItem): void
+  (e: "add-cooking", rawDate: string): void
+  (e: "add-meal", rawDate: string): void
+  (
+    e: "drag-end",
+    payload: {
+      itemId: string
+      fromDate: string
+      toDate: string
+      oldIndex: number
+      newIndex: number
+      type: "cooking" | "meals"
+    }
+  ): void
+  (e: "create-shopping-day", payload: { rawDate: string; dayLabel: string }): void
+}>()
 
-const cookRef = ref(null)
-const eatRef = ref(null)
+const cookRef = ref<HTMLElement | null>(null)
+const eatRef = ref<HTMLElement | null>(null)
 
-function makeSortableOptions(type) {
+function makeSortableOptions(type: "cooking" | "meals") {
   return {
     group: type,
     draggable: ".meal-card",

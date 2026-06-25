@@ -29,10 +29,17 @@
   </svg>
 </template>
 
-<script setup>
-defineProps({
-  width: { default: 16 },
-  height: { default: 16 },
-  ascending: { type: Boolean, default: true },
-})
+<script lang="ts" setup>
+withDefaults(
+  defineProps<{
+    width?: number
+    height?: number
+    ascending?: boolean
+  }>(),
+  {
+    width: 16,
+    height: 16,
+    ascending: true,
+  }
+)
 </script>

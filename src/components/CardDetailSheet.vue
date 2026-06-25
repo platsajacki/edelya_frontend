@@ -5,7 +5,7 @@
       <div class="detail__section">
         <div class="detail__dish-header">
           <div class="detail__dish-title-row">
-            <h4 class="detail__dish-name">{{ dish.name }}</h4>
+            <h4 class="detail__dish-name">{{ dish?.name }}</h4>
             <OwnershipBadge :is-own="isOwn" />
           </div>
           <button
@@ -26,7 +26,7 @@
       <div v-if="type === 'cooking'" class="detail__section">
         <div class="detail__row">
           <span class="detail__label">Дата готовки</span>
-          <span class="detail__value">{{ formatDate(item.cooking_date) }}</span>
+          <span class="detail__value">{{ formatDate(cookingItem?.cooking_date ?? "") }}</span>
         </div>
         <div class="detail__row detail__row--col">
           <span class="detail__label">Дни еды</span>
@@ -35,24 +35,24 @@
           </div>
           <span v-else class="detail__value detail__value--muted">Нет запланированных дней</span>
         </div>
-        <div v-if="item.notes" class="detail__row detail__row--col">
+        <div v-if="cookingItem?.notes" class="detail__row detail__row--col">
           <span class="detail__label">Комментарий</span>
-          <span class="detail__value">{{ item.notes }}</span>
+          <span class="detail__value">{{ cookingItem?.notes }}</span>
         </div>
       </div>
 
       <div v-if="type === 'meal'" class="detail__section">
         <div class="detail__row">
           <span class="detail__label">Дата</span>
-          <span class="detail__value">{{ formatDate(item.date) }}</span>
+          <span class="detail__value">{{ formatDate(mealItem?.date ?? "") }}</span>
         </div>
         <div class="detail__row">
           <span class="detail__label">Источник</span>
           <button
-            v-if="item.cooking_event"
+            v-if="mealItem?.cooking_event"
             type="button"
             class="detail__link"
-            @click="$emit('view-cooking', item.cooking_event)"
+            @click="$emit('view-cooking', mealItem!.cooking_event)"
           >
             Из готовки →
           </button>
@@ -65,13 +65,11 @@
         <span class="detail__label">Состав</span>
         <ul class="detail__ingredients">
           <li v-for="di in dish.dish_ingredients" :key="di.id" class="detail__ingredient">
-            <span class="detail__ingredient-name">{{ di.ingredient?.name ?? di.name }}</span>
+            <span class="detail__ingredient-name">{{ di.ingredient.name }}</span>
             <span class="detail__ingredient-right">
               <span v-if="di.is_optional" class="detail__ingredient-optional">опц.</span>
               <span class="detail__ingredient-amount">
-                {{
-                  formatShoppingAmount(di.amount, di.ingredient?.base_unit ?? di.base_unit).display
-                }}
+                {{ formatShoppingAmount(di.amount, di.ingredient.base_unit).display }}
               </span>
             </span>
           </li>
@@ -99,7 +97,7 @@
   <!-- Delete confirmation modal -->
   <ModalWrapper v-model="confirming" title="Подтверждение" :z-index="1050">
     <p class="detail__confirm-text">
-      Удалить {{ type === "cooking" ? "готовку" : "приём пищи" }} «{{ dish.name }}»?
+      Удалить {{ type === "cooking" ? "готовку" : "приём пищи" }} «{{ dish?.name }}»?
     </p>
     <template #footer>
       <div class="detail__confirm-actions">
@@ -126,26 +124,34 @@
   <DishForm v-model="showCloneForm" :z-index="1020" :clone-dish="dish" @created="onCloneCreated" />
 </template>
 
-<script setup>
+<script lang="ts" setup>
 import { ref, computed, watch } from "vue"
 import ModalWrapper from "./forms/ModalWrapper.vue"
 import DishForm from "./forms/DishForm.vue"
 import IconPencil from "./icons/IconPencil.vue"
 import OwnershipBadge from "./OwnershipBadge.vue"
 import { formatYMDtoDDMMYYYY } from "../utils/formatDate"
-import { formatAmount } from "../utils/formatAmount"
 import { formatShoppingAmount } from "../utils/formatShoppingAmount"
 import { usePlanningStore } from "../store/planning"
 import { isDishOwn } from "../utils/dishOwnership"
-import { UNIT_LABELS } from "../utils/unitLabels"
+import type { DTOCookingEvent, DTOMealPlanItem } from "@/types/planning"
+import type { DTODish } from "@/types/dish"
 
-const props = defineProps({
-  modelValue: { type: Boolean, required: true },
-  item: { type: Object, default: null },
-  type: { type: String, default: "cooking" }, // 'cooking' | 'meal'
-})
+const props = withDefaults(
+  defineProps<{
+    modelValue: boolean
+    item?: DTOCookingEvent | DTOMealPlanItem | null
+    type?: "cooking" | "meal"
+  }>(),
+  { item: null, type: "cooking" }
+)
 
-const emit = defineEmits(["update:modelValue", "edit", "delete", "view-cooking"])
+const emit = defineEmits<{
+  (e: "update:modelValue", value: boolean): void
+  (e: "edit"): void
+  (e: "delete"): void
+  (e: "view-cooking", cookingEvent: string | null | undefined): void
+}>()
 
 const planning = usePlanningStore()
 
@@ -164,6 +170,14 @@ const confirming = ref(false)
 const showDishForm = ref(false)
 const showCloneForm = ref(false)
 
+const cookingItem = computed(() =>
+  props.type === "cooking" ? (props.item as DTOCookingEvent | null) : null
+)
+const mealItem = computed(() =>
+  props.type === "meal" ? (props.item as DTOMealPlanItem | null) : null
+)
+const dish = computed(() => props.item?.dish ?? null)
+
 const isOwn = computed(() => isDishOwn(dish.value))
 
 watch(
@@ -175,10 +189,8 @@ watch(
   }
 )
 
-const dish = computed(() => props.item?.dish ?? {})
-
 const eatDates = computed(() => {
-  const items = props.item?.meal_plan_items || []
+  const items = cookingItem.value?.meal_plan_items ?? []
   return items.map((m) => m.date).sort()
 })
 
@@ -187,12 +199,8 @@ const title = computed(() => {
   return "Приём пищи"
 })
 
-function formatDate(iso) {
+function formatDate(iso: string): string {
   return formatYMDtoDDMMYYYY(iso)
-}
-
-function unitLabel(unit) {
-  return UNIT_LABELS[unit] || unit || ""
 }
 
 async function onDishUpdated() {
@@ -209,14 +217,14 @@ function handleDishEdit() {
   }
 }
 
-async function onCloneCreated(dish) {
+async function onCloneCreated(newDish: DTODish) {
   showCloneForm.value = false
-  if (props.type === "cooking" && props.item?.id) {
-    await planning.editCookingEvent(props.item.id, {
-      dish: dish.id,
-      cooking_date: props.item.cooking_date,
+  if (cookingItem.value?.id) {
+    await planning.editCookingEvent(cookingItem.value.id, {
+      dish: newDish.id as unknown as DTODish,
+      cooking_date: cookingItem.value.cooking_date,
       eat_dates: eatDates.value,
-      notes: props.item.notes || undefined,
+      notes: cookingItem.value.notes || undefined,
     })
   }
   await planning.loadWeek()
@@ -225,7 +233,7 @@ async function onCloneCreated(dish) {
 </script>
 
 <style>
-@import "../styles/detail-sheet.css";
+@import "../styles/detail-sheet.scss";
 </style>
 
 <style scoped>

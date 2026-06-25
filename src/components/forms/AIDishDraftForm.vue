@@ -260,7 +260,7 @@
                   autocomplete="off"
                   class="form__input ingredient-amount__input"
                   placeholder="Например: 200"
-                  @focus="$event.target.select()"
+                  @focus="($event.target as HTMLInputElement).select()"
                   @keydown.enter.prevent="finishIngredientEdit"
                 />
                 <select
@@ -332,7 +332,7 @@
                   title="Редактировать"
                   @click="startIngredientEdit(idx)"
                 >
-                  <IconPencil width="14" height="14" />
+                  <IconPencil :width="14" :height="14" />
                 </button>
                 <button
                   type="button"
@@ -451,7 +451,7 @@
   </ModalWrapper>
 </template>
 
-<script setup>
+<script lang="ts" setup>
 import { computed, nextTick, onUnmounted, ref, watch } from "vue"
 import ModalWrapper from "./ModalWrapper.vue"
 import IngredientForm from "./IngredientForm.vue"
@@ -468,6 +468,27 @@ import {
 } from "../../services/ingredientService"
 import { formatShoppingAmount } from "../../utils/formatShoppingAmount"
 import { UNIT_LABELS } from "../../utils/unitLabels"
+import type { DTOAIDraft, DTOBaseUnit, DTODish, DTODishCategory } from "@/types/dish"
+import type { DTOIngredient, DTOIngredientCategory } from "@/types/shopping"
+
+interface AIDraftPayloadIngredient {
+  localId: string
+  ingredient: string | null
+  name: string
+  category: string | number | null
+  base_unit: DTOBaseUnit
+  amount: string | number
+  is_optional: boolean
+  new: boolean
+  suggested_ids: string[]
+}
+
+interface AIDraftPayload {
+  name: string
+  recipe: string
+  category: string | number
+  ingredients: AIDraftPayloadIngredient[]
+}
 
 const MIN_SOURCE_LENGTH = 10
 const MAX_SOURCE_LENGTH = 10000
@@ -479,52 +500,55 @@ const NOT_PROCESSABLE_MESSAGE =
 const DEFAULT_PARSE_FAILURE_MESSAGE =
   "Попробуйте добавить больше деталей: ингредиенты, количество и шаги приготовления."
 
-const props = defineProps({
-  modelValue: { type: Boolean, required: true },
-  zIndex: { type: Number, default: 1010 },
-  draftToOpen: { type: Object, default: null },
-})
+const props = withDefaults(
+  defineProps<{
+    modelValue: boolean
+    zIndex?: number
+    draftToOpen?: DTOAIDraft | null
+  }>(),
+  { zIndex: 1010, draftToOpen: null }
+)
 
-const emit = defineEmits([
-  "update:modelValue",
-  "created",
-  "draft-created",
-  "draft-updated",
-  "open-dish",
-])
+const emit = defineEmits<{
+  (e: "update:modelValue", value: boolean): void
+  (e: "created", dish: DTODish): void
+  (e: "draft-created", draft: DTOAIDraft): void
+  (e: "draft-updated", draft: DTOAIDraft): void
+  (e: "open-dish", dish: DTODish): void
+}>()
 
 const subscription = useSubscriptionStore()
 const open = ref(props.modelValue)
 const sourceText = ref("")
-const sourceTextRef = ref(null)
-const draft = ref(null)
-const createdDish = ref(null)
+const sourceTextRef = ref<HTMLTextAreaElement | null>(null)
+const draft = ref<DTOAIDraft | null>(null)
+const createdDish = ref<DTODish | null>(null)
 const openingCreatedDish = ref(false)
-const payload = ref(createEmptyPayload())
-const dishCategories = ref([])
-const ingredientCategories = ref([])
+const payload = ref<AIDraftPayload>(createEmptyPayload())
+const dishCategories = ref<DTODishCategory[]>([])
+const ingredientCategories = ref<DTOIngredientCategory[]>([])
 const error = ref("")
 const saving = ref(false)
 const polling = ref(false)
 const sourceExpanded = ref(false)
-const editingIngredientIndex = ref(null)
+const editingIngredientIndex = ref<number | null>(null)
 const addIngredientExpanded = ref(false)
 const ingredientSearchQuery = ref("")
-const ingredientSearchResults = ref([])
+const ingredientSearchResults = ref<DTOIngredient[]>([])
 const ingredientSearchLoading = ref(false)
 const showIngredientForm = ref(false)
 const ingredientFormInitialName = ref("")
-const amountInputRef = ref(null)
-const suggestionsMap = ref({})
+const amountInputRef = ref<HTMLInputElement[]>([])
+const suggestionsMap = ref<Record<string, DTOIngredient[]>>({})
 
 const inlineReplaceVisible = ref(false)
 const inlineReplaceQuery = ref("")
-const inlineReplaceResults = ref([])
+const inlineReplaceResults = ref<DTOIngredient[]>([])
 const inlineReplaceLoading = ref(false)
-let inlineReplaceTimer = null
+let inlineReplaceTimer: ReturnType<typeof setTimeout> | null = null
 
-let pollTimer = null
-let ingredientSearchTimer = null
+let pollTimer: ReturnType<typeof setTimeout> | null = null
+let ingredientSearchTimer: ReturnType<typeof setTimeout> | null = null
 
 const unitOptions = computed(() =>
   Object.entries(UNIT_LABELS).map(([value, label]) => ({ value, label }))
@@ -622,7 +646,7 @@ async function loadReferences() {
   }
 }
 
-function createEmptyPayload() {
+function createEmptyPayload(): AIDraftPayload {
   return {
     name: "",
     recipe: "",
@@ -656,13 +680,10 @@ function resetToInput() {
   nextTick(() => sourceTextRef.value?.focus())
 }
 
-function applyDraft(nextDraft) {
+function applyDraft(nextDraft: DTOAIDraft) {
   draft.value = nextDraft
   sourceText.value = nextDraft?.source_text || sourceText.value
   sourceExpanded.value = false
-  if (nextDraft?.status === "dish_created") {
-    createdDish.value = nextDraft.created_dish || null
-  }
   resetIngredientSearch()
   if (nextDraft?.payload) setPayload(nextDraft.payload)
   if (nextDraft?.status === "processing") schedulePoll(nextDraft.id)
@@ -676,14 +697,14 @@ function stopPolling() {
   polling.value = false
 }
 
-function schedulePoll(id) {
+function schedulePoll(id: string) {
   if (!open.value) return
   stopPolling()
   polling.value = true
   pollTimer = setTimeout(() => pollDraft(id), POLL_INTERVAL_MS)
 }
 
-async function pollDraft(id) {
+async function pollDraft(id: string) {
   try {
     const data = await fetchAIDraft(id)
     if (!open.value) return
@@ -702,11 +723,12 @@ async function pollDraft(id) {
   } catch (err) {
     if (!open.value) return
     stopPolling()
-    error.value = err.message || "Не удалось получить результат разбора."
+    error.value =
+      (err instanceof Error ? err.message : "") || "Не удалось получить результат разбора."
   }
 }
 
-function setPayload(data) {
+function setPayload(data: Record<string, unknown> | null) {
   const nextPayload = normalizePayload(data)
   nextPayload.ingredients = (nextPayload.ingredients || []).map((ingredient, index) => ({
     ...ingredient,
@@ -718,34 +740,36 @@ function setPayload(data) {
   loadSuggestions(nextPayload.ingredients)
 }
 
-async function loadSuggestions(ingredients) {
-  const map = {}
+async function loadSuggestions(ingredients: AIDraftPayloadIngredient[]) {
+  const map: Record<string, DTOIngredient[]> = {}
   const toLoad = ingredients.filter((ing) => ing.new && ing.suggested_ids?.length)
   await Promise.allSettled(
     toLoad.map(async (ing) => {
       const results = await Promise.allSettled(
         ing.suggested_ids.map((id) => fetchIngredientById(id))
       )
-      map[ing.localId] = results.filter((r) => r.status === "fulfilled").map((r) => r.value)
+      map[ing.localId] = results
+        .filter((r): r is PromiseFulfilledResult<DTOIngredient> => r.status === "fulfilled")
+        .map((r) => r.value)
     })
   )
   suggestionsMap.value = map
 }
 
-function normalizePayload(data) {
-  return JSON.parse(JSON.stringify(data || createEmptyPayload()))
+function normalizePayload(data: Record<string, unknown> | null): AIDraftPayload {
+  return JSON.parse(JSON.stringify(data ?? createEmptyPayload())) as AIDraftPayload
 }
 
-function getCategoryName(categoryId) {
+function getCategoryName(categoryId: string | number): string {
   const id = getCategoryId(categoryId)
   return dishCategories.value.find((category) => category.id === id)?.name || ""
 }
 
-function ingredientLabel(ingredient) {
+function ingredientLabel(ingredient: { name?: string }): string {
   return ingredient.name?.trim() || "Без названия"
 }
 
-function removeIngredient(index) {
+function removeIngredient(index: number) {
   payload.value.ingredients.splice(index, 1)
   if (editingIngredientIndex.value === index) {
     editingIngredientIndex.value = null
@@ -755,15 +779,14 @@ function removeIngredient(index) {
   }
 }
 
-function startIngredientEdit(index) {
+function startIngredientEdit(index: number) {
   closeInlineReplace()
   editingIngredientIndex.value = index
   const ingredient = payload.value.ingredients[index]
   if (ingredient && !ingredient.new && !ingredient.ingredient) {
-    // Broken state: marked as found but no ID — auto-open replace search
     nextTick(() => openInlineReplace(ingredient))
   } else {
-    nextTick(() => amountInputRef.value?.focus())
+    nextTick(() => amountInputRef.value[0]?.focus())
   }
 }
 
@@ -778,8 +801,8 @@ function cancelIngredientEdit() {
 }
 
 function resetIngredientSearch() {
-  clearTimeout(ingredientSearchTimer)
-  clearTimeout(inlineReplaceTimer)
+  clearTimeout(ingredientSearchTimer ?? undefined)
+  clearTimeout(inlineReplaceTimer ?? undefined)
   editingIngredientIndex.value = null
   addIngredientExpanded.value = false
   ingredientSearchQuery.value = ""
@@ -794,7 +817,7 @@ function clearIngredientSearch() {
 }
 
 function searchIngredients() {
-  clearTimeout(ingredientSearchTimer)
+  clearTimeout(ingredientSearchTimer ?? undefined)
   const query = ingredientSearchQuery.value.trim()
   if (!query) {
     ingredientSearchResults.value = []
@@ -814,7 +837,7 @@ function searchIngredients() {
   }, 300)
 }
 
-function selectExistingIngredient(ingredient) {
+function selectExistingIngredient(ingredient: DTOIngredient) {
   addExistingIngredient(ingredient)
 }
 
@@ -823,11 +846,11 @@ function openIngredientForm() {
   showIngredientForm.value = true
 }
 
-function onIngredientCreated(ingredient) {
+function onIngredientCreated(ingredient: DTOIngredient) {
   addExistingIngredient(ingredient)
 }
 
-function addExistingIngredient(ingredient) {
+function addExistingIngredient(ingredient: DTOIngredient) {
   const alreadyUsed = payload.value.ingredients.some((item) => item.ingredient === ingredient.id)
   if (alreadyUsed) {
     error.value = "Ингредиент уже добавлен."
@@ -848,10 +871,10 @@ function addExistingIngredient(ingredient) {
   clearIngredientSearch()
   error.value = ""
   editingIngredientIndex.value = payload.value.ingredients.length - 1
-  nextTick(() => amountInputRef.value?.focus())
+  nextTick(() => amountInputRef.value[0]?.focus())
 }
 
-function setExistingIngredient(index, ingredient) {
+function setExistingIngredient(index: number, ingredient: DTOIngredient) {
   const current = payload.value.ingredients[index]
   if (!current) return
   const alreadyUsed = payload.value.ingredients.some(
@@ -874,16 +897,18 @@ function setExistingIngredient(index, ingredient) {
   error.value = ""
 }
 
-function getCategoryId(category) {
+function getCategoryId(
+  category: DTOIngredientCategory | string | number | null | undefined
+): string | number | null | undefined {
   return typeof category === "object" ? category?.id : category
 }
 
-function getCreatedDishId(value) {
+function getCreatedDishId(value: DTODish | string | null | undefined): string | null {
   if (!value) return null
   return typeof value === "object" ? value.id : value
 }
 
-function formatValidationErrors(errors) {
+function formatValidationErrors(errors: unknown): string {
   if (!errors || (Array.isArray(errors) && !errors.length)) {
     return DEFAULT_PARSE_FAILURE_MESSAGE
   }
@@ -891,31 +916,29 @@ function formatValidationErrors(errors) {
   return text || DEFAULT_PARSE_FAILURE_MESSAGE
 }
 
-function formatErrorItem(item) {
+function formatErrorItem(item: unknown): string {
   if (!item) return ""
   if (item === "prompt_injection") return PROMPT_INJECTION_MESSAGE
   if (item === "not_processable") return NOT_PROCESSABLE_MESSAGE
   if (typeof item === "string") return ""
   if (Array.isArray(item)) return item.map(formatErrorItem).filter(Boolean).join("\n")
   if (typeof item !== "object") return ""
-  if (item.error_code === "prompt_injection") return PROMPT_INJECTION_MESSAGE
-  if (item.code === "prompt_injection") return PROMPT_INJECTION_MESSAGE
-  if (item.error_code === "not_processable") return NOT_PROCESSABLE_MESSAGE
-  if (item.code === "not_processable") return NOT_PROCESSABLE_MESSAGE
-  if (item.error_message) return formatErrorItem(item.error_message)
-  if (item.message) return formatErrorItem(item.message)
-  if (item.detail) return formatErrorItem(item.detail)
-  return Object.entries(item)
+  const obj = item as Record<string, unknown>
+  if (obj.error_code === "prompt_injection") return PROMPT_INJECTION_MESSAGE
+  if (obj.code === "prompt_injection") return PROMPT_INJECTION_MESSAGE
+  if (obj.error_code === "not_processable") return NOT_PROCESSABLE_MESSAGE
+  if (obj.code === "not_processable") return NOT_PROCESSABLE_MESSAGE
+  if (obj.error_message) return formatErrorItem(obj.error_message)
+  if (obj.message) return formatErrorItem(obj.message)
+  if (obj.detail) return formatErrorItem(obj.detail)
+  return Object.entries(obj)
     .filter(([key]) => key !== "error_code")
-    .map(([, value]) => {
-      const text = formatErrorItem(value)
-      return text || ""
-    })
+    .map(([, value]) => formatErrorItem(value))
     .filter(Boolean)
     .join("\n")
 }
 
-function validateSourceText() {
+function validateSourceText(): string | null {
   const text = sourceText.value.trim()
   if (text.length < MIN_SOURCE_LENGTH) return "Вставьте рецепт длиной не менее 10 символов."
   if (text.length > MAX_SOURCE_LENGTH)
@@ -923,7 +946,7 @@ function validateSourceText() {
   return null
 }
 
-function validatePayload() {
+function validatePayload(): string | null {
   if (!payload.value.name?.trim()) return "Укажите название блюда."
   if (!payload.value.recipe?.trim()) return "Добавьте текст рецепта."
   if (!payload.value.category) return "Выберите категорию блюда."
@@ -943,7 +966,7 @@ function validatePayload() {
   return null
 }
 
-function buildPayload() {
+function buildPayload(): Record<string, unknown> {
   return {
     name: payload.value.name.trim(),
     recipe: payload.value.recipe.trim(),
@@ -968,7 +991,7 @@ async function submit() {
       error.value = "Лимит AI-рецептов на текущий период исчерпан."
       return
     }
-    error.value = validateSourceText()
+    error.value = validateSourceText() ?? ""
     if (error.value) return
     saving.value = true
     try {
@@ -977,7 +1000,8 @@ async function submit() {
       emit("draft-created", data)
       schedulePoll(data.id)
     } catch (err) {
-      error.value = err.message || "Не удалось отправить рецепт на разбор."
+      error.value =
+        (err instanceof Error ? err.message : "") || "Не удалось отправить рецепт на разбор."
     } finally {
       saving.value = false
     }
@@ -985,15 +1009,15 @@ async function submit() {
   }
 
   if (step.value !== "parsed") return
-  error.value = validatePayload()
+  error.value = validatePayload() ?? ""
   if (error.value) return
   saving.value = true
   try {
     const confirmedPayload = buildPayload()
-    const dish = await createDishFromAIDraft(draft.value.id, confirmedPayload)
+    const dish = await createDishFromAIDraft(draft.value!.id, confirmedPayload)
     createdDish.value = dish
-    const updatedDraft = {
-      ...draft.value,
+    const updatedDraft: DTOAIDraft = {
+      ...draft.value!,
       status: "dish_created",
       payload: confirmedPayload,
       created_dish: getCreatedDishId(dish),
@@ -1002,13 +1026,13 @@ async function submit() {
     emit("draft-updated", updatedDraft)
     emit("created", dish)
   } catch (err) {
-    error.value = err.message || "Не удалось создать блюдо."
+    error.value = (err instanceof Error ? err.message : "") || "Не удалось создать блюдо."
   } finally {
     saving.value = false
   }
 }
 
-function openInlineReplace(ingredient) {
+function openInlineReplace(ingredient: AIDraftPayloadIngredient) {
   inlineReplaceQuery.value = ingredient.name?.trim() || ""
   inlineReplaceResults.value = []
   inlineReplaceVisible.value = true
@@ -1016,7 +1040,7 @@ function openInlineReplace(ingredient) {
 }
 
 function closeInlineReplace() {
-  clearTimeout(inlineReplaceTimer)
+  clearTimeout(inlineReplaceTimer ?? undefined)
   inlineReplaceVisible.value = false
   inlineReplaceQuery.value = ""
   inlineReplaceResults.value = []
@@ -1024,7 +1048,7 @@ function closeInlineReplace() {
 }
 
 function searchInlineReplace() {
-  clearTimeout(inlineReplaceTimer)
+  clearTimeout(inlineReplaceTimer ?? undefined)
   const query = inlineReplaceQuery.value.trim()
   if (!query) {
     inlineReplaceResults.value = []
@@ -1044,17 +1068,18 @@ function searchInlineReplace() {
   }, 300)
 }
 
-function selectInlineReplaceIngredient(index, ingredient) {
+function selectInlineReplaceIngredient(index: number, ingredient: DTOIngredient) {
   setExistingIngredient(index, ingredient)
   closeInlineReplace()
 }
 
-function applySuggestion(index, ingredient) {
+function applySuggestion(index: number, ingredient: DTOIngredient) {
   setExistingIngredient(index, ingredient)
   const localId = payload.value.ingredients[index]?.localId
   if (localId) {
-    const { [localId]: _, ...rest } = suggestionsMap.value
-    suggestionsMap.value = rest
+    const updated = { ...suggestionsMap.value }
+    delete updated[localId]
+    suggestionsMap.value = updated
   }
 }
 
@@ -1065,13 +1090,13 @@ async function openCreatedDish() {
   error.value = ""
   try {
     const dish =
-      typeof createdDish.value === "object" && createdDish.value?.id === id
+      createdDish.value !== null && createdDish.value.id === id
         ? createdDish.value
         : await fetchDish(id)
     emit("open-dish", dish)
     open.value = false
   } catch (err) {
-    error.value = err.message || "Не удалось открыть блюдо."
+    error.value = (err instanceof Error ? err.message : "") || "Не удалось открыть блюдо."
   } finally {
     openingCreatedDish.value = false
   }
@@ -1079,13 +1104,13 @@ async function openCreatedDish() {
 
 onUnmounted(() => {
   stopPolling()
-  clearTimeout(ingredientSearchTimer)
-  clearTimeout(inlineReplaceTimer)
+  clearTimeout(ingredientSearchTimer ?? undefined)
+  clearTimeout(inlineReplaceTimer ?? undefined)
 })
 </script>
 
 <style>
-@import "../../styles/detail-sheet.css";
+@import "../../styles/detail-sheet.scss";
 </style>
 
 <style scoped>

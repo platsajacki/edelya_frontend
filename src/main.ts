@@ -4,7 +4,7 @@ import "./style.scss"
 import App from "./App.vue"
 import { router } from "./router"
 
-if (!import.meta.env.VITE_API) {
+if (!window.__APP_CONFIG__?.apiUrl && !import.meta.env.VITE_API) {
   throw new Error("API URL is not configured (VITE_API or config.js)")
 }
 

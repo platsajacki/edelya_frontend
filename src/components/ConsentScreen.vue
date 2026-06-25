@@ -30,7 +30,7 @@
   </div>
 </template>
 
-<script setup>
+<script lang="ts" setup>
 import { ref } from "vue"
 import { useAuthStore } from "../store/auth"
 import { useSubscriptionStore } from "../store/subscription"
@@ -41,7 +41,7 @@ const sub = useSubscriptionStore()
 const termsAccepted = ref(false)
 const marketingAccepted = ref(false)
 const loading = ref(false)
-const error = ref(null)
+const error = ref<string | null>(null)
 
 async function submit() {
   if (!termsAccepted.value || loading.value) return
@@ -51,7 +51,7 @@ async function submit() {
     await auth.submitConsent(termsAccepted.value, marketingAccepted.value)
     await sub.loadMySubscription().catch(() => {})
   } catch (err) {
-    error.value = err.message ?? "Произошла ошибка. Попробуйте снова."
+    error.value = err instanceof Error ? err.message : "Произошла ошибка. Попробуйте снова."
   } finally {
     loading.value = false
   }

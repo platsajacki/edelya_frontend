@@ -10,36 +10,43 @@ import {
   batchUpdateMealPositions,
 } from "../services/planningService"
 import { recalcPositions } from "../utils/recalcPositions"
+import type {
+  DTOWeekDishes,
+  DTOMealPlanItem,
+  DTOCookingEvent,
+  CreateMealPlanItemPayload,
+  UpdateMealPlanItemPayload,
+} from "@/types/planning"
 
-function getISOWeek(date) {
+function getISOWeek(date: Date): { year: number; week: number } {
   const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()))
   d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7))
   const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1))
-  const week = Math.ceil(((d - yearStart) / 86400000 + 1) / 7)
+  const week = Math.ceil(((d.getTime() - yearStart.getTime()) / 86400000 + 1) / 7)
   return { year: d.getUTCFullYear(), week }
 }
 
-function lastISOWeek(year) {
+function lastISOWeek(year: number): number {
   // Dec 28 is always in the last ISO week of the year
   return getISOWeek(new Date(year, 11, 28)).week
 }
 
-function formatDateRange(startISO, endISO) {
-  const fmt = (iso) => {
+function formatDateRange(startISO: string, endISO: string): string {
+  const fmt = (iso: string) => {
     const d = new Date(iso + "T00:00:00")
     return d.toLocaleDateString("ru-RU", { day: "numeric", month: "long" })
   }
   return `${fmt(startISO)} – ${fmt(endISO)}`
 }
 
-function emptyWeek(year, week) {
+function emptyWeek(year: number, week: number): DTOWeekDishes {
   const simple = new Date(Date.UTC(year, 0, 1 + (week - 1) * 7))
   const day = simple.getUTCDay() || 7
   const monday = new Date(simple)
   monday.setUTCDate(simple.getUTCDate() - day + 1)
   const sunday = new Date(monday)
   sunday.setUTCDate(monday.getUTCDate() + 6)
-  const toISO = (d) => d.toISOString().slice(0, 10)
+  const toISO = (d: Date) => d.toISOString().slice(0, 10)
   return {
     start_week: toISO(monday),
     end_week: toISO(sunday),
@@ -57,17 +64,17 @@ export const usePlanningStore = defineStore("planning", {
       year,
       week,
       weekData: emptyWeek(year, week),
-      nextWeekData: null,
+      nextWeekData: null as DTOWeekDishes | null,
       loading: false,
       loadingNextWeek: false,
       loadError: false,
-      toast: null,
-      savingItemIds: [],
+      toast: null as string | null,
+      savingItemIds: [] as string[],
     }
   },
 
   getters: {
-    weekLabel(state) {
+    weekLabel(state): string {
       if (!state.weekData) return ""
       return formatDateRange(state.weekData.start_week, state.weekData.end_week)
     },
@@ -88,7 +95,7 @@ export const usePlanningStore = defineStore("planning", {
       }
     },
 
-    async loadNextWeek(year, week) {
+    async loadNextWeek(year: number, week: number) {
       if (this.nextWeekData || this.loadingNextWeek) return
       this.loadingNextWeek = true
       try {
@@ -100,7 +107,7 @@ export const usePlanningStore = defineStore("planning", {
       }
     },
 
-    showToast(message) {
+    showToast(message: string) {
       this.toast = message
       setTimeout(() => {
         if (this.toast === message) this.toast = null
@@ -144,7 +151,7 @@ export const usePlanningStore = defineStore("planning", {
       await Promise.all(refreshes)
     },
 
-    async addCookingEvent(payload) {
+    async addCookingEvent(payload: Partial<DTOCookingEvent>) {
       try {
         await createCookingEvent(payload)
         this.showToast("Готовка создана")
@@ -155,7 +162,7 @@ export const usePlanningStore = defineStore("planning", {
       }
     },
 
-    async addMealPlanItem(payload) {
+    async addMealPlanItem(payload: CreateMealPlanItemPayload) {
       try {
         await createMealPlanItem(payload)
         this.showToast("Приём пищи добавлен")
@@ -166,7 +173,7 @@ export const usePlanningStore = defineStore("planning", {
       }
     },
 
-    async editCookingEvent(id, payload) {
+    async editCookingEvent(id: string, payload: Partial<DTOCookingEvent>) {
       try {
         await updateCookingEvent(id, payload)
         this.showToast("Готовка обновлена")
@@ -177,7 +184,7 @@ export const usePlanningStore = defineStore("planning", {
       }
     },
 
-    async removeCookingEvent(id) {
+    async removeCookingEvent(id: string) {
       try {
         await deleteCookingEvent(id)
         this.showToast("Готовка удалена")
@@ -188,7 +195,7 @@ export const usePlanningStore = defineStore("planning", {
       }
     },
 
-    async editMealPlanItem(id, payload) {
+    async editMealPlanItem(id: string, payload: UpdateMealPlanItemPayload) {
       try {
         await updateMealPlanItem(id, payload)
         this.showToast("Приём пищи обновлён")
@@ -199,7 +206,7 @@ export const usePlanningStore = defineStore("planning", {
       }
     },
 
-    async removeMealPlanItem(id) {
+    async removeMealPlanItem(id: string) {
       try {
         await deleteMealPlanItem(id)
         this.showToast("Приём пищи удалён")
@@ -210,7 +217,21 @@ export const usePlanningStore = defineStore("planning", {
       }
     },
 
-    async handleDragEnd({ itemId, fromDate, toDate, oldIndex, newIndex, type }) {
+    async handleDragEnd({
+      itemId,
+      fromDate,
+      toDate,
+      oldIndex,
+      newIndex,
+      type,
+    }: {
+      itemId: string
+      fromDate: string
+      toDate: string
+      oldIndex: number
+      newIndex: number
+      type: "meals" | "cooking"
+    }) {
       const opId = ++_opCounter
       const snapshot = JSON.parse(JSON.stringify(this.weekData))
       const nextSnapshot = this.nextWeekData ? JSON.parse(JSON.stringify(this.nextWeekData)) : null
@@ -237,16 +258,16 @@ export const usePlanningStore = defineStore("planning", {
           this.weekData = snapshot
           if (nextSnapshot) this.nextWeekData = nextSnapshot
         }
-        this.showToast(err?.message || "Не удалось переместить")
+        this.showToast((err as Error)?.message || "Не удалось переместить")
       } finally {
         const idx = this.savingItemIds.indexOf(itemId)
         if (idx !== -1) this.savingItemIds.splice(idx, 1)
       }
     },
 
-    async _silentRefreshBackground(includeCurrent, includeNext, opId) {
+    async _silentRefreshBackground(includeCurrent: boolean, includeNext: boolean, opId: number) {
       try {
-        const fetches = []
+        const fetches: Promise<DTOWeekDishes>[] = []
         if (includeCurrent) {
           fetches.push(fetchWeek(this.year, this.week))
         }
@@ -273,7 +294,7 @@ export const usePlanningStore = defineStore("planning", {
       }
     },
 
-    _mealItemsForDate(date) {
+    _mealItemsForDate(date: string): DTOMealPlanItem[] {
       if (
         this.nextWeekData &&
         date >= this.nextWeekData.start_week &&
@@ -284,7 +305,7 @@ export const usePlanningStore = defineStore("planning", {
       return this.weekData.meal_plan_items
     },
 
-    _cookingEventsForDate(date) {
+    _cookingEventsForDate(date: string): DTOCookingEvent[] {
       if (
         this.nextWeekData &&
         date >= this.nextWeekData.start_week &&
@@ -295,9 +316,13 @@ export const usePlanningStore = defineStore("planning", {
       return this.weekData.cooking_events
     },
 
-    _positionBetween(dayItems, newIndex) {
-      const prev = newIndex > 0 ? dayItems[newIndex - 1].position : 0
-      const next = newIndex < dayItems.length ? dayItems[newIndex].position : prev + 200
+    _positionBetween(
+      dayItems: DTOMealPlanItem[],
+      newIndex: number
+    ): { position: number; needsRecalc: false } | { position: null; needsRecalc: true } {
+      const prev = newIndex > 0 ? (dayItems[newIndex - 1].position ?? 0) : 0
+      const next =
+        newIndex < dayItems.length ? (dayItems[newIndex].position ?? prev + 200) : prev + 200
 
       const mid = Math.floor((prev + next) / 2)
       if (mid > prev && mid < next) return { position: mid, needsRecalc: false }
@@ -306,7 +331,13 @@ export const usePlanningStore = defineStore("planning", {
       return { position: null, needsRecalc: true }
     },
 
-    async _handleMealDrag(itemId, fromDate, toDate, oldIndex, newIndex) {
+    async _handleMealDrag(
+      itemId: string,
+      fromDate: string,
+      toDate: string,
+      _oldIndex: number,
+      newIndex: number
+    ) {
       const fromItems = this._mealItemsForDate(fromDate)
       const movedItem = fromItems.find((m) => m.id === itemId)
       if (!movedItem) return
@@ -315,7 +346,7 @@ export const usePlanningStore = defineStore("planning", {
         // Within same day — reorder
         const dayItems = fromItems
           .filter((m) => m.date === fromDate)
-          .sort((a, b) => a.position - b.position)
+          .sort((a, b) => (a.position ?? 0) - (b.position ?? 0))
 
         const fromIdx = dayItems.indexOf(movedItem)
         if (fromIdx !== -1) dayItems.splice(fromIdx, 1)
@@ -344,7 +375,7 @@ export const usePlanningStore = defineStore("planning", {
 
         const targetItems = toItems
           .filter((m) => m.date === toDate && m.id !== itemId)
-          .sort((a, b) => a.position - b.position)
+          .sort((a, b) => (a.position ?? 0) - (b.position ?? 0))
 
         const { position, needsRecalc } = this._positionBetween(targetItems, newIndex)
 
@@ -358,7 +389,7 @@ export const usePlanningStore = defineStore("planning", {
       }
     },
 
-    async _recalcAndPatch(dayItems, allItems) {
+    async _recalcAndPatch(dayItems: DTOMealPlanItem[], allItems: DTOMealPlanItem[]) {
       const oldPositions = new Map(dayItems.map((m) => [m.id, m.position]))
       const updated = recalcPositions(dayItems)
 
@@ -375,7 +406,7 @@ export const usePlanningStore = defineStore("planning", {
       }
     },
 
-    async _handleCookingDrag(itemId, fromDate, toDate) {
+    async _handleCookingDrag(itemId: string, fromDate: string, toDate: string) {
       if (fromDate === toDate) return
 
       const fromEvents = this._cookingEventsForDate(fromDate)

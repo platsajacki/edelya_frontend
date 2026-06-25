@@ -28,7 +28,7 @@
       </label>
 
       <div v-if="isEdit && datesChanged" class="form__warning">
-        <IconWarning width="14" height="14" />
+        <IconWarning :width="14" :height="14" />
         При сохранении список покупок будет пересчитан на основе готовок за новый период.
       </div>
 
@@ -43,20 +43,31 @@
   </ModalWrapper>
 </template>
 
-<script setup>
+<script lang="ts" setup>
 import { ref, computed, watch, nextTick } from "vue"
 import ModalWrapper from "./ModalWrapper.vue"
 import DateInput from "./DateInput.vue"
 import { useShoppingStore } from "../../store/shopping"
 import IconWarning from "../icons/IconWarning.vue"
+import type { DTOShoppingList } from "@/types/shopping"
 
-const props = defineProps({
-  modelValue: { type: Boolean, required: true },
-  zIndex: { type: Number, default: 1010 },
-  editList: { type: Object, default: null },
-})
+const props = withDefaults(
+  defineProps<{
+    modelValue: boolean
+    zIndex?: number
+    editList?: DTOShoppingList | null
+  }>(),
+  {
+    zIndex: 1010,
+    editList: null,
+  }
+)
 
-const emit = defineEmits(["update:modelValue", "created", "updated"])
+const emit = defineEmits<{
+  (e: "update:modelValue", value: boolean): void
+  (e: "created", list: DTOShoppingList): void
+  (e: "updated", list: DTOShoppingList): void
+}>()
 
 const isEdit = computed(() => !!props.editList)
 
@@ -81,7 +92,7 @@ const dateFrom = ref("")
 const dateTo = ref("")
 const saving = ref(false)
 const error = ref("")
-const errorRef = ref(null)
+const errorRef = ref<HTMLElement | null>(null)
 watch(error, (val) => {
   if (val) nextTick(() => errorRef.value?.scrollIntoView({ behavior: "smooth", block: "nearest" }))
 })
@@ -95,13 +106,13 @@ function todayISO() {
   return `${y}-${m}-${day}`
 }
 
-function formatDateShort(iso) {
+function formatDateShort(iso: string) {
   if (!iso) return ""
   const [, m, d] = iso.split("-")
   return `${d}.${m}`
 }
 
-function generateName(from, to) {
+function generateName(from: string, to: string) {
   if (from && to) return `Список покупок ${formatDateShort(from)}–${formatDateShort(to)}`
   if (from) return `Список покупок с ${formatDateShort(from)}`
   return ""
@@ -145,8 +156,11 @@ function validate() {
 }
 
 async function submit() {
-  error.value = validate()
-  if (error.value) return
+  const validationError = validate()
+  if (validationError) {
+    error.value = validationError
+    return
+  }
   saving.value = true
   try {
     const payload = {
@@ -156,7 +170,7 @@ async function submit() {
     }
     const store = useShoppingStore()
     if (isEdit.value) {
-      const data = await store.updateList(props.editList.id, payload)
+      const data = await store.updateList(props.editList!.id, payload)
       emit("updated", data)
     } else {
       const data = await store.createList(payload)
@@ -164,7 +178,7 @@ async function submit() {
     }
     open.value = false
   } catch (err) {
-    error.value = err.message || "Не удалось сохранить список"
+    error.value = err instanceof Error ? err.message : "Не удалось сохранить список"
   } finally {
     saving.value = false
   }

@@ -1,9 +1,10 @@
 import { defineStore } from "pinia"
+import type { WebAppUser } from "@twa-dev/types"
 import { login, telegramLogin, telegramLoginWithConsent } from "../services/authService"
 import { clearTokens, getAccess, getRefreshExp, saveTokens } from "../storage/tokenStorage"
 
 export const useAuthStore = defineStore("auth", {
-  state: () => ({
+  state: (): { user: WebAppUser | null; requiresConsent: boolean; consentFields: string[] } => ({
     user: null,
     requiresConsent: false,
     consentFields: [],
@@ -19,7 +20,7 @@ export const useAuthStore = defineStore("auth", {
         if (tg?.initDataUnsafe?.user) {
           this.user = tg.initDataUnsafe.user
         } else if (import.meta.env.DEV) {
-          this.user = { first_name: "Developer" }
+          this.user = { id: 0, first_name: "Developer" }
         }
         return
       }
@@ -35,7 +36,7 @@ export const useAuthStore = defineStore("auth", {
       const username = import.meta.env.VITE_DEBUG_USER
       const password = import.meta.env.VITE_DEBUG_PASSWORD
       await login(username, password)
-      this.user = { first_name: "Developer" }
+      this.user = { id: 0, first_name: "Developer" }
     },
 
     async tgLogin() {
@@ -55,7 +56,7 @@ export const useAuthStore = defineStore("auth", {
       }
     },
 
-    async submitConsent(terms, marketing) {
+    async submitConsent(terms: boolean, marketing: boolean) {
       const tg = window.Telegram?.WebApp
       if (!tg?.initData) throw new Error("Нет данных Telegram.")
       const tokens = await telegramLoginWithConsent(tg.initData, terms, marketing)

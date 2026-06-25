@@ -15,27 +15,29 @@
   </button>
 </template>
 
-<script setup>
+<script lang="ts" setup>
 import { computed } from "vue"
 import { isDishOwn } from "../utils/dishOwnership"
 import { usePlanningStore } from "../store/planning"
+import type { DTOMealPlanItem, DTOCookingEvent } from "@/types/planning"
 
-const props = defineProps({
-  item: {
-    type: Object,
-    required: true,
-  },
-})
+type CardItem = DTOMealPlanItem | DTOCookingEvent
 
-defineEmits(["tap"])
+const props = defineProps<{
+  item: CardItem
+}>()
+
+defineEmits<{
+  (e: "tap", item: CardItem): void
+}>()
 
 const isOwn = computed(() => isDishOwn(props.item.dish))
-const isManual = computed(() => props.item.is_manual === true)
+const isManual = computed(() => "is_manual" in props.item && props.item.is_manual === true)
 
 const planning = usePlanningStore()
 const isPending = computed(() => planning.savingItemIds.includes(props.item.id))
 
-function hexToRgba(hex, alpha) {
+function hexToRgba(hex: string, alpha: number): string {
   const r = parseInt(hex.slice(1, 3), 16)
   const g = parseInt(hex.slice(3, 5), 16)
   const b = parseInt(hex.slice(5, 7), 16)

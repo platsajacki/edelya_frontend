@@ -16,7 +16,7 @@
             :title="isDishOwn(selectedDish) ? 'Редактировать рецепт' : 'Создать личную копию'"
             @click="onEditDishClick"
           >
-            <IconPencil width="14" height="14" />
+            <IconPencil :width="14" :height="14" />
           </button>
           <button type="button" class="selected-dish__replace" @click="selectedDish = null">
             Заменить
@@ -96,7 +96,7 @@
   </ModalWrapper>
 </template>
 
-<script setup>
+<script lang="ts" setup>
 import { ref, computed, watch, nextTick } from "vue"
 import ModalWrapper from "./ModalWrapper.vue"
 import DishSearch from "./DishSearch.vue"
@@ -108,14 +108,21 @@ import { usePlanningStore } from "../../store/planning"
 import { useSubscriptionStore } from "../../store/subscription"
 import IconPencil from "../icons/IconPencil.vue"
 import { isDishOwn } from "../../utils/dishOwnership"
+import type { DTODish } from "@/types/dish"
+import type { DTOCookingEvent } from "@/types/planning"
 
-const props = defineProps({
-  modelValue: { type: Boolean, required: true },
-  editItem: { type: Object, default: null },
-  initialDate: { type: String, default: "" },
-})
+const props = withDefaults(
+  defineProps<{
+    modelValue: boolean
+    editItem?: DTOCookingEvent | null
+    initialDate?: string
+  }>(),
+  { editItem: null, initialDate: "" }
+)
 
-const emit = defineEmits(["update:modelValue"])
+const emit = defineEmits<{
+  (e: "update:modelValue", value: boolean): void
+}>()
 
 const planning = usePlanningStore()
 const subscription = useSubscriptionStore()
@@ -133,23 +140,23 @@ watch(open, (v) => {
   emit("update:modelValue", v)
 })
 
-const selectedDish = ref(null)
+const selectedDish = ref<DTODish | null>(null)
 const cookingDate = ref("")
-const eatDates = ref([])
+const eatDates = ref<string[]>([])
 const notes = ref("")
 const saving = ref(false)
 const error = ref("")
-const errorRef = ref(null)
+const errorRef = ref<HTMLElement | null>(null)
 watch(error, (val) => {
   if (val) nextTick(() => errorRef.value?.scrollIntoView({ behavior: "smooth", block: "nearest" }))
 })
 const showDishForm = ref(false)
-const editDish = ref(null)
+const editDish = ref<DTODish | null>(null)
 const initialDishName = ref("")
 const showCloneConfirm = ref(false)
 const showCloneForm = ref(false)
 const showAIForm = ref(false)
-const dishToClone = ref(null)
+const dishToClone = ref<DTODish | null>(null)
 
 watch(
   () => props.modelValue,
@@ -185,17 +192,17 @@ watch(cookingDate, (newVal, oldVal) => {
     .filter((iso) => iso >= newVal)
 })
 
-function onDishSelect(dish) {
+function onDishSelect(dish: DTODish) {
   selectedDish.value = dish
   error.value = ""
 }
 
-function onDishCreated(dish) {
+function onDishCreated(dish: DTODish) {
   selectedDish.value = dish
   error.value = ""
 }
 
-function onDishUpdated(dish) {
+function onDishUpdated(dish: DTODish) {
   selectedDish.value = dish
   error.value = ""
 }
@@ -215,13 +222,13 @@ function startClone() {
   showCloneForm.value = true
 }
 
-function onCloneCreated(dish) {
+function onCloneCreated(dish: DTODish) {
   selectedDish.value = dish
   showCloneForm.value = false
   error.value = ""
 }
 
-function onCreateDish(searchQuery) {
+function onCreateDish(searchQuery: string) {
   editDish.value = null
   initialDishName.value = searchQuery || ""
   showDishForm.value = true
@@ -231,7 +238,7 @@ function onCreateAIDish() {
   showAIForm.value = true
 }
 
-function validate() {
+function validate(): string | null {
   if (!selectedDish.value) return "Выберите блюдо."
   if (!cookingDate.value) return "Укажите дату готовки."
   if (!eatDates.value.length) return "Выберите хотя бы один день еды."
@@ -239,24 +246,24 @@ function validate() {
 }
 
 async function submit() {
-  error.value = validate()
+  error.value = validate() ?? ""
   if (error.value) return
   saving.value = true
   try {
     const payload = {
-      dish: selectedDish.value.id,
+      dish: selectedDish.value!.id as unknown as DTODish,
       cooking_date: cookingDate.value,
       eat_dates: [...eatDates.value].sort(),
       notes: notes.value.trim() || undefined,
     }
     if (isEdit.value) {
-      await planning.editCookingEvent(props.editItem.id, payload)
+      await planning.editCookingEvent(props.editItem!.id, payload)
     } else {
       await planning.addCookingEvent(payload)
     }
     open.value = false
   } catch (err) {
-    error.value = err.message || "Не удалось сохранить готовку"
+    error.value = (err instanceof Error ? err.message : "") || "Не удалось сохранить готовку"
   } finally {
     saving.value = false
   }

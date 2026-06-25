@@ -1,4 +1,4 @@
-export function formatYMDtoDDMMYYYY(ymd) {
+export function formatYMDtoDDMMYYYY(ymd: string | null | undefined): string {
   if (!ymd) return ""
   const [y, m, d] = String(ymd).split("-")
   if (!y || !m || !d) return ymd
@@ -21,7 +21,7 @@ const SHORT_MONTHS_RU = [
 ]
 
 /** Formats YYYY-MM-DD → "8 апр" */
-export function formatDateRuShort(ymd) {
+export function formatDateRuShort(ymd: string | null | undefined): string {
   if (!ymd) return ""
   const [, m, d] = String(ymd).split("-")
   if (!m || !d) return ymd

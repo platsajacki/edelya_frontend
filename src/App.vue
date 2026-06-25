@@ -13,7 +13,7 @@
   </template>
 </template>
 
-<script setup>
+<script lang="ts" setup>
 import { ref, onMounted } from "vue"
 import { useRouter } from "vue-router"
 import { useAuthStore } from "./store/auth"

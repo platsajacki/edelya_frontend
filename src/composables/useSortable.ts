@@ -1,8 +1,8 @@
-import { onMounted, onBeforeUnmount, shallowRef } from "vue"
+import { onMounted, onBeforeUnmount, shallowRef, type Ref } from "vue"
 import Sortable from "sortablejs"
 
-export function useSortable(elRef, options) {
-  const instance = shallowRef(null)
+export function useSortable(elRef: Ref<HTMLElement | null>, options: Sortable.Options) {
+  const instance = shallowRef<Sortable | null>(null)
 
   onMounted(() => {
     if (elRef.value) {

@@ -205,7 +205,7 @@
   </div>
 </template>
 
-<script setup>
+<script lang="ts" setup>
 import { ref, computed, onMounted, onUnmounted } from "vue"
 import { useRouter, useRoute } from "vue-router"
 import { useAuthStore } from "../store/auth"

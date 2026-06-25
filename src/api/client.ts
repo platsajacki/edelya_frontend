@@ -1,6 +1,6 @@
 import { getAccess, getRefresh, getAccessExp, saveTokens } from "../storage/tokenStorage"
 
-const API = import.meta.env.VITE_API
+const API = window.__APP_CONFIG__?.apiUrl ?? import.meta.env.VITE_API
 
 const EXPIRY_BUFFER_SEC = 10
 
@@ -9,7 +9,7 @@ function isAccessExpired() {
   return exp === null || Date.now() / 1000 >= exp - EXPIRY_BUFFER_SEC
 }
 
-let refreshing = null
+let refreshing: Promise<unknown> | null = null
 
 async function refreshTokens() {
   const refresh = getRefresh()
@@ -31,8 +31,8 @@ async function refreshTokens() {
   return tokens
 }
 
-function buildHeaders(extra = {}, hasBody = false) {
-  const headers = { ...extra }
+function buildHeaders(extra: Record<string, string> = {}, hasBody = false): Record<string, string> {
+  const headers: Record<string, string> = { ...extra }
   if (hasBody) {
     headers["Content-Type"] = headers["Content-Type"] ?? "application/json"
   }
@@ -43,7 +43,7 @@ function buildHeaders(extra = {}, hasBody = false) {
   return headers
 }
 
-const ERROR_MESSAGES = {
+const ERROR_MESSAGES: Record<string, string> = {
   "At least one ingredient is required.": "Нужен хотя бы один ингредиент.",
   "Duplicate ingredients are not allowed.": "Ингредиенты не должны повторяться.",
   "Dish with this name already exists.": "Личный рецепт с таким названием уже существует.",
@@ -106,7 +106,7 @@ const ERROR_MESSAGES = {
     "Рецепт не может быть обработан. Пожалуйста, проверьте формат и содержание текста.",
 }
 
-const SUBSCRIPTION_DETAIL_TO_CODE = {
+const SUBSCRIPTION_DETAIL_TO_CODE: Record<string, string> = {
   "Subscription required to access this resource.": "subscription_required",
   "Trial period has expired. Please subscribe to continue using this resource.": "trial_expired",
   "Your subscription is inactive. Please check your subscription status.": "subscription_inactive",
@@ -118,7 +118,7 @@ const SUBSCRIPTION_DETAIL_TO_CODE = {
     "subscription_expired",
 }
 
-const FIELD_NAMES = {
+const FIELD_NAMES: Record<string, string> = {
   name: "Название",
   category: "Категория",
   recipe: "Рецепт",
@@ -137,7 +137,7 @@ const FIELD_NAMES = {
   ingredients: "Ингредиенты",
 }
 
-function translateMessage(msg) {
+function translateMessage(msg: string): string {
   if (ERROR_MESSAGES[msg]) return ERROR_MESSAGES[msg]
 
   // "Not valid year 2025 and week 99." — dynamic
@@ -180,10 +180,10 @@ function translateMessage(msg) {
   return "Произошла ошибка. Попробуйте ещё раз."
 }
 
-async function parseError(response) {
+async function parseError(response: Response) {
   const body = await response.json().catch(() => null)
 
-  const err = new Error()
+  const err = new Error() as Error & { status: number; body: unknown; code: string | null }
   err.status = response.status
   err.body = body
   err.code = body?.code ?? SUBSCRIPTION_DETAIL_TO_CODE[body?.detail] ?? null
@@ -210,7 +210,7 @@ async function parseError(response) {
   }
 
   // {"non_field_errors": [...], "field": [...], ...} — DRF validation
-  const parts = []
+  const parts: string[] = []
   for (const [key, value] of Object.entries(body)) {
     const messages = Array.isArray(value) ? value : [value]
     const translated = messages.map((m) => translateMessage(String(m)))
@@ -227,7 +227,7 @@ async function parseError(response) {
   return err
 }
 
-export async function api(url, options = {}) {
+export async function api<T = unknown>(url: string, options: RequestInit = {}): Promise<T> {
   if (getRefresh() && isAccessExpired()) {
     if (!refreshing) {
       refreshing = refreshTokens().finally(() => {
@@ -237,7 +237,7 @@ export async function api(url, options = {}) {
     await refreshing
   }
 
-  const headers = buildHeaders(options.headers, Boolean(options.body))
+  const headers = buildHeaders(options.headers as Record<string, string>, Boolean(options.body))
 
   let response = await fetch(API + url, { ...options, headers })
 
@@ -248,7 +248,7 @@ export async function api(url, options = {}) {
       })
     }
     await refreshing // throws if refresh failed — caller handles it
-    headers.Authorization = `Bearer ${getAccess()}`
+    headers.Authorization = `Bearer ${getAccess()!}`
     response = await fetch(API + url, { ...options, headers })
   }
 
@@ -270,7 +270,7 @@ export async function api(url, options = {}) {
     throw await parseError(response)
   }
 
-  if (response.status === 204) return null
+  if (response.status === 204) return null as T
 
-  return response.json()
+  return (await response.json()) as T
 }

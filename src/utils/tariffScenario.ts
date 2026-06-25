@@ -1,16 +1,44 @@
 import { calcProration } from "./calcProration"
 
-const BILLING_PERIOD_LABEL = {
+type ScenarioType = "card_binding" | "schedule" | "payment" | "downgrade" | "upgrade"
+
+interface Tariff {
+  name: string
+  price: string | number
+  billing_period: string
+}
+
+interface PaymentMethod {
+  is_active: boolean
+}
+
+interface Subscription {
+  status: string
+  tariff: Tariff
+  payment_method?: PaymentMethod | null
+  current_period_end?: string | null
+  current_period_start?: string | null
+}
+
+export interface TariffScenario {
+  type: ScenarioType
+  title: string
+  description: string
+  confirmLabel: string
+  proration: number | null
+}
+
+const BILLING_PERIOD_LABEL: Record<string, string> = {
   monthly: "мес",
   yearly: "год",
 }
 
-function formatPrice(tariff) {
+function formatPrice(tariff: Tariff): string {
   const period = BILLING_PERIOD_LABEL[tariff.billing_period] ?? tariff.billing_period
   return `${Number(tariff.price)} ₽/${period}`
 }
 
-function formatDate(iso) {
+function formatDate(iso: string): string {
   return new Date(iso).toLocaleDateString("ru-RU", {
     day: "numeric",
     month: "long",
@@ -28,13 +56,12 @@ function formatDate(iso) {
  *   payment      — expired/cancelled → redirect to full payment
  *   downgrade    — active, cheaper tariff → schedule for next period
  *   upgrade      — active, more expensive → immediate charge + activation
- *
- * @param {object} subscription  - current subscription from the store
- * @param {object} newTariff     - the tariff the user wants to switch to
- * @param {object|null} paymentMethod - payment method from the store (takes priority)
- * @returns {{ type, title, description, confirmLabel, proration: number|null }}
  */
-export function getTariffChangeScenario(subscription, newTariff, paymentMethod = null) {
+export function getTariffChangeScenario(
+  subscription: Subscription,
+  newTariff: Tariff,
+  paymentMethod: PaymentMethod | null = null
+): TariffScenario | null {
   const { status, tariff: currentTariff, payment_method, current_period_end } = subscription
   const hasCard = paymentMethod?.is_active === true || payment_method?.is_active === true
 

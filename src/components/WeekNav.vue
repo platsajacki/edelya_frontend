@@ -20,23 +20,26 @@
   </nav>
 </template>
 
-<script setup>
+<script lang="ts" setup>
 import IconChevronLeft from "./icons/IconChevronLeft.vue"
 import IconChevronRight from "./icons/IconChevronRight.vue"
 import IconCartPlus from "./icons/IconCartPlus.vue"
 
-defineProps({
-  label: {
-    type: String,
-    required: true,
-  },
-  disabled: {
-    type: Boolean,
-    default: false,
-  },
-})
+withDefaults(
+  defineProps<{
+    label: string
+    disabled?: boolean
+  }>(),
+  {
+    disabled: false,
+  }
+)
 
-defineEmits(["prev", "next", "create-shopping-week"])
+defineEmits<{
+  (e: "prev"): void
+  (e: "next"): void
+  (e: "create-shopping-week"): void
+}>()
 </script>
 
 <style scoped>

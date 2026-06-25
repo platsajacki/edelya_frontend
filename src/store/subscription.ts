@@ -13,45 +13,53 @@ import {
   cancelSubscription as apiCancelSubscription,
   resumeSubscription as apiResumeSubscription,
 } from "../services/subscriptionService"
+import type {
+  DTOSubscription,
+  DTOTariff,
+  DTOPaymentMethod,
+  DTOAIRecipeUsage,
+  DTOSubscriptionDictionary,
+} from "@/types/subscription"
 
 const DICTIONARY_CACHE_KEY = "subscription_dictionary_cache"
 const DICTIONARY_CACHE_TTL_MS = 24 * 60 * 60 * 1000
 
 export const useSubscriptionStore = defineStore("subscription", {
   state: () => ({
-    errorCode: null,
-    message: null,
-    trialDays: null,
-    dictionary: null,
+    errorCode: null as string | null,
+    message: null as string | null,
+    trialDays: null as number | null,
+    dictionary: null as DTOSubscriptionDictionary | null,
     dictionaryLoading: false,
-    dictionaryError: null,
-    aiRecipeUsage: null,
+    dictionaryError: null as string | null,
+    aiRecipeUsage: null as DTOAIRecipeUsage | null,
     aiRecipeUsageLoading: false,
-    aiRecipeUsageError: null,
-    subscription: null,
-    tariffs: [],
-    paymentMethod: null,
+    aiRecipeUsageError: null as string | null,
+    subscription: null as DTOSubscription | null,
+    tariffs: [] as DTOTariff[],
+    paymentMethod: null as DTOPaymentMethod | null,
   }),
 
   getters: {
-    hasSubscription: (state) => state.subscription !== null,
+    hasSubscription: (state): boolean => state.subscription !== null,
 
-    isTrialActive: (state) =>
+    isTrialActive: (state): boolean =>
       state.subscription?.status === "trial" &&
       state.subscription?.is_active === true &&
       state.subscription?.tariff?.is_trial_tariff === true,
 
-    canCreateAIRecipes: (state) => state.subscription?.tariff?.can_create_ai_recipes === true,
+    canCreateAIRecipes: (state): boolean =>
+      state.subscription?.tariff?.can_create_ai_recipes === true,
 
-    aiRecipeLimit: (state) =>
+    aiRecipeLimit: (state): number | null =>
       state.aiRecipeUsage?.limit ?? state.dictionary?.ai_recipe_limit_per_period ?? null,
 
-    isAIRecipeLimitExceeded: (state) =>
+    isAIRecipeLimitExceeded: (state): boolean =>
       state.aiRecipeUsage?.remaining !== undefined &&
       state.aiRecipeUsage?.remaining !== null &&
       Number(state.aiRecipeUsage.remaining) <= 0,
 
-    daysLeft: (state) => {
+    daysLeft: (state): number | null => {
       const sub = state.subscription
       if (!sub || sub.status !== "trial" || !sub.is_active) return null
       // Prefer server-set end date; fall back to start + days_in_trial
@@ -67,7 +75,7 @@ export const useSubscriptionStore = defineStore("subscription", {
   },
 
   actions: {
-    setError(code, message) {
+    setError(code: string | null, message: string | null) {
       this.errorCode = code
       this.message = message
     },
@@ -86,7 +94,7 @@ export const useSubscriptionStore = defineStore("subscription", {
       this.trialDays = data?.trial_duration ?? null
     },
 
-    async loadSubscriptionDictionary({ force = false } = {}) {
+    async loadSubscriptionDictionary({ force = false }: { force?: boolean } = {}) {
       this.dictionaryError = null
       if (!force) {
         const cached = readDictionaryCache()
@@ -102,7 +110,7 @@ export const useSubscriptionStore = defineStore("subscription", {
         writeDictionaryCache(data)
         return data
       } catch (err) {
-        this.dictionaryError = err.message ?? "Не удалось загрузить параметры подписки."
+        this.dictionaryError = (err as Error).message ?? "Не удалось загрузить параметры подписки."
         throw err
       } finally {
         this.dictionaryLoading = false
@@ -117,7 +125,8 @@ export const useSubscriptionStore = defineStore("subscription", {
         this.aiRecipeUsage = data
         return data
       } catch (err) {
-        this.aiRecipeUsageError = err.message ?? "Не удалось загрузить лимит AI-рецептов."
+        this.aiRecipeUsageError =
+          (err as Error).message ?? "Не удалось загрузить лимит AI-рецептов."
         throw err
       } finally {
         this.aiRecipeUsageLoading = false
@@ -135,7 +144,7 @@ export const useSubscriptionStore = defineStore("subscription", {
       return sub
     },
 
-    async selectTariff(tariffId) {
+    async selectTariff(tariffId: string) {
       const result = await apiSelectTariff(tariffId)
       if (result.action === "success") {
         this.subscription = result.subscription
@@ -148,8 +157,7 @@ export const useSubscriptionStore = defineStore("subscription", {
     },
 
     async bindPaymentMethod() {
-      const result = await apiBindPaymentMethod()
-      return result
+      return await apiBindPaymentMethod()
     },
 
     async deletePaymentMethod() {
@@ -171,7 +179,7 @@ export const useSubscriptionStore = defineStore("subscription", {
   },
 })
 
-function readDictionaryCache() {
+function readDictionaryCache(): DTOSubscriptionDictionary | null {
   try {
     const raw = localStorage.getItem(DICTIONARY_CACHE_KEY)
     if (!raw) return null
@@ -187,7 +195,7 @@ function readDictionaryCache() {
   }
 }
 
-function writeDictionaryCache(data) {
+function writeDictionaryCache(data: DTOSubscriptionDictionary): void {
   try {
     localStorage.setItem(
       DICTIONARY_CACHE_KEY,

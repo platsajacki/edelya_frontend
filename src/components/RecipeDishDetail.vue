@@ -18,13 +18,11 @@
         <span class="detail__label">Состав</span>
         <ul class="detail__ingredients">
           <li v-for="di in dish.dish_ingredients" :key="di.id" class="detail__ingredient">
-            <span class="detail__ingredient-name">{{ di.ingredient?.name ?? di.name }}</span>
+            <span class="detail__ingredient-name">{{ di.ingredient.name }}</span>
             <span class="detail__ingredient-right">
               <span v-if="di.is_optional" class="detail__ingredient-optional">опц.</span>
               <span class="detail__ingredient-amount">
-                {{
-                  formatShoppingAmount(di.amount, di.ingredient?.base_unit ?? di.base_unit).display
-                }}
+                {{ formatShoppingAmount(di.amount, di.ingredient.base_unit).display }}
               </span>
             </span>
           </li>
@@ -64,7 +62,7 @@
   <DishForm v-model="showCloneForm" :z-index="1020" :clone-dish="dish" @created="onCloneCreated" />
 </template>
 
-<script setup>
+<script lang="ts" setup>
 import { ref, computed, watch } from "vue"
 import ModalWrapper from "./forms/ModalWrapper.vue"
 import DishForm from "./forms/DishForm.vue"
@@ -72,13 +70,18 @@ import OwnershipBadge from "./OwnershipBadge.vue"
 import { fetchDish } from "../services/dishService"
 import { formatShoppingAmount } from "../utils/formatShoppingAmount"
 import { isDishOwn } from "../utils/dishOwnership"
+import type { DTODish } from "@/types/dish"
 
-const props = defineProps({
-  modelValue: { type: Boolean, required: true },
-  dish: { type: Object, default: () => ({}) },
-})
+const props = defineProps<{
+  modelValue: boolean
+  dish: DTODish | null
+}>()
 
-const emit = defineEmits(["update:modelValue", "deleted", "updated"])
+const emit = defineEmits<{
+  (e: "update:modelValue", value: boolean): void
+  (e: "deleted", id: string): void
+  (e: "updated"): void
+}>()
 
 const open = ref(props.modelValue)
 watch(
@@ -95,7 +98,7 @@ const confirming = ref(false)
 const showDishForm = ref(false)
 const showCloneForm = ref(false)
 const loadingFull = ref(false)
-const fullDish = ref(null)
+const fullDish = ref<DTODish | null>(null)
 
 const isOwn = computed(() => isDishOwn(dish.value))
 
@@ -137,7 +140,7 @@ function confirmDelete() {
   emit("deleted", dish.value.id)
 }
 
-function onDishUpdated(updatedDish) {
+function onDishUpdated(updatedDish: DTODish | null) {
   showDishForm.value = false
   if (updatedDish) fullDish.value = updatedDish
   emit("updated")
@@ -151,7 +154,7 @@ function onCloneCreated() {
 </script>
 
 <style>
-@import "../styles/detail-sheet.css";
+@import "../styles/detail-sheet.scss";
 </style>
 
 <style scoped>

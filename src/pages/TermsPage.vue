@@ -10,7 +10,7 @@
   </div>
 </template>
 
-<script setup>
+<script lang="ts" setup>
 import { ref, onMounted } from "vue"
 import { marked } from "marked"
 import { fetchTermsLatest } from "../services/legalService"
@@ -21,7 +21,7 @@ const html = ref("")
 onMounted(async () => {
   try {
     const data = await fetchTermsLatest()
-    html.value = marked.parse(data.content ?? "")
+    html.value = await marked.parse(data.content ?? "")
   } catch {
     // 404 or network error — loading screen stays (won't happen in practice)
   } finally {

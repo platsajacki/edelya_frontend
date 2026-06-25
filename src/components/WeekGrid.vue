@@ -125,32 +125,40 @@
   </div>
 </template>
 
-<script setup>
+<script lang="ts" setup>
 import { computed, ref, watch } from "vue"
 import { formatYMDtoDDMMYYYY } from "../utils/formatDate"
 import { DAY_LABELS, splitDays, pastDaysLabel, getNextWeekInfo } from "../utils/weekDays"
 import { usePlanningStore } from "../store/planning"
+import type { DTOWeekDishes, DTOMealPlanItem, DTOCookingEvent } from "@/types/planning"
 import DayRow from "./DayRow.vue"
 import IconPot from "./icons/IconPot.vue"
 import IconFork from "./icons/IconFork.vue"
 
 const planning = usePlanningStore()
 
-const props = defineProps({
-  weekData: {
-    type: Object,
-    required: true,
-  },
-})
+const props = defineProps<{
+  weekData: DTOWeekDishes
+}>()
 
-const emit = defineEmits([
-  "add-cooking",
-  "add-meal",
-  "tap-cooking",
-  "tap-meal",
-  "drag-end",
-  "create-shopping-day",
-])
+defineEmits<{
+  (e: "tap-cooking", event: DTOCookingEvent): void
+  (e: "tap-meal", event: DTOMealPlanItem): void
+  (e: "add-cooking", rawDate: string): void
+  (e: "add-meal", rawDate: string): void
+  (
+    e: "drag-end",
+    payload: {
+      itemId: string
+      fromDate: string
+      toDate: string
+      oldIndex: number
+      newIndex: number
+      type: "meals" | "cooking"
+    }
+  ): void
+  (e: "create-shopping-day", payload: { rawDate: string; dayLabel: string }): void
+}>()
 
 const showPast = ref(false)
 const showNextWeek = ref(false)

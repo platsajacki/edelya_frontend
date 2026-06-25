@@ -1,4 +1,4 @@
-function decodeJwtExp(token) {
+function decodeJwtExp(token: string): number | null {
   try {
     const payload = token.split(".")[1]
     const decoded = JSON.parse(atob(payload.replace(/-/g, "+").replace(/_/g, "/")))
@@ -8,7 +8,7 @@ function decodeJwtExp(token) {
   }
 }
 
-export function saveTokens(tokens) {
+export function saveTokens(tokens: { access: string; refresh: string }) {
   if (!tokens?.access || !tokens?.refresh) {
     throw new Error("Invalid token response from server")
   }
@@ -17,8 +17,8 @@ export function saveTokens(tokens) {
 
   const accessExp = decodeJwtExp(tokens.access)
   const refreshExp = decodeJwtExp(tokens.refresh)
-  if (accessExp !== null) sessionStorage.setItem("access_exp", accessExp)
-  if (refreshExp !== null) localStorage.setItem("refresh_exp", refreshExp)
+  if (accessExp !== null) sessionStorage.setItem("access_exp", String(accessExp))
+  if (refreshExp !== null) localStorage.setItem("refresh_exp", String(refreshExp))
 }
 
 export function getAccess() {

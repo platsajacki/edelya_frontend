@@ -1,0 +1,4 @@
+window.__APP_CONFIG__ = {
+  apiUrl: "${VITE_API}",
+  telegramBot: "${VITE_TELEGRAM_BOT}"
+};

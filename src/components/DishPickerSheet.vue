@@ -157,14 +157,11 @@
                     :key="di.id"
                     class="preview-ingredient"
                   >
-                    <span class="preview-ingredient__name">{{
-                      di.ingredient?.name ?? di.name
-                    }}</span>
+                    <span class="preview-ingredient__name">{{ di.ingredient.name }}</span>
                     <span class="preview-ingredient__right">
                       <span v-if="di.is_optional" class="preview-ingredient__opt">опц.</span>
                       <span class="preview-ingredient__amount">{{
-                        formatShoppingAmount(di.amount, di.ingredient?.base_unit ?? di.base_unit)
-                          .display
+                        formatShoppingAmount(di.amount, di.ingredient.base_unit).display
                       }}</span>
                     </span>
                   </li>
@@ -189,7 +186,7 @@
   </Teleport>
 </template>
 
-<script setup>
+<script lang="ts" setup>
 import { ref, computed, watch, onUnmounted } from "vue"
 import { fetchDishes, fetchDish, fetchDishCategories } from "../services/dishService"
 import { isDishOwn } from "../utils/dishOwnership"
@@ -198,43 +195,52 @@ import OwnershipBadge from "./OwnershipBadge.vue"
 import RecipeFilterPanel from "./RecipeFilterPanel.vue"
 import IconSearch from "./icons/IconSearch.vue"
 import IconFilter from "./icons/IconFilter.vue"
+import type { DTODish, DTODishCategory } from "@/types/dish"
 
 const PAGE_SIZE = 20
 
 const TABS = [
   { value: "own", label: "Личные" },
   { value: "global", label: "Общие" },
-]
+] as const
 
-const props = defineProps({
-  modelValue: { type: Boolean, required: true },
-  zIndex: { type: Number, default: 1100 },
-})
+const props = withDefaults(
+  defineProps<{
+    modelValue: boolean
+    zIndex?: number
+  }>(),
+  {
+    zIndex: 1100,
+  }
+)
 
-const emit = defineEmits(["update:modelValue", "select"])
+const emit = defineEmits<{
+  (e: "update:modelValue", value: boolean): void
+  (e: "select", dish: DTODish): void
+}>()
 
 // --- State ---
 const query = ref("")
-const ownership = ref("own")
-const categoryId = ref(null)
-const dishes = ref([])
-const categories = ref([])
+const ownership = ref<"own" | "global">("own")
+const categoryId = ref<number | null>(null)
+const dishes = ref<DTODish[]>([])
+const categories = ref<DTODishCategory[]>([])
 const page = ref(1)
 const hasMore = ref(false)
 const initialLoading = ref(false)
 const loadingMore = ref(false)
-const initialError = ref(null)
+const initialError = ref<string | null>(null)
 const showFilters = ref(false)
-const searchInputEl = ref(null)
-const listEl = ref(null)
-const sentinelEl = ref(null)
+const searchInputEl = ref<HTMLInputElement | null>(null)
+const listEl = ref<HTMLElement | null>(null)
+const sentinelEl = ref<HTMLElement | null>(null)
 
 // preview
 const showPreview = ref(false)
-const previewDish = ref(null)
+const previewDish = ref<DTODish | null>(null)
 const previewLoading = ref(false)
 
-async function openPreview(dish) {
+async function openPreview(dish: DTODish) {
   showPreview.value = true
   // Use cached data first, then fetch full if ingredients missing
   previewDish.value = dish
@@ -250,8 +256,8 @@ async function openPreview(dish) {
   }
 }
 
-let debounceTimer = null
-let observer = null
+let debounceTimer: ReturnType<typeof setTimeout> | null = null
+let observer: IntersectionObserver | null = null
 let savedOverflow = ""
 
 const activeCategoryName = computed(() => {
@@ -259,8 +265,8 @@ const activeCategoryName = computed(() => {
   return categories.value.find((c) => c.id === categoryId.value)?.name ?? ""
 })
 
-function buildParams(p = 1) {
-  const params = { page: p, page_size: PAGE_SIZE }
+function buildParams(p = 1): Record<string, unknown> {
+  const params: Record<string, unknown> = { page: p, page_size: PAGE_SIZE }
   if (ownership.value === "own") params.only_owned = true
   if (ownership.value === "global") params.only_global = true
   if (categoryId.value) params.category = categoryId.value
@@ -280,7 +286,7 @@ async function loadFirst() {
     hasMore.value = !!data.next
     page.value = 1
   } catch (e) {
-    initialError.value = e.message || "Не удалось загрузить рецепты"
+    initialError.value = e instanceof Error ? e.message : "Не удалось загрузить рецепты"
   } finally {
     initialLoading.value = false
   }
@@ -316,17 +322,17 @@ function clearQuery() {
   reload()
 }
 
-function switchTab(value) {
+function switchTab(value: "own" | "global") {
   ownership.value = value
   reload()
 }
 
-function onApplyFilters({ categoryId: catId }) {
+function onApplyFilters({ categoryId: catId }: { categoryId: number | null }) {
   categoryId.value = catId
   reload()
 }
 
-function selectDish(dish) {
+function selectDish(dish: DTODish) {
   emit("select", dish)
   close()
 }
@@ -349,7 +355,7 @@ watch(
       if (!categories.value.length) {
         fetchDishCategories()
           .then((data) => {
-            categories.value = data.results ?? data
+            categories.value = data.results
           })
           .catch(() => {})
       }

@@ -10,14 +10,17 @@
   </button>
 </template>
 
-<script setup>
+<script lang="ts" setup>
 import { computed } from "vue"
+import type { DTODish } from "@/types/dish"
 
-const props = defineProps({
-  dish: { type: Object, required: true },
-})
+const props = defineProps<{
+  dish: DTODish
+}>()
 
-defineEmits(["tap"])
+defineEmits<{
+  (e: "tap", dish: DTODish): void
+}>()
 
 const ingredientCount = computed(() => props.dish.dish_ingredients?.length ?? 0)
 

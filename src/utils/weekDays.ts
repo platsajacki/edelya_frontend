@@ -3,18 +3,23 @@
  * No component or store dependencies.
  */
 
+export interface WeekDay {
+  rawDate: string
+  label: string
+}
+
 const DAY_LABELS = ["ПН", "ВТ", "СР", "ЧТ", "ПТ", "СБ", "ВС"]
 
 export { DAY_LABELS }
 
 /** Today as YYYY-MM-DD in local timezone */
-export function getTodayISO() {
+export function getTodayISO(): string {
   const d = new Date()
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`
 }
 
 /** Check if today falls within the week starting at `startWeek` (YYYY-MM-DD, Monday) */
-export function isCurrentWeek(startWeek) {
+export function isCurrentWeek(startWeek: string): boolean {
   const today = getTodayISO()
   const start = new Date(startWeek + "T00:00:00")
   const end = new Date(start)
@@ -26,12 +31,11 @@ export function isCurrentWeek(startWeek) {
 /**
  * Split a days array into past and current+future.
  * Only splits when the week is the current week; otherwise all days go to visible.
- *
- * @param {Array} days - array of day objects with `rawDate` (YYYY-MM-DD)
- * @param {string} startWeek - week start date (YYYY-MM-DD)
- * @returns {{ pastDays: Array, visibleDays: Array }}
  */
-export function splitDays(days, startWeek) {
+export function splitDays<T extends WeekDay>(
+  days: T[],
+  startWeek: string
+): { pastDays: T[]; visibleDays: T[] } {
   if (!isCurrentWeek(startWeek)) {
     return { pastDays: [], visibleDays: days }
   }
@@ -45,7 +49,7 @@ export function splitDays(days, startWeek) {
  * Build a human-readable label for the collapsed past days toggle.
  * e.g. "ПН – СР · 3 дня"
  */
-export function pastDaysLabel(pastDays) {
+export function pastDaysLabel(pastDays: WeekDay[]): string {
   if (!pastDays.length) return ""
   const first = pastDays[0].label
   const last = pastDays[pastDays.length - 1].label
@@ -57,20 +61,18 @@ export function pastDaysLabel(pastDays) {
 
 /**
  * Compute next week's year and ISO week number from a given week start date.
- * @param {string} startWeek - current week's Monday as YYYY-MM-DD
- * @returns {{ year: number, week: number }}
+ * @param startWeek - current week's Monday as YYYY-MM-DD
  */
-export function getNextWeekInfo(startWeek) {
+export function getNextWeekInfo(startWeek: string): { year: number; week: number } {
   const monday = new Date(startWeek + "T00:00:00")
   const nextMonday = new Date(monday)
   nextMonday.setDate(monday.getDate() + 7)
-  // Use ISO week calculation
   const d = new Date(
     Date.UTC(nextMonday.getFullYear(), nextMonday.getMonth(), nextMonday.getDate())
   )
   d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7))
   const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1))
-  const week = Math.ceil(((d - yearStart) / 86400000 + 1) / 7)
+  const week = Math.ceil(((d.getTime() - yearStart.getTime()) / 86400000 + 1) / 7)
   return { year: d.getUTCFullYear(), week }
 }
 
@@ -78,10 +80,10 @@ export function getNextWeekInfo(startWeek) {
  * Format a week's date range as human-readable label.
  * e.g. "13 апреля – 19 апреля"
  */
-export function formatWeekRange(startWeek) {
+export function formatWeekRange(startWeek: string): string {
   const start = new Date(startWeek + "T00:00:00")
   const end = new Date(start)
   end.setDate(start.getDate() + 6)
-  const fmt = (d) => d.toLocaleDateString("ru-RU", { day: "numeric", month: "long" })
+  const fmt = (d: Date) => d.toLocaleDateString("ru-RU", { day: "numeric", month: "long" })
   return `${fmt(start)} – ${fmt(end)}`
 }

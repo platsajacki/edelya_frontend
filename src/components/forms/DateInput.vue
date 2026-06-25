@@ -26,16 +26,21 @@
   </div>
 </template>
 
-<script setup>
+<script lang="ts" setup>
 import { ref, computed } from "vue"
 import IconCalendar from "../icons/IconCalendar.vue"
 
-const props = defineProps({
-  modelValue: { type: String, default: "" },
-  required: { type: Boolean, default: false },
-})
+const props = withDefaults(
+  defineProps<{
+    modelValue?: string
+    required?: boolean
+  }>(),
+  { modelValue: "", required: false }
+)
 
-const emit = defineEmits(["update:modelValue"])
+const emit = defineEmits<{
+  (e: "update:modelValue", value: string): void
+}>()
 
 const displayValue = computed(() => {
   if (!props.modelValue) return ""
@@ -44,10 +49,10 @@ const displayValue = computed(() => {
   return `${d.padStart(2, "0")}.${m.padStart(2, "0")}.${y}`
 })
 
-function onTextInput(e) {
-  let v = e.target.value.replace(/[^\d.]/g, "")
+function onTextInput(e: Event) {
+  const input = e.target as HTMLInputElement
+  let v = input.value.replace(/[^\d.]/g, "")
 
-  // Auto-insert dots after DD and MM
   const digits = v.replace(/\./g, "")
   if (digits.length >= 4) {
     v = digits.slice(0, 2) + "." + digits.slice(2, 4) + "." + digits.slice(4, 8)
@@ -55,7 +60,7 @@ function onTextInput(e) {
     v = digits.slice(0, 2) + "." + digits.slice(2)
   }
 
-  e.target.value = v
+  input.value = v
 
   const match = v.match(/^(\d{2})\.(\d{2})\.(\d{4})$/)
   if (match) {
@@ -64,15 +69,14 @@ function onTextInput(e) {
   }
 }
 
-function onBlur(e) {
-  // Restore formatted value on blur
-  e.target.value = displayValue.value
+function onBlur(e: FocusEvent) {
+  ;(e.target as HTMLInputElement).value = displayValue.value
 }
 
-const pickerRef = ref(null)
+const pickerRef = ref<HTMLInputElement | null>(null)
 
-function onPickerInput(e) {
-  emit("update:modelValue", e.target.value)
+function onPickerInput(e: Event) {
+  emit("update:modelValue", (e.target as HTMLInputElement).value)
 }
 </script>
 

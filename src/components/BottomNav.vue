@@ -8,14 +8,14 @@
       :class="{ 'bottom-nav__tab--active': isActive(tab.to) }"
     >
       <span class="bottom-nav__tab-inner">
-        <component :is="tab.icon" class="bottom-nav__icon" width="22" height="22" />
+        <component :is="tab.icon" class="bottom-nav__icon" :width="22" :height="22" />
         <span class="bottom-nav__label">{{ tab.label }}</span>
       </span>
     </router-link>
   </nav>
 </template>
 
-<script setup>
+<script lang="ts" setup>
 import { useRoute } from "vue-router"
 import IconNavPlanner from "./icons/IconNavPlanner.vue"
 import IconNavRecipes from "./icons/IconNavRecipes.vue"
@@ -31,7 +31,7 @@ const tabs = [
   { to: "/cabinet", label: "Кабинет", icon: IconProfile },
 ]
 
-function isActive(to) {
+function isActive(to: string): boolean {
   return route.path === to
 }
 </script>

@@ -68,7 +68,7 @@
                 autocomplete="off"
                 class="form__input amount-step__input"
                 :placeholder="'Например: 100'"
-                @focus="$event.target.select()"
+                @focus="($event.target as HTMLInputElement).select()"
                 @keydown.enter.prevent="submit"
               />
               <span class="amount-step__unit">{{ unitLabel(selectedIngredient.base_unit) }}</span>
@@ -119,21 +119,31 @@
   </ModalWrapper>
 </template>
 
-<script setup>
+<script lang="ts" setup>
 import { ref, watch, nextTick } from "vue"
 import ModalWrapper from "./ModalWrapper.vue"
 import IngredientForm from "./IngredientForm.vue"
 import { fetchIngredients } from "../../services/ingredientService"
 import { getUnitLabel } from "../../utils/unitSteps"
 import { useShoppingStore } from "../../store/shopping"
+import type { DTOIngredient, DTOShoppingListItem } from "@/types/shopping"
+import type { DTOBaseUnit } from "@/types/dish"
 
-const props = defineProps({
-  modelValue: { type: Boolean, required: true },
-  zIndex: { type: Number, default: 1010 },
-  listId: { type: String, required: true },
-})
+const props = withDefaults(
+  defineProps<{
+    modelValue: boolean
+    listId: string
+    zIndex?: number
+  }>(),
+  { zIndex: 1010 }
+)
 
-const emit = defineEmits(["update:modelValue", "created"])
+const emit = defineEmits<{
+  (e: "update:modelValue", value: boolean): void
+  (e: "created", item: DTOShoppingListItem): void
+}>()
+
+const store = useShoppingStore()
 
 const open = ref(props.modelValue)
 watch(
@@ -147,33 +157,33 @@ watch(open, (v) => {
 })
 
 const query = ref("")
-const results = ref([])
+const results = ref<DTOIngredient[]>([])
 const searching = ref(false)
 const searched = ref(false)
-const searchInput = ref(null)
-const amountInput = ref(null)
+const searchInput = ref<HTMLInputElement | null>(null)
+const amountInput = ref<HTMLInputElement | null>(null)
 
-const selectedIngredient = ref(null)
+const selectedIngredient = ref<DTOIngredient | null>(null)
 const amount = ref("")
 const saving = ref(false)
 const error = ref("")
-const errorRef = ref(null)
+const errorRef = ref<HTMLElement | null>(null)
 watch(error, (val) => {
   if (val) nextTick(() => errorRef.value?.scrollIntoView({ behavior: "smooth", block: "nearest" }))
 })
 const showIngredientForm = ref(false)
 const ingredientFormInitialName = ref("")
 const confirmDuplicate = ref(false)
-const existingItem = ref(null)
+const existingItem = ref<DTOShoppingListItem | null>(null)
 
 const DUPLICATE_MESSAGES = new Set([
   "Такая запись уже существует.",
   "Этот ингредиент уже в списке покупок.",
 ])
 
-let debounceTimer = null
+let debounceTimer: ReturnType<typeof setTimeout> | null = null
 
-function unitLabel(unit) {
+function unitLabel(unit: DTOBaseUnit) {
   return getUnitLabel(unit)
 }
 
@@ -211,13 +221,13 @@ function openIngredientForm() {
   showIngredientForm.value = true
 }
 
-function onIngredientCreated(ing) {
+function onIngredientCreated(ing: DTOIngredient) {
   showIngredientForm.value = false
   selectIngredient(ing)
 }
 
 function onSearch() {
-  clearTimeout(debounceTimer)
+  clearTimeout(debounceTimer ?? undefined)
   const q = query.value.trim()
   if (!q) {
     results.value = []
@@ -238,7 +248,7 @@ function onSearch() {
   }, 300)
 }
 
-function selectIngredient(ing) {
+function selectIngredient(ing: DTOIngredient) {
   selectedIngredient.value = ing
   nextTick(() => amountInput.value?.focus())
 }
@@ -269,21 +279,20 @@ async function submit() {
   error.value = ""
   saving.value = true
   try {
-    const store = useShoppingStore()
     const data = await store.addItem(props.listId, {
-      ingredient: selectedIngredient.value.id,
+      ingredient: selectedIngredient.value!.id as unknown as DTOIngredient,
       amount: finalAmount,
     })
     emit("created", data)
     open.value = false
   } catch (err) {
-    if (DUPLICATE_MESSAGES.has(err.message) && selectedIngredient.value?.base_unit !== "to_taste") {
-      const store = useShoppingStore()
+    const message = err instanceof Error ? err.message : ""
+    if (DUPLICATE_MESSAGES.has(message) && selectedIngredient.value?.base_unit !== "to_taste") {
       existingItem.value =
         store.items.find((i) => i.ingredient?.id === selectedIngredient.value?.id) ?? null
       confirmDuplicate.value = true
     } else {
-      error.value = err.message || "Не удалось добавить позицию"
+      error.value = message || "Не удалось добавить позицию"
     }
   } finally {
     saving.value = false
@@ -291,7 +300,6 @@ async function submit() {
 }
 
 async function confirmAdd() {
-  const store = useShoppingStore()
   const item = existingItem.value
   if (!item) return
 
@@ -305,7 +313,7 @@ async function confirmAdd() {
     open.value = false
   } catch (err) {
     confirmDuplicate.value = false
-    error.value = err.message || "Не удалось обновить позицию"
+    error.value = (err instanceof Error ? err.message : "") || "Не удалось обновить позицию"
   } finally {
     saving.value = false
   }

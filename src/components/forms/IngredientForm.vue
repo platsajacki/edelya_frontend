@@ -37,10 +37,11 @@
   </ModalWrapper>
 </template>
 
-<script setup>
+<script lang="ts" setup>
 import { ref, watch, nextTick } from "vue"
 import ModalWrapper from "./ModalWrapper.vue"
 import { createIngredient, fetchIngredientCategories } from "../../services/ingredientService"
+import type { DTOIngredient, DTOIngredientCategory } from "@/types/shopping"
 
 const UNITS = [
   { value: "gram", label: "Грамм" },
@@ -61,13 +62,22 @@ const UNITS = [
   { value: "to_taste", label: "По вкусу" },
 ]
 
-const props = defineProps({
-  modelValue: { type: Boolean, required: true },
-  zIndex: { type: Number, default: 1020 },
-  initialName: { type: String, default: "" },
-})
+const props = withDefaults(
+  defineProps<{
+    modelValue: boolean
+    zIndex?: number
+    initialName?: string
+  }>(),
+  {
+    zIndex: 1020,
+    initialName: "",
+  }
+)
 
-const emit = defineEmits(["update:modelValue", "created"])
+const emit = defineEmits<{
+  (e: "update:modelValue", value: boolean): void
+  (e: "created", ingredient: DTOIngredient): void
+}>()
 
 const open = ref(props.modelValue)
 watch(
@@ -83,10 +93,10 @@ watch(open, (v) => {
 const name = ref("")
 const categoryId = ref("")
 const baseUnit = ref("")
-const categories = ref([])
+const categories = ref<DTOIngredientCategory[]>([])
 const saving = ref(false)
 const error = ref("")
-const errorRef = ref(null)
+const errorRef = ref<HTMLElement | null>(null)
 watch(error, (val) => {
   if (val) nextTick(() => errorRef.value?.scrollIntoView({ behavior: "smooth", block: "nearest" }))
 })
@@ -117,8 +127,11 @@ function validate() {
 }
 
 async function submit() {
-  error.value = validate()
-  if (error.value) return
+  const validationError = validate()
+  if (validationError) {
+    error.value = validationError
+    return
+  }
   saving.value = true
   try {
     const ingredient = await createIngredient({
@@ -129,7 +142,7 @@ async function submit() {
     emit("created", ingredient)
     open.value = false
   } catch (err) {
-    error.value = err.message || "Не удалось создать ингредиент"
+    error.value = err instanceof Error ? err.message : "Не удалось создать ингредиент"
   } finally {
     saving.value = false
   }

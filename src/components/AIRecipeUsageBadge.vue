@@ -8,13 +8,17 @@
   </div>
 </template>
 
-<script setup>
+<script lang="ts" setup>
 import { computed } from "vue"
+import type { DTOAIRecipeUsage } from "@/types/subscription"
 
-const props = defineProps({
-  usage: { type: Object, default: null },
-  limit: { type: Number, default: null },
-})
+const props = withDefaults(
+  defineProps<{
+    usage?: DTOAIRecipeUsage | null
+    limit?: number | null
+  }>(),
+  { usage: null, limit: null }
+)
 
 const resolvedLimit = computed(() => props.usage?.limit ?? props.limit)
 const hasUsage = computed(() => props.usage?.used !== undefined && props.usage?.used !== null)

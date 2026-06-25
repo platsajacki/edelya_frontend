@@ -1,15 +1,24 @@
+interface ProratedSubscription {
+  current_period_start?: string | null
+  current_period_end?: string | null
+  tariff: { price: string | number }
+}
+
+interface ProratedTariff {
+  price: string | number
+}
+
 /**
  * Calculates the prorated upgrade charge, mirroring the backend's _calc_proration logic
  * in tariff_selector.py (TariffSwitcher).
  *
  * Python timedelta.days returns integer floor-division, so we use Math.floor here.
  * Final result is rounded to 2 decimal places (same as Decimal.quantize('0.01')).
- *
- * @param {object} subscription - current subscription object from the store
- * @param {object} newTariff    - the tariff the user wants to switch to
- * @returns {number} prorated amount in rubles, ≥ 0
  */
-export function calcProration(subscription, newTariff) {
+export function calcProration(
+  subscription: ProratedSubscription,
+  newTariff: ProratedTariff
+): number {
   const { current_period_start, current_period_end, tariff: currentTariff } = subscription
   if (!current_period_start || !current_period_end) return 0
 

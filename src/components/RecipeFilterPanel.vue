@@ -62,19 +62,30 @@
   </Teleport>
 </template>
 
-<script setup>
+<script lang="ts" setup>
 import { ref, computed, watch } from "vue"
+import type { DTODishCategory } from "@/types/dish"
 
-const props = defineProps({
-  modelValue: { type: Boolean, required: true },
-  categories: { type: Array, default: () => [] },
-  currentCategoryId: { type: [String, Number], default: null },
-  zIndex: { type: Number, default: null },
-})
+const props = withDefaults(
+  defineProps<{
+    modelValue: boolean
+    categories?: DTODishCategory[]
+    currentCategoryId?: number | null
+    zIndex?: number | null
+  }>(),
+  {
+    categories: () => [],
+    currentCategoryId: null,
+    zIndex: null,
+  }
+)
 
-const emit = defineEmits(["update:modelValue", "apply"])
+const emit = defineEmits<{
+  (e: "update:modelValue", value: boolean): void
+  (e: "apply", filters: { categoryId: number | null }): void
+}>()
 
-const categoryId = ref(props.currentCategoryId)
+const categoryId = ref<number | null>(props.currentCategoryId ?? null)
 
 watch(
   () => props.modelValue,

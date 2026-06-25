@@ -6,9 +6,19 @@
   </Transition>
 </template>
 
-<script setup>
-defineProps({ message: { type: String, default: "" } })
-defineEmits(["dismiss"])
+<script lang="ts" setup>
+withDefaults(
+  defineProps<{
+    message?: string
+  }>(),
+  {
+    message: "",
+  }
+)
+
+defineEmits<{
+  (e: "dismiss"): void
+}>()
 </script>
 
 <style scoped>

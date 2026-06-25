@@ -13,9 +13,15 @@
   </svg>
 </template>
 
-<script setup>
-defineProps({
-  width: { default: 10 },
-  height: { default: 10 },
-})
+<script lang="ts" setup>
+withDefaults(
+  defineProps<{
+    width?: number
+    height?: number
+  }>(),
+  {
+    width: 10,
+    height: 10,
+  }
+)
 </script>

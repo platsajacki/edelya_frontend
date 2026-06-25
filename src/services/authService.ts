@@ -1,10 +1,10 @@
 import { api } from "../api/client"
 import { saveTokens } from "../storage/tokenStorage"
 
-const API = import.meta.env.VITE_API
+const API = window.__APP_CONFIG__?.apiUrl ?? import.meta.env.VITE_API
 
-export async function login(username, password) {
-  const tokens = await api("/api/v1/auth/token/login/", {
+export async function login(username: string, password: string) {
+  const tokens = await api<{ access: string; refresh: string }>("/api/v1/auth/token/login/", {
     method: "POST",
     body: JSON.stringify({ username, password }),
   })
@@ -18,20 +18,20 @@ export async function login(username, password) {
  *         { ok: false, consents: string[] } on 428 (new user needs consent).
  * Throws on 401 or other errors.
  */
-export async function telegramLogin(initData) {
+export async function telegramLogin(initData: string) {
   const response = await fetch(API + "/api/v1/auth/token/telegram/", {
     method: "POST",
     headers: { "X-TG-INIT-DATA": initData },
   })
 
   if (response.ok) {
-    const tokens = await response.json()
-    return { ok: true, tokens }
+    const tokens = (await response.json()) as { access: string; refresh: string }
+    return { ok: true as const, tokens }
   }
 
   if (response.status === 428) {
     const body = await response.json()
-    return { ok: false, consents: body.consents ?? [] }
+    return { ok: false as const, consents: (body.consents ?? []) as string[] }
   }
 
   if (response.status === 401) {
@@ -45,7 +45,11 @@ export async function telegramLogin(initData) {
  * Re-sends POST /token/telegram/ with consent fields after user accepts terms.
  * Returns tokens on 200. Throws on 428 (unexpected) or 401.
  */
-export async function telegramLoginWithConsent(initData, terms, marketing) {
+export async function telegramLoginWithConsent(
+  initData: string,
+  terms: boolean,
+  marketing: boolean
+) {
   const response = await fetch(API + "/api/v1/auth/token/telegram/", {
     method: "POST",
     headers: {
@@ -59,7 +63,7 @@ export async function telegramLoginWithConsent(initData, terms, marketing) {
   })
 
   if (response.ok) {
-    return await response.json()
+    return (await response.json()) as { access: string; refresh: string }
   }
 
   if (response.status === 428) {

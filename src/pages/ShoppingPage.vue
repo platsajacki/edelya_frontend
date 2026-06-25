@@ -46,7 +46,7 @@
 
     <!-- Empty state: no lists at all -->
     <div v-else-if="!store.lists.length" class="empty-state">
-      <IconShoppingBag class="empty-state__icon" width="48" height="48" />
+      <IconShoppingBag class="empty-state__icon" :width="48" :height="48" />
       <p class="empty-state__text">Нет списков покупок</p>
       <button class="empty-state__action" @click="showForm = true">+ Создать список</button>
     </div>
@@ -69,7 +69,7 @@
   </div>
 </template>
 
-<script setup>
+<script lang="ts" setup>
 import { ref, computed, onMounted, onUnmounted } from "vue"
 import { useRouter } from "vue-router"
 

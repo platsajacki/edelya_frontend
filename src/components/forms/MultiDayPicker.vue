@@ -18,17 +18,24 @@
   </div>
 </template>
 
-<script setup>
+<script lang="ts" setup>
 import { computed } from "vue"
 
 const WEEKDAYS = ["ВС", "ПН", "ВТ", "СР", "ЧТ", "ПТ", "СБ"]
 
-const props = defineProps({
-  modelValue: { type: Array, default: () => [] },
-  startDate: { type: String, default: "" },
-})
+const props = withDefaults(
+  defineProps<{
+    modelValue: string[]
+    startDate?: string
+  }>(),
+  {
+    startDate: "",
+  }
+)
 
-const emit = defineEmits(["update:modelValue"])
+const emit = defineEmits<{
+  (e: "update:modelValue", value: string[]): void
+}>()
 
 function todayISO() {
   const d = new Date()
@@ -37,7 +44,7 @@ function todayISO() {
 
 const days = computed(() => {
   const start = new Date((props.startDate || todayISO()) + "T00:00:00")
-  const result = []
+  const result: { iso: string; weekday: string; label: string }[] = []
 
   for (let i = 0; i < 8; i++) {
     const d = new Date(start)
@@ -54,7 +61,7 @@ const days = computed(() => {
   return result
 })
 
-function toggle(iso) {
+function toggle(iso: string) {
   const idx = props.modelValue.indexOf(iso)
   const next = [...props.modelValue]
   if (idx >= 0) {

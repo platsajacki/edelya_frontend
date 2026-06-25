@@ -8,16 +8,19 @@
   </button>
 </template>
 
-<script setup>
+<script lang="ts" setup>
 import { computed } from "vue"
 import { formatYMDtoDDMMYYYY } from "../utils/formatDate"
 import IconChevronRight from "./icons/IconChevronRight.vue"
+import type { DTOShoppingList } from "@/types/shopping"
 
-const props = defineProps({
-  list: { type: Object, required: true },
-})
+const props = defineProps<{
+  list: DTOShoppingList
+}>()
 
-defineEmits(["tap"])
+defineEmits<{
+  (e: "tap", list: DTOShoppingList): void
+}>()
 
 const dateRange = computed(() => {
   const from = formatYMDtoDDMMYYYY(props.list.date_from)

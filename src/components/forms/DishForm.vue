@@ -32,7 +32,7 @@
           v-model="recipe"
           class="form__textarea form__textarea--auto"
           rows="2"
-          @input="autoResize($event.target)"
+          @input="autoResize($event.target as HTMLTextAreaElement)"
         />
       </label>
 
@@ -56,7 +56,7 @@
                 autocomplete="off"
                 class="form__input ingredient-amount__input"
                 placeholder="Например: 200"
-                @focus="$event.target.select()"
+                @focus="($event.target as HTMLInputElement).select()"
                 @keydown.enter.prevent="confirmIngredient"
               />
               <span class="ingredient-amount__unit">{{
@@ -97,7 +97,7 @@
               title="Редактировать"
               @click="startEditIngredient(idx)"
             >
-              <IconPencil width="14" height="14" />
+              <IconPencil :width="14" :height="14" />
             </button>
             <button
               type="button"
@@ -125,7 +125,7 @@
               autocomplete="off"
               class="form__input ingredient-amount__input"
               placeholder="Например: 200"
-              @focus="$event.target.select()"
+              @focus="($event.target as HTMLInputElement).select()"
               @keydown.enter.prevent="confirmIngredient"
             />
             <span class="ingredient-amount__unit">{{
@@ -217,7 +217,7 @@
   </ModalWrapper>
 </template>
 
-<script setup>
+<script lang="ts" setup>
 import { ref, computed, watch, nextTick } from "vue"
 import ModalWrapper from "./ModalWrapper.vue"
 import IngredientForm from "./IngredientForm.vue"
@@ -234,16 +234,40 @@ import { fetchIngredients } from "../../services/ingredientService"
 import { formatAmount } from "../../utils/formatAmount"
 import { formatShoppingAmount } from "../../utils/formatShoppingAmount"
 import { UNIT_LABELS } from "../../utils/unitLabels"
+import type { DTOBaseUnit, DTODish, DTODishCategory } from "@/types/dish"
+import type { DTOIngredient } from "@/types/shopping"
 
-const props = defineProps({
-  modelValue: { type: Boolean, required: true },
-  zIndex: { type: Number, default: 1010 },
-  editDish: { type: Object, default: null },
-  cloneDish: { type: Object, default: null },
-  initialName: { type: String, default: "" },
-})
+interface PendingIngredient {
+  id: string
+  name: string
+  base_unit: DTOBaseUnit
+}
 
-const emit = defineEmits(["update:modelValue", "created", "updated"])
+interface IngredientRow {
+  ingredient: string
+  ingredientName: string
+  amount: string
+  base_unit: DTOBaseUnit
+  unitLabel: string
+  is_optional: boolean
+}
+
+const props = withDefaults(
+  defineProps<{
+    modelValue: boolean
+    zIndex?: number
+    editDish?: DTODish | null
+    cloneDish?: DTODish | null
+    initialName?: string
+  }>(),
+  { zIndex: 1010, editDish: null, cloneDish: null, initialName: "" }
+)
+
+const emit = defineEmits<{
+  (e: "update:modelValue", value: boolean): void
+  (e: "created", dish: DTODish): void
+  (e: "updated", dish: DTODish): void
+}>()
 
 const isEdit = computed(() => !!props.editDish)
 const isClone = computed(() => !props.editDish && !!props.cloneDish)
@@ -260,10 +284,10 @@ watch(open, (v) => {
 })
 
 const name = ref("")
-const categoryId = ref("")
+const categoryId = ref<string | number>("")
 const recipe = ref("")
-const categories = ref([])
-const ingredients = ref([])
+const categories = ref<DTODishCategory[]>([])
+const ingredients = ref<IngredientRow[]>([])
 const saving = ref(false)
 const error = ref("")
 const duplicateActions = ref(false)
@@ -272,28 +296,42 @@ watch(error, (val) => {
   if (val) nextTick(() => errorRef.value?.scrollIntoView({ behavior: "smooth", block: "nearest" }))
 })
 
-// Ingredient search state
 const ingredientQuery = ref("")
-const ingredientResults = ref([])
+const ingredientResults = ref<DTOIngredient[]>([])
 const showIngredientForm = ref(false)
 const ingredientFormInitialName = ref("")
 
-// Pending ingredient (selected but not yet confirmed with amount)
-const pendingIngredient = ref(null)
+const pendingIngredient = ref<PendingIngredient | null>(null)
 const pendingAmount = ref("")
 const pendingOptional = ref(false)
 const amountError = ref("")
-const editingIdx = ref(null)
-const amountInputRef = ref(null)
-const recipeRef = ref(null)
-const errorRef = ref(null)
+const editingIdx = ref<number | null>(null)
+const amountInputRef = ref<HTMLInputElement | HTMLInputElement[] | null>(null)
+const recipeRef = ref<HTMLTextAreaElement | null>(null)
+const errorRef = ref<HTMLElement | null>(null)
 
-function autoResize(el) {
+function autoResize(el: HTMLTextAreaElement) {
   el.style.height = "auto"
   el.style.height = el.scrollHeight + "px"
 }
 
-let ingredientSearchTimer = null
+function focusAmountInput() {
+  const el = Array.isArray(amountInputRef.value) ? amountInputRef.value[0] : amountInputRef.value
+  el?.focus()
+}
+
+let ingredientSearchTimer: ReturnType<typeof setTimeout> | null = null
+
+function mapDishIngredients(dish: DTODish): IngredientRow[] {
+  return (dish.dish_ingredients || []).map((di) => ({
+    ingredient: di.ingredient?.id ?? "",
+    ingredientName: di.ingredient?.name ?? "",
+    amount: formatAmount(di.amount),
+    base_unit: di.ingredient?.base_unit ?? ("" as DTOBaseUnit),
+    unitLabel: UNIT_LABELS[di.ingredient?.base_unit] || di.ingredient?.base_unit || "",
+    is_optional: di.is_optional ?? false,
+  }))
+}
 
 watch(
   () => props.modelValue,
@@ -312,26 +350,12 @@ watch(
         name.value = props.editDish.name || ""
         categoryId.value = props.editDish.category?.id || ""
         recipe.value = props.editDish.recipe || ""
-        ingredients.value = (props.editDish.dish_ingredients || []).map((di) => ({
-          ingredient: di.ingredient?.id ?? di.ingredient,
-          ingredientName: di.ingredient?.name ?? di.name ?? "",
-          amount: formatAmount(di.amount),
-          base_unit: di.ingredient?.base_unit ?? "",
-          unitLabel: UNIT_LABELS[di.ingredient?.base_unit] || di.ingredient?.base_unit || "",
-          is_optional: di.is_optional ?? false,
-        }))
+        ingredients.value = mapDishIngredients(props.editDish)
       } else if (props.cloneDish) {
         name.value = props.cloneDish.name || ""
         categoryId.value = props.cloneDish.category?.id || ""
         recipe.value = props.cloneDish.recipe || ""
-        ingredients.value = (props.cloneDish.dish_ingredients || []).map((di) => ({
-          ingredient: di.ingredient?.id ?? di.ingredient,
-          ingredientName: di.ingredient?.name ?? di.name ?? "",
-          amount: formatAmount(di.amount),
-          base_unit: di.ingredient?.base_unit ?? "",
-          unitLabel: UNIT_LABELS[di.ingredient?.base_unit] || di.ingredient?.base_unit || "",
-          is_optional: di.is_optional ?? false,
-        }))
+        ingredients.value = mapDishIngredients(props.cloneDish)
       } else {
         name.value = props.initialName || ""
         categoryId.value = ""
@@ -364,7 +388,7 @@ function resetIngredientSearch() {
 }
 
 function searchIngredients() {
-  clearTimeout(ingredientSearchTimer)
+  clearTimeout(ingredientSearchTimer ?? undefined)
   const q = ingredientQuery.value.trim()
   if (!q) {
     ingredientResults.value = []
@@ -380,7 +404,7 @@ function searchIngredients() {
   }, 300)
 }
 
-function selectIngredient(ing) {
+function selectIngredient(ing: DTOIngredient) {
   const alreadyAdded = ingredients.value.some((i) => i.ingredient === ing.id)
   if (alreadyAdded) {
     amountError.value = "Ингредиент уже добавлен."
@@ -391,10 +415,10 @@ function selectIngredient(ing) {
   ingredientResults.value = []
   amountError.value = ""
   editingIdx.value = null
-  nextTick(() => amountInputRef.value?.focus())
+  nextTick(() => focusAmountInput())
 }
 
-function startEditIngredient(idx) {
+function startEditIngredient(idx: number) {
   const ing = ingredients.value[idx]
   pendingIngredient.value = {
     id: ing.ingredient,
@@ -407,10 +431,10 @@ function startEditIngredient(idx) {
   amountError.value = ""
   ingredientQuery.value = ""
   ingredientResults.value = []
-  nextTick(() => amountInputRef.value?.focus())
+  nextTick(() => focusAmountInput())
 }
 
-function removeIngredient(idx) {
+function removeIngredient(idx: number) {
   ingredients.value.splice(idx, 1)
   if (editingIdx.value === idx) {
     resetIngredientSearch()
@@ -433,7 +457,7 @@ function confirmIngredient() {
     finalAmount = String(num)
   }
   amountError.value = ""
-  const row = {
+  const row: IngredientRow = {
     ingredient: pendingIngredient.value.id,
     ingredientName: pendingIngredient.value.name,
     amount: finalAmount,
@@ -461,11 +485,11 @@ function cancelIngredient() {
   editingIdx.value = null
 }
 
-function onIngredientCreated(ingredient) {
+function onIngredientCreated(ingredient: DTOIngredient) {
   selectIngredient(ingredient)
 }
 
-function validate() {
+function validate(): string | null {
   if (!name.value.trim()) return "Укажите название рецепта."
   if (!categoryId.value) return "Выберите категорию."
   if (!ingredients.value.length) return "Добавьте хотя бы один ингредиент."
@@ -475,17 +499,15 @@ function validate() {
 }
 
 async function submit() {
-  error.value = validate()
+  error.value = validate() ?? ""
   if (error.value) return
   saving.value = true
   try {
-    const payload = {
+    const payload: Record<string, unknown> = {
       name: name.value.trim(),
       category: categoryId.value,
     }
-    if (recipe.value.trim()) {
-      payload.recipe = recipe.value.trim()
-    }
+    if (recipe.value.trim()) payload.recipe = recipe.value.trim()
     if (ingredients.value.length) {
       payload.dish_ingredients = ingredients.value.map((i) => ({
         ingredient: i.ingredient,
@@ -494,16 +516,17 @@ async function submit() {
       }))
     }
     if (isEdit.value) {
-      const dish = await updateDish(props.editDish.id, payload)
+      const dish = await updateDish(props.editDish!.id, payload as Partial<DTODish>)
       emit("updated", dish)
     } else {
-      const dish = await createDish(payload)
+      const dish = await createDish(payload as Partial<DTODish>)
       emit("created", dish)
     }
     open.value = false
   } catch (err) {
-    error.value = err.message || "Не удалось создать блюдо"
-    if (isClone.value && err.message?.includes("уже существует")) {
+    const message = err instanceof Error ? err.message : ""
+    error.value = message || "Не удалось создать блюдо"
+    if (isClone.value && message.includes("уже существует")) {
       duplicateActions.value = true
     }
   } finally {

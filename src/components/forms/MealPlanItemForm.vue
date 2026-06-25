@@ -74,7 +74,7 @@
   </ModalWrapper>
 </template>
 
-<script setup>
+<script lang="ts" setup>
 import { ref, computed, watch, nextTick } from "vue"
 import ModalWrapper from "./ModalWrapper.vue"
 import DishSearch from "./DishSearch.vue"
@@ -84,14 +84,24 @@ import MultiDayPicker from "./MultiDayPicker.vue"
 import { usePlanningStore } from "../../store/planning"
 import IconPencil from "../icons/IconPencil.vue"
 import { isDishOwn } from "../../utils/dishOwnership"
+import type { DTOMealPlanItem } from "@/types/planning"
+import type { DTODish } from "@/types/dish"
 
-const props = defineProps({
-  modelValue: { type: Boolean, required: true },
-  editItem: { type: Object, default: null },
-  initialDate: { type: String, default: "" },
-})
+const props = withDefaults(
+  defineProps<{
+    modelValue: boolean
+    editItem?: DTOMealPlanItem | null
+    initialDate?: string
+  }>(),
+  {
+    editItem: null,
+    initialDate: "",
+  }
+)
 
-const emit = defineEmits(["update:modelValue"])
+const emit = defineEmits<{
+  (e: "update:modelValue", value: boolean): void
+}>()
 
 const planning = usePlanningStore()
 
@@ -109,20 +119,20 @@ watch(open, (v) => {
   emit("update:modelValue", v)
 })
 
-const selectedDish = ref(null)
+const selectedDish = ref<DTODish | null>(null)
 const mealDate = ref("")
-const eatDates = ref([])
+const eatDates = ref<string[]>([])
 const saving = ref(false)
 const error = ref("")
-const errorRef = ref(null)
+const errorRef = ref<HTMLElement | null>(null)
 watch(error, (val) => {
   if (val) nextTick(() => errorRef.value?.scrollIntoView({ behavior: "smooth", block: "nearest" }))
 })
 const showDishForm = ref(false)
-const editDish = ref(null)
+const editDish = ref<DTODish | null>(null)
 const initialDishName = ref("")
 const showCloneForm = ref(false)
-const dishToClone = ref(null)
+const dishToClone = ref<DTODish | null>(null)
 
 watch(
   () => props.modelValue,
@@ -141,28 +151,29 @@ watch(
   }
 )
 
-function onDishSelect(dish) {
+function onDishSelect(dish: DTODish) {
   selectedDish.value = dish
   error.value = ""
 }
 
-function onDishCreated(dish) {
+function onDishCreated(dish: DTODish) {
   selectedDish.value = dish
   error.value = ""
 }
 
-function onDishUpdated(dish) {
+function onDishUpdated(dish: DTODish) {
   selectedDish.value = dish
   error.value = ""
 }
 
-function onCreateDish(searchQuery) {
+function onCreateDish(searchQuery: string) {
   editDish.value = null
   initialDishName.value = searchQuery || ""
   showDishForm.value = true
 }
 
 function onEditDishClick() {
+  if (!selectedDish.value) return
   if (isDishOwn(selectedDish.value)) {
     editDish.value = selectedDish.value
     showDishForm.value = true
@@ -172,7 +183,7 @@ function onEditDishClick() {
   }
 }
 
-function onCloneCreated(dish) {
+function onCloneCreated(dish: DTODish) {
   selectedDish.value = dish
   showCloneForm.value = false
   error.value = ""
@@ -186,24 +197,27 @@ function validate() {
 }
 
 async function submit() {
-  error.value = validate()
-  if (error.value) return
+  const validationError = validate()
+  if (validationError) {
+    error.value = validationError
+    return
+  }
   saving.value = true
   try {
     if (isEdit.value) {
-      await planning.editMealPlanItem(props.editItem.id, {
-        dish: selectedDish.value.id,
+      await planning.editMealPlanItem(props.editItem!.id, {
+        dish: selectedDish.value!.id,
         date: mealDate.value,
       })
     } else {
       await planning.addMealPlanItem({
-        dish: selectedDish.value.id,
+        dish: selectedDish.value!.id,
         eat_dates: [...eatDates.value].sort(),
       })
     }
     open.value = false
   } catch (err) {
-    error.value = err.message || "Не удалось сохранить приём пищи"
+    error.value = err instanceof Error ? err.message : "Не удалось сохранить приём пищи"
   } finally {
     saving.value = false
   }

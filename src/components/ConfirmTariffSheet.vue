@@ -42,17 +42,24 @@
   </ModalWrapper>
 </template>
 
-<script setup>
+<script lang="ts" setup>
 import ModalWrapper from "./forms/ModalWrapper.vue"
 import IconWarning from "./icons/IconWarning.vue"
+import type { TariffScenario } from "@/utils/tariffScenario"
 
-const props = defineProps({
-  modelValue: { type: Boolean, required: true },
-  scenario: { type: Object, required: true },
-  loading: { type: Boolean, default: false },
-})
+const props = withDefaults(
+  defineProps<{
+    modelValue: boolean
+    scenario: TariffScenario
+    loading?: boolean
+  }>(),
+  { loading: false }
+)
 
-const emit = defineEmits(["update:modelValue", "confirm"])
+const emit = defineEmits<{
+  (e: "update:modelValue", value: boolean): void
+  (e: "confirm"): void
+}>()
 
 function onClose() {
   if (!props.loading) {

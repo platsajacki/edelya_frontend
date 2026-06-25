@@ -11,12 +11,16 @@ import {
   updateShoppingListItem,
   deleteShoppingListItem,
 } from "../services/shoppingService"
+import type { DTOShoppingList, DTOShoppingListItem } from "@/types/shopping"
+
+const _adjustTimers: Record<string, ReturnType<typeof setTimeout>> = {}
+const _adjustPrev: Record<string, string> = {}
 
 export const useShoppingStore = defineStore("shopping", {
   state: () => ({
-    lists: [],
-    currentList: null,
-    items: [],
+    lists: [] as DTOShoppingList[],
+    currentList: null as DTOShoppingList | null,
+    items: [] as DTOShoppingListItem[],
     loading: false,
     loadingMore: false,
     loadingItems: false,
@@ -26,20 +30,20 @@ export const useShoppingStore = defineStore("shopping", {
       search: "",
       dateFrom: "",
     },
-    toast: null,
+    toast: null as string | null,
   }),
 
   getters: {
-    queryParams(state) {
-      const params = { ordering: "-created_at" }
+    queryParams(state): Record<string, string> {
+      const params: Record<string, string> = { ordering: "-created_at" }
       if (state.filters.search.trim()) params.name__icontains = state.filters.search.trim()
       if (state.filters.dateFrom) params.date_from__gte = state.filters.dateFrom
       return params
     },
 
-    groupedItems(state) {
-      const groups = {}
-      const uncategorized = []
+    groupedItems(state): { name: string; items: DTOShoppingListItem[] }[] {
+      const groups: Record<string, DTOShoppingListItem[]> = {}
+      const uncategorized: DTOShoppingListItem[] = []
 
       for (const item of state.items) {
         const catName = item.ingredient?.category?.name
@@ -68,11 +72,11 @@ export const useShoppingStore = defineStore("shopping", {
       return sorted
     },
 
-    uncheckedCount(state) {
+    uncheckedCount(state): number {
       return state.items.filter((i) => !i.is_checked).length
     },
 
-    checkedCount(state) {
+    checkedCount(state): number {
       return state.items.filter((i) => i.is_checked).length
     },
   },
@@ -112,12 +116,12 @@ export const useShoppingStore = defineStore("shopping", {
       }
     },
 
-    setFilter(key, value) {
+    setFilter(key: "search" | "dateFrom", value: string) {
       this.filters[key] = value
-      this.loadLists()
+      void this.loadLists()
     },
 
-    async loadList(id) {
+    async loadList(id: string) {
       this.loading = true
       try {
         this.currentList = await fetchShoppingList(id)
@@ -129,11 +133,11 @@ export const useShoppingStore = defineStore("shopping", {
       }
     },
 
-    async loadItems(listId) {
+    async loadItems(listId: string) {
       this.loadingItems = true
       try {
         const data = await fetchShoppingListItems(listId, { page_size: 500 })
-        this.items = data.results ?? (Array.isArray(data) ? data : [])
+        this.items = data.results ?? []
       } catch {
         this.items = []
         this.showToast("Не удалось загрузить позиции")
@@ -142,14 +146,14 @@ export const useShoppingStore = defineStore("shopping", {
       }
     },
 
-    async createList(payload) {
+    async createList(payload: Partial<DTOShoppingList>): Promise<DTOShoppingList> {
       const data = await createShoppingList(payload)
       this.lists.unshift(data)
       this.showToast("Список создан")
       return data
     },
 
-    async updateList(id, payload) {
+    async updateList(id: string, payload: Partial<DTOShoppingList>): Promise<DTOShoppingList> {
       const data = await updateShoppingList(id, payload)
       const idx = this.lists.findIndex((l) => l.id === id)
       if (idx !== -1) this.lists[idx] = data
@@ -158,27 +162,34 @@ export const useShoppingStore = defineStore("shopping", {
       return data
     },
 
-    async removeList(id) {
+    async removeList(id: string) {
       await deleteShoppingList(id)
       this.lists = this.lists.filter((l) => l.id !== id)
       if (this.currentList?.id === id) this.currentList = null
       this.showToast("Список удалён")
     },
 
-    async recalculateList(id) {
+    async recalculateList(id: string) {
       await recalculateShoppingList(id)
       await this.loadItems(id)
       this.showToast("Список пересчитан")
     },
 
-    async addItem(listId, payload) {
+    async addItem(
+      listId: string,
+      payload: Partial<DTOShoppingListItem>
+    ): Promise<DTOShoppingListItem> {
       const data = await createShoppingListItem(listId, payload)
       this.items.push(data)
       this.showToast("Позиция добавлена")
       return data
     },
 
-    async updateItemAmount(listId, itemId, amount) {
+    async updateItemAmount(
+      listId: string,
+      itemId: string,
+      amount: string
+    ): Promise<DTOShoppingListItem> {
       const data = await updateShoppingListItem(listId, itemId, { amount })
       const idx = this.items.findIndex((i) => i.id === itemId)
       if (idx !== -1) Object.assign(this.items[idx], data)
@@ -186,7 +197,7 @@ export const useShoppingStore = defineStore("shopping", {
       return data
     },
 
-    async toggleItemChecked(listId, item) {
+    async toggleItemChecked(listId: string, item: DTOShoppingListItem) {
       const wasChecked = item.is_checked
       const wasCheckedAt = item.checked_at
 
@@ -208,32 +219,29 @@ export const useShoppingStore = defineStore("shopping", {
       }
     },
 
-    async adjustItemAmount(listId, item, delta) {
+    async adjustItemAmount(listId: string, item: DTOShoppingListItem, delta: number) {
       const oldAmount = parseFloat(item.amount)
       const newAmount = parseFloat(Math.max(0, oldAmount + delta).toFixed(4))
       if (newAmount === oldAmount) return
 
       item.amount = String(newAmount)
 
-      if (!this._adjustTimers) this._adjustTimers = {}
-      if (!this._adjustPrev) this._adjustPrev = {}
+      clearTimeout(_adjustTimers[item.id])
 
-      clearTimeout(this._adjustTimers[item.id])
-
-      if (this._adjustPrev[item.id] === undefined) {
-        this._adjustPrev[item.id] = String(oldAmount)
+      if (_adjustPrev[item.id] === undefined) {
+        _adjustPrev[item.id] = String(oldAmount)
       }
 
-      this._adjustTimers[item.id] = setTimeout(async () => {
-        const prevVal = this._adjustPrev[item.id]
-        delete this._adjustTimers[item.id]
-        delete this._adjustPrev[item.id]
+      _adjustTimers[item.id] = setTimeout(async () => {
+        const prevVal = _adjustPrev[item.id]
+        delete _adjustTimers[item.id]
+        delete _adjustPrev[item.id]
 
         try {
           const updated = await updateShoppingListItem(listId, item.id, {
             amount: item.amount,
           })
-          if (!this._adjustTimers?.[item.id]) {
+          if (!_adjustTimers[item.id]) {
             Object.assign(item, updated)
           }
         } catch {
@@ -243,13 +251,13 @@ export const useShoppingStore = defineStore("shopping", {
       }, 600)
     },
 
-    async removeItem(listId, itemId) {
+    async removeItem(listId: string, itemId: string) {
       await deleteShoppingListItem(listId, itemId)
       this.items = this.items.filter((i) => i.id !== itemId)
       this.showToast("Позиция удалена")
     },
 
-    showToast(message) {
+    showToast(message: string) {
       this.toast = message
       setTimeout(() => {
         if (this.toast === message) this.toast = null
