@@ -63,6 +63,7 @@
 
   /* ─── Layout ─── */
   --nav-height: calc(64px + env(safe-area-inset-bottom, 0px));
+  --page-safe-area-top: var(--tg-content-safe-area-inset-top, env(safe-area-inset-top, 0px));
   --overlay-bg: rgba(30, 20, 45, 0.48);
   --color-surface-glass: rgba(255, 255, 255, 0.92);
 
@@ -326,6 +327,7 @@ textarea {
   max-width: 480px;
   margin: 0 auto;
   min-height: 100dvh;
+  padding-top: var(--page-safe-area-top);
   display: flex;
   flex-direction: column;
   gap: 12px;
