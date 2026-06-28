@@ -705,7 +705,7 @@ async function handleDeletePaymentMethod() {
   display: flex;
   flex-direction: column;
   gap: 20px;
-  padding: 12px 16px var(--nav-height);
+  padding: var(--page-padding-top) 16px var(--nav-height);
 
   &__header {
     padding: 0;

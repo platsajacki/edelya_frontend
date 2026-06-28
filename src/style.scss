@@ -63,6 +63,12 @@
 
   /* ─── Layout ─── */
   --nav-height: calc(64px + env(safe-area-inset-bottom, 0px));
+  --page-safe-area-top: calc(
+    var(--tg-safe-area-inset-top, env(safe-area-inset-top, 0px)) +
+      var(--tg-content-safe-area-inset-top, 0px)
+  );
+  --page-padding-top: calc(12px + var(--page-safe-area-top));
+  --page-padding-top-lg: calc(16px + var(--page-safe-area-top));
   --overlay-bg: rgba(30, 20, 45, 0.48);
   --color-surface-glass: rgba(255, 255, 255, 0.92);
 
