@@ -132,10 +132,10 @@ function onListCreated(list) {
 
 <style lang="scss" scoped>
 .shopping-page {
-  padding: 12px 16px calc(var(--nav-height) + 72px);
+  padding: var(--page-padding-top) 16px calc(var(--nav-height) + 72px);
 
   @media (min-width: 600px) {
-    padding: 16px 24px 88px;
+    padding: var(--page-padding-top-lg) 24px 88px;
   }
 }
 
