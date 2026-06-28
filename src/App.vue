@@ -27,7 +27,10 @@ const router = useRouter()
 const loading = ref(true)
 
 onMounted(async () => {
-  window.Telegram?.WebApp?.expand()
+  const tg = window.Telegram?.WebApp
+  tg?.ready()
+  tg?.expand()
+  tg?.requestFullscreen?.()
   window.addEventListener("auth:expired", () => auth.logout())
 
   try {
