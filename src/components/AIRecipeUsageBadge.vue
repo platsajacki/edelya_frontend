@@ -1,7 +1,7 @@
 <template>
   <div v-if="visible" class="ai-usage" :class="{ 'ai-usage--empty': isEmpty }">
     <div class="ai-usage__main">
-      <span class="ai-usage__title">AI-рецепты</span>
+      <span class="ai-usage__title">AI-запросы</span>
       <span class="ai-usage__value">{{ usageText }}</span>
     </div>
     <span v-if="remainingText" class="ai-usage__remaining">{{ remainingText }}</span>

@@ -249,7 +249,7 @@ const AI_LIMIT_EXCEEDED_MESSAGE = "Лимит AI-рецептов на теку�
 const tabs = computed(() => [
   { value: "own", label: "Личные" },
   { value: "global", label: "Общие" },
-  ...(subscription.canCreateAIRecipes ? [{ value: "ai", label: "AI-рецепты" }] : []),
+  ...(subscription.canCreateAIRecipes ? [{ value: "ai", label: "AI-запросы" }] : []),
 ])
 
 const searchPlaceholder = computed(() =>
@@ -402,7 +402,7 @@ function draftStatusLabel(status) {
   return (
     {
       processing: "Разбор",
-      parsed: "Распознан",
+      parsed: "Ожидает создания",
       failed: "Ошибка",
       dish_created: "Создано",
     }[status] || status

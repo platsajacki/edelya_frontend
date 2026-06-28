@@ -39,15 +39,25 @@
         <div class="ai-draft__counter">{{ sourceTextLength }}/{{ MAX_SOURCE_LENGTH }}</div>
       </template>
 
-      <div v-else-if="step === 'processing'" class="ai-draft__notice">
-        <div class="ai-draft__notice-head">
-          <div class="spinner spinner--sm" />
-          <p class="ai-draft__title">Рецепт в обработке</p>
-        </div>
-        <p class="ai-draft__text">
-          Черновик доступен во вкладке AI-рецепты. Статус обновится автоматически.
-        </p>
-        <div class="ai-draft__source-preview">{{ draftSourceText }}</div>
+      <div v-else-if="step === 'processing'" class="ai-draft__progress">
+        <ul class="ai-draft__steps">
+          <li
+            v-for="(label, idx) in FAKE_STEPS"
+            :key="idx"
+            class="ai-draft__step"
+            :class="`ai-draft__step--${fakeStepStates[idx]}`"
+          >
+            <span class="ai-draft__step-icon">
+              <span v-if="fakeStepStates[idx] === 'done'" class="ai-draft__step-check">
+                <IconCheck :width="10" :height="10" />
+              </span>
+              <span v-else-if="fakeStepStates[idx] === 'loading'" class="spinner spinner--sm" />
+              <span v-else class="ai-draft__step-dot" />
+            </span>
+            <span class="ai-draft__step-label">{{ label }}</span>
+          </li>
+        </ul>
+        <p class="ai-draft__text">Черновик сохраняется в AI-рецептах — можно закрыть окно.</p>
       </div>
 
       <div v-else-if="step === 'failed'" class="ai-draft__notice ai-draft__notice--error">
@@ -55,7 +65,7 @@
         <p class="ai-draft__text">{{ failureMessage }}</p>
         <div v-if="draftSourceText" class="ai-draft__source-preview">{{ draftSourceText }}</div>
         <button type="button" class="ai-draft__secondary-btn" @click="resetToInput">
-          Попробовать заново
+          Изменить описание
         </button>
       </div>
 
@@ -467,11 +477,12 @@ import {
   fetchIngredientById,
   fetchIngredientCategories,
   fetchIngredients,
-} from "../../services/ingredientService"
-import { formatShoppingAmount } from "../../utils/formatShoppingAmount"
-import { UNIT_LABELS } from "../../utils/unitLabels"
+} from "@/services/ingredientService.ts"
+import { formatShoppingAmount } from "@/utils/formatShoppingAmount.ts"
+import { UNIT_LABELS } from "@/utils/unitLabels.ts"
 import type { DTOAIDraft, DTOBaseUnit, DTODish, DTODishCategory } from "@/types/dish"
 import type { DTOIngredient, DTOIngredientCategory } from "@/types/shopping"
+import IconCheck from "@/components/icons/IconCheck.vue"
 
 interface AIDraftPayloadIngredient {
   localId: string
@@ -492,15 +503,27 @@ interface AIDraftPayload {
   ingredients: AIDraftPayloadIngredient[]
 }
 
+type FakeStepState = "pending" | "loading" | "done"
+
 const MIN_SOURCE_LENGTH = 10
-const MAX_SOURCE_LENGTH = 10000
-const POLL_INTERVAL_MS = 7000
+const MAX_SOURCE_LENGTH = 10_000
+const POLL_INTERVAL_MS = 7_000
 const PROMPT_INJECTION_MESSAGE =
   "Обнаружены подозрительные данные, похожие на попытку обойти систему. Пожалуйста, измените формулировку и попробуйте снова."
 const NOT_PROCESSABLE_MESSAGE =
   "Рецепт не может быть обработан. Пожалуйста, проверьте формат и содержание текста."
 const DEFAULT_PARSE_FAILURE_MESSAGE =
   "Попробуйте добавить больше деталей: ингредиенты, количество и шаги приготовления."
+const FAKE_STEPS = [
+  "Читаю ваш запрос",
+  "Определяю блюдо и категорию",
+  "Подбираю ингредиенты",
+  "Рассчитываю пропорции",
+  "Формирую рецепт",
+]
+const FAKE_STEP_MIN_DURATION_MS = 8_000
+const FAKE_STEP_MAX_DURATION_MS = 12_000
+const FAKE_STEP_FF_MS = 300
 
 const props = withDefaults(
   defineProps<{
@@ -551,6 +574,9 @@ let inlineReplaceTimer: ReturnType<typeof setTimeout> | null = null
 
 let pollTimer: ReturnType<typeof setTimeout> | null = null
 let ingredientSearchTimer: ReturnType<typeof setTimeout> | null = null
+const fakeStepStates = ref<FakeStepState[]>(FAKE_STEPS.map(() => "pending"))
+const fakeCurrentStep = ref(-1)
+let fakeTimer: ReturnType<typeof setTimeout> | null = null
 
 const unitOptions = computed(() =>
   Object.entries(UNIT_LABELS).map(([value, label]) => ({ value, label }))
@@ -618,7 +644,10 @@ watch(
 
 watch(open, (value) => {
   emit("update:modelValue", value)
-  if (!value) stopPolling()
+  if (!value) {
+    stopPolling()
+    clearFakeTimer()
+  }
 })
 
 watch(
@@ -672,6 +701,9 @@ function resetState({ keepDraft = false } = {}) {
   addIngredientExpanded.value = false
   resetIngredientSearch()
   stopPolling()
+  clearFakeTimer()
+  fakeStepStates.value = FAKE_STEPS.map(() => "pending")
+  fakeCurrentStep.value = -1
 }
 
 function resetToInput() {
@@ -687,7 +719,10 @@ function applyDraft(nextDraft: DTOAIDraft) {
   sourceExpanded.value = false
   resetIngredientSearch()
   if (nextDraft?.payload) setPayload(nextDraft.payload)
-  if (nextDraft?.status === "processing") schedulePoll(nextDraft.id)
+  if (nextDraft?.status === "processing") {
+    startFakeProgress()
+    schedulePoll(nextDraft.id)
+  }
 }
 
 function stopPolling() {
@@ -696,6 +731,60 @@ function stopPolling() {
     pollTimer = null
   }
   polling.value = false
+}
+
+function clearFakeTimer() {
+  if (fakeTimer) {
+    clearTimeout(fakeTimer)
+    fakeTimer = null
+  }
+}
+
+function startFakeProgress() {
+  clearFakeTimer()
+  fakeStepStates.value = FAKE_STEPS.map(() => "pending")
+  fakeCurrentStep.value = -1
+  advanceFakeStep()
+}
+
+function advanceFakeStep() {
+  const next = fakeCurrentStep.value + 1
+  if (next >= FAKE_STEPS.length) return
+  if (fakeCurrentStep.value >= 0) fakeStepStates.value[fakeCurrentStep.value] = "done"
+  fakeCurrentStep.value = next
+  fakeStepStates.value[next] = "loading"
+  if (next < FAKE_STEPS.length - 1) {
+    const randomDuration =
+      Math.random() * (FAKE_STEP_MAX_DURATION_MS - FAKE_STEP_MIN_DURATION_MS) +
+      FAKE_STEP_MIN_DURATION_MS
+
+    fakeTimer = setTimeout(advanceFakeStep, randomDuration)
+  }
+}
+
+async function finishFakeAndApply(finalDraft: DTOAIDraft) {
+  clearFakeTimer()
+  let idx = fakeCurrentStep.value < 0 ? 0 : fakeCurrentStep.value
+  if (fakeCurrentStep.value < 0) {
+    fakeCurrentStep.value = 0
+    fakeStepStates.value[0] = "loading"
+  }
+  while (idx < FAKE_STEPS.length - 1) {
+    if (!open.value) return
+    fakeStepStates.value[idx] = "done"
+    idx++
+    fakeCurrentStep.value = idx
+    fakeStepStates.value[idx] = "loading"
+    await new Promise<void>((resolve) => setTimeout(resolve, FAKE_STEP_FF_MS))
+  }
+  if (!open.value) return
+  fakeStepStates.value[FAKE_STEPS.length - 1] = "done"
+  await new Promise<void>((resolve) => setTimeout(resolve, FAKE_STEP_FF_MS))
+  if (!open.value) return
+  draft.value = finalDraft
+  if (finalDraft.status === "parsed" && finalDraft.payload) {
+    setPayload(finalDraft.payload)
+  }
 }
 
 function schedulePoll(id: string) {
@@ -709,17 +798,13 @@ async function pollDraft(id: string) {
   try {
     const data = await fetchAIDraft(id)
     if (!open.value) return
-    draft.value = data
     emit("draft-updated", data)
-    if (data.status === "parsed") {
+    if (data.status === "parsed" || data.status === "failed") {
       stopPolling()
-      setPayload(data.payload)
+      await finishFakeAndApply(data)
       return
     }
-    if (data.status === "failed") {
-      stopPolling()
-      return
-    }
+    draft.value = data
     schedulePoll(id)
   } catch (err) {
     if (!open.value) return
@@ -999,6 +1084,7 @@ async function submit() {
       const data = await createAIDraft({ source_text: sourceText.value.trim() })
       draft.value = data
       emit("draft-created", data)
+      startFakeProgress()
       schedulePoll(data.id)
     } catch (err) {
       error.value =
@@ -1105,6 +1191,7 @@ async function openCreatedDish() {
 
 onUnmounted(() => {
   stopPolling()
+  clearFakeTimer()
   clearTimeout(ingredientSearchTimer ?? undefined)
   clearTimeout(inlineReplaceTimer ?? undefined)
 })
@@ -1239,6 +1326,83 @@ onUnmounted(() => {
     align-items: center;
     justify-content: space-between;
     gap: 8px;
+  }
+
+  &__progress {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 14px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    background: var(--color-empty);
+  }
+
+  &__steps {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  &__step {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: var(--font-sm);
+    transition:
+      opacity var(--transition-fast),
+      color var(--transition-fast);
+
+    &--pending {
+      opacity: 0.35;
+      color: var(--color-text-secondary);
+    }
+
+    &--loading {
+      opacity: 1;
+      color: var(--color-text);
+      font-weight: 600;
+    }
+
+    &--done {
+      opacity: 0.55;
+      color: var(--color-text-secondary);
+    }
+
+    &-icon {
+      flex-shrink: 0;
+      width: 20px;
+      height: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    &-dot {
+      display: block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--color-border);
+    }
+
+    &-check {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: var(--color-mint);
+      color: var(--on-primary);
+    }
+
+    &-label {
+      flex: 1;
+    }
   }
 }
 
