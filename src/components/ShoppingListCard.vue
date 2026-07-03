@@ -24,6 +24,7 @@ defineEmits<{
 
 const dateRange = computed(() => {
   const from = formatYMDtoDDMMYYYY(props.list.date_from)
+  if (props.list.date_from === props.list.date_to) return from
   const to = formatYMDtoDDMMYYYY(props.list.date_to)
   return `${from} – ${to}`
 })
@@ -39,7 +40,7 @@ const dateRange = computed(() => {
   padding: 14px 14px;
   background: var(--color-surface);
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-md);
   text-align: left;
   cursor: pointer;
   transition:

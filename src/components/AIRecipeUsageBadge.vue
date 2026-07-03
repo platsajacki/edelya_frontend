@@ -1,8 +1,11 @@
 <template>
   <div v-if="visible" class="ai-usage" :class="{ 'ai-usage--empty': isEmpty }">
-    <div class="ai-usage__main">
+    <div class="ai-usage__row">
       <span class="ai-usage__title">AI-запросы</span>
       <span class="ai-usage__value">{{ usageText }}</span>
+    </div>
+    <div v-if="progressPercent !== null" class="ai-usage__bar">
+      <div class="ai-usage__bar-fill" :style="{ width: progressPercent + '%' }" />
     </div>
     <span v-if="remainingText" class="ai-usage__remaining">{{ remainingText }}</span>
   </div>
@@ -39,26 +42,26 @@ const remainingText = computed(() => {
   if (props.usage?.remaining === undefined || props.usage?.remaining === null) return ""
   return `Осталось ${props.usage.remaining}`
 })
+
+const progressPercent = computed(() => {
+  if (!hasUsage.value || !resolvedLimit.value) return null
+  const used = Number(props.usage.used)
+  const limit = Number(resolvedLimit.value)
+  return Math.min(100, Math.max(0, (used / limit) * 100))
+})
 </script>
 
 <style lang="scss" scoped>
 .ai-usage {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
+  flex-direction: column;
+  gap: 8px;
   padding: 12px 14px;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
   background: var(--color-surface);
   box-shadow: var(--shadow-card);
   color: var(--color-text);
-
-  @media (max-width: 360px) {
-    align-items: flex-start;
-    flex-direction: column;
-    gap: 6px;
-  }
 
   &--empty {
     background: var(--color-warning-bg);
@@ -69,11 +72,11 @@ const remainingText = computed(() => {
     }
   }
 
-  &__main {
-    min-width: 0;
+  &__row {
     display: flex;
-    flex-direction: column;
-    gap: 2px;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
   }
 
   &__title {
@@ -94,9 +97,22 @@ const remainingText = computed(() => {
   }
 
   &__remaining {
-    flex-shrink: 0;
-    color: var(--color-text);
-    font-weight: 600;
+    color: var(--color-text-secondary);
+  }
+
+  &__bar {
+    width: 100%;
+    height: 4px;
+    border-radius: var(--radius-pill);
+    background: var(--color-border);
+    overflow: hidden;
+  }
+
+  &__bar-fill {
+    height: 100%;
+    border-radius: var(--radius-pill);
+    background: var(--color-mint);
+    transition: width var(--transition-normal);
   }
 }
 </style>

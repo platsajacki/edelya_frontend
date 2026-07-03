@@ -30,5 +30,5 @@ router.beforeEach((to) => {
 })
 
 if (import.meta.env.VITE_DEBUG === "1") {
-  router.addRoute({ path: "/dev/icons", component: () => import("@/pages/DevIcons.vue") })
+  router.addRoute({ path: "/dev/icons", component: () => import("@/pages/DevIconsPage.vue") })
 }

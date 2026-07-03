@@ -203,6 +203,10 @@ export const useRecipesStore = defineStore("recipes", {
       value: string | number | null
     ) {
       this.filters[key] = value as never
+      if (key === "ownership") {
+        this.dishes = []
+        this.aiDrafts = []
+      }
       void this.loadCurrent()
     },
 

@@ -1,16 +1,5 @@
 <template>
   <div class="week-grid">
-    <div class="week-grid__header">
-      <div class="week-grid__header-col week-grid__header-col--cook">
-        <IconPot :width="13" :height="13" />
-        Готовлю
-      </div>
-      <div class="week-grid__header-col week-grid__header-col--eat">
-        <IconFork :width="13" :height="13" />
-        Ем
-      </div>
-    </div>
-
     <!-- Collapsed past days toggle -->
     <button
       v-if="pastDays.length"
@@ -38,7 +27,7 @@
     </button>
 
     <!-- Past days (expandable) -->
-    <Transition name="past-expand">
+    <Transition name="expand">
       <div v-if="showPast && pastDays.length" class="week-grid__past-days">
         <DayRow
           v-for="day in pastDays"
@@ -132,8 +121,6 @@ import { DAY_LABELS, splitDays, pastDaysLabel, getNextWeekInfo } from "../utils/
 import { usePlanningStore } from "../store/planning"
 import type { DTOWeekDishes, DTOMealPlanItem, DTOCookingEvent } from "@/types/planning"
 import DayRow from "./DayRow.vue"
-import IconPot from "./icons/IconPot.vue"
-import IconFork from "./icons/IconFork.vue"
 
 const planning = usePlanningStore()
 
@@ -239,37 +226,12 @@ async function loadNext() {
 </script>
 
 <style lang="scss" scoped>
+@use "../styles/mixins" as mixins;
+
 .week-grid {
   display: flex;
   flex-direction: column;
   gap: 12px;
-
-  &__header {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    column-gap: 12px;
-    padding: 0 16px;
-  }
-
-  &__header-col {
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
-    gap: 5px;
-    font-size: var(--font-2xs);
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    padding: 4px 0;
-    border-bottom: 2px solid currentColor;
-
-    &--eat {
-      color: var(--color-eat);
-    }
-    &--cook {
-      color: var(--color-cook);
-    }
-  }
 
   &__past-toggle {
     display: flex;
@@ -277,8 +239,8 @@ async function loadNext() {
     gap: 8px;
     padding: 10px 16px;
     border: 1px solid var(--color-border);
-    border-radius: var(--radius-sm);
-    background: var(--color-empty);
+    border-radius: var(--radius-md);
+    background: var(--color-surface);
     cursor: pointer;
     transition:
       background var(--transition-fast),
@@ -377,34 +339,5 @@ async function loadNext() {
   }
 }
 
-.past-expand-enter-active {
-  transition:
-    opacity var(--transition-normal),
-    max-height 0.35s ease;
-  overflow: hidden;
-}
-
-.past-expand-leave-active {
-  transition:
-    opacity var(--transition-fast),
-    max-height 0.25s ease;
-  overflow: hidden;
-}
-
-.past-expand-enter-from {
-  opacity: 0;
-  max-height: 0;
-}
-.past-expand-enter-to {
-  opacity: 1;
-  max-height: 2000px;
-}
-.past-expand-leave-from {
-  opacity: 1;
-  max-height: 2000px;
-}
-.past-expand-leave-to {
-  opacity: 0;
-  max-height: 0;
-}
+@include mixins.expand-transition(2000px);
 </style>

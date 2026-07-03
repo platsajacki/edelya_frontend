@@ -1,0 +1,27 @@
+@mixin expand-transition($max-height: 2000px) {
+  .expand-enter-active {
+    transition:
+      opacity var(--transition-normal),
+      max-height 0.35s ease;
+    overflow: hidden;
+  }
+
+  .expand-leave-active {
+    transition:
+      opacity var(--transition-fast),
+      max-height 0.25s ease;
+    overflow: hidden;
+  }
+
+  .expand-enter-from,
+  .expand-leave-to {
+    opacity: 0;
+    max-height: 0;
+  }
+
+  .expand-enter-to,
+  .expand-leave-from {
+    opacity: 1;
+    max-height: #{$max-height};
+  }
+}

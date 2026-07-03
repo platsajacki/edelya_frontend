@@ -123,6 +123,10 @@ const cardStyle = computed(() => {
     -webkit-hyphens: auto;
     hyphens: auto;
     overflow-wrap: break-word;
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
   }
 }
 

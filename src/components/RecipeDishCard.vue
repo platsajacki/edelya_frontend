@@ -1,10 +1,13 @@
 <template>
   <button class="dish-card" type="button" @click="$emit('tap', dish)">
-    <div class="dish-card__main">
-      <span class="dish-card__name">{{ dish.name }}</span>
-      <span class="dish-card__meta">
-        <span v-if="dish.category?.name" class="dish-card__category">{{ dish.category.name }}</span>
-        <span class="dish-card__ingredients"> {{ ingredientCount }} {{ ingredientWord }} </span>
+    <span class="dish-card__name">{{ dish.name }}</span>
+    <span v-if="dish.category?.name" class="dish-card__category">{{ dish.category.name }}</span>
+    <div v-if="visibleIngredients.length" class="dish-card__ingredients">
+      <span v-for="di in visibleIngredients" :key="di.id" class="dish-card__ingredient-chip">
+        {{ di.ingredient.name }}
+      </span>
+      <span v-if="extraIngredientsCount > 0" class="dish-card__ingredients-more">
+        +{{ extraIngredientsCount }}
       </span>
     </div>
   </button>
@@ -22,30 +25,28 @@ defineEmits<{
   (e: "tap", dish: DTODish): void
 }>()
 
-const ingredientCount = computed(() => props.dish.dish_ingredients?.length ?? 0)
+const MAX_VISIBLE_INGREDIENTS = 3
 
-const ingredientWord = computed(() => {
-  const n = ingredientCount.value
-  const mod10 = n % 10
-  const mod100 = n % 100
-  if (mod100 >= 11 && mod100 <= 14) return "ингредиентов"
-  if (mod10 === 1) return "ингредиент"
-  if (mod10 >= 2 && mod10 <= 4) return "ингредиента"
-  return "ингредиентов"
-})
+const visibleIngredients = computed(
+  () => props.dish.dish_ingredients?.slice(0, MAX_VISIBLE_INGREDIENTS) ?? []
+)
+
+const extraIngredientsCount = computed(() =>
+  Math.max((props.dish.dish_ingredients?.length ?? 0) - MAX_VISIBLE_INGREDIENTS, 0)
+)
 </script>
 
 <style lang="scss" scoped>
 .dish-card {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
   width: 100%;
-  padding: 14px 14px;
+  padding: 16px;
   background: var(--color-surface);
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-md);
   text-align: left;
   cursor: pointer;
   transition:
@@ -64,35 +65,42 @@ const ingredientWord = computed(() => {
     transform: scale(var(--press-scale-sm));
   }
 
-  &__main {
-    display: flex;
-    flex-direction: column;
-    gap: 3px;
-    min-width: 0;
-  }
-
   &__name {
-    font-size: var(--font-base);
-    font-weight: 600;
+    width: 100%;
+    font-size: var(--font-md);
+    font-weight: 700;
     color: var(--color-text);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
 
-  &__meta {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: var(--font-xs);
+  &__category {
+    font-size: var(--font-sm);
     color: var(--color-text-secondary);
   }
 
-  &__category {
-    font-weight: 500;
-  }
   &__ingredients {
-    opacity: 0.7;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    margin-top: 2px;
+  }
+
+  &__ingredient-chip {
+    padding: 5px 12px;
+    border-radius: var(--radius-lg);
+    background: var(--color-mint-alpha-10);
+    font-size: var(--font-xs);
+    font-weight: 500;
+    color: var(--color-text);
+  }
+
+  &__ingredients-more {
+    font-size: var(--font-xs);
+    font-weight: 500;
+    color: var(--color-text-secondary);
   }
 }
 </style>

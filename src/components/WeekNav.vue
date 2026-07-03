@@ -46,30 +46,29 @@ defineEmits<{
 .week-nav {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   gap: 8px;
-  padding: 12px 16px;
-  background: var(--color-surface);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-card);
   min-height: 52px;
 
   &__btn {
-    width: 36px;
-    height: 36px;
+    flex-shrink: 0;
+    width: 44px;
+    height: 44px;
     border: 1px solid var(--color-border);
-    border-radius: var(--radius-sm);
-    background: var(--color-bg);
+    border-radius: var(--radius-md);
+    background: var(--color-surface);
     color: var(--color-text);
+    box-shadow: var(--shadow-card);
     display: flex;
     align-items: center;
     justify-content: center;
     transition:
       background var(--transition-fast),
-      border-color var(--transition-fast);
+      border-color var(--transition-fast),
+      transform var(--transition-fast);
 
     &:active {
-      background: var(--color-border);
+      background: var(--color-empty);
+      transform: scale(var(--press-scale-md));
     }
     &:disabled {
       opacity: 0.5;
@@ -79,21 +78,31 @@ defineEmits<{
   }
 
   &__center {
+    position: relative;
     display: flex;
     align-items: center;
-    gap: 6px;
-    flex: 1;
     justify-content: center;
+    flex: 1;
+    height: 44px;
+    padding: 0 16px;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-card);
   }
 
   &__label {
     font-size: var(--font-lg);
-    font-weight: 600;
+    font-weight: 700;
     letter-spacing: -0.01em;
     text-align: center;
   }
 
   &__shopping-btn {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
     display: flex;
     align-items: center;
     justify-content: center;

@@ -1,9 +1,12 @@
 <template>
-  <div class="day-row" :class="{ 'day-row--muted': muted }">
+  <div class="day-row" :class="{ 'day-row--muted': muted, 'day-row--today': isToday }">
     <div class="day-row__label">
       <div class="day-row__label-text">
-        <span class="day-row__day">{{ day }}</span>
-        <span class="day-row__date">{{ date.slice(0, 2) }}</span>
+        <div class="day-row__badge">
+          <span class="day-row__day">{{ day }}</span>
+          <span class="day-row__date">{{ date.slice(0, 2) }}</span>
+        </div>
+        <span v-if="isToday" class="day-row__today-text">Сегодня</span>
       </div>
       <button
         v-if="cookingEvents.length > 0"
@@ -17,6 +20,10 @@
     </div>
 
     <div class="day-row__cook">
+      <div class="day-row__col-header">
+        <IconPot :width="12" :height="12" />
+        <span>Готовлю</span>
+      </div>
       <div ref="cookRef" class="day-row__items" :data-date="rawDate">
         <MealCard
           v-for="event in cookingEvents"
@@ -36,6 +43,10 @@
     </div>
 
     <div class="day-row__eat">
+      <div class="day-row__col-header">
+        <IconFork :width="12" :height="12" />
+        <span>Ем</span>
+      </div>
       <div ref="eatRef" class="day-row__items" :data-date="rawDate">
         <MealCard
           v-for="item in meals"
@@ -57,13 +68,16 @@
 </template>
 
 <script lang="ts" setup>
-import { ref } from "vue"
+import { computed, ref } from "vue"
 import MealCard from "./MealCard.vue"
 import IconCartPlus from "./icons/IconCartPlus.vue"
+import IconPot from "./icons/IconPot.vue"
+import IconFork from "./icons/IconFork.vue"
 import { useSortable } from "../composables/useSortable"
+import { getTodayISO } from "../utils/weekDays"
 import type { DTOMealPlanItem, DTOCookingEvent } from "@/types/planning"
 
-withDefaults(
+const props = withDefaults(
   defineProps<{
     day: string
     date: string
@@ -78,6 +92,8 @@ withDefaults(
     muted: false,
   }
 )
+
+const isToday = computed(() => props.rawDate === getTodayISO())
 
 const emit = defineEmits<{
   (e: "tap-cooking", event: DTOCookingEvent): void
@@ -152,17 +168,24 @@ useSortable(eatRef, makeSortableOptions("meals"))
 .day-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  column-gap: 12px;
-  row-gap: 8px;
+  column-gap: 10px;
+  row-gap: 10px;
   align-items: start;
-  padding: 6px 16px 12px;
+  padding: 14px;
   background: var(--color-surface);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-md);
+  border: 1px solid transparent;
   box-shadow: var(--shadow-day);
-  transition: opacity var(--transition-normal);
+  transition:
+    opacity var(--transition-normal),
+    border-color var(--transition-normal);
 
   &--muted {
     opacity: 0.75;
+  }
+
+  &--today {
+    border-color: var(--color-mint-alpha-25);
   }
 
   &__label {
@@ -171,29 +194,51 @@ useSortable(eatRef, makeSortableOptions("meals"))
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
-    padding-bottom: 4px;
-    line-height: 1;
-    border-bottom: 1px solid var(--color-border);
+    margin-bottom: 2px;
   }
 
   &__label-text {
     display: flex;
     flex-direction: row;
-    align-items: baseline;
-    gap: 4px;
+    align-items: center;
+    gap: 10px;
+  }
+
+  &__badge {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
+    border-radius: var(--radius-sm);
+    background: var(--color-mint-alpha-10);
+    line-height: 1.1;
+    transition: background var(--transition-normal);
+
+    .day-row--today & {
+      background: var(--color-mint);
+    }
+  }
+
+  &__today-text {
+    font-size: var(--font-base);
+    font-weight: 600;
+    color: var(--color-mint);
   }
 
   &__shopping-btn {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 28px;
-    height: 28px;
+    width: 36px;
+    height: 36px;
     padding: 0;
     border: none;
-    background: none;
-    border-radius: var(--radius-xs);
-    color: var(--color-text-secondary);
+    background: var(--color-mint-alpha-10);
+    border-radius: var(--radius-sm);
+    color: var(--color-mint);
     cursor: pointer;
     flex-shrink: 0;
     transition:
@@ -202,55 +247,66 @@ useSortable(eatRef, makeSortableOptions("meals"))
     -webkit-tap-highlight-color: transparent;
 
     &:hover {
-      color: var(--color-mint);
-      background: color-mix(in srgb, var(--color-mint) 10%, transparent);
+      background: var(--color-mint-alpha-25);
     }
 
     &:active {
-      background: var(--color-empty);
+      background: var(--color-mint-alpha-25);
     }
   }
 
   &__day {
-    font-weight: 550;
-    font-size: var(--font-sm);
-    color: var(--color-text-secondary);
+    font-weight: 700;
+    font-size: var(--font-xs);
+    color: var(--color-mint);
     text-transform: uppercase;
     letter-spacing: 0.06em;
+
+    .day-row--today & {
+      color: var(--on-primary);
+    }
   }
 
   &__date {
-    font-weight: 550;
-    font-size: var(--font-sm);
-    color: var(--color-text-secondary);
+    font-weight: 700;
+    font-size: var(--font-md);
+    color: var(--color-mint);
+
+    .day-row--today & {
+      color: var(--on-primary);
+    }
+  }
+
+  &__eat,
+  &__cook {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    padding: 10px;
+    background: var(--color-mint-alpha-06);
+    border-radius: var(--radius-sm);
   }
 
   &__eat {
     --card-bg: var(--color-eat-bg);
     --card-accent: var(--color-eat);
-    display: flex;
-    flex-direction: column;
-    position: relative;
-    padding-left: 8px;
-    min-width: 0;
-
-    &::before {
-      content: "";
-      position: absolute;
-      left: -6px;
-      top: 0;
-      bottom: 0;
-      width: 1px;
-      background: var(--color-border);
-    }
   }
 
   &__cook {
     --card-bg: var(--color-cook-bg);
     --card-accent: var(--color-cook);
+  }
+
+  &__col-header {
     display: flex;
-    flex-direction: column;
-    min-width: 0;
+    align-items: center;
+    gap: 4px;
+    margin-bottom: 8px;
+    font-size: var(--font-xs);
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--color-text-secondary);
   }
 
   &__items {
@@ -270,22 +326,27 @@ useSortable(eatRef, makeSortableOptions("meals"))
   &__add {
     display: flex;
     align-items: center;
-    justify-content: flex-start;
-    gap: 3px;
+    justify-content: center;
+    gap: 4px;
     width: 100%;
-    padding: 6px;
-    border: none;
+    padding: 8px;
+    border: 1px dashed var(--color-border);
+    border-radius: var(--radius-xs);
     background: none;
     font-weight: 500;
     cursor: pointer;
-    transition: color var(--transition-fast);
+    transition:
+      color var(--transition-fast),
+      border-color var(--transition-fast);
     color: var(--color-text-secondary);
 
     &--cook:hover {
       color: var(--color-mint);
+      border-color: var(--color-mint-alpha-25);
     }
     &--eat:hover {
       color: var(--color-mint);
+      border-color: var(--color-mint-alpha-25);
     }
   }
 

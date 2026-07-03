@@ -132,7 +132,7 @@
 
     <!-- AI drafts list -->
     <div v-else-if="store.isAIDraftsTab" class="recipes-list">
-      <div v-if="store.refreshing" class="recipes-refreshing">
+      <div v-if="store.refreshing || store.initialLoading" class="recipes-refreshing">
         <div class="spinner spinner--sm" />
       </div>
 
@@ -165,7 +165,7 @@
     <!-- Dish list -->
     <div v-else class="recipes-list">
       <!-- Refreshing indicator -->
-      <div v-if="store.refreshing" class="recipes-refreshing">
+      <div v-if="store.refreshing || store.initialLoading" class="recipes-refreshing">
         <div class="spinner spinner--sm" />
       </div>
 
@@ -705,7 +705,7 @@ onUnmounted(() => {
   gap: 4px;
   padding: 14px 16px;
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-md);
   background: var(--color-surface);
   color: var(--color-text);
   text-align: left;

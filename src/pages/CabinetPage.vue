@@ -9,15 +9,33 @@
     <!-- Subscription card -->
     <section class="cabinet__card">
       <template v-if="subscriptionCard">
-        <component
-          :is="subscriptionCard.icon"
-          class="cabinet__card-icon"
-          :class="subscriptionCard.iconClass"
-          :width="40"
-          :height="40"
+        <div class="cabinet__card-header">
+          <div class="cabinet__card-avatar">
+            <component :is="subscriptionCard.icon" :width="22" :height="22" />
+          </div>
+          <div class="cabinet__card-header-text">
+            <div class="cabinet__card-title-row">
+              <h2 class="cabinet__card-heading">{{ subscriptionCard.title }}</h2>
+              <span
+                v-if="cardBadge"
+                class="cabinet__card-status"
+                :class="`cabinet__card-status--${cardBadge.tone}`"
+              >
+                <IconCheck v-if="cardBadge.tone === 'success'" :width="12" :height="12" />
+                {{ cardBadge.text }}
+              </span>
+            </div>
+            <p class="cabinet__card-text">{{ subscriptionCard.description }}</p>
+          </div>
+        </div>
+
+        <AIRecipeUsageBadge
+          v-if="sub.canCreateAIRecipes"
+          class="cabinet__card-usage"
+          :usage="sub.aiRecipeUsage"
+          :limit="sub.aiRecipeLimit"
         />
-        <h2 class="cabinet__card-heading">{{ subscriptionCard.title }}</h2>
-        <p class="cabinet__card-text">{{ subscriptionCard.description }}</p>
+
         <p v-if="subscriptionCard.actionText" class="cabinet__recurring-notice">
           На время пробного периода все функции сервиса доступны бесплатно.<br />
           Далее от 99 руб./месяц.
@@ -37,12 +55,6 @@
       </template>
     </section>
 
-    <AIRecipeUsageBadge
-      v-if="sub.canCreateAIRecipes"
-      :usage="sub.aiRecipeUsage"
-      :limit="sub.aiRecipeLimit"
-    />
-
     <!-- Tariff change confirmation sheet -->
     <ConfirmTariffSheet
       v-if="confirmSheetScenario"
@@ -60,15 +72,24 @@
     <section v-if="showPaymentMethod" class="cabinet__card cabinet__payment">
       <h2 class="cabinet__section-title cabinet__payment-title">Способ оплаты</h2>
       <template v-if="sub.paymentMethod">
-        <p class="cabinet__payment-card">
-          {{
-            sub.paymentMethod?.card_type && sub.paymentMethod?.card_last4
-              ? `${sub.paymentMethod.card_type} *${sub.paymentMethod.card_last4}`
-              : sub.paymentMethod?.title
-          }}
-        </p>
+        <div class="cabinet__payment-info">
+          <div class="cabinet__payment-brand">{{ cardBrandAbbr }}</div>
+          <div class="cabinet__payment-details">
+            <span class="cabinet__payment-card">
+              {{
+                sub.paymentMethod?.card_type && sub.paymentMethod?.card_last4
+                  ? `${sub.paymentMethod.card_type} *${sub.paymentMethod.card_last4}`
+                  : sub.paymentMethod?.title
+              }}
+            </span>
+            <span class="cabinet__payment-status">
+              {{
+                sub.subscription?.auto_renew ? "Автопродление включено" : "Автопродление отключено"
+              }}
+            </span>
+          </div>
+        </div>
         <template v-if="!deleteCardConfirm">
-          <p class="cabinet__payment-warning">⚠ Удаление карты отключит автопродление</p>
           <button
             class="cabinet__btn cabinet__btn--cancel"
             :disabled="paymentLoading"
@@ -76,6 +97,10 @@
           >
             Удалить карту
           </button>
+          <p class="cabinet__payment-warning">
+            <IconWarning class="cabinet__payment-warning-icon" :width="14" :height="14" />
+            Удаление карты отключит автопродление
+          </p>
         </template>
         <div v-else class="cabinet__cancel-confirm">
           <p class="cabinet__cancel-text">Удалить привязанную карту?</p>
@@ -99,7 +124,8 @@
       </template>
       <template v-else>
         <p class="cabinet__payment-warning">
-          ⚠ Карта не привязана. Для автоматического списания необходимо привязать карту.
+          <IconWarning class="cabinet__payment-warning-icon" :width="14" :height="14" />
+          Карта не привязана. Для автоматического списания необходимо привязать карту.
         </p>
         <button class="cabinet__btn" :disabled="paymentLoading" @click="handleBindPaymentMethod">
           {{ paymentLoading ? "Загрузка..." : "Привязать карту" }}
@@ -110,7 +136,10 @@
 
     <!-- Tariffs -->
     <section v-if="showTariffs && sub.tariffs.length" class="cabinet__tariffs">
-      <h2 class="cabinet__section-title">Тарифы</h2>
+      <div class="cabinet__tariffs-header">
+        <h2 class="cabinet__section-title">Тарифы</h2>
+        <span v-if="billingNote" class="cabinet__tariffs-note">{{ billingNote }}</span>
+      </div>
       <div
         v-for="tariff in sub.tariffs"
         :key="tariff.id"
@@ -120,26 +149,36 @@
           'cabinet__tariff--pending': isPending(tariff),
         }"
       >
-        <div class="cabinet__tariff-header">
-          <span class="cabinet__tariff-name">{{ tariff.name }}</span>
-          <span v-if="tariff.soon" class="cabinet__tariff-badge cabinet__tariff-badge--soon"
-            >Скоро</span
-          >
-          <span
-            v-if="isCurrent(tariff)"
-            class="cabinet__tariff-badge cabinet__tariff-badge--current"
-            >Текущий</span
-          >
-          <span
-            v-if="isPending(tariff)"
-            class="cabinet__tariff-badge cabinet__tariff-badge--pending"
-            >Запланирован</span
-          >
+        <div class="cabinet__tariff-top">
+          <div class="cabinet__tariff-header">
+            <span class="cabinet__tariff-name">{{ tariff.name }}</span>
+            <span v-if="tariff.soon" class="cabinet__tariff-badge cabinet__tariff-badge--soon"
+              >Скоро</span
+            >
+            <span
+              v-if="isCurrent(tariff)"
+              class="cabinet__tariff-badge cabinet__tariff-badge--current"
+            >
+              <IconCheck :width="11" :height="11" />
+              Текущий</span
+            >
+            <span
+              v-if="isPending(tariff)"
+              class="cabinet__tariff-badge cabinet__tariff-badge--pending"
+              >Запланирован</span
+            >
+          </div>
+          <div class="cabinet__tariff-price">
+            <span class="cabinet__tariff-price-value">{{ tariffPriceValue(tariff) }}</span>
+            <span class="cabinet__tariff-price-period">{{ tariffPricePeriod(tariff) }}</span>
+          </div>
         </div>
-        <p class="cabinet__tariff-price">{{ formatPrice(tariff) }}</p>
         <p v-if="tariff.description" class="cabinet__tariff-desc">{{ tariff.description }}</p>
         <ul v-if="tariff.description_items?.length" class="cabinet__tariff-description">
-          <li v-for="item in tariff.description_items" :key="item">{{ item }}</li>
+          <li v-for="item in tariff.description_items" :key="item">
+            <IconCheck class="cabinet__tariff-check" :width="14" :height="14" />
+            <span>{{ item }}</span>
+          </li>
         </ul>
         <ul class="cabinet__tariff-features">
           <li v-if="tariff.can_create_ai_recipes">{{ aiRecipeFeatureText }}</li>
@@ -294,10 +333,47 @@ const BILLING_PERIOD_LABEL = {
   yearly: "год",
 }
 
-function formatPrice(tariff) {
-  const period = BILLING_PERIOD_LABEL[tariff.billing_period] ?? tariff.billing_period
-  return `${Number(tariff.price)} ₽/${period}`
+const BILLING_PERIOD_NOTE = {
+  monthly: "оплата ежемесячно",
+  yearly: "оплата ежегодно",
 }
+
+function tariffPriceValue(tariff) {
+  return `${Number(tariff.price)} ₽`
+}
+
+function tariffPricePeriod(tariff) {
+  const period = BILLING_PERIOD_LABEL[tariff.billing_period] ?? tariff.billing_period
+  return `в ${period}`
+}
+
+const billingNote = computed(() => {
+  const periods = new Set(sub.tariffs.map((t) => t.billing_period))
+  if (periods.size !== 1) return ""
+  return BILLING_PERIOD_NOTE[[...periods][0]] ?? ""
+})
+
+const CARD_BRAND_LABEL = {
+  mastercard: "MC",
+  visa: "VISA",
+  mir: "МИР",
+}
+
+const cardBrandAbbr = computed(() => {
+  const type = sub.paymentMethod?.card_type
+  if (!type) return "💳"
+  return CARD_BRAND_LABEL[type.toLowerCase()] ?? type.slice(0, 2).toUpperCase()
+})
+
+const cardBadge = computed(() => {
+  if (subscriptionCard.value?.iconClass === "cabinet__card-icon--ok") {
+    return { text: "Активен", tone: "success" }
+  }
+  if (subscriptionCard.value?.iconClass === "cabinet__card-icon--warning") {
+    return { text: "Внимание", tone: "warning" }
+  }
+  return null
+})
 
 function isCurrent(tariff) {
   return sub.subscription?.tariff?.id === tariff.id
@@ -322,8 +398,7 @@ const aiRecipeFeatureText = computed(() => {
 })
 
 const showTariffs = computed(() => {
-  if (sub.errorCode === "subscription_required") return false
-  return true
+  return sub.errorCode !== "subscription_required"
 })
 
 const showPaymentMethod = computed(() => {
@@ -424,8 +499,8 @@ const subscriptionCard = computed(() => {
       title: `Тариф: ${s.tariff?.name}`,
       description:
         (s.current_period_end
-          ? `Активен до ${formatDate(s.current_period_end)}.`
-          : "Подписка активна.") + pendingNote,
+          ? `Активен до ${formatDate(s.current_period_end)}`
+          : "Подписка активна") + pendingNote,
       actionText: null,
     }
   }
@@ -726,21 +801,67 @@ async function handleDeletePaymentMethod() {
   &__card {
     display: flex;
     flex-direction: column;
-    align-items: center;
-    text-align: center;
-    gap: 12px;
-    padding: 28px 24px;
-    background: var(--color-surface);
-    border-radius: var(--radius-md);
+    gap: 14px;
+    padding: 20px;
+    background: linear-gradient(
+      135deg,
+      var(--color-mint-alpha-16) 0%,
+      var(--color-mint-alpha-06) 100%
+    );
+    border: 1px solid var(--color-mint-alpha-25);
+    border-radius: var(--radius-lg);
     box-shadow: var(--shadow-card);
   }
 
-  &__card-icon {
-    &--warning {
-      color: var(--color-warning-icon);
-    }
-    &--ok {
+  &__card-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  &__card-avatar {
+    flex-shrink: 0;
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-sm);
+    background: var(--color-mint);
+    color: var(--on-primary);
+  }
+
+  &__card-header-text {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+  }
+
+  &__card-title-row {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  &__card-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 10px;
+    border-radius: var(--radius-pill);
+    font-size: var(--font-xs);
+    font-weight: 700;
+
+    &--success {
+      background: var(--color-success-bg);
       color: var(--color-success);
+    }
+
+    &--warning {
+      background: var(--color-warning-bg);
+      color: var(--color-warning);
     }
   }
 
@@ -756,13 +877,18 @@ async function handleDeletePaymentMethod() {
     line-height: 1.5;
   }
 
+  &__card-usage {
+    width: 100%;
+    border: none;
+  }
+
   /* Buttons */
   &__btn {
     margin-top: 8px;
     width: 100%;
     padding: 14px 24px;
     border: none;
-    border-radius: var(--radius-sm);
+    border-radius: var(--radius-pill);
     font-size: var(--font-md);
     font-weight: 600;
     color: var(--on-primary);
@@ -790,7 +916,7 @@ async function handleDeletePaymentMethod() {
       width: 100%;
       padding: 10px 24px;
       border: 1px solid var(--color-border);
-      border-radius: var(--radius-sm);
+      border-radius: var(--radius-pill);
       font-size: var(--font-sm);
       font-weight: 500;
       color: var(--color-text-secondary);
@@ -809,7 +935,7 @@ async function handleDeletePaymentMethod() {
       flex: 1;
       padding: 10px 16px;
       border: none;
-      border-radius: var(--radius-sm);
+      border-radius: var(--radius-pill);
       font-size: var(--font-sm);
       font-weight: 600;
       color: var(--color-text-secondary);
@@ -825,7 +951,7 @@ async function handleDeletePaymentMethod() {
       flex: 1;
       padding: 10px 16px;
       border: none;
-      border-radius: var(--radius-sm);
+      border-radius: var(--radius-pill);
       font-size: var(--font-sm);
       font-weight: 700;
       color: var(--on-primary);
@@ -853,14 +979,29 @@ async function handleDeletePaymentMethod() {
 
   /* Tariffs section */
   &__section-title {
-    font-size: var(--font-lg);
-    font-weight: 600;
+    font-size: var(--font-xs);
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--color-text-secondary);
   }
 
   &__tariffs {
     display: flex;
     flex-direction: column;
     gap: 12px;
+  }
+
+  &__tariffs-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  &__tariffs-note {
+    font-size: var(--font-xs);
+    color: var(--color-text-secondary);
   }
 
   &__tariff {
@@ -879,11 +1020,19 @@ async function handleDeletePaymentMethod() {
     }
   }
 
+  &__tariff-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 4px;
+  }
+
   &__tariff-header {
     display: flex;
     align-items: center;
+    flex-wrap: wrap;
     gap: 8px;
-    margin-bottom: 4px;
   }
 
   &__tariff-name {
@@ -892,10 +1041,13 @@ async function handleDeletePaymentMethod() {
   }
 
   &__tariff-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
     font-size: var(--font-xs);
     font-weight: 600;
     padding: 2px 8px;
-    border-radius: var(--radius-xs, 4px);
+    border-radius: var(--radius-pill);
     background: var(--color-surface-muted);
     color: var(--color-text-secondary);
 
@@ -919,10 +1071,23 @@ async function handleDeletePaymentMethod() {
   }
 
   &__tariff-price {
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    text-align: right;
+  }
+
+  &__tariff-price-value {
     font-size: var(--font-lg);
     font-weight: 700;
     color: var(--color-text);
-    margin: 4px 0 8px;
+    white-space: nowrap;
+  }
+
+  &__tariff-price-period {
+    font-size: var(--font-xs);
+    color: var(--color-text-secondary);
   }
 
   &__tariff-desc {
@@ -933,15 +1098,26 @@ async function handleDeletePaymentMethod() {
   }
 
   &__tariff-description {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
     margin: 0 0 10px;
-    padding-left: 18px;
-    color: var(--color-text-secondary);
+    padding-left: 0;
+    list-style: none;
+    color: var(--color-text);
     font-size: var(--font-sm);
-    line-height: 1.45;
+    line-height: 1.4;
 
-    li + li {
-      margin-top: 4px;
+    li {
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
+  }
+
+  &__tariff-check {
+    flex-shrink: 0;
+    color: var(--color-mint);
   }
 
   &__tariff-features {
@@ -960,7 +1136,7 @@ async function handleDeletePaymentMethod() {
         color-mix(in srgb, var(--color-mint) 10%, transparent)
       );
       color: var(--color-mint);
-      border-radius: var(--radius-xs, 4px);
+      border-radius: var(--radius-pill);
       font-weight: 600;
     }
   }
@@ -981,10 +1157,44 @@ async function handleDeletePaymentMethod() {
   &__payment {
     align-items: stretch;
     text-align: left;
+    gap: 12px;
+    background: var(--color-surface);
+    border-color: var(--color-border);
   }
 
   &__payment-title {
-    margin-bottom: 4px;
+    margin-bottom: 0;
+  }
+
+  &__payment-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    background: var(--color-empty);
+    border-radius: var(--radius-sm);
+  }
+
+  &__payment-brand {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-xs);
+    background: var(--color-text);
+    color: var(--color-surface);
+    font-size: var(--font-xs);
+    font-weight: 700;
+    letter-spacing: 0.02em;
+  }
+
+  &__payment-details {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
   }
 
   &__payment-card {
@@ -993,10 +1203,24 @@ async function handleDeletePaymentMethod() {
     color: var(--color-text);
   }
 
+  &__payment-status {
+    font-size: var(--font-xs);
+    color: var(--color-text-secondary);
+  }
+
   &__payment-warning {
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
     font-size: var(--font-xs);
     color: var(--color-text-secondary);
     line-height: 1.4;
+  }
+
+  &__payment-warning-icon {
+    flex-shrink: 0;
+    margin-top: 1px;
+    color: var(--color-warning-icon);
   }
 
   &__cancel-pending {
