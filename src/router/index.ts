@@ -28,3 +28,7 @@ router.beforeEach((to) => {
     return "/"
   }
 })
+
+if (import.meta.env.VITE_DEBUG === "1") {
+  router.addRoute({ path: "/dev/icons", component: () => import("@/pages/DevIcons.vue") })
+}
