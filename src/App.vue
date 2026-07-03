@@ -28,9 +28,15 @@ const loading = ref(true)
 
 onMounted(async () => {
   const tg = window.Telegram?.WebApp
-  tg?.ready()
-  tg?.expand()
-  tg?.requestFullscreen?.()
+
+  try {
+    tg?.ready()
+    tg?.expand()
+    tg?.requestFullscreen?.()
+  } catch (e) {
+    // ignore
+  }
+
   window.addEventListener("auth:expired", () => auth.logout())
 
   try {
