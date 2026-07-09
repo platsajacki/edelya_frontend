@@ -234,8 +234,13 @@
           <div v-if="isPending(tariff)" class="cabinet__tariff-pending-note">
             <p class="cabinet__tariff-pending-text">{{ pendingActivationText }}</p>
           </div>
-          <!-- Selectable: primary CTA -->
-          <button v-else class="cabinet__btn cabinet__btn--tariff" @click="selectTariff(tariff)">
+          <!-- Selectable: primary CTA for upgrades, muted for downgrades/lateral -->
+          <button
+            v-else
+            class="cabinet__btn cabinet__btn--tariff"
+            :class="{ 'cabinet__btn--tariff-secondary': !isUpgradeTariff(tariff) }"
+            @click="selectTariff(tariff)"
+          >
             {{ sub.hasSubscription && !sub.isTrialActive ? "Сменить тариф" : "Выбрать тариф" }}
           </button>
         </template>
@@ -377,6 +382,12 @@ const cardBadge = computed(() => {
 
 function isCurrent(tariff) {
   return sub.subscription?.tariff?.id === tariff.id
+}
+
+function isUpgradeTariff(tariff) {
+  const current = sub.subscription?.tariff
+  if (!current) return true
+  return Number(tariff.price) > Number(current.price)
 }
 
 function isPending(tariff) {
@@ -909,6 +920,18 @@ async function handleDeletePaymentMethod() {
 
     &--tariff {
       margin-top: 0;
+    }
+
+    &--tariff-secondary {
+      color: var(--color-mint);
+      background: var(--color-mint-alpha-06);
+      border: 1.5px solid var(--color-mint-alpha-25);
+      font-size: var(--font-sm);
+      padding: 10px 24px;
+
+      &:active {
+        background: var(--color-mint-alpha-16);
+      }
     }
 
     &--cancel {

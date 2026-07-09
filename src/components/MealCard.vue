@@ -124,7 +124,7 @@ const cardStyle = computed(() => {
     hyphens: auto;
     overflow-wrap: break-word;
     display: -webkit-box;
-    -webkit-line-clamp: 1;
+    -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
   }
