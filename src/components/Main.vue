@@ -3,21 +3,25 @@
     <WeekNav
       :label="planning.weekLabel"
       :disabled="planning.loading"
-      @prev="planning.prevWeek"
-      @next="planning.nextWeek"
+      @prev="goPrevWeek"
+      @next="goNextWeek"
       @create-shopping-week="handleCreateShoppingWeek"
     />
 
-    <WeekGrid
-      :week-data="planning.weekData"
-      :class="{ 'planner__grid--loading': planning.loading }"
-      @add-cooking="openCookingForm"
-      @add-meal="openMealForm"
-      @tap-cooking="openCookingDetail"
-      @tap-meal="openMealDetail"
-      @drag-end="onDragEnd"
-      @create-shopping-day="handleCreateShoppingDay"
-    />
+    <div class="planner__grid-wrap" :class="{ 'planner__grid-wrap--loading': planning.loading }">
+      <Transition :name="weekTransitionName">
+        <WeekGrid
+          :key="planning.weekData.start_week"
+          :week-data="planning.weekData"
+          @add-cooking="openCookingForm"
+          @add-meal="openMealForm"
+          @tap-cooking="openCookingDetail"
+          @tap-meal="openMealDetail"
+          @drag-end="onDragEnd"
+          @create-shopping-day="handleCreateShoppingDay"
+        />
+      </Transition>
+    </div>
 
     <div v-if="planning.loadError" class="planner__error">
       <span>Не удалось загрузить неделю</span>
@@ -225,6 +229,19 @@ async function onViewCookingFromMeal(cookingEventId: string) {
   showCookingDetail.value = true
 }
 
+// --- Week navigation direction ---
+const weekTransitionName = ref<"slide-forward" | "slide-back">("slide-forward")
+
+function goPrevWeek() {
+  weekTransitionName.value = "slide-back"
+  planning.prevWeek()
+}
+
+function goNextWeek() {
+  weekTransitionName.value = "slide-forward"
+  planning.nextWeek()
+}
+
 // --- Edit from detail ---
 function onEditCooking() {
   const item = detailItem.value as DTOCookingEvent
@@ -279,10 +296,14 @@ onMounted(() => {
     padding: var(--page-padding-top-lg) 24px 24px;
   }
 
-  &__grid--loading {
-    opacity: 0.5;
-    transition: opacity var(--transition-normal);
-    pointer-events: none;
+  &__grid-wrap {
+    position: relative;
+
+    &--loading {
+      opacity: 0.75;
+      transition: opacity var(--transition-normal);
+      pointer-events: none;
+    }
   }
 
   &__error {
