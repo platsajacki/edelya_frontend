@@ -63,7 +63,8 @@
   --color-mint-alpha-25: rgba(138, 99, 181, 0.25);
 
   /* ─── Layout ─── */
-  --nav-height: calc(64px + env(safe-area-inset-bottom, 0px));
+  --safe-area-bottom: var(--tg-safe-area-inset-bottom, env(safe-area-inset-bottom, 0px));
+  --nav-height: calc(70px + var(--safe-area-bottom));
   --page-safe-area-top: calc(
     var(--tg-safe-area-inset-top, env(safe-area-inset-top, 0px)) +
       var(--tg-content-safe-area-inset-top, 0px)
@@ -332,7 +333,7 @@ textarea {
 .page-layout {
   max-width: 480px;
   margin: 0 auto;
-  min-height: 100dvh;
+  min-height: 100%;
   display: flex;
   flex-direction: column;
   gap: 12px;

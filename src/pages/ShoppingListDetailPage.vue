@@ -313,10 +313,10 @@ async function doDeleteList() {
 
 <style lang="scss" scoped>
 .detail-page {
-  padding: var(--page-padding-top) 16px calc(var(--nav-height) + 72px);
+  padding: var(--page-padding-top) 16px 72px;
 
   @media (min-width: 600px) {
-    padding: var(--page-padding-top-lg) 24px 88px;
+    padding: var(--page-padding-top-lg) 24px 72px;
   }
 }
 

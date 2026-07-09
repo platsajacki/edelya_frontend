@@ -3,14 +3,16 @@
     <div class="spinner" />
   </div>
   <ConsentScreen v-else-if="auth.requiresConsent" />
-  <template v-else>
-    <RouterView v-slot="{ Component }">
-      <KeepAlive :include="['RecipesPage', 'ShoppingPage']">
-        <component :is="Component" />
-      </KeepAlive>
-    </RouterView>
+  <div v-else class="app-shell">
+    <div class="app-shell__content">
+      <RouterView v-slot="{ Component }">
+        <KeepAlive :include="['RecipesPage', 'ShoppingPage']">
+          <component :is="Component" />
+        </KeepAlive>
+      </RouterView>
+    </div>
     <BottomNav v-if="auth.user" />
-  </template>
+  </div>
 </template>
 
 <script lang="ts" setup>
@@ -62,5 +64,19 @@ onMounted(async () => {
   align-items: center;
   justify-content: center;
   min-height: 100dvh;
+}
+
+.app-shell {
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  overflow: hidden;
+}
+
+.app-shell__content {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 </style>

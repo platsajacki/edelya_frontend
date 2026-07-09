@@ -272,11 +272,11 @@ onMounted(() => {
 
 <style lang="scss" scoped>
 .planner {
-  padding: var(--page-padding-top) 16px var(--nav-height);
+  padding: var(--page-padding-top) 16px 16px;
   position: relative;
 
   @media (min-width: 600px) {
-    padding: var(--page-padding-top-lg) 24px 88px;
+    padding: var(--page-padding-top-lg) 24px 24px;
   }
 
   &__grid--loading {

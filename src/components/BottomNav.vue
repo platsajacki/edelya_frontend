@@ -38,24 +38,18 @@ function isActive(to: string): boolean {
 
 <style lang="scss" scoped>
 .bottom-nav {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
   display: flex;
+  width: 100%;
+  flex-shrink: 0;
   background: var(--color-surface-glass);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border-top: 1px solid var(--color-border);
-  padding: 6px 0 calc(6px + env(safe-area-inset-bottom, 0px));
-  z-index: var(--z-nav);
+  padding: 6px 0 calc(6px + var(--safe-area-bottom));
 
   @media (min-width: 600px) {
-    width: 100%;
     max-width: 540px;
-    left: 50%;
-    right: auto;
-    transform: translateX(-50%);
+    margin: 0 auto;
     border-radius: var(--radius-md) var(--radius-md) 0 0;
   }
 
