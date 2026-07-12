@@ -2,10 +2,7 @@
   <div class="day-row" :class="{ 'day-row--muted': muted, 'day-row--today': isToday }">
     <div class="day-row__label">
       <div class="day-row__label-text">
-        <div class="day-row__badge">
-          <span class="day-row__day">{{ day }}</span>
-          <span class="day-row__date">{{ date.slice(0, 2) }}</span>
-        </div>
+        <DayBadge :day="day" :date="date.slice(0, 2)" :active="isToday" />
         <span v-if="isToday" class="day-row__today-text">Сегодня</span>
       </div>
       <button
@@ -70,6 +67,7 @@
 <script lang="ts" setup>
 import { computed, ref } from "vue"
 import MealCard from "./MealCard.vue"
+import DayBadge from "./DayBadge.vue"
 import IconCartPlus from "./icons/IconCartPlus.vue"
 import IconPot from "./icons/IconPot.vue"
 import IconFork from "./icons/IconFork.vue"
@@ -204,24 +202,6 @@ useSortable(eatRef, makeSortableOptions("meals"))
     gap: 10px;
   }
 
-  &__badge {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    width: 40px;
-    height: 40px;
-    flex-shrink: 0;
-    border-radius: var(--radius-sm);
-    background: var(--color-mint-alpha-10);
-    line-height: 1.1;
-    transition: background var(--transition-normal);
-
-    .day-row--today & {
-      background: var(--color-mint);
-    }
-  }
-
   &__today-text {
     font-size: var(--font-base);
     font-weight: 600;
@@ -252,28 +232,6 @@ useSortable(eatRef, makeSortableOptions("meals"))
 
     &:active {
       background: var(--color-mint-alpha-25);
-    }
-  }
-
-  &__day {
-    font-weight: 700;
-    font-size: var(--font-xs);
-    color: var(--color-mint);
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-
-    .day-row--today & {
-      color: var(--on-primary);
-    }
-  }
-
-  &__date {
-    font-weight: 700;
-    font-size: var(--font-md);
-    color: var(--color-mint);
-
-    .day-row--today & {
-      color: var(--on-primary);
     }
   }
 

@@ -48,6 +48,13 @@ defineEmits<{
   align-items: center;
   gap: 8px;
   min-height: 52px;
+  position: sticky;
+  top: var(--page-padding-top);
+  z-index: 2;
+
+  @media (min-width: 600px) {
+    top: var(--page-padding-top-lg);
+  }
 
   &__btn {
     flex-shrink: 0;

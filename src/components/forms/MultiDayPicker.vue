@@ -6,13 +6,9 @@
         :key="day.iso"
         type="button"
         class="multi-day-picker__chip"
-        :class="{
-          'multi-day-picker__chip--selected': modelValue.includes(day.iso),
-        }"
         @click="toggle(day.iso)"
       >
-        <span class="multi-day-picker__weekday">{{ day.weekday }}</span>
-        <span class="multi-day-picker__date">{{ day.label }}</span>
+        <DayBadge :day="day.weekday" :date="day.label" :active="modelValue.includes(day.iso)" />
       </button>
     </div>
   </div>
@@ -20,6 +16,7 @@
 
 <script lang="ts" setup>
 import { computed } from "vue"
+import DayBadge from "../DayBadge.vue"
 
 const WEEKDAYS = ["ВС", "ПН", "ВТ", "СР", "ЧТ", "ПТ", "СБ"]
 
@@ -54,7 +51,7 @@ const days = computed(() => {
     result.push({
       iso,
       weekday: WEEKDAYS[d.getDay()],
-      label: `${String(d.getDate()).padStart(2, "0")}.${String(d.getMonth() + 1).padStart(2, "0")}`,
+      label: `${String(d.getDate()).padStart(2, "0")}`,
     })
   }
 
@@ -82,55 +79,15 @@ function toggle(iso: string) {
   }
 
   &__chip {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 2px;
-    padding: 8px 12px;
-    min-width: 48px;
-    border: 1.5px solid var(--color-border);
-    border-radius: var(--radius-sm);
-    background: var(--color-surface);
+    padding: 0;
+    border: none;
+    background: none;
     cursor: pointer;
-    transition:
-      background var(--transition-fast),
-      border-color var(--transition-fast),
-      color var(--transition-fast),
-      transform var(--transition-fast),
-      box-shadow var(--transition-fast);
+    transition: transform var(--transition-fast);
 
     &:hover:not(:disabled) {
-      background: var(--color-mint-alpha-06);
-      border-color: var(--color-mint);
-    }
-
-    &--selected {
-      background: var(--color-mint);
-      border-color: var(--color-mint);
-      color: var(--on-primary);
       transform: scale(1.05);
-      box-shadow: 0 2px 8px var(--color-mint-alpha-25);
-
-      &:hover:not(:disabled) {
-        background: var(--color-mint-hover);
-        border-color: var(--color-mint-hover);
-        color: var(--on-primary);
-        transform: scale(1.05);
-        box-shadow: 0 2px 8px var(--color-mint-alpha-25);
-      }
     }
-  }
-
-  &__weekday {
-    font-size: var(--font-xs);
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.03em;
-  }
-
-  &__date {
-    font-size: var(--font-sm);
-    font-weight: 500;
   }
 }
 </style>
