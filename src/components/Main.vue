@@ -3,8 +3,10 @@
     <WeekNav
       :label="planning.weekLabel"
       :disabled="planning.loading"
+      :is-current-week="planning.isCurrentWeek"
       @prev="goPrevWeek"
       @next="goNextWeek"
+      @today="goToToday"
       @create-shopping-week="handleCreateShoppingWeek"
     />
 
@@ -240,6 +242,12 @@ function goPrevWeek() {
 function goNextWeek() {
   weekTransitionName.value = "slide-forward"
   planning.nextWeek()
+}
+
+function goToToday() {
+  weekTransitionName.value =
+    getTodayISO() > planning.weekData.end_week ? "slide-forward" : "slide-back"
+  planning.goToToday()
 }
 
 // --- Edit from detail ---

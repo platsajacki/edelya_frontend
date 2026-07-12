@@ -3,6 +3,18 @@
     <button class="week-nav__btn" :disabled="disabled" @click="$emit('prev')">
       <IconChevronLeft />
     </button>
+    <Transition name="pop">
+      <button
+        v-if="!isCurrentWeek"
+        type="button"
+        class="week-nav__btn week-nav__btn--today"
+        aria-label="Перейти к текущей неделе"
+        title="Сегодня"
+        @click="$emit('today')"
+      >
+        <IconCalendar :width="18" :height="18" />
+      </button>
+    </Transition>
     <div class="week-nav__center">
       <span class="week-nav__label">{{ label }}</span>
       <button
@@ -24,20 +36,24 @@
 import IconChevronLeft from "./icons/IconChevronLeft.vue"
 import IconChevronRight from "./icons/IconChevronRight.vue"
 import IconCartPlus from "./icons/IconCartPlus.vue"
+import IconCalendar from "./icons/IconCalendar.vue"
 
 withDefaults(
   defineProps<{
     label: string
     disabled?: boolean
+    isCurrentWeek?: boolean
   }>(),
   {
     disabled: false,
+    isCurrentWeek: true,
   }
 )
 
 defineEmits<{
   (e: "prev"): void
   (e: "next"): void
+  (e: "today"): void
   (e: "create-shopping-week"): void
 }>()
 </script>
@@ -81,6 +97,14 @@ defineEmits<{
       opacity: 0.5;
       cursor: default;
       pointer-events: none;
+    }
+  }
+
+  &__btn--today {
+    color: var(--color-text-secondary);
+
+    &:active {
+      background: var(--color-mint-alpha-10);
     }
   }
 

@@ -78,6 +78,11 @@ export const usePlanningStore = defineStore("planning", {
       if (!state.weekData) return ""
       return formatDateRange(state.weekData.start_week, state.weekData.end_week)
     },
+
+    isCurrentWeek(state): boolean {
+      const { year, week } = getISOWeek(new Date())
+      return state.year === year && state.week === week
+    },
   },
 
   actions: {
@@ -132,6 +137,15 @@ export const usePlanningStore = defineStore("planning", {
         this.year++
         this.week = 1
       }
+      this.nextWeekData = null
+      await this.loadWeek()
+    },
+
+    async goToToday() {
+      if (this.isCurrentWeek) return
+      const { year, week } = getISOWeek(new Date())
+      this.year = year
+      this.week = week
       this.nextWeekData = null
       await this.loadWeek()
     },
