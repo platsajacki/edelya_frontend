@@ -12,16 +12,6 @@
         >
           <IconSort />
         </button>
-        <button
-          v-if="!store.isAIDraftsTab"
-          class="recipes-header__action-btn"
-          :class="{ 'recipes-header__action-btn--active': store.hasActiveFilters }"
-          aria-label="Фильтры"
-          @click="showFilters = true"
-        >
-          <IconFilter />
-          <span v-if="store.hasActiveFilters" class="recipes-header__filter-dot" />
-        </button>
       </div>
     </div>
 
@@ -93,6 +83,13 @@
       v-if="store.isAIDraftsTab"
       :usage="subscription.aiRecipeUsage"
       :limit="subscription.aiRecipeLimit"
+    />
+
+    <CategoryChips
+      v-if="!store.isAIDraftsTab"
+      :categories="store.categories"
+      :model-value="store.filters.categoryId"
+      @update:model-value="(value) => store.setFilter('categoryId', value)"
     />
 
     <!-- Initial loading -->
@@ -188,14 +185,6 @@
       <IconPlus />
     </FabButton>
 
-    <!-- Filter panel -->
-    <RecipeFilterPanel
-      v-model="showFilters"
-      :categories="store.categories"
-      :current-category-id="store.filters.categoryId"
-      @apply="onApplyFilters"
-    />
-
     <!-- Dish detail bottom-sheet -->
     <RecipeDishDetail
       v-model="showDetail"
@@ -227,12 +216,11 @@ import type { DTODish } from "@/types/dish"
 import { useRecipesStore, SORT_OPTIONS } from "../store/recipes"
 import { useSubscriptionStore } from "../store/subscription"
 import RecipeDishCard from "../components/RecipeDishCard.vue"
-import RecipeFilterPanel from "../components/RecipeFilterPanel.vue"
+import CategoryChips from "../components/CategoryChips.vue"
 import RecipeDishDetail from "../components/RecipeDishDetail.vue"
 import DishForm from "../components/forms/DishForm.vue"
 import AIDishDraftForm from "../components/forms/AIDishDraftForm.vue"
 import AIRecipeUsageBadge from "../components/AIRecipeUsageBadge.vue"
-import IconFilter from "../components/icons/IconFilter.vue"
 import IconSearch from "../components/icons/IconSearch.vue"
 import IconSort from "../components/icons/IconSort.vue"
 import IconPlus from "../components/icons/IconPlus.vue"
@@ -269,7 +257,6 @@ const fabLabel = computed(() => (store.isAIDraftsTab ? "Создать с ИИ" 
 
 function switchTab(value) {
   showSortMenu.value = false
-  showFilters.value = false
   store.setFilter("ownership", value)
 }
 
@@ -299,33 +286,17 @@ function applySorting(value) {
 
 // --- Filter chips ---
 const activeChips = computed(() => {
-  if (store.isAIDraftsTab) return []
-  const chips = []
-  if (store.filters.categoryId) {
-    const cat = store.categories.find((c) => c.id === store.filters.categoryId)
-    chips.push({ key: "category", label: cat?.name || "Категория" })
-  }
-  if (store.hasNonDefaultSort) {
-    chips.push({ key: "sorting", label: store.sortLabel })
-  }
-  return chips
+  if (store.isAIDraftsTab || !store.hasNonDefaultSort) return []
+  return [{ key: "sorting", label: store.sortLabel }]
 })
 
 function removeChip(key) {
-  if (key === "category") store.setFilter("categoryId", null)
   if (key === "sorting") store.setSorting("-created_at")
 }
 
 function resetAll() {
   searchQuery.value = ""
   store.resetFilters()
-}
-
-// --- Filters panel ---
-const showFilters = ref(false)
-
-function onApplyFilters({ categoryId }) {
-  store.setFilter("categoryId", categoryId)
 }
 
 // --- Detail ---

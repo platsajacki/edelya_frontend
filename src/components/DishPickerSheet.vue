@@ -43,29 +43,12 @@
             </button>
           </div>
 
-          <!-- Filter chips row -->
           <div class="picker-filter-row">
-            <button
-              class="picker-filter-btn"
-              :class="{ 'picker-filter-btn--active': categoryId !== null }"
-              @click="showFilters = true"
-            >
-              <IconFilter />
-              <span>Фильтры</span>
-              <span v-if="categoryId !== null" class="picker-filter-btn__dot" />
-            </button>
-            <button
-              v-if="categoryId !== null"
-              class="picker-chip"
-              @click="
-                () => {
-                  categoryId = null
-                  reload()
-                }
-              "
-            >
-              {{ activeCategoryName }} &times;
-            </button>
+            <CategoryChips
+              :categories="categories"
+              :model-value="categoryId"
+              @update:model-value="onCategoryChange"
+            />
           </div>
 
           <!-- List -->
@@ -112,15 +95,6 @@
       </div>
     </Transition>
   </Teleport>
-
-  <!-- Category filter panel -->
-  <RecipeFilterPanel
-    v-model="showFilters"
-    :categories="categories"
-    :current-category-id="categoryId"
-    :z-index="zIndex + 10"
-    @apply="onApplyFilters"
-  />
 
   <!-- Dish preview sheet -->
   <Teleport to="body">
@@ -187,14 +161,13 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, watch, onUnmounted } from "vue"
+import { ref, watch, onUnmounted } from "vue"
 import { fetchDishes, fetchDish, fetchDishCategories } from "../services/dishService"
 import { isDishOwn } from "../utils/dishOwnership"
 import { formatShoppingAmount } from "../utils/formatShoppingAmount"
 import OwnershipBadge from "./OwnershipBadge.vue"
-import RecipeFilterPanel from "./RecipeFilterPanel.vue"
+import CategoryChips from "./CategoryChips.vue"
 import IconSearch from "./icons/IconSearch.vue"
-import IconFilter from "./icons/IconFilter.vue"
 import type { DTODish, DTODishCategory } from "@/types/dish"
 
 const PAGE_SIZE = 20
@@ -230,7 +203,6 @@ const hasMore = ref(false)
 const initialLoading = ref(false)
 const loadingMore = ref(false)
 const initialError = ref<string | null>(null)
-const showFilters = ref(false)
 const searchInputEl = ref<HTMLInputElement | null>(null)
 const listEl = ref<HTMLElement | null>(null)
 const sentinelEl = ref<HTMLElement | null>(null)
@@ -259,11 +231,6 @@ async function openPreview(dish: DTODish) {
 let debounceTimer: ReturnType<typeof setTimeout> | null = null
 let observer: IntersectionObserver | null = null
 let savedOverflow = ""
-
-const activeCategoryName = computed(() => {
-  if (!categoryId.value) return ""
-  return categories.value.find((c) => c.id === categoryId.value)?.name ?? ""
-})
 
 function buildParams(p = 1): Record<string, unknown> {
   const params: Record<string, unknown> = { page: p, page_size: PAGE_SIZE }
@@ -327,7 +294,7 @@ function switchTab(value: "own" | "global") {
   reload()
 }
 
-function onApplyFilters({ categoryId: catId }: { categoryId: number | null }) {
+function onCategoryChange(catId: number | null) {
   categoryId.value = catId
   reload()
 }
@@ -351,7 +318,6 @@ watch(
       query.value = ""
       ownership.value = "own"
       categoryId.value = null
-      showFilters.value = false
       if (!categories.value.length) {
         fetchDishCategories()
           .then((data) => {
@@ -556,54 +522,6 @@ onUnmounted(() => {
   padding: 8px 16px;
   border-bottom: 1px solid var(--color-border);
   flex-shrink: 0;
-}
-
-.picker-filter-btn {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  padding: 5px 10px;
-  border: 1.5px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  background: none;
-  font-size: var(--font-xs);
-  font-weight: 500;
-  color: var(--color-text-secondary);
-  cursor: pointer;
-  position: relative;
-  transition:
-    border-color var(--transition-fast),
-    color var(--transition-fast);
-
-  &--active {
-    border-color: var(--color-mint);
-    color: var(--color-mint);
-  }
-
-  &__dot {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: var(--color-mint);
-    position: absolute;
-    top: -2px;
-    right: -2px;
-  }
-}
-
-.picker-chip {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  padding: 4px 10px;
-  border-radius: 20px;
-  background: var(--color-mint-alpha-10);
-  border: 1px solid var(--color-mint-alpha-25);
-  font-size: var(--font-xs);
-  font-weight: 500;
-  color: var(--color-mint);
-  cursor: pointer;
-  white-space: nowrap;
 }
 
 .picker-body {
