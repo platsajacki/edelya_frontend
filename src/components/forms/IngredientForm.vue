@@ -3,7 +3,7 @@
     <form id="ingredient-form" class="form" @submit.prevent="submit">
       <label class="form__field">
         <span class="form__label">Название <span class="form__required">*</span></span>
-        <input v-model="name" type="text" class="form__input" required />
+        <input v-model="name" v-autofocus.select type="text" class="form__input" required />
       </label>
 
       <label class="form__field">
@@ -41,6 +41,7 @@
 import { ref, watch, nextTick } from "vue"
 import ModalWrapper from "./ModalWrapper.vue"
 import { createIngredient, fetchIngredientCategories } from "../../services/ingredientService"
+import { AutoFocusDirective as vAutofocus } from "@/directives/autofocus"
 import type { DTOIngredient, DTOIngredientCategory } from "@/types/shopping"
 
 const UNITS = [

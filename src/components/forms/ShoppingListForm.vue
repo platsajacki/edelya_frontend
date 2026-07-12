@@ -9,6 +9,7 @@
         <span class="form__label">Название <span class="form__required">*</span></span>
         <input
           v-model="name"
+          v-autofocus.select
           type="text"
           class="form__input"
           required
@@ -49,6 +50,7 @@ import ModalWrapper from "./ModalWrapper.vue"
 import DateInput from "./DateInput.vue"
 import { useShoppingStore } from "../../store/shopping"
 import IconWarning from "../icons/IconWarning.vue"
+import { AutoFocusDirective as vAutofocus } from "@/directives/autofocus"
 import type { DTOShoppingList } from "@/types/shopping"
 
 const props = withDefaults(

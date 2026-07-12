@@ -220,6 +220,7 @@
                   <div class="search-field">
                     <input
                       v-model="inlineReplaceQuery"
+                      v-autofocus.select
                       type="search"
                       class="form__input"
                       placeholder="Поиск ингредиента..."
@@ -384,6 +385,7 @@
             <div class="search-field">
               <input
                 v-model="ingredientSearchQuery"
+                v-autofocus
                 type="search"
                 class="form__input"
                 placeholder="Поиск ингредиента..."

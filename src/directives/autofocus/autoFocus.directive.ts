@@ -81,7 +81,14 @@ const focusOnIos = (el: HTMLElement, select: boolean) => {
   fakeInput.focus({ preventScroll: true })
 }
 
-const mounted = (el: HTMLElement, binding: { modifiers: Record<string, boolean> }) => {
+const mounted = (
+  el: HTMLElement,
+  binding: { modifiers: Record<string, boolean>; value: boolean }
+) => {
+  if (binding.value === false) {
+    return
+  }
+
   const select = !!binding.modifiers.select
 
   Promise.resolve().then(() => {
@@ -98,6 +105,6 @@ const mounted = (el: HTMLElement, binding: { modifiers: Record<string, boolean> 
   })
 }
 
-export const AutoFocusDirective: Directive<HTMLElement> = {
+export const AutoFocusDirective: Directive<HTMLElement, boolean> = {
   mounted,
 }

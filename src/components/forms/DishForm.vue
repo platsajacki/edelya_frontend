@@ -12,7 +12,13 @@
 
       <label class="form__field">
         <span class="form__label">Название <span class="form__required">*</span></span>
-        <input v-model="name" type="text" class="form__input" required />
+        <input
+          v-model="name"
+          v-autofocus.select="!isEdit"
+          type="text"
+          class="form__input"
+          required
+        />
       </label>
 
       <label class="form__field">
