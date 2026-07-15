@@ -409,7 +409,7 @@ function searchIngredients() {
 function selectIngredient(ing: DTOIngredient) {
   const alreadyAdded = ingredients.value.some((i) => i.ingredient === ing.id)
   if (alreadyAdded) {
-    amountError.value = "Ингредиент уже добавлен."
+    error.value = "Ингредиент уже добавлен."
     return
   }
   pendingIngredient.value = ing
@@ -733,10 +733,6 @@ async function useExistingDish() {
     display: flex;
     align-items: center;
     gap: 8px;
-  }
-
-  &__input {
-    width: 120px;
   }
 
   &__unit {

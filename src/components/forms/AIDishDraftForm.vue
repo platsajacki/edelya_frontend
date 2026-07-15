@@ -164,44 +164,46 @@
           <span class="form__label">Ингредиенты <span class="form__required">*</span></span>
 
           <template v-for="(ingredient, idx) in payload.ingredients" :key="ingredient.localId">
-            <div v-if="editingIngredientIndex === idx" class="ingredient-amount">
+            <div v-if="editingIngredientIndex === idx && ingredientDraft" class="ingredient-amount">
               <div class="ingredient-amount__header">
                 <span
                   class="ingredient-amount__mode-badge"
                   :class="
-                    ingredient.new
+                    ingredientDraft.new
                       ? 'ingredient-amount__mode-badge--new'
-                      : ingredient.ingredient
+                      : ingredientDraft.ingredient
                         ? 'ingredient-amount__mode-badge--found'
                         : null
                   "
                 >
                   {{
-                    !ingredient.new && !ingredient.ingredient
+                    !ingredientDraft.new && !ingredientDraft.ingredient
                       ? "Нужна привязка"
-                      : ingredient.new
+                      : ingredientDraft.new
                         ? "Новый"
                         : "Найден"
                   }}
                 </span>
                 <span
-                  v-if="!ingredient.new && ingredient.ingredient"
+                  v-if="!ingredientDraft.new && ingredientDraft.ingredient"
                   class="ingredient-amount__name"
-                  >{{ ingredientLabel(ingredient) }}</span
+                  >{{ ingredientLabel(ingredientDraft) }}</span
                 >
               </div>
 
-              <template v-if="ingredient.new || (!ingredient.new && !ingredient.ingredient)">
-                <label v-if="ingredient.new" class="form__field">
+              <template
+                v-if="ingredientDraft.new || (!ingredientDraft.new && !ingredientDraft.ingredient)"
+              >
+                <label v-if="ingredientDraft.new" class="form__field">
                   <span class="form__label">Название</span>
-                  <input v-model="ingredient.name" type="text" class="form__input" />
+                  <input v-model="ingredientDraft.name" type="text" class="form__input" />
                 </label>
 
                 <button
                   v-if="!inlineReplaceVisible"
                   type="button"
                   class="ingredient-amount__link-btn"
-                  @click="openInlineReplace(ingredient)"
+                  @click="openInlineReplace(ingredientDraft)"
                 >
                   Привязать к существующему
                 </button>
@@ -249,7 +251,7 @@
                       v-for="result in inlineReplaceResults"
                       :key="result.id"
                       class="ingredient-search__item"
-                      @click="selectInlineReplaceIngredient(idx, result)"
+                      @click="selectInlineReplaceIngredient(result)"
                     >
                       {{ result.name }}
                       <span class="ingredient-search__unit">{{
@@ -263,10 +265,10 @@
                 </div>
               </template>
 
-              <div v-if="ingredient.base_unit !== 'to_taste'" class="ingredient-amount__row">
+              <div v-if="ingredientDraft.base_unit !== 'to_taste'" class="ingredient-amount__row">
                 <input
                   ref="amountInputRef"
-                  v-model="ingredient.amount"
+                  v-model="ingredientDraft.amount"
                   v-autofocus.select
                   type="text"
                   inputmode="decimal"
@@ -276,8 +278,8 @@
                   @keydown.enter.prevent="finishIngredientEdit"
                 />
                 <select
-                  v-if="ingredient.new"
-                  v-model="ingredient.base_unit"
+                  v-if="ingredientDraft.new"
+                  v-model="ingredientDraft.base_unit"
                   class="form__select ingredient-amount__select"
                 >
                   <option v-for="unit in unitOptions" :key="unit.value" :value="unit.value">
@@ -285,16 +287,16 @@
                   </option>
                 </select>
                 <span v-else class="ingredient-amount__unit">{{
-                  UNIT_LABELS[ingredient.base_unit] || ingredient.base_unit
+                  UNIT_LABELS[ingredientDraft.base_unit] || ingredientDraft.base_unit
                 }}</span>
               </div>
               <p v-else class="ingredient-amount__taste-hint">
                 Количество не указывается — добавится как «по вкусу»
               </p>
 
-              <label v-if="ingredient.new" class="form__field">
+              <label v-if="ingredientDraft.new" class="form__field">
                 <span class="form__label">Категория ингредиента</span>
-                <select v-model="ingredient.category" class="form__select">
+                <select v-model="ingredientDraft.category" class="form__select">
                   <option value="" disabled>Выберите категорию</option>
                   <option v-for="cat in ingredientCategories" :key="cat.id" :value="cat.id">
                     {{ cat.name }}
@@ -303,7 +305,7 @@
               </label>
 
               <label class="ingredient-amount__optional">
-                <input v-model="ingredient.is_optional" type="checkbox" />
+                <input v-model="ingredientDraft.is_optional" type="checkbox" />
                 Опционально
               </label>
 
@@ -335,9 +337,9 @@
                   {{ ingredient.new ? "создать" : !ingredient.ingredient ? "привязать" : "найден" }}
                 </span>
                 <span v-if="ingredient.is_optional" class="ingredient-row__opt-label">опц.</span>
-                <span class="ingredient-row__amount">{{
-                  formatShoppingAmount(ingredient.amount, ingredient.base_unit).display
-                }}</span>
+                <span class="ingredient-row__amount">
+                  {{ formatShoppingAmount(ingredient.amount, ingredient.base_unit).display }}
+                </span>
                 <button
                   type="button"
                   class="ingredient-row__edit"
@@ -427,7 +429,7 @@
         </div>
       </template>
 
-      <div v-if="error" class="form__error">{{ error }}</div>
+      <div v-if="error" ref="errorRef" class="form__error">{{ error }}</div>
     </form>
 
     <IngredientForm
@@ -555,10 +557,13 @@ const payload = ref<AIDraftPayload>(createEmptyPayload())
 const dishCategories = ref<DTODishCategory[]>([])
 const ingredientCategories = ref<DTOIngredientCategory[]>([])
 const error = ref("")
+const errorRef = ref<HTMLElement | null>(null)
 const saving = ref(false)
 const polling = ref(false)
 const sourceExpanded = ref(false)
 const editingIngredientIndex = ref<number | null>(null)
+const ingredientDraft = ref<AIDraftPayloadIngredient | null>(null)
+const isNewlyAddedIngredient = ref(false)
 const addIngredientExpanded = ref(false)
 const ingredientSearchQuery = ref("")
 const ingredientSearchResults = ref<DTOIngredient[]>([])
@@ -663,6 +668,12 @@ watch(
   },
   { deep: true }
 )
+
+watch(error, (value) => {
+  if (value) {
+    nextTick(() => errorRef.value?.scrollIntoView({ behavior: "smooth", block: "nearest" }))
+  }
+})
 
 async function loadReferences() {
   try {
@@ -861,30 +872,45 @@ function removeIngredient(index: number) {
   payload.value.ingredients.splice(index, 1)
   if (editingIngredientIndex.value === index) {
     editingIngredientIndex.value = null
+    ingredientDraft.value = null
+    isNewlyAddedIngredient.value = false
     closeInlineReplace()
   } else if (editingIngredientIndex.value !== null && editingIngredientIndex.value > index) {
     editingIngredientIndex.value--
   }
 }
 
-function startIngredientEdit(index: number) {
+function startIngredientEdit(index: number, isNewlyAdded = false) {
   closeInlineReplace()
-  editingIngredientIndex.value = index
   const ingredient = payload.value.ingredients[index]
-  if (ingredient && !ingredient.new && !ingredient.ingredient) {
-    nextTick(() => openInlineReplace(ingredient))
+  if (!ingredient) return
+  editingIngredientIndex.value = index
+  ingredientDraft.value = { ...ingredient }
+  isNewlyAddedIngredient.value = isNewlyAdded
+  if (!ingredient.new && !ingredient.ingredient) {
+    nextTick(() => openInlineReplace(ingredientDraft.value as AIDraftPayloadIngredient))
   } else {
     nextTick(() => amountInputRef.value[0]?.focus())
   }
 }
 
 function finishIngredientEdit() {
+  if (editingIngredientIndex.value !== null && ingredientDraft.value) {
+    payload.value.ingredients[editingIngredientIndex.value] = ingredientDraft.value
+  }
   editingIngredientIndex.value = null
+  ingredientDraft.value = null
+  isNewlyAddedIngredient.value = false
   closeInlineReplace()
 }
 
 function cancelIngredientEdit() {
+  if (isNewlyAddedIngredient.value && editingIngredientIndex.value !== null) {
+    payload.value.ingredients.splice(editingIngredientIndex.value, 1)
+  }
   editingIngredientIndex.value = null
+  ingredientDraft.value = null
+  isNewlyAddedIngredient.value = false
   closeInlineReplace()
 }
 
@@ -892,6 +918,8 @@ function resetIngredientSearch() {
   clearTimeout(ingredientSearchTimer ?? undefined)
   clearTimeout(inlineReplaceTimer ?? undefined)
   editingIngredientIndex.value = null
+  ingredientDraft.value = null
+  isNewlyAddedIngredient.value = false
   addIngredientExpanded.value = false
   ingredientSearchQuery.value = ""
   ingredientSearchResults.value = []
@@ -958,8 +986,7 @@ function addExistingIngredient(ingredient: DTOIngredient) {
   addIngredientExpanded.value = false
   clearIngredientSearch()
   error.value = ""
-  editingIngredientIndex.value = payload.value.ingredients.length - 1
-  nextTick(() => amountInputRef.value[0]?.focus())
+  startIngredientEdit(payload.value.ingredients.length - 1, true)
 }
 
 function setExistingIngredient(index: number, ingredient: DTOIngredient) {
@@ -973,6 +1000,30 @@ function setExistingIngredient(index: number, ingredient: DTOIngredient) {
     return
   }
   payload.value.ingredients[index] = {
+    ...current,
+    ingredient: ingredient.id,
+    name: ingredient.name,
+    category: getCategoryId(ingredient.category),
+    base_unit: ingredient.base_unit,
+    amount: ingredient.base_unit === "to_taste" ? 1 : current.amount,
+    new: false,
+    suggested_ids: [],
+  }
+  error.value = ""
+}
+
+function applyExistingIngredientToDraft(ingredient: DTOIngredient) {
+  const current = ingredientDraft.value
+  if (!current) return
+  const alreadyUsed = payload.value.ingredients.some(
+    (item, itemIndex) =>
+      itemIndex !== editingIngredientIndex.value && item.ingredient === ingredient.id
+  )
+  if (alreadyUsed) {
+    error.value = "Ингредиент уже добавлен."
+    return
+  }
+  ingredientDraft.value = {
     ...current,
     ingredient: ingredient.id,
     name: ingredient.name,
@@ -1157,8 +1208,8 @@ function searchInlineReplace() {
   }, 300)
 }
 
-function selectInlineReplaceIngredient(index: number, ingredient: DTOIngredient) {
-  setExistingIngredient(index, ingredient)
+function selectInlineReplaceIngredient(ingredient: DTOIngredient) {
+  applyExistingIngredientToDraft(ingredient)
   closeInlineReplace()
 }
 
@@ -1646,9 +1697,6 @@ onUnmounted(() => {
     gap: 8px;
   }
 
-  &__input {
-    width: 120px;
-  }
   &__select {
     width: min(160px, 100%);
   }
