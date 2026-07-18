@@ -166,10 +166,9 @@ useSortable(eatRef, makeSortableOptions("meals"))
 .day-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  column-gap: 10px;
-  row-gap: 10px;
+  gap: 8px;
   align-items: start;
-  padding: 14px;
+  padding: 12px;
   background: var(--color-surface);
   border-radius: var(--radius-md);
   border: 1px solid transparent;
@@ -240,14 +239,13 @@ useSortable(eatRef, makeSortableOptions("meals"))
     display: flex;
     flex-direction: column;
     min-width: 0;
-    padding: 10px;
-    background: var(--color-mint-alpha-06);
-    border-radius: var(--radius-sm);
   }
 
   &__eat {
     --card-bg: var(--color-eat-bg);
     --card-accent: var(--color-eat);
+    padding-left: 12px;
+    border-left: 1px solid var(--color-border);
   }
 
   &__cook {
@@ -259,7 +257,7 @@ useSortable(eatRef, makeSortableOptions("meals"))
     display: flex;
     align-items: center;
     gap: 4px;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
     font-size: var(--font-xs);
     font-weight: 700;
     letter-spacing: 0.04em;
@@ -270,11 +268,11 @@ useSortable(eatRef, makeSortableOptions("meals"))
   &__items {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 6px;
     min-height: 1px;
 
     &:not(:empty) {
-      margin-bottom: 8px;
+      margin-bottom: 6px;
     }
     &:empty + .day-row__add {
       margin-top: 0;
@@ -287,7 +285,7 @@ useSortable(eatRef, makeSortableOptions("meals"))
     justify-content: center;
     gap: 4px;
     width: 100%;
-    padding: 8px;
+    padding: 7px;
     border: 1px dashed var(--color-border);
     border-radius: var(--radius-xs);
     background: none;
