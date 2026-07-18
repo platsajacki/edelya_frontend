@@ -16,6 +16,7 @@
       </button>
     </Transition>
     <div class="week-nav__center">
+      <span class="week-nav__spacer" aria-hidden="true"></span>
       <span class="week-nav__label">{{ label }}</span>
       <button
         type="button"
@@ -109,11 +110,11 @@ defineEmits<{
   }
 
   &__center {
-    position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
     flex: 1;
+    min-width: 0;
     height: 44px;
     padding: 0 16px;
     background: var(--color-surface);
@@ -123,17 +124,24 @@ defineEmits<{
   }
 
   &__label {
-    font-size: var(--font-lg);
+    flex: 1;
+    min-width: 0;
+    font-size: clamp(var(--font-sm), 4.5vw, var(--font-lg));
     font-weight: 700;
     letter-spacing: -0.01em;
     text-align: center;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__spacer {
+    width: 32px;
+    height: 32px;
+    flex-shrink: 0;
   }
 
   &__shopping-btn {
-    position: absolute;
-    right: 8px;
-    top: 50%;
-    transform: translateY(-50%);
     display: flex;
     align-items: center;
     justify-content: center;

@@ -32,11 +32,19 @@ function lastISOWeek(year: number): number {
 }
 
 function formatDateRange(startISO: string, endISO: string): string {
-  const fmt = (iso: string) => {
-    const d = new Date(iso + "T00:00:00")
-    return d.toLocaleDateString("ru-RU", { day: "numeric", month: "long" })
-  }
-  return `${fmt(startISO)} – ${fmt(endISO)}`
+  const start = new Date(startISO + "T00:00:00")
+  const end = new Date(endISO + "T00:00:00")
+  const fmt = (d: Date, withMonth: boolean) =>
+    d.toLocaleDateString(
+      "ru-RU",
+      withMonth ? { day: "numeric", month: "long" } : { day: "numeric" }
+    )
+
+  const sameMonth = start.getMonth() === end.getMonth() && start.getFullYear() === end.getFullYear()
+
+  return sameMonth
+    ? `${fmt(start, false)} – ${fmt(end, true)}`
+    : `${fmt(start, true)} – ${fmt(end, true)}`
 }
 
 function emptyWeek(year: number, week: number): DTOWeekDishes {
