@@ -5,7 +5,9 @@
         <div class="modal-panel" @mousedown.stop @focusin="onFocusIn">
           <div class="modal-header">
             <h3 class="modal-title">{{ title }}</h3>
-            <button class="modal-close" aria-label="Закрыть" @click="close">&times;</button>
+            <button class="modal-close" aria-label="Закрыть" @click="close">
+              <IconClose />
+            </button>
           </div>
           <div class="modal-body">
             <slot />
@@ -21,6 +23,7 @@
 
 <script lang="ts" setup>
 import { watch, onUnmounted } from "vue"
+import IconClose from "@/components/icons/IconClose.vue"
 
 const props = withDefaults(
   defineProps<{

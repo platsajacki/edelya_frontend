@@ -9,7 +9,7 @@
         :title="`Кликни, чтобы скопировать <${icon.name} />`"
         @click="copyTag(icon.name)"
       >
-        <component :is="icon.component" :width="28" :height="28" />
+        <component :is="icon.component" :width="50" :height="50" />
         <span class="dev-icons__icon-name">{{ icon.name }}</span>
       </button>
     </div>

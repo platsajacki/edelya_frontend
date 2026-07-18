@@ -12,7 +12,7 @@
         title="Сегодня"
         @click="$emit('today')"
       >
-        <IconCalendar :width="18" :height="18" />
+        <IconCalendar :width="20" :height="20" />
       </button>
     </Transition>
     <div class="week-nav__center">
@@ -23,7 +23,7 @@
         title="Список покупок на неделю"
         @click="$emit('create-shopping-week')"
       >
-        <IconCartPlus :width="18" :height="18" />
+        <IconBasket :width="20" :height="20" />
       </button>
     </div>
     <button class="week-nav__btn" :disabled="disabled" @click="$emit('next')">
@@ -35,7 +35,7 @@
 <script lang="ts" setup>
 import IconChevronLeft from "./icons/IconChevronLeft.vue"
 import IconChevronRight from "./icons/IconChevronRight.vue"
-import IconCartPlus from "./icons/IconCartPlus.vue"
+import IconBasket from "./icons/IconBasket.vue"
 import IconCalendar from "./icons/IconCalendar.vue"
 
 withDefaults(

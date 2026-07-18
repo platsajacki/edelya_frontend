@@ -17,10 +17,10 @@
               :title="isDishOwn(selectedDish) ? 'Редактировать блюдо' : 'Создать копию'"
               @click="onEditDishClick"
             >
-              <IconPencil />
+              <IconPencil :width="18" :height="18" />
             </button>
             <button type="button" class="selected-dish__clear" @click="selectedDish = null">
-              &times;
+              <IconClose :width="18" :height="18" />
             </button>
           </template>
         </div>
@@ -86,6 +86,7 @@ import IconPencil from "../icons/IconPencil.vue"
 import { isDishOwn } from "../../utils/dishOwnership"
 import type { DTOMealPlanItem } from "@/types/planning"
 import type { DTODish } from "@/types/dish"
+import IconClose from "@/components/icons/IconClose.vue"
 
 const props = withDefaults(
   defineProps<{

@@ -1,4 +1,3 @@
-<!-- Еделя icon for BottomNav "Еделя" tab -->
 <template>
   <svg
     :width="width"

@@ -16,7 +16,7 @@
           title="Редактировать"
           @click="showEditForm = true"
         >
-          <IconPencil :width="18" :height="18" />
+          <IconPencil :width="20" :height="20" />
         </button>
         <button
           class="detail-header__btn"
@@ -24,7 +24,7 @@
           title="Пересчитать"
           @click="confirmRecalculate"
         >
-          <IconRefresh />
+          <IconRefresh :width="20" :height="20" />
         </button>
         <button
           class="detail-header__btn detail-header__btn--danger"
@@ -32,7 +32,7 @@
           title="Удалить"
           @click="confirmDeleteList"
         >
-          <IconTrash />
+          <IconTrash :width="20" :height="20" />
         </button>
       </div>
     </div>

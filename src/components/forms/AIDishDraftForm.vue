@@ -49,7 +49,7 @@
           >
             <span class="ai-draft__step-icon">
               <span v-if="fakeStepStates[idx] === 'done'" class="ai-draft__step-check">
-                <IconCheck :width="10" :height="10" />
+                <IconCheck />
               </span>
               <span v-else-if="fakeStepStates[idx] === 'loading'" class="spinner spinner--sm" />
               <span v-else class="ai-draft__step-dot" />
@@ -346,7 +346,7 @@
                   title="Редактировать"
                   @click="startIngredientEdit(idx)"
                 >
-                  <IconPencil :width="14" :height="14" />
+                  <IconPencil :width="16" :height="16" />
                 </button>
                 <button
                   type="button"

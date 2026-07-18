@@ -9,7 +9,7 @@
       aria-label="Отметить как купленное"
       @click="$emit('toggle-checked', item)"
     >
-      <IconCheck v-if="item.is_checked" :width="10" :height="10" />
+      <IconCheck v-if="item.is_checked" />
     </button>
 
     <!-- Name + sub-line -->
@@ -71,7 +71,7 @@
       aria-label="Удалить"
       @click="$emit('delete', item)"
     >
-      <IconClose :width="10" :height="10" />
+      <IconClose :width="16" :height="16" />
     </button>
   </div>
 </template>
@@ -308,12 +308,11 @@ function cancelEdit() {
     height: 26px;
     border: none;
     background: transparent;
-    color: var(--color-text-secondary);
+    color: var(--color-danger);
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 0;
-    opacity: 0.3;
+    opacity: 0.6;
     cursor: pointer;
     border-radius: 50%;
     transition:
@@ -325,7 +324,6 @@ function cancelEdit() {
     &:active,
     &:hover {
       opacity: 1;
-      color: var(--color-danger);
       background: var(--color-danger-pale);
     }
   }

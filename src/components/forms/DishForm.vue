@@ -103,7 +103,7 @@
               title="Редактировать"
               @click="startEditIngredient(idx)"
             >
-              <IconPencil :width="14" :height="14" />
+              <IconPencil :width="16" :height="16" />
             </button>
             <button
               type="button"

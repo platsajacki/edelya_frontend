@@ -9,9 +9,10 @@
     stroke-width="2"
     stroke-linecap="round"
     stroke-linejoin="round"
+    class="lucide lucide-user-icon lucide-user"
   >
-    <circle cx="12" cy="8" r="4" />
-    <path d="M20 21a8 8 0 0 0-16 0" />
+    <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
+    <circle cx="12" cy="7" r="4" />
   </svg>
 </template>
 
@@ -22,8 +23,8 @@ withDefaults(
     height?: number
   }>(),
   {
-    width: 24,
-    height: 24,
+    width: 28,
+    height: 28,
   }
 )
 </script>

@@ -7,22 +7,12 @@
       class="week-grid__past-toggle"
       @click="showPast = !showPast"
     >
-      <svg
+      <IconChevronRight
         class="week-grid__past-chevron"
         :class="{ 'week-grid__past-chevron--open': showPast }"
-        width="16"
-        height="16"
-        viewBox="0 0 20 20"
-        fill="none"
-      >
-        <path
-          d="M7.5 5L12.5 10L7.5 15"
-          stroke="currentColor"
-          stroke-width="1.8"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        />
-      </svg>
+        :width="16"
+        :height="16"
+      />
       <span class="week-grid__past-label">Прошедшие дни · {{ pastLabel }}</span>
     </button>
 
@@ -121,6 +111,7 @@ import { DAY_LABELS, splitDays, pastDaysLabel, getNextWeekInfo } from "../utils/
 import { usePlanningStore } from "../store/planning"
 import type { DTOWeekDishes, DTOMealPlanItem, DTOCookingEvent } from "@/types/planning"
 import DayRow from "./DayRow.vue"
+import IconChevronRight from "@/components/icons/IconChevronRight.vue"
 
 const planning = usePlanningStore()
 

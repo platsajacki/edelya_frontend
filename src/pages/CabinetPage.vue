@@ -11,7 +11,7 @@
       <template v-if="subscriptionCard">
         <div class="cabinet__card-header">
           <div class="cabinet__card-avatar">
-            <component :is="subscriptionCard.icon" :width="22" :height="22" />
+            <component :is="subscriptionCard.icon" :width="30" :height="30" />
           </div>
           <div class="cabinet__card-header-text">
             <div class="cabinet__card-title-row">
@@ -21,7 +21,7 @@
                 class="cabinet__card-status"
                 :class="`cabinet__card-status--${cardBadge.tone}`"
               >
-                <IconCheck v-if="cardBadge.tone === 'success'" :width="12" :height="12" />
+                <IconCheck v-if="cardBadge.tone === 'success'" :width="18" :height="18" />
                 {{ cardBadge.text }}
               </span>
             </div>
@@ -159,7 +159,7 @@
               v-if="isCurrent(tariff)"
               class="cabinet__tariff-badge cabinet__tariff-badge--current"
             >
-              <IconCheck :width="11" :height="11" />
+              <IconCheck />
               Текущий</span
             >
             <span
@@ -176,7 +176,7 @@
         <p v-if="tariff.description" class="cabinet__tariff-desc">{{ tariff.description }}</p>
         <ul v-if="tariff.description_items?.length" class="cabinet__tariff-description">
           <li v-for="item in tariff.description_items" :key="item">
-            <IconCheck class="cabinet__tariff-check" :width="14" :height="14" />
+            <IconCheck class="cabinet__tariff-check" :width="22" :height="22" />
             <span>{{ item }}</span>
           </li>
         </ul>
@@ -260,6 +260,7 @@ import IconCheck from "../components/icons/IconCheck.vue"
 import ConfirmTariffSheet from "../components/ConfirmTariffSheet.vue"
 import Toast from "../components/Toast.vue"
 import AIRecipeUsageBadge from "../components/AIRecipeUsageBadge.vue"
+import IconCrown from "@/components/icons/IconCrown.vue"
 
 const router = useRouter()
 const route = useRoute()
@@ -505,7 +506,7 @@ const subscriptionCard = computed(() => {
       ? ` Тариф «${s.pending_tariff.name}» будет подключён с ${s.current_period_end ? formatDate(s.current_period_end) : "начала следующего периода"}.`
       : ""
     return {
-      icon: IconCheck,
+      icon: IconCrown,
       iconClass: "cabinet__card-icon--ok",
       title: `Тариф: ${s.tariff?.name}`,
       description:

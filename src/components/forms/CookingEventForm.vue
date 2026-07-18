@@ -16,7 +16,7 @@
             :title="isDishOwn(selectedDish) ? 'Редактировать рецепт' : 'Создать личную копию'"
             @click="onEditDishClick"
           >
-            <IconPencil :width="14" :height="14" />
+            <IconPencil :width="16" :height="16" />
           </button>
           <button type="button" class="selected-dish__replace" @click="selectedDish = null">
             Заменить

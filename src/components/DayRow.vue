@@ -12,13 +12,13 @@
         :title="`Список покупок на ${day} ${date.slice(0, 2)}`"
         @click.stop="$emit('create-shopping-day', { rawDate, dayLabel: day })"
       >
-        <IconCartPlus :width="16" :height="16" />
+        <IconBasket :width="22" :height="22" />
       </button>
     </div>
 
     <div class="day-row__cook">
       <div class="day-row__col-header">
-        <IconPot :width="12" :height="12" />
+        <IconPot :width="14" :height="14" />
         <span>Готовлю</span>
       </div>
       <div ref="cookRef" class="day-row__items" :data-date="rawDate">
@@ -41,7 +41,7 @@
 
     <div class="day-row__eat">
       <div class="day-row__col-header">
-        <IconFork :width="12" :height="12" />
+        <IconFork :width="14" :height="14" />
         <span>Ем</span>
       </div>
       <div ref="eatRef" class="day-row__items" :data-date="rawDate">
@@ -68,7 +68,7 @@
 import { computed, ref } from "vue"
 import MealCard from "./MealCard.vue"
 import DayBadge from "./DayBadge.vue"
-import IconCartPlus from "./icons/IconCartPlus.vue"
+import IconBasket from "./icons/IconBasket.vue"
 import IconPot from "./icons/IconPot.vue"
 import IconFork from "./icons/IconFork.vue"
 import { useSortable } from "../composables/useSortable"
