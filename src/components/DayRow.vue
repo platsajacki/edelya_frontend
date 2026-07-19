@@ -21,22 +21,24 @@
         <IconPot :width="14" :height="14" />
         <span>Готовлю</span>
       </div>
-      <div ref="cookRef" class="day-row__items" :data-date="rawDate">
-        <MealCard
-          v-for="event in cookingEvents"
-          :key="event.id"
-          :item="event"
-          @tap="$emit('tap-cooking', event)"
-        />
+      <div class="day-row__drop-zone">
+        <div ref="cookRef" class="day-row__items" :data-date="rawDate">
+          <MealCard
+            v-for="event in cookingEvents"
+            :key="event.id"
+            :item="event"
+            @tap="$emit('tap-cooking', event)"
+          />
+        </div>
+        <button
+          type="button"
+          class="day-row__add day-row__add--cook"
+          @click="$emit('add-cooking', rawDate)"
+        >
+          <span class="day-row__add-icon">+</span>
+          <span class="day-row__add-text">Добавить</span>
+        </button>
       </div>
-      <button
-        type="button"
-        class="day-row__add day-row__add--cook"
-        @click="$emit('add-cooking', rawDate)"
-      >
-        <span class="day-row__add-icon">+</span>
-        <span class="day-row__add-text">Добавить</span>
-      </button>
     </div>
 
     <div class="day-row__eat">
@@ -44,22 +46,24 @@
         <IconFork :width="14" :height="14" />
         <span>Ем</span>
       </div>
-      <div ref="eatRef" class="day-row__items" :data-date="rawDate">
-        <MealCard
-          v-for="item in meals"
-          :key="item.id"
-          :item="item"
-          @tap="$emit('tap-meal', item)"
-        />
+      <div class="day-row__drop-zone">
+        <div ref="eatRef" class="day-row__items" :data-date="rawDate">
+          <MealCard
+            v-for="item in meals"
+            :key="item.id"
+            :item="item"
+            @tap="$emit('tap-meal', item)"
+          />
+        </div>
+        <button
+          type="button"
+          class="day-row__add day-row__add--eat"
+          @click="$emit('add-meal', rawDate)"
+        >
+          <span class="day-row__add-icon">+</span>
+          <span class="day-row__add-text">Добавить</span>
+        </button>
       </div>
-      <button
-        type="button"
-        class="day-row__add day-row__add--eat"
-        @click="$emit('add-meal', rawDate)"
-      >
-        <span class="day-row__add-icon">+</span>
-        <span class="day-row__add-text">Добавить</span>
-      </button>
     </div>
   </div>
 </template>
@@ -129,7 +133,12 @@ function makeSortableOptions(type: "cooking" | "meals") {
     forceFallback: true,
     fallbackOnBody: true,
     fallbackTolerance: 3,
+    onStart() {
+      document.body.classList.add(`is-dragging-${type}`)
+    },
     onEnd(evt) {
+      document.body.classList.remove(`is-dragging-${type}`)
+
       const itemId = evt.item.dataset.id
       const fromDate = evt.from.dataset.date
       const toDate = evt.to.dataset.date
@@ -239,18 +248,29 @@ useSortable(eatRef, makeSortableOptions("meals"))
     display: flex;
     flex-direction: column;
     min-width: 0;
+    padding: 4px 6px;
   }
 
   &__eat {
     --card-bg: var(--color-eat-bg);
     --card-accent: var(--color-eat);
-    padding-left: 12px;
+    padding-left: 16px;
     border-left: 1px solid var(--color-border);
   }
 
   &__cook {
     --card-bg: var(--color-cook-bg);
     --card-accent: var(--color-cook);
+  }
+
+  &__drop-zone {
+    display: flex;
+    flex-direction: column;
+    justify-content: end;
+    border-radius: var(--radius-xs);
+    outline: 1.5px dashed transparent;
+    outline-offset: 4px;
+    transition: outline-color var(--transition-fast);
   }
 
   &__col-header {
@@ -313,6 +333,19 @@ useSortable(eatRef, makeSortableOptions("meals"))
 
   &__add-text {
     font-size: var(--font-xs);
+  }
+}
+</style>
+
+<style lang="scss">
+body.is-dragging-cooking .day-row__cook,
+body.is-dragging-meals .day-row__eat {
+  .day-row__drop-zone {
+    outline-color: var(--color-border);
+  }
+
+  .day-row__items {
+    min-height: 50px;
   }
 }
 </style>
