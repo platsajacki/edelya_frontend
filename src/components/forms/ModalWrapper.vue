@@ -113,7 +113,7 @@ onUnmounted(() => {
   box-shadow: var(--shadow-elevated);
   width: 100%;
   max-width: 420px;
-  max-height: calc(100dvh - 32px);
+  max-height: calc(100dvh - 32px - var(--page-safe-area-top));
   margin-top: auto;
   display: flex;
   flex-direction: column;
