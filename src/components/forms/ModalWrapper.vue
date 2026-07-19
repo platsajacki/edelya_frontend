@@ -24,6 +24,7 @@
 <script lang="ts" setup>
 import { watch, onUnmounted } from "vue"
 import IconClose from "@/components/icons/IconClose.vue"
+import { useModalBackButton } from "@/composables/useModalBackButton"
 
 const props = withDefaults(
   defineProps<{
@@ -83,6 +84,8 @@ watch(
 onUnmounted(() => {
   document.body.style.overflow = savedOverflow
 })
+
+useModalBackButton(() => props.modelValue, close)
 </script>
 
 <style lang="scss" scoped>
