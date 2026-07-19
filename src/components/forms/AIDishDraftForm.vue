@@ -1316,7 +1316,7 @@ onUnmounted(() => {
     overflow-y: auto;
     padding: 10px;
     border: 1px solid var(--color-border);
-    border-radius: var(--radius-xs);
+    border-radius: var(--radius-sm);
     background: var(--color-surface);
     color: var(--color-text-secondary);
     font-size: var(--font-sm);

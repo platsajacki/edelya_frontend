@@ -10,11 +10,13 @@
       </a>
     </div>
     <footer class="home-landing__footer">
-      <router-link to="/terms" class="home-landing__legal-link">Условия использования</router-link>
+      <router-link to="/terms" class="home-landing__legal-link">
+        Условия использования
+      </router-link>
       <span class="home-landing__footer-sep">·</span>
-      <router-link to="/privacy" class="home-landing__legal-link"
-        >Политика конфиденциальности</router-link
-      >
+      <router-link to="/privacy" class="home-landing__legal-link">
+        Политика конфиденциальности
+      </router-link>
     </footer>
   </main>
 </template>

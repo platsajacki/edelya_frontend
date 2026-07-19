@@ -959,7 +959,7 @@ async function handleDeletePaymentMethod() {
       flex: 1;
       padding: 10px 16px;
       border: none;
-      border-radius: var(--radius-pill);
+      border-radius: var(--radius-sm);
       font-size: var(--font-sm);
       font-weight: 600;
       color: var(--color-text-secondary);
@@ -975,7 +975,7 @@ async function handleDeletePaymentMethod() {
       flex: 1;
       padding: 10px 16px;
       border: none;
-      border-radius: var(--radius-pill);
+      border-radius: var(--radius-sm);
       font-size: var(--font-sm);
       font-weight: 700;
       color: var(--on-primary);
@@ -1206,7 +1206,7 @@ async function handleDeletePaymentMethod() {
     justify-content: center;
     width: 40px;
     height: 40px;
-    border-radius: var(--radius-xs);
+    border-radius: var(--radius-sm);
     background: var(--color-text);
     color: var(--color-surface);
     font-size: var(--font-xs);
