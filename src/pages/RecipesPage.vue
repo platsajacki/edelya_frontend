@@ -565,7 +565,7 @@ onUnmounted(() => {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  padding: 4px 10px;
+  padding: 6px 14px;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   background: var(--color-empty);
@@ -611,7 +611,7 @@ onUnmounted(() => {
   }
 
   &__retry {
-    padding: 8px 20px;
+    padding: var(--btn-padding-sm);
     border: 1px solid var(--color-mint);
     border-radius: var(--radius-sm);
     background: none;
@@ -646,12 +646,12 @@ onUnmounted(() => {
   }
 
   &__retry {
-    padding: 4px 12px;
+    padding: var(--btn-padding-sm);
     border: 1px solid var(--color-mint);
     border-radius: var(--radius-sm);
     background: none;
     color: var(--color-mint);
-    font-size: var(--font-xs);
+    font-size: var(--font-sm);
     font-weight: 600;
     cursor: pointer;
     transition: background var(--transition-fast);

@@ -81,28 +81,15 @@ function onPickerInput(e: Event) {
 </script>
 
 <style lang="scss" scoped>
+@use "../../styles/mixins" as mixins;
+
 .date-input {
   position: relative;
 
   &__text {
     width: 100%;
-    padding: 10px 36px 10px 12px;
-    border: 1.5px solid var(--color-border);
-    border-radius: var(--radius-sm);
-    font-size: var(--font-md);
-    font-family: inherit;
-    background: var(--color-surface);
-    color: var(--color-text);
-    outline: none;
-    transition:
-      border-color var(--transition-fast),
-      box-shadow var(--transition-fast);
     box-sizing: border-box;
-
-    &:focus {
-      border-color: var(--color-mint-alpha-25);
-      box-shadow: 0 0 0 3px var(--color-mint-alpha-10);
-    }
+    @include mixins.form-control-base(10px 36px 10px 12px);
   }
 
   &__btn {

@@ -111,7 +111,7 @@ function onClose() {
 
   &__btn {
     flex: 1;
-    padding: 12px 16px;
+    padding: var(--btn-padding-md);
     border: none;
     border-radius: var(--radius-sm);
     font-size: var(--font-sm);

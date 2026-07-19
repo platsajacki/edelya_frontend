@@ -4,12 +4,13 @@
       <!-- Step 1: Search ingredient -->
       <div v-if="!selectedIngredient" class="ingredient-search">
         <div class="search-field">
+          <IconSearch class="search-field__icon" />
           <input
             ref="searchInput"
             v-model="query"
             v-autofocus
             type="search"
-            class="form__input"
+            class="search-field__input"
             placeholder="Поиск ингредиента..."
             @input="onSearch"
           />
@@ -125,6 +126,7 @@ import { AutoFocusDirective as vAutofocus } from "@/directives/autofocus"
 import { ref, watch, nextTick } from "vue"
 import ModalWrapper from "./ModalWrapper.vue"
 import IngredientForm from "./IngredientForm.vue"
+import IconSearch from "../icons/IconSearch.vue"
 import { fetchIngredients } from "@/services/ingredientService.ts"
 import { getUnitLabel } from "@/utils/unitSteps.ts"
 import { useShoppingStore } from "@/store/shopping.ts"
@@ -322,6 +324,8 @@ async function confirmAdd() {
 </script>
 
 <style lang="scss" scoped>
+@use "../../styles/mixins" as mixins;
+
 .add-item-form {
   display: flex;
   flex-direction: column;
@@ -337,7 +341,7 @@ async function confirmAdd() {
 
   &__create {
     align-self: flex-start;
-    padding: 8px 16px;
+    padding: var(--btn-padding-sm);
     border: 1.5px dashed var(--color-border);
     border-radius: var(--radius-sm);
     background: transparent;
@@ -456,22 +460,7 @@ async function confirmAdd() {
   }
 
   &__input {
-    padding: 10px 12px;
-    border: 1.5px solid var(--color-border);
-    border-radius: var(--radius-sm);
-    font-size: var(--font-md);
-    font-family: inherit;
-    background: var(--color-surface);
-    color: var(--color-text);
-    outline: none;
-    transition:
-      border-color var(--transition-fast),
-      box-shadow var(--transition-fast);
-
-    &:focus {
-      border-color: var(--color-mint-alpha-25);
-      box-shadow: 0 0 0 3px var(--color-mint-alpha-10);
-    }
+    @include mixins.form-control-base;
   }
 
   &__error {

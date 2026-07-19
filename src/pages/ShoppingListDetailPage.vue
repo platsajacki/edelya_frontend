@@ -372,8 +372,8 @@ async function doDeleteList() {
   }
 
   &__btn {
-    width: 34px;
-    height: 34px;
+    width: 36px;
+    height: 36px;
     border: 1px solid var(--color-border);
     border-radius: var(--radius-sm);
     background: var(--color-bg);
@@ -484,7 +484,7 @@ async function doDeleteList() {
   }
 
   &__btn {
-    padding: 10px 18px;
+    padding: var(--btn-padding-md);
     border: none;
     border-radius: var(--radius-sm);
     font-size: var(--font-sm);

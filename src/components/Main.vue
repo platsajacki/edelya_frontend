@@ -327,7 +327,7 @@ onMounted(() => {
     color: var(--color-danger-dark);
 
     &-retry {
-      padding: 6px 16px;
+      padding: var(--btn-padding-sm);
       border: none;
       border-radius: var(--radius-sm);
       background: var(--color-danger);

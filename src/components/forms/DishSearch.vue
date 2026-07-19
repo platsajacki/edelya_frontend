@@ -120,6 +120,8 @@ function clearQuery() {
 </script>
 
 <style lang="scss" scoped>
+@use "../../styles/mixins" as mixins;
+
 .dish-search {
   display: flex;
   flex-direction: column;
@@ -127,21 +129,7 @@ function clearQuery() {
 
   &__input {
     width: 100%;
-    padding: 10px 12px;
-    border: 1.5px solid var(--color-border);
-    border-radius: var(--radius-sm);
-    font-size: var(--font-md);
-    background: var(--color-surface);
-    color: var(--color-text);
-    outline: none;
-    transition:
-      border-color var(--transition-fast),
-      box-shadow var(--transition-fast);
-
-    &:focus {
-      border-color: var(--color-mint-alpha-25);
-      box-shadow: 0 0 0 3px var(--color-mint-alpha-10);
-    }
+    @include mixins.form-control-base;
   }
 
   &__list {
@@ -201,7 +189,7 @@ function clearQuery() {
 
   &__pick {
     flex: 1;
-    padding: 9px 16px;
+    padding: var(--btn-padding-sm);
     border: 1.5px solid var(--color-mint-alpha-25);
     border-radius: var(--radius-sm);
     background: var(--color-mint-alpha-10);
@@ -223,7 +211,7 @@ function clearQuery() {
   &__create,
   &__ai {
     flex: 1;
-    padding: 9px 16px;
+    padding: var(--btn-padding-sm);
     border: 1.5px dashed var(--color-border);
     border-radius: var(--radius-sm);
     background: transparent;

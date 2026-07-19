@@ -938,7 +938,7 @@ async function handleDeletePaymentMethod() {
     &--cancel {
       margin-top: 0;
       width: 100%;
-      padding: 10px 24px;
+      padding: 12px 24px;
       border: 1px solid var(--color-border);
       border-radius: var(--radius-pill);
       font-size: var(--font-sm);
@@ -957,7 +957,7 @@ async function handleDeletePaymentMethod() {
 
     &--cancel-confirm {
       flex: 1;
-      padding: 10px 16px;
+      padding: var(--btn-padding-md);
       border: none;
       border-radius: var(--radius-sm);
       font-size: var(--font-sm);
@@ -973,7 +973,7 @@ async function handleDeletePaymentMethod() {
 
     &--cancel-dismiss {
       flex: 1;
-      padding: 10px 16px;
+      padding: var(--btn-padding-md);
       border: none;
       border-radius: var(--radius-sm);
       font-size: var(--font-sm);

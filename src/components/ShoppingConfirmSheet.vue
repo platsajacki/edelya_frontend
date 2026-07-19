@@ -111,6 +111,8 @@ watch(listName, (val) => {
 </script>
 
 <style lang="scss" scoped>
+@use "../styles/mixins" as mixins;
+
 .confirm {
   &__dates {
     display: flex;
@@ -144,23 +146,8 @@ watch(listName, (val) => {
 
     &-input {
       width: 100%;
-      padding: 10px 12px;
-      border: 1.5px solid var(--color-border);
-      border-radius: var(--radius-sm);
-      font-size: var(--font-md);
-      font-family: inherit;
-      background: var(--color-surface);
-      color: var(--color-text);
-      outline: none;
       box-sizing: border-box;
-      transition:
-        border-color var(--transition-fast),
-        box-shadow var(--transition-fast);
-
-      &:focus {
-        border-color: var(--color-mint-alpha-25);
-        box-shadow: 0 0 0 3px var(--color-mint-alpha-10);
-      }
+      @include mixins.form-control-base;
     }
   }
 
@@ -193,7 +180,7 @@ watch(listName, (val) => {
 
   &__btn {
     flex: 1;
-    padding: 12px 16px;
+    padding: var(--btn-padding-md);
     border: none;
     border-radius: var(--radius-sm);
     font-size: var(--font-sm);

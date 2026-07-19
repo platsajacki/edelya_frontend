@@ -793,7 +793,7 @@ async function useExistingDish() {
 .dish-search {
   &__create {
     align-self: flex-start;
-    padding: 8px 16px;
+    padding: var(--btn-padding-sm);
     border: 1.5px dashed var(--color-border);
     border-radius: var(--radius-sm);
     background: transparent;
