@@ -347,7 +347,7 @@ async function confirmAdd() {
     background: transparent;
     font-size: var(--font-sm);
     font-weight: 500;
-    color: var(--color-mint-hover);
+    color: var(--color-text-secondary);
     transition:
       background var(--transition-fast),
       border-color var(--transition-fast);
@@ -355,6 +355,7 @@ async function confirmAdd() {
     &:hover {
       background: var(--color-empty);
       border-color: var(--color-mint);
+      color: var(--color-mint);
     }
   }
 }

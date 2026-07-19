@@ -152,21 +152,22 @@
         <div class="cabinet__tariff-top">
           <div class="cabinet__tariff-header">
             <span class="cabinet__tariff-name">{{ tariff.name }}</span>
-            <span v-if="tariff.soon" class="cabinet__tariff-badge cabinet__tariff-badge--soon"
-              >Скоро</span
-            >
+            <span v-if="tariff.soon" class="cabinet__tariff-badge cabinet__tariff-badge--soon">
+              Скоро
+            </span>
             <span
               v-if="isCurrent(tariff)"
               class="cabinet__tariff-badge cabinet__tariff-badge--current"
             >
               <IconCheck />
-              Текущий</span
-            >
+              Текущий
+            </span>
             <span
               v-if="isPending(tariff)"
               class="cabinet__tariff-badge cabinet__tariff-badge--pending"
-              >Запланирован</span
             >
+              Запланирован
+            </span>
           </div>
           <div class="cabinet__tariff-price">
             <span class="cabinet__tariff-price-value">{{ tariffPriceValue(tariff) }}</span>
@@ -990,7 +991,7 @@ async function handleDeletePaymentMethod() {
 
   &__error {
     font-size: var(--font-sm);
-    color: var(--color-error);
+    color: var(--color-danger);
   }
 
   &__recurring-notice {
@@ -1076,10 +1077,7 @@ async function handleDeletePaymentMethod() {
     color: var(--color-text-secondary);
 
     &--current {
-      background: var(
-        --color-mint-alpha-10,
-        color-mix(in srgb, var(--color-mint) 10%, transparent)
-      );
+      background: var(--color-mint-alpha-10);
       color: var(--color-mint);
     }
 
@@ -1155,10 +1153,7 @@ async function handleDeletePaymentMethod() {
     li {
       font-size: var(--font-xs);
       padding: 2px 10px;
-      background: var(
-        --color-mint-alpha-10,
-        color-mix(in srgb, var(--color-mint) 10%, transparent)
-      );
+      background: var(--color-mint-alpha-10);
       color: var(--color-mint);
       border-radius: var(--radius-pill);
       font-weight: 600;

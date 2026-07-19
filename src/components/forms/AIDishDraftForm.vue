@@ -1821,7 +1821,7 @@ onUnmounted(() => {
     border: 1.5px dashed var(--color-border);
     border-radius: var(--radius-sm);
     background: transparent;
-    color: var(--color-mint-hover);
+    color: var(--color-text-secondary);
     font-size: var(--font-sm);
     font-weight: 500;
     transition:
@@ -1831,6 +1831,7 @@ onUnmounted(() => {
     &:hover {
       background: var(--color-empty);
       border-color: var(--color-mint);
+      color: var(--color-mint);
     }
   }
 }

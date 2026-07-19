@@ -161,7 +161,7 @@ defineEmits<{
 
     &:hover {
       color: var(--color-mint);
-      background: color-mix(in srgb, var(--color-mint) 10%, transparent);
+      background: var(--color-mint-alpha-10);
     }
 
     &:active {

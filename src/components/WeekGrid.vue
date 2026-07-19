@@ -307,7 +307,7 @@ async function loadNext() {
       border-color var(--transition-fast);
 
     &:active {
-      background: var(--color-bg-secondary);
+      background: var(--color-empty);
     }
     &:disabled {
       opacity: 0.6;

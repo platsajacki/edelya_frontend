@@ -176,8 +176,8 @@ function cancelEdit() {
     -webkit-tap-highlight-color: transparent;
 
     &--on {
-      border-color: var(--color-eat);
-      background: var(--color-eat);
+      border-color: var(--color-success);
+      background: var(--color-success);
       color: var(--on-primary);
     }
 
