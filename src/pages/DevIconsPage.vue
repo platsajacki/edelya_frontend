@@ -40,11 +40,13 @@ function copyTag(name: string) {
 
 <style lang="scss" scoped>
 .dev-icons {
-  padding: 12px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: var(--page-padding-top) 16px 16px;
 
   &__search {
     width: 100%;
-    margin-bottom: 16px;
     padding: 10px 12px;
     border: 1.5px solid var(--color-border);
     border-radius: var(--radius-sm);
