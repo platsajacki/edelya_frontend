@@ -171,7 +171,7 @@ useModalBackButton(() => props.modelValue, close)
 }
 
 .modal-footer {
-  padding: 12px 20px 16px;
+  padding: 12px 20px calc(16px + var(--safe-area-bottom));
   border-top: 1px solid var(--color-border);
   flex-shrink: 0;
 }
