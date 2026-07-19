@@ -175,7 +175,8 @@ useSortable(eatRef, makeSortableOptions("meals"))
 .day-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 8px;
+  row-gap: 8px;
+  column-gap: 0;
   align-items: start;
   padding: 12px;
   background: var(--color-surface);
@@ -261,6 +262,7 @@ useSortable(eatRef, makeSortableOptions("meals"))
   &__cook {
     --card-bg: var(--color-cook-bg);
     --card-accent: var(--color-cook);
+    padding-right: 17px;
   }
 
   &__drop-zone {
