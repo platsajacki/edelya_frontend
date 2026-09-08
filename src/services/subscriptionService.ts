@@ -22,6 +22,13 @@ export interface DTOSelectTariffResult {
   description?: string
 }
 
+export interface DTORetryPaymentResult {
+  action: "success" | "payment_failed"
+  payment_status: "succeeded" | "canceled"
+  subscription: DTOSubscription | null
+  description?: string
+}
+
 export async function getMySubscription(): Promise<DTOSubscription | null> {
   try {
     return await api<DTOSubscription>("/api/v1/subscriptions/me/")
@@ -83,4 +90,17 @@ export function cancelSubscription(): Promise<DTOSubscription> {
 
 export function resumeSubscription(): Promise<DTOSubscription> {
   return api<DTOSubscription>("/api/v1/subscriptions/resume/", { method: "POST" })
+}
+
+export async function retryPayment(): Promise<DTORetryPaymentResult> {
+  try {
+    return await api<DTORetryPaymentResult>("/api/v1/subscriptions/retry-payment/", {
+      method: "POST",
+      skipPaywall: true,
+    })
+  } catch (err) {
+    const failure = err as { status?: number; body?: DTORetryPaymentResult }
+    if (failure.status === 402 && failure.body?.action) return failure.body
+    throw err
+  }
 }

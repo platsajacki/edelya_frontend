@@ -36,7 +36,7 @@
           :limit="sub.aiRecipeLimit"
         />
 
-        <p v-if="subscriptionCard.actionText" class="cabinet__recurring-notice">
+        <p v-if="subscriptionCard.actionKind === 'trial'" class="cabinet__recurring-notice">
           На время пробного периода все функции сервиса доступны бесплатно.<br />
           Далее от 99 руб./месяц.
         </p>
@@ -46,7 +46,11 @@
           :disabled="loading"
           @click="handleAction"
         >
-          {{ loading ? "Загрузка..." : subscriptionCard.actionText }}
+          {{
+            loading
+              ? (subscriptionCard.actionLoadingText ?? "Загрузка...")
+              : subscriptionCard.actionText
+          }}
         </button>
         <p v-if="actionError" class="cabinet__error">{{ actionError }}</p>
       </template>
@@ -435,8 +439,10 @@ const subscriptionCard = computed(() => {
           ? `У вас ещё нет подписки. Попробуйте бесплатно ${getWeekFromDays(days)}!`
           : "У вас ещё нет подписки. Попробуйте бесплатно!",
         actionText: "Начать бесплатно",
+        actionKind: "trial",
       }
     }
+    if (sub.errorCode === "subscription_expired") return expiredCard()
     return ERROR_CARDS[sub.errorCode] ?? null
   }
 
@@ -451,6 +457,7 @@ const subscriptionCard = computed(() => {
         ? `У вас ещё нет подписки. Попробуйте бесплатно ${getWeekFromDays(days)}!`
         : "У вас ещё нет подписки. Попробуйте бесплатно!",
       actionText: "Начать бесплатно",
+      actionKind: "trial",
     }
   }
 
@@ -530,8 +537,24 @@ const subscriptionCard = computed(() => {
     }
   }
 
+  if (s.status === "expired") return expiredCard()
+
   return ERROR_CARDS[s.status] ?? null
 })
+
+function expiredCard() {
+  if (!sub.canRetryPayment) return ERROR_CARDS.expired
+  return {
+    icon: IconWarning,
+    iconClass: "cabinet__card-icon--warning",
+    title: "Подписка истекла",
+    description:
+      "Не удалось списать оплату с привязанной карты. Повторите оплату — спишем с неё же.",
+    actionText: "Повторить оплату",
+    actionLoadingText: "Оплачиваем…",
+    actionKind: "retry_payment",
+  }
+}
 
 const ERROR_CARDS = {
   trial_expired: {
@@ -562,18 +585,12 @@ const ERROR_CARDS = {
     description: "Не удалось списать средства. Проверьте платёжные данные.",
     actionText: null,
   },
-  subscription_expired: {
-    icon: IconWarning,
-    iconClass: "cabinet__card-icon--warning",
-    title: "Подписка истекла",
-    description: "Возможно, возникла проблема с оплатой. Проверьте платёжную информацию.",
-    actionText: null,
-  },
   expired: {
     icon: IconWarning,
     iconClass: "cabinet__card-icon--warning",
     title: "Подписка истекла",
-    description: "Возможно, возникла проблема с оплатой. Проверьте платёжную информацию.",
+    description:
+      "Не удалось списать оплату. Выберите тариф, чтобы продолжить пользоваться сервисом.",
     actionText: null,
   },
   subscription_inactive: {
@@ -640,7 +657,12 @@ function formatDateTime(iso) {
   })
 }
 
-async function handleAction() {
+function handleAction() {
+  if (subscriptionCard.value?.actionKind === "retry_payment") return handleRetryPayment()
+  return handleStartTrial()
+}
+
+async function handleStartTrial() {
   actionError.value = null
   loading.value = true
   try {
@@ -649,6 +671,40 @@ async function handleAction() {
     router.push("/")
   } catch (err) {
     actionError.value = err.message ?? "Не удалось запустить триал."
+  } finally {
+    loading.value = false
+  }
+}
+
+const RETRY_NO_CARD_DETAIL = "Active payment method is required to retry subscription payment."
+
+async function handleRetryPayment() {
+  if (loading.value) return
+  actionError.value = null
+  loading.value = true
+  try {
+    const result = await sub.retryPayment()
+    if (result.action === "success") {
+      showToast("Оплата прошла, подписка активна")
+      if (sub.canCreateAIRecipes) await sub.loadAIRecipeUsage().catch(() => {})
+    } else {
+      actionError.value =
+        "Оплата не прошла. Проверьте баланс и срок действия карты или выберите другой тариф."
+    }
+  } catch (err) {
+    if (err.status === 409 && err.body?.detail === RETRY_NO_CARD_DETAIL) {
+      await sub.loadPaymentMethod().catch(() => {})
+      actionError.value =
+        "Привязанная карта недоступна. Выберите тариф ниже, чтобы оплатить подписку."
+    } else if (err.status === 409) {
+      actionError.value = "Списание уже выполняется. Подождите минуту и попробуйте снова."
+    } else if (err.status >= 500) {
+      actionError.value = "Не удалось связаться с платёжной системой. Попробуйте позже."
+      await sub.loadMySubscription().catch(() => {})
+    } else {
+      actionError.value = err.message ?? "Не удалось повторить оплату."
+      await sub.loadMySubscription().catch(() => {})
+    }
   } finally {
     loading.value = false
   }

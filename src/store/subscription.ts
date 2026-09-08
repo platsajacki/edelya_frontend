@@ -12,6 +12,7 @@ import {
   deletePaymentMethod as apiDeletePaymentMethod,
   cancelSubscription as apiCancelSubscription,
   resumeSubscription as apiResumeSubscription,
+  retryPayment as apiRetryPayment,
 } from "../services/subscriptionService"
 import type {
   DTOSubscription,
@@ -47,6 +48,9 @@ export const useSubscriptionStore = defineStore("subscription", {
       state.subscription?.status === "trial" &&
       state.subscription?.is_active === true &&
       state.subscription?.tariff?.is_trial_tariff === true,
+
+    canRetryPayment: (state): boolean =>
+      state.subscription?.status === "expired" && state.paymentMethod?.is_active === true,
 
     canCreateAIRecipes: (state): boolean =>
       state.subscription?.tariff?.can_create_ai_recipes === true,
@@ -175,6 +179,13 @@ export const useSubscriptionStore = defineStore("subscription", {
       const sub = await apiResumeSubscription()
       this.subscription = sub
       return sub
+    },
+
+    async retryPayment() {
+      const result = await apiRetryPayment()
+      if (result.subscription) this.subscription = result.subscription
+      if (result.action === "success") this.clear()
+      return result
     },
   },
 })

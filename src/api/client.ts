@@ -90,6 +90,12 @@ const ERROR_MESSAGES: Record<string, string> = {
   "Subscription is not pending cancellation.": "Подписка не находится в процессе отмены.",
   "Subscription cannot be resumed in current status.":
     "Подписку невозможно возобновить в текущем статусе.",
+  "Subscription payment retry is available only for expired subscriptions.":
+    "Повторная оплата доступна только для истёкшей подписки.",
+  "Active payment method is required to retry subscription payment.":
+    "Нет активной привязанной карты. Выберите тариф, чтобы оплатить подписку.",
+  "Subscription has a pending recurring payment.":
+    "Списание уже выполняется. Подождите минуту и попробуйте снова.",
   "AI recipe limit for the current subscription period has been exceeded.":
     "Лимит AI-рецептов на текущий период исчерпан.",
   "AI draft must be parsed before dish creation.": "AI-рецепт ещё не готов к созданию блюда.",
@@ -227,7 +233,9 @@ async function parseError(response: Response) {
   return err
 }
 
-export async function api<T = unknown>(url: string, options: RequestInit = {}): Promise<T> {
+export type ApiOptions = RequestInit & { skipPaywall?: boolean }
+
+export async function api<T = unknown>(url: string, options: ApiOptions = {}): Promise<T> {
   if (getRefresh() && isAccessExpired()) {
     if (!refreshing) {
       refreshing = refreshTokens().finally(() => {
@@ -252,7 +260,7 @@ export async function api<T = unknown>(url: string, options: RequestInit = {}): 
     response = await fetch(API + url, { ...options, headers })
   }
 
-  if (response.status === 402) {
+  if (response.status === 402 && !options.skipPaywall) {
     const err = await parseError(response)
     const { useSubscriptionStore } = await import("../store/subscription")
     const subscriptionStore = useSubscriptionStore()
