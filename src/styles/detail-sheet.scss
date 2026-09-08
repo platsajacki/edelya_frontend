@@ -1,0 +1,207 @@
+/* ─── Shared detail sheet styles ─────────────────────────── */
+/* Used by CardDetailSheet.vue and RecipeDishDetail.vue       */
+
+.detail {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+
+  &__section {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+
+    & + & {
+      padding-top: 16px;
+      border-top: 1px solid var(--color-border);
+    }
+  }
+
+  &__dish-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  &__dish-title-row {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+  }
+
+  &__dish-name {
+    font-size: var(--font-lg);
+    font-weight: 700;
+    color: var(--color-text);
+    margin: 0;
+  }
+
+  &__dish-edit {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    background: none;
+    color: var(--color-text-secondary);
+    border-radius: var(--radius-xs);
+    flex-shrink: 0;
+    transition:
+      background var(--transition-fast),
+      color var(--transition-fast);
+
+    &:hover {
+      background: var(--color-empty);
+      color: var(--color-mint);
+    }
+  }
+
+  &__meta {
+    font-size: var(--font-sm);
+    color: var(--color-text-secondary);
+    margin: 0;
+  }
+
+  &__recipe {
+    font-size: var(--font-base);
+    color: var(--color-text);
+    line-height: 1.5;
+    margin: 0;
+    white-space: pre-line;
+  }
+
+  &__label {
+    font-size: var(--font-sm);
+    font-weight: 600;
+    color: var(--color-text-secondary);
+  }
+
+  &__ingredients {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+
+    li:last-child {
+      border-bottom: none;
+    }
+  }
+
+  &__ingredient {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 0;
+    border-bottom: 1px solid var(--color-border);
+    font-size: var(--font-sm);
+  }
+
+  &__ingredient-name {
+    font-weight: 500;
+    color: var(--color-text);
+  }
+
+  &__ingredient-amount {
+    font-size: var(--font-sm);
+    color: var(--color-text-secondary);
+    white-space: nowrap;
+  }
+
+  &__ingredient-right {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+  }
+
+  &__ingredient-optional {
+    font-size: var(--font-xs);
+    color: var(--color-mint);
+    background: var(--color-mint-alpha-12);
+    border-radius: var(--radius-xs);
+    padding: 1px 5px;
+    font-weight: 500;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  &__actions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  &__btn {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-size: var(--font-base);
+    font-weight: 600;
+    transition:
+      background var(--transition-fast),
+      opacity var(--transition-fast),
+      transform var(--transition-fast);
+
+    &--edit {
+      background: var(--color-mint);
+      color: var(--on-primary);
+
+      &:hover {
+        background: var(--color-mint-hover);
+      }
+
+      &:active {
+        transform: scale(var(--press-scale-md));
+      }
+    }
+
+    &--delete {
+      background: var(--color-danger-pale);
+      color: var(--color-danger-dark);
+
+      &:hover {
+        background: var(--color-danger-bg);
+      }
+
+      &:active {
+        transform: scale(var(--press-scale-md));
+      }
+    }
+
+    &--cancel {
+      background: var(--color-empty);
+      color: var(--color-text-secondary);
+
+      &:hover {
+        background: var(--color-border);
+      }
+    }
+  }
+
+  &__confirm-text {
+    font-size: var(--font-base);
+    font-weight: 600;
+    color: var(--color-danger-dark);
+    margin: 0;
+  }
+
+  &__confirm-actions {
+    display: flex;
+    gap: 8px;
+
+    .detail__btn {
+      flex: 1;
+    }
+  }
+
+  &__clone-text {
+    font-size: var(--font-sm);
+    color: var(--color-text);
+    line-height: 1.5;
+    margin: 0;
+  }
+}

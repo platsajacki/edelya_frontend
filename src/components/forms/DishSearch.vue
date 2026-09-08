@@ -9,7 +9,15 @@
         placeholder="Поиск рецепта..."
         @input="onInput"
       />
-      <button v-if="query" type="button" class="search-field__clear" aria-label="Очистить" @click="clearQuery">&times;</button>
+      <button
+        v-if="query"
+        type="button"
+        class="search-field__clear"
+        aria-label="Очистить"
+        @click="clearQuery"
+      >
+        &times;
+      </button>
     </div>
 
     <div v-if="loading" class="dish-search__status"><div class="spinner spinner--sm" /></div>
@@ -25,7 +33,7 @@
           <span class="dish-search__name">{{ dish.name }}</span>
           <span class="dish-search__category">{{ dish.category?.name }}</span>
         </div>
-          <OwnershipBadge :is-own="isDishOwn(dish)" short />
+        <OwnershipBadge :is-own="isDishOwn(dish)" short />
       </li>
     </ul>
 
@@ -47,35 +55,40 @@
   </div>
 </template>
 
-<script setup>
+<script lang="ts" setup>
 import { ref } from "vue"
-import { fetchDishes } from "../../services/dishService"
-import { isDishOwn } from "../../utils/dishOwnership"
+import { fetchDishes } from "@/services/dishService.ts"
+import { isDishOwn } from "@/utils/dishOwnership.ts"
 import OwnershipBadge from "../OwnershipBadge.vue"
 import DishPickerSheet from "../DishPickerSheet.vue"
+import type { DTODish } from "@/types/dish"
 
-defineProps({
-  canCreateAi: { type: Boolean, default: false },
-})
+defineProps<{
+  canCreateAi?: boolean
+}>()
 
-const emit = defineEmits(["select", "create", "create-ai"])
+const emit = defineEmits<{
+  (e: "select", dish: DTODish): void
+  (e: "create", query: string): void
+  (e: "create-ai"): void
+}>()
 
 const showPicker = ref(false)
 
-function onPickerSelect(dish) {
+function onPickerSelect(dish: DTODish) {
   emit("select", dish)
 }
 
 const query = ref("")
-const results = ref([])
+const results = ref<DTODish[]>([])
 const loading = ref(false)
 const searched = ref(false)
-const inputEl = ref(null)
+const inputEl = ref<HTMLInputElement | null>(null)
 
-let debounceTimer = null
+let debounceTimer: ReturnType<typeof setTimeout> | null = null
 
 function onInput() {
-  clearTimeout(debounceTimer)
+  clearTimeout(debounceTimer ?? undefined)
   const q = query.value.trim()
 
   if (!q) {
@@ -87,7 +100,7 @@ function onInput() {
   debounceTimer = setTimeout(async () => {
     loading.value = true
     try {
-      const data = await fetchDishes({ name__icontains: q })
+      const data = await fetchDishes({ search: q })
       results.value = data.results ?? []
     } catch {
       results.value = []
@@ -106,135 +119,131 @@ function clearQuery() {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
+@use "../../styles/mixins" as mixins;
+
 .dish-search {
   display: flex;
   flex-direction: column;
   gap: 8px;
-}
 
-.dish-search__input {
-  width: 100%;
-  padding: 10px 12px;
-  border: 1.5px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  font-size: var(--font-md);
-  background: var(--color-surface);
-  color: var(--color-text);
-  outline: none;
-  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
-}
+  &__input {
+    width: 100%;
+    @include mixins.form-control-base;
+  }
 
-.dish-search__input:focus {
-  border-color: var(--color-mint-alpha-25);
-  box-shadow: 0 0 0 3px var(--color-mint-alpha-10);
-}
+  &__list {
+    list-style: none;
+    max-height: 200px;
+    overflow-y: auto;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+  }
 
-.dish-search__list {
-  list-style: none;
-  max-height: 200px;
-  overflow-y: auto;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
-}
+  &__item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 12px;
+    cursor: pointer;
+    transition: background var(--transition-fast);
 
-.dish-search__item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 12px;
-  cursor: pointer;
-  transition: background var(--transition-fast);
-}
+    &:hover {
+      background: var(--color-empty);
+    }
 
-.dish-search__item:hover {
-  background: var(--color-empty);
-}
+    & + & {
+      border-top: 1px solid var(--color-border);
+    }
+  }
 
-.dish-search__info {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  min-width: 0;
-}
+  &__info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+  }
 
-.dish-search__item + .dish-search__item {
-  border-top: 1px solid var(--color-border);
-}
+  &__name {
+    font-size: var(--font-sm);
+    font-weight: 500;
+  }
 
-.dish-search__name {
-  font-size: var(--font-sm);
-  font-weight: 500;
-}
+  &__category {
+    font-size: var(--font-xs);
+    color: var(--color-text-secondary);
+  }
 
-.dish-search__category {
-  font-size: var(--font-xs);
-  color: var(--color-text-secondary);
-}
+  &__status {
+    font-size: var(--font-sm);
+    color: var(--color-text-secondary);
+    padding: 8px 0;
+  }
 
-.dish-search__status {
-  font-size: var(--font-sm);
-  color: var(--color-text-secondary);
-  padding: 8px 0;
-}
+  &__actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
 
-.dish-search__actions {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-}
+  &__pick {
+    flex: 1;
+    padding: var(--btn-padding-sm);
+    border: 1.5px solid var(--color-mint-alpha-25);
+    border-radius: var(--radius-sm);
+    background: var(--color-mint-alpha-10);
+    font-size: var(--font-sm);
+    font-weight: 600;
+    color: var(--color-mint);
+    cursor: pointer;
+    transition:
+      background var(--transition-fast),
+      border-color var(--transition-fast);
+    white-space: nowrap;
 
-.dish-search__pick {
-  flex: 1;
-  padding: 9px 16px;
-  border: 1.5px solid var(--color-mint-alpha-25);
-  border-radius: var(--radius-sm);
-  background: var(--color-mint-alpha-10);
-  font-size: var(--font-sm);
-  font-weight: 600;
-  color: var(--color-mint);
-  cursor: pointer;
-  transition: background var(--transition-fast), border-color var(--transition-fast);
-  white-space: nowrap;
-}
+    &:hover {
+      background: var(--color-mint-alpha-25);
+      border-color: var(--color-mint);
+    }
+  }
 
-.dish-search__pick:hover {
-  background: var(--color-mint-alpha-25);
-  border-color: var(--color-mint);
-}
+  &__create,
+  &__ai {
+    flex: 1;
+    padding: var(--btn-padding-sm);
+    border: 1.5px dashed var(--color-border);
+    border-radius: var(--radius-sm);
+    background: transparent;
+    font-size: var(--font-sm);
+    font-weight: 500;
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    transition:
+      background var(--transition-fast),
+      border-color var(--transition-fast);
+    white-space: nowrap;
+  }
 
-.dish-search__create,
-.dish-search__ai {
-  flex: 1;
-  padding: 9px 16px;
-  border: 1.5px dashed var(--color-border);
-  border-radius: var(--radius-sm);
-  background: transparent;
-  font-size: var(--font-sm);
-  font-weight: 500;
-  color: var(--color-text-secondary);
-  cursor: pointer;
-  transition: background var(--transition-fast), border-color var(--transition-fast);
-  white-space: nowrap;
-}
+  &__create {
+    &:hover {
+      background: var(--color-empty);
+      border-color: var(--color-mint);
+      color: var(--color-mint);
+    }
+  }
 
-.dish-search__create:hover {
-  background: var(--color-empty);
-  border-color: var(--color-mint);
-  color: var(--color-mint);
-}
+  &__ai {
+    border-style: solid;
+    border-color: var(--color-mint-alpha-25);
+    background: var(--color-mint-alpha-10);
+    color: var(--color-mint);
+    font-weight: 600;
 
-.dish-search__ai {
-  border-style: solid;
-  border-color: var(--color-mint-alpha-25);
-  background: var(--color-mint-alpha-10);
-  color: var(--color-mint);
-  font-weight: 600;
-}
-
-.dish-search__ai:hover {
-  background: var(--color-mint-alpha-25);
-  border-color: var(--color-mint);
+    &:hover {
+      background: var(--color-mint-alpha-25);
+      border-color: var(--color-mint);
+    }
+  }
 }
 </style>

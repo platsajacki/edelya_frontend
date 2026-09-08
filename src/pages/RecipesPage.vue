@@ -7,20 +7,10 @@
         <button
           v-if="!store.isAIDraftsTab"
           class="recipes-header__action-btn"
-          @click="showSortMenu = !showSortMenu"
           aria-label="Сортировка"
+          @click="showSortMenu = !showSortMenu"
         >
           <IconSort />
-        </button>
-        <button
-          v-if="!store.isAIDraftsTab"
-          class="recipes-header__action-btn"
-          :class="{ 'recipes-header__action-btn--active': store.hasActiveFilters }"
-          @click="showFilters = true"
-          aria-label="Фильтры"
-        >
-          <IconFilter />
-          <span v-if="store.hasActiveFilters" class="recipes-header__filter-dot" />
         </button>
       </div>
     </div>
@@ -56,8 +46,8 @@
       <button
         v-if="searchQuery"
         class="search-field__clear"
-        @click="clearSearch"
         aria-label="Очистить"
+        @click="clearSearch"
       >
         &times;
       </button>
@@ -95,6 +85,13 @@
       :limit="subscription.aiRecipeLimit"
     />
 
+    <CategoryChips
+      v-if="!store.isAIDraftsTab"
+      :categories="store.categories"
+      :model-value="store.filters.categoryId"
+      @update:model-value="(value) => store.setFilter('categoryId', value)"
+    />
+
     <!-- Initial loading -->
     <div v-if="store.initialLoading && !activeItemsCount" class="recipes-loading">
       <div class="spinner" />
@@ -111,24 +108,28 @@
       <p class="empty-state__text">
         {{ emptyText }}
       </p>
-      <button
-        v-if="store.isAIDraftsTab"
-        class="empty-state__action"
-        @click="openAICreate()"
-      >
+      <button v-if="store.isAIDraftsTab" class="empty-state__action" @click="openAICreate()">
         Создать с ИИ
       </button>
-      <button v-if="store.filters.ownership === 'own'" class="empty-state__action" @click="showCreateForm = true">
+      <button
+        v-if="store.filters.ownership === 'own'"
+        class="empty-state__action"
+        @click="showCreateForm = true"
+      >
         Добавить первое блюдо
       </button>
-      <button v-if="store.hasActiveFilters || store.hasNonDefaultSort" class="empty-state__secondary" @click="resetAll">
+      <button
+        v-if="store.hasActiveFilters || store.hasNonDefaultSort"
+        class="empty-state__secondary"
+        @click="resetAll"
+      >
         Сбросить фильтры
       </button>
     </div>
 
     <!-- AI drafts list -->
     <div v-else-if="store.isAIDraftsTab" class="recipes-list">
-      <div v-if="store.refreshing" class="recipes-refreshing">
+      <div v-if="store.refreshing || store.initialLoading" class="recipes-refreshing">
         <div class="spinner spinner--sm" />
       </div>
 
@@ -161,16 +162,11 @@
     <!-- Dish list -->
     <div v-else class="recipes-list">
       <!-- Refreshing indicator -->
-      <div v-if="store.refreshing" class="recipes-refreshing">
+      <div v-if="store.refreshing || store.initialLoading" class="recipes-refreshing">
         <div class="spinner spinner--sm" />
       </div>
 
-      <RecipeDishCard
-        v-for="dish in store.dishes"
-        :key="dish.id"
-        :dish="dish"
-        @tap="openDetail"
-      />
+      <RecipeDishCard v-for="dish in store.dishes" :key="dish.id" :dish="dish" @tap="openDetail" />
 
       <!-- Load more error -->
       <div v-if="store.loadMoreError" class="recipes-load-more-error">
@@ -185,17 +181,9 @@
     </div>
 
     <!-- FAB: create new dish -->
-    <FabButton @click="onFabClick" :aria-label="fabLabel">
+    <FabButton :aria-label="fabLabel" @click="onFabClick">
       <IconPlus />
     </FabButton>
-
-    <!-- Filter panel -->
-    <RecipeFilterPanel
-      v-model="showFilters"
-      :categories="store.categories"
-      :current-category-id="store.filters.categoryId"
-      @apply="onApplyFilters"
-    />
 
     <!-- Dish detail bottom-sheet -->
     <RecipeDishDetail
@@ -206,10 +194,7 @@
     />
 
     <!-- Create dish form -->
-    <DishForm
-      v-model="showCreateForm"
-      @created="onDishCreated"
-    />
+    <DishForm v-model="showCreateForm" @created="onDishCreated" />
 
     <AIDishDraftForm
       v-model="showAIForm"
@@ -225,17 +210,17 @@
   </div>
 </template>
 
-<script setup>
+<script lang="ts" setup>
 import { ref, computed, onMounted, onUnmounted, watch } from "vue"
+import type { DTODish } from "@/types/dish"
 import { useRecipesStore, SORT_OPTIONS } from "../store/recipes"
 import { useSubscriptionStore } from "../store/subscription"
 import RecipeDishCard from "../components/RecipeDishCard.vue"
-import RecipeFilterPanel from "../components/RecipeFilterPanel.vue"
+import CategoryChips from "../components/CategoryChips.vue"
 import RecipeDishDetail from "../components/RecipeDishDetail.vue"
 import DishForm from "../components/forms/DishForm.vue"
 import AIDishDraftForm from "../components/forms/AIDishDraftForm.vue"
 import AIRecipeUsageBadge from "../components/AIRecipeUsageBadge.vue"
-import IconFilter from "../components/icons/IconFilter.vue"
 import IconSearch from "../components/icons/IconSearch.vue"
 import IconSort from "../components/icons/IconSort.vue"
 import IconPlus from "../components/icons/IconPlus.vue"
@@ -252,15 +237,15 @@ const AI_LIMIT_EXCEEDED_MESSAGE = "Лимит AI-рецептов на теку�
 const tabs = computed(() => [
   { value: "own", label: "Личные" },
   { value: "global", label: "Общие" },
-  ...(subscription.canCreateAIRecipes ? [{ value: "ai", label: "AI-рецепты" }] : []),
+  ...(subscription.canCreateAIRecipes ? [{ value: "ai", label: "AI-запросы" }] : []),
 ])
 
 const searchPlaceholder = computed(() =>
-  store.isAIDraftsTab ? "Поиск AI-рецептов..." : "Поиск блюд...",
+  store.isAIDraftsTab ? "Поиск AI-рецептов..." : "Поиск блюд..."
 )
 
 const activeItemsCount = computed(() =>
-  store.isAIDraftsTab ? store.aiDrafts.length : store.dishes.length,
+  store.isAIDraftsTab ? store.aiDrafts.length : store.dishes.length
 )
 
 const emptyText = computed(() => {
@@ -268,11 +253,10 @@ const emptyText = computed(() => {
   return store.filters.ownership === "own" ? "У вас пока нет личных блюд" : "Общих блюд пока нет"
 })
 
-const fabLabel = computed(() => store.isAIDraftsTab ? "Создать с ИИ" : "Создать блюдо")
+const fabLabel = computed(() => (store.isAIDraftsTab ? "Создать с ИИ" : "Создать блюдо"))
 
 function switchTab(value) {
   showSortMenu.value = false
-  showFilters.value = false
   store.setFilter("ownership", value)
 }
 
@@ -302,20 +286,11 @@ function applySorting(value) {
 
 // --- Filter chips ---
 const activeChips = computed(() => {
-  if (store.isAIDraftsTab) return []
-  const chips = []
-  if (store.filters.categoryId) {
-    const cat = store.categories.find((c) => c.id === store.filters.categoryId)
-    chips.push({ key: "category", label: cat?.name || "Категория" })
-  }
-  if (store.hasNonDefaultSort) {
-    chips.push({ key: "sorting", label: store.sortLabel })
-  }
-  return chips
+  if (store.isAIDraftsTab || !store.hasNonDefaultSort) return []
+  return [{ key: "sorting", label: store.sortLabel }]
 })
 
 function removeChip(key) {
-  if (key === "category") store.setFilter("categoryId", null)
   if (key === "sorting") store.setSorting("-created_at")
 }
 
@@ -324,18 +299,11 @@ function resetAll() {
   store.resetFilters()
 }
 
-// --- Filters panel ---
-const showFilters = ref(false)
-
-function onApplyFilters({ categoryId }) {
-  store.setFilter("categoryId", categoryId)
-}
-
 // --- Detail ---
 const showDetail = ref(false)
-const detailDish = ref({})
+const detailDish = ref<DTODish | null>(null)
 
-function openDetail(dish) {
+function openDetail(dish: DTODish) {
   detailDish.value = dish
   showDetail.value = true
 }
@@ -392,7 +360,7 @@ function onAIDraftUpdated(draft) {
   store.upsertAIDraft(draft)
 }
 
-function onOpenDish(dish) {
+function onOpenDish(dish: DTODish) {
   detailDish.value = dish
   showDetail.value = true
 }
@@ -402,12 +370,14 @@ function draftTitle(draft) {
 }
 
 function draftStatusLabel(status) {
-  return {
-    processing: "Разбор",
-    parsed: "Распознан",
-    failed: "Ошибка",
-    dish_created: "Создано",
-  }[status] || status
+  return (
+    {
+      processing: "Разбор",
+      parsed: "Ожидает создания",
+      failed: "Ошибка",
+      dish_created: "Создано",
+    }[status] || status
+  )
 }
 
 function formatDraftDate(value) {
@@ -422,11 +392,16 @@ let observer = null
 onMounted(() => {
   observer = new IntersectionObserver(
     (entries) => {
-      if (entries[0]?.isIntersecting && store.hasMore && !store.initialLoading && !store.loadingMore) {
+      if (
+        entries[0]?.isIntersecting &&
+        store.hasMore &&
+        !store.initialLoading &&
+        !store.loadingMore
+      ) {
         store.loadMore()
       }
     },
-    { rootMargin: "200px" },
+    { rootMargin: "200px" }
   )
 
   // Load data only on first mount (KeepAlive preserves state on revisit)
@@ -451,19 +426,23 @@ watch(
       store.refreshProcessingAIDrafts()
     }, 7000)
   },
-  { immediate: true },
+  { immediate: true }
 )
 
 watch(
   () => subscription.canCreateAIRecipes,
   (canCreateAIRecipes) => {
     if (!canCreateAIRecipes && store.isAIDraftsTab) store.setFilter("ownership", "own")
-  },
+  }
 )
 
-watch(sentinelRef, (el) => {
-  if (el && observer) observer.observe(el)
-}, { flush: "post" })
+watch(
+  sentinelRef,
+  (el) => {
+    if (el && observer) observer.observe(el)
+  },
+  { flush: "post" }
+)
 
 onUnmounted(() => {
   observer?.disconnect()
@@ -472,65 +451,67 @@ onUnmounted(() => {
 })
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .recipes-page {
-  padding: 12px 16px calc(var(--nav-height) + 72px);
+  padding: var(--page-padding-top) 16px 72px;
+
+  @media (min-width: 600px) {
+    padding: var(--page-padding-top-lg) 24px 72px;
+  }
 }
 
-/* Header */
 .recipes-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
+
+  &__title {
+    font-size: var(--font-lg);
+    font-weight: 700;
+    color: var(--color-text);
+    margin: 0;
+  }
+
+  &__actions {
+    display: flex;
+    gap: 6px;
+  }
+
+  &__action-btn {
+    position: relative;
+    width: 36px;
+    height: 36px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    background: var(--color-bg);
+    color: var(--color-text);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background var(--transition-fast);
+    -webkit-tap-highlight-color: transparent;
+
+    &:active {
+      background: var(--color-border);
+    }
+
+    &--active {
+      border-color: var(--color-mint);
+      color: var(--color-mint);
+    }
+  }
+
+  &__filter-dot {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--color-mint);
+  }
 }
 
-.recipes-header__title {
-  font-size: var(--font-lg);
-  font-weight: 700;
-  color: var(--color-text);
-  margin: 0;
-}
-
-.recipes-header__actions {
-  display: flex;
-  gap: 6px;
-}
-
-.recipes-header__action-btn {
-  position: relative;
-  width: 36px;
-  height: 36px;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  background: var(--color-bg);
-  color: var(--color-text);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background var(--transition-fast);
-  -webkit-tap-highlight-color: transparent;
-}
-
-.recipes-header__action-btn:active {
-  background: var(--color-border);
-}
-
-.recipes-header__action-btn--active {
-  border-color: var(--color-mint);
-  color: var(--color-mint);
-}
-
-.recipes-header__filter-dot {
-  position: absolute;
-  top: 5px;
-  right: 5px;
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--color-mint);
-}
-
-/* Sort dropdown */
 .sort-dropdown-overlay {
   position: fixed;
   inset: 0;
@@ -546,35 +527,34 @@ onUnmounted(() => {
   border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
   overflow: hidden;
+
+  &__item {
+    padding: 10px 14px;
+    border: none;
+    background: none;
+    text-align: left;
+    font-size: var(--font-sm);
+    color: var(--color-text);
+    cursor: pointer;
+    transition: background var(--transition-fast);
+    -webkit-tap-highlight-color: transparent;
+
+    &:active {
+      background: var(--color-empty);
+    }
+
+    &--active {
+      color: var(--color-mint);
+      font-weight: 600;
+      background: var(--color-mint-alpha-08);
+    }
+
+    & + & {
+      border-top: 1px solid var(--color-border);
+    }
+  }
 }
 
-.sort-dropdown__item {
-  padding: 10px 14px;
-  border: none;
-  background: none;
-  text-align: left;
-  font-size: var(--font-sm);
-  color: var(--color-text);
-  cursor: pointer;
-  transition: background var(--transition-fast);
-  -webkit-tap-highlight-color: transparent;
-}
-
-.sort-dropdown__item:active {
-  background: var(--color-empty);
-}
-
-.sort-dropdown__item--active {
-  color: var(--color-mint);
-  font-weight: 600;
-  background: var(--color-mint-alpha-08);
-}
-
-.sort-dropdown__item + .sort-dropdown__item {
-  border-top: 1px solid var(--color-border);
-}
-
-/* Filter chips */
 .recipes-chips {
   display: flex;
   flex-wrap: wrap;
@@ -585,7 +565,7 @@ onUnmounted(() => {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  padding: 4px 10px;
+  padding: 6px 14px;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   background: var(--color-empty);
@@ -594,19 +574,18 @@ onUnmounted(() => {
   color: var(--color-text);
   cursor: pointer;
   transition: background var(--transition-fast);
+
+  &:hover {
+    background: var(--color-border);
+  }
+
+  &__x {
+    font-size: 14px;
+    line-height: 1;
+    color: var(--color-text-secondary);
+  }
 }
 
-.recipes-chip:hover {
-  background: var(--color-border);
-}
-
-.recipes-chip__x {
-  font-size: 14px;
-  line-height: 1;
-  color: var(--color-text-secondary);
-}
-
-/* Loading */
 .recipes-loading {
   display: flex;
   flex-direction: column;
@@ -617,7 +596,6 @@ onUnmounted(() => {
   color: var(--color-text-secondary);
 }
 
-/* Error */
 .recipes-error {
   display: flex;
   flex-direction: column;
@@ -625,68 +603,65 @@ onUnmounted(() => {
   gap: 12px;
   padding: 40px 0;
   text-align: center;
+
+  &__text {
+    font-size: var(--font-sm);
+    color: var(--color-text-secondary);
+    margin: 0;
+  }
+
+  &__retry {
+    padding: var(--btn-padding-sm);
+    border: 1px solid var(--color-mint);
+    border-radius: var(--radius-sm);
+    background: none;
+    color: var(--color-mint);
+    font-size: var(--font-sm);
+    font-weight: 600;
+    cursor: pointer;
+    transition: background var(--transition-fast);
+
+    &:active {
+      background: var(--color-mint-alpha-08);
+    }
+  }
 }
 
-.recipes-error__text {
-  font-size: var(--font-sm);
-  color: var(--color-text-secondary);
-  margin: 0;
-}
-
-.recipes-error__retry {
-  padding: 8px 20px;
-  border: 1px solid var(--color-mint);
-  border-radius: var(--radius-sm);
-  background: none;
-  color: var(--color-mint);
-  font-size: var(--font-sm);
-  font-weight: 600;
-  cursor: pointer;
-  transition: background var(--transition-fast);
-}
-
-.recipes-error__retry:active {
-  background: var(--color-mint-alpha-08);
-}
-
-/* Refreshing */
 .recipes-refreshing {
   display: flex;
   justify-content: center;
   padding: 4px 0;
 }
 
-/* Load more error */
 .recipes-load-more-error {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 10px;
   padding: 10px 0;
+
+  &__text {
+    font-size: var(--font-xs);
+    color: var(--color-text-secondary);
+  }
+
+  &__retry {
+    padding: var(--btn-padding-sm);
+    border: 1px solid var(--color-mint);
+    border-radius: var(--radius-sm);
+    background: none;
+    color: var(--color-mint);
+    font-size: var(--font-sm);
+    font-weight: 600;
+    cursor: pointer;
+    transition: background var(--transition-fast);
+
+    &:active {
+      background: var(--color-mint-alpha-08);
+    }
+  }
 }
 
-.recipes-load-more-error__text {
-  font-size: var(--font-xs);
-  color: var(--color-text-secondary);
-}
-
-.recipes-load-more-error__retry {
-  padding: 4px 12px;
-  border: 1px solid var(--color-mint);
-  border-radius: var(--radius-sm);
-  background: none;
-  color: var(--color-mint);
-  font-size: var(--font-xs);
-  font-weight: 600;
-  cursor: pointer;
-  transition: background var(--transition-fast);
-}
-
-.recipes-load-more-error__retry:active {
-  background: var(--color-mint-alpha-08);
-}
-
-/* Sections & list */
 .recipes-list {
   display: flex;
   flex-direction: column;
@@ -701,62 +676,64 @@ onUnmounted(() => {
   gap: 4px;
   padding: 14px 16px;
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-md);
   background: var(--color-surface);
   color: var(--color-text);
   text-align: left;
   box-shadow: var(--shadow-card);
-  transition: background var(--transition-fast), transform var(--transition-fast);
-}
+  transition:
+    background var(--transition-fast),
+    transform var(--transition-fast);
 
-.ai-draft-card:active {
-  transform: scale(var(--press-scale-sm));
-  background: var(--color-empty);
-}
+  &:active {
+    transform: scale(var(--press-scale-sm));
+    background: var(--color-empty);
+  }
 
-.ai-draft-card__title {
-  width: 100%;
-  font-size: var(--font-md);
-  font-weight: 700;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
+  &__title {
+    width: 100%;
+    font-size: var(--font-md);
+    font-weight: 700;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
 
-.ai-draft-card__meta {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: var(--font-xs);
-  color: var(--color-text-secondary);
-}
+  &__meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: var(--font-xs);
+    color: var(--color-text-secondary);
+  }
 
-.ai-draft-card__status {
-  padding: 2px 6px;
-  border-radius: var(--radius-xs);
-  background: var(--color-empty);
-  color: var(--color-text-secondary);
-  font-weight: 600;
-}
+  &__status {
+    padding: 2px 6px;
+    border-radius: var(--radius-xs);
+    background: var(--color-empty);
+    color: var(--color-text-secondary);
+    font-weight: 600;
 
-.ai-draft-card__status--processing {
-  background: var(--color-mint-alpha-10);
-  color: var(--color-mint);
-}
+    &--processing {
+      background: var(--color-mint-alpha-10);
+      color: var(--color-mint);
+    }
 
-.ai-draft-card__status--parsed {
-  background: var(--color-info-bg);
-  color: var(--color-info);
-}
+    &--parsed {
+      background: var(--color-info-bg);
+      color: var(--color-info);
+    }
 
-.ai-draft-card__status--failed {
-  background: var(--color-danger-pale);
-  color: var(--color-danger);
-}
+    &--failed {
+      background: var(--color-danger-pale);
+      color: var(--color-danger);
+    }
 
-.ai-draft-card__status--dish_created {
-  background: var(--color-success-bg);
-  color: var(--color-success);
+    &--dish_created {
+      background: var(--color-success-bg);
+      color: var(--color-success);
+    }
+  }
 }
 
 .recipes-sentinel {
@@ -766,10 +743,11 @@ onUnmounted(() => {
   min-height: 1px;
 }
 
-/* Dropdown transition */
 .dropdown-enter-active,
 .dropdown-leave-active {
-  transition: opacity var(--transition-fast), transform var(--transition-fast);
+  transition:
+    opacity var(--transition-fast),
+    transform var(--transition-fast);
   transform-origin: top right;
 }
 
@@ -777,11 +755,5 @@ onUnmounted(() => {
 .dropdown-leave-to {
   opacity: 0;
   transform: scaleY(0.9);
-}
-
-@media (min-width: 600px) {
-  .recipes-page {
-    padding: 16px 24px 88px;
-  }
 }
 </style>

@@ -1,7 +1,11 @@
 <template>
   <button
     class="meal-card"
-    :class="{ 'meal-card--shared': !isOwn && !isManual, 'meal-card--manual': isManual, 'meal-card--saving': isPending }"
+    :class="{
+      'meal-card--shared': !isOwn && !isManual,
+      'meal-card--manual': isManual,
+      'meal-card--saving': isPending,
+    }"
     :style="cardStyle"
     type="button"
     :data-id="item.id"
@@ -11,27 +15,29 @@
   </button>
 </template>
 
-<script setup>
+<script lang="ts" setup>
 import { computed } from "vue"
 import { isDishOwn } from "../utils/dishOwnership"
 import { usePlanningStore } from "../store/planning"
+import type { DTOMealPlanItem, DTOCookingEvent } from "@/types/planning"
 
-const props = defineProps({
-  item: {
-    type: Object,
-    required: true,
-  },
-})
+type CardItem = DTOMealPlanItem | DTOCookingEvent
 
-defineEmits(["tap"])
+const props = defineProps<{
+  item: CardItem
+}>()
+
+defineEmits<{
+  (e: "tap", item: CardItem): void
+}>()
 
 const isOwn = computed(() => isDishOwn(props.item.dish))
-const isManual = computed(() => props.item.is_manual === true)
+const isManual = computed(() => "is_manual" in props.item && props.item.is_manual === true)
 
 const planning = usePlanningStore()
 const isPending = computed(() => planning.savingItemIds.includes(props.item.id))
 
-function hexToRgba(hex, alpha) {
+function hexToRgba(hex: string, alpha: number): string {
   const r = parseInt(hex.slice(1, 3), 16)
   const g = parseInt(hex.slice(3, 5), 16)
   const b = parseInt(hex.slice(5, 7), 16)
@@ -41,13 +47,13 @@ function hexToRgba(hex, alpha) {
 const cardStyle = computed(() => {
   if (!props.item.color) return {}
   return {
-    '--card-accent': props.item.color,
-    '--card-bg': hexToRgba(props.item.color, 0.2),
+    "--card-accent": props.item.color,
+    "--card-bg": hexToRgba(props.item.color, 0.2),
   }
 })
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .meal-card {
   display: flex;
   align-items: center;
@@ -62,64 +68,70 @@ const cardStyle = computed(() => {
   font-size: var(--font-sm);
   text-align: left;
   cursor: pointer;
-  transition: box-shadow var(--transition-fast), transform var(--transition-fast);
+  transition:
+    box-shadow var(--transition-fast),
+    transform var(--transition-fast);
   -webkit-user-select: none;
   user-select: none;
   -webkit-touch-callout: none;
   touch-action: manipulation;
-}
 
-.meal-card--shared {
-  border-left-color: var(--card-accent, var(--color-shared-accent));
-}
+  &--shared {
+    border-left-color: var(--card-accent, var(--color-shared-accent));
+  }
 
-.meal-card--manual {
-  border-left-color: var(--card-accent, var(--color-manual-meal));
-  background: var(--color-manual-meal-bg);
-}
+  &--manual {
+    border-left-color: var(--card-accent, var(--color-manual-meal));
+    background: var(--color-manual-meal-bg);
+  }
 
-.meal-card:hover {
-  box-shadow: var(--shadow-card);
-  border-color: var(--color-mint-alpha-10);
-}
+  &:hover {
+    box-shadow: var(--shadow-card);
+    border-color: var(--color-mint-alpha-10);
+  }
 
-.meal-card--ghost {
-  opacity: 0.5;
-  border: 2px dashed var(--card-accent, var(--color-mint));
-  background: var(--card-bg, var(--color-empty));
-}
+  &--ghost {
+    opacity: 0.5;
+    border: 2px dashed var(--card-accent, var(--color-mint));
+    background: var(--card-bg, var(--color-empty));
+  }
 
-.meal-card--chosen {
-  box-shadow: var(--shadow-elevated);
-  transform: scale(1.02);
-  cursor: grabbing;
-  transition: none;
-}
+  &--chosen {
+    box-shadow: var(--shadow-elevated);
+    transform: scale(1.02);
+    cursor: grabbing;
+    transition: none;
+  }
 
-.meal-card--drag {
-  opacity: 0.9;
-  transform: rotate(2deg);
-  box-shadow: var(--shadow-drag);
-  transition: none;
+  &--drag {
+    opacity: 0.9;
+    transform: rotate(2deg);
+    box-shadow: var(--shadow-drag);
+    transition: none;
+  }
+
+  &--saving {
+    opacity: 0.65;
+    pointer-events: none;
+  }
+
+  &__name {
+    font-weight: 500;
+    line-height: 1.3;
+    color: var(--color-text);
+    min-width: 0;
+    -webkit-hyphens: auto;
+    hyphens: auto;
+    overflow-wrap: break-word;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
 }
 
 .sortable-fallback {
   touch-action: none;
   transition: none;
-}
-
-.meal-card--saving {
-  opacity: 0.65;
-  pointer-events: none;
-}
-
-.meal-card__name {
-  font-weight: 500;
-  line-height: 1.3;
-  color: var(--color-text);
-  min-width: 0;
-  -webkit-hyphens: auto;
-  hyphens: auto;
-  overflow-wrap: break-word;
 }
 </style>

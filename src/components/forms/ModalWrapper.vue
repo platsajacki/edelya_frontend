@@ -5,7 +5,9 @@
         <div class="modal-panel" @mousedown.stop @focusin="onFocusIn">
           <div class="modal-header">
             <h3 class="modal-title">{{ title }}</h3>
-            <button class="modal-close" @click="close" aria-label="Закрыть">&times;</button>
+            <button class="modal-close" aria-label="Закрыть" @click="close">
+              <IconClose />
+            </button>
           </div>
           <div class="modal-body">
             <slot />
@@ -19,29 +21,39 @@
   </Teleport>
 </template>
 
-<script setup>
+<script lang="ts" setup>
 import { watch, onUnmounted } from "vue"
+import IconClose from "@/components/icons/IconClose.vue"
+import { useModalBackButton } from "@/composables/useModalBackButton"
 
-const props = defineProps({
-  modelValue: { type: Boolean, required: true },
-  title: { type: String, default: "" },
-  zIndex: { type: Number, default: 1000 },
-})
+const props = withDefaults(
+  defineProps<{
+    modelValue: boolean
+    title?: string
+    zIndex?: number
+  }>(),
+  {
+    title: "",
+    zIndex: 1000,
+  }
+)
 
-const emit = defineEmits(["update:modelValue"])
+const emit = defineEmits<{
+  (e: "update:modelValue", value: boolean): void
+}>()
 
 function close() {
   emit("update:modelValue", false)
 }
 
-function onFocusIn(e) {
-  const el = e.target
-  if (el.tagName !== 'INPUT' && el.tagName !== 'TEXTAREA' && el.tagName !== 'SELECT') return
+function onFocusIn(e: FocusEvent) {
+  const el = e.target as HTMLElement
+  if (el.tagName !== "INPUT" && el.tagName !== "TEXTAREA" && el.tagName !== "SELECT") return
 
   requestAnimationFrame(() => {
     window.scrollTo(0, 0)
 
-    const scrollParent = el.closest('.modal-body')
+    const scrollParent = el.closest(".modal-body")
     if (!scrollParent) return
     const elRect = el.getBoundingClientRect()
     const parentRect = scrollParent.getBoundingClientRect()
@@ -66,15 +78,17 @@ watch(
     } else {
       document.body.style.overflow = savedOverflow
     }
-  },
+  }
 )
 
 onUnmounted(() => {
   document.body.style.overflow = savedOverflow
 })
+
+useModalBackButton(() => props.modelValue, close)
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .modal-overlay {
   position: fixed;
   inset: 0;
@@ -89,6 +103,11 @@ onUnmounted(() => {
   overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
+
+  @media (min-width: 600px) {
+    align-items: center;
+    padding: 16px;
+  }
 }
 
 .modal-panel {
@@ -97,12 +116,17 @@ onUnmounted(() => {
   box-shadow: var(--shadow-elevated);
   width: 100%;
   max-width: 420px;
-  max-height: calc(100dvh - 32px);
+  max-height: calc(100dvh - 32px - var(--page-safe-area-top));
   margin-top: auto;
   display: flex;
   flex-direction: column;
   overflow: hidden;
   flex-shrink: 0;
+
+  @media (min-width: 600px) {
+    border-radius: var(--radius-md);
+    margin: auto 0;
+  }
 }
 
 .modal-header {
@@ -133,10 +157,10 @@ onUnmounted(() => {
   color: var(--color-text-secondary);
   border-radius: var(--radius-xs);
   transition: background var(--transition-fast);
-}
 
-.modal-close:hover {
-  background: var(--color-empty);
+  &:hover {
+    background: var(--color-empty);
+  }
 }
 
 .modal-body {
@@ -147,55 +171,38 @@ onUnmounted(() => {
 }
 
 .modal-footer {
-  padding: 12px 20px 16px;
+  padding: 12px 20px calc(16px + var(--safe-area-bottom));
   border-top: 1px solid var(--color-border);
   flex-shrink: 0;
 }
 
-/* Transitions */
 .modal-enter-active,
 .modal-leave-active {
   transition: opacity var(--transition-normal);
 }
 
-.modal-enter-active .modal-panel {
-  transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1);
+.modal-enter-active {
+  .modal-panel {
+    transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1);
+  }
 }
 
-.modal-leave-active .modal-panel {
-  transition: transform var(--transition-normal);
+.modal-leave-active {
+  .modal-panel {
+    transition: transform var(--transition-normal);
+  }
 }
 
 .modal-enter-from,
 .modal-leave-to {
   opacity: 0;
-}
-
-.modal-enter-from .modal-panel {
-  transform: translateY(100%);
-}
-
-.modal-leave-to .modal-panel {
-  transform: translateY(100%);
-}
-
-@media (min-width: 600px) {
-  .modal-overlay {
-    align-items: center;
-    padding: 16px;
-  }
 
   .modal-panel {
-    border-radius: var(--radius-md);
-    margin: auto 0;
-  }
+    transform: translateY(100%);
 
-  .modal-enter-from .modal-panel {
-    transform: scale(0.95);
-  }
-
-  .modal-leave-to .modal-panel {
-    transform: scale(0.95);
+    @media (min-width: 600px) {
+      transform: scale(0.95);
+    }
   }
 }
 </style>

@@ -1,0 +1,560 @@
+@use "./styles/mixins" as mixins;
+
+:root {
+  /* ─── Colors: backgrounds & surfaces ─── */
+  --color-bg: #f8f7f3;
+  --color-bg-secondary: #efede8;
+  --color-surface: #ffffff;
+  --color-surface-muted: #eeeae5;
+  --color-text: #252520;
+  --color-text-secondary: #5f5f56;
+  --color-border: #e0ddd6;
+  --color-empty: #f4f3f0;
+
+  /* ─── Colors: primary (mint / lavender) ─── */
+  --color-mint: #8a63b5;
+  --color-mint-hover: #7d56a9;
+  --on-primary: #ffffff;
+
+  /* ─── Colors: semantic (eat / cook) ─── */
+  --color-eat: #6f9737;
+  --color-eat-bg: rgba(111, 151, 55, 0.12);
+  --color-eat-bg-strong: rgba(111, 151, 55, 0.22);
+  --color-cook: #8aaa25;
+  --color-cook-bg: rgba(138, 170, 37, 0.14);
+  --color-cook-bg-strong: rgba(138, 170, 37, 0.22);
+
+  /* ─── Colors: shared / manual ─── */
+  --color-shared: #6b7280;
+  --color-shared-bg: rgba(107, 114, 128, 0.1);
+  --color-shared-accent: #9ca3af;
+  --color-manual-meal: #6b8fbf;
+  --color-manual-meal-bg: rgba(107, 143, 191, 0.12);
+
+  /* ─── Colors: danger ─── */
+  --color-danger: #d64545;
+  --color-danger-dark: #b91c1c;
+  --color-danger-bg: #fee2e2;
+  --color-danger-soft: #fecaca;
+  --color-danger-pale: #fef2f2;
+
+  /* ─── Colors: success ─── */
+  --color-success: #3d8c3d;
+  --color-success-bg: rgba(61, 140, 61, 0.1);
+
+  /* ─── Colors: info ─── */
+  --color-info: #2563eb;
+  --color-info-bg: rgba(37, 99, 235, 0.1);
+
+  /* ─── Colors: focus ─── */
+  --color-focus: var(--color-mint);
+
+  /* ─── Colors: warning ─── */
+  --color-warning: #92661a;
+  --color-warning-bg: #fef9ec;
+  --color-warning-border: #f3d98a;
+  --color-warning-icon: #f59e0b;
+
+  /* ─── Colors: mint alpha palette ─── */
+  --color-mint-alpha-06: rgba(138, 99, 181, 0.06);
+  --color-mint-alpha-08: rgba(138, 99, 181, 0.08);
+  --color-mint-alpha-10: rgba(138, 99, 181, 0.1);
+  --color-mint-alpha-12: rgba(138, 99, 181, 0.12);
+  --color-mint-alpha-16: rgba(138, 99, 181, 0.16);
+  --color-mint-alpha-25: rgba(138, 99, 181, 0.25);
+
+  /* ─── Layout ─── */
+  --safe-area-bottom: var(--tg-safe-area-inset-bottom, env(safe-area-inset-bottom, 0px));
+  --nav-height: calc(70px + var(--safe-area-bottom));
+  --page-safe-area-top: calc(
+    var(--tg-safe-area-inset-top, env(safe-area-inset-top, 0px)) +
+      var(--tg-content-safe-area-inset-top, 0px)
+  );
+  --page-padding-top: calc(12px + var(--page-safe-area-top));
+  --page-padding-top-lg: calc(16px + var(--page-safe-area-top));
+  --overlay-bg: rgba(30, 20, 45, 0.48);
+  --color-surface-glass: rgba(255, 255, 255, 0.92);
+
+  /* ─── Shadows ─── */
+  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02);
+  --shadow-day: 0 1px 4px rgba(0, 0, 0, 0.05), 0 0 0 1px var(--color-border);
+  --shadow-elevated: 0 8px 30px rgba(0, 0, 0, 0.1);
+  --shadow-tab: 0 1px 3px rgba(0, 0, 0, 0.08);
+  --shadow-drag: 0 8px 25px rgba(0, 0, 0, 0.15);
+  --shadow-side: -4px 0 16px rgba(0, 0, 0, 0.1);
+
+  /* ─── Radii ─── */
+  --radius-xs: 8px;
+  --radius-sm: 10px;
+  --radius-md: 16px;
+  --radius-lg: 20px;
+  --radius-pill: 9999px;
+
+  /* ─── Buttons: shared paddings ─── */
+  --btn-padding-sm: 9px 16px;
+  --btn-padding-md: 12px 16px;
+
+  /* ─── Typography ─── */
+  --font-display: 2rem;
+  --font-lg: 18px;
+  --font-md: 16px;
+  --font-base: 15px;
+  --font-body: 14px;
+  --font-sm: 13px;
+  --font-2xs: 12px;
+  --font-xs: 11px;
+
+  /* ─── Transitions ─── */
+  --transition-fast: 0.15s ease;
+  --transition-normal: 0.2s ease;
+  --transition-slow: 0.3s ease;
+
+  /* ─── Press scales ─── */
+  --press-scale-sm: 0.99;
+  --press-scale-md: 0.98;
+  --press-scale-lg: 0.95;
+
+  /* ─── Z-index scale ─── */
+  --z-fab: 800;
+  --z-nav: 900;
+  --z-filter: 950;
+  --z-sheet: 990;
+  --z-modal: 1000;
+  --z-modal-inner: 1010;
+  --z-modal-form: 1020;
+  --z-confirm: 1050;
+  --z-toast: 9999;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+input[type="search"] {
+  &::-webkit-search-cancel-button,
+  &::-webkit-search-decoration,
+  &::-webkit-search-results-button,
+  &::-webkit-search-results-decoration {
+    -webkit-appearance: none;
+    appearance: none;
+    display: none;
+  }
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif;
+  background: var(--color-bg);
+  color: var(--color-text);
+  -webkit-font-smoothing: antialiased;
+  line-height: 1.4;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+*:focus-visible {
+  outline: none;
+  box-shadow:
+    0 0 0 2px var(--color-surface),
+    0 0 0 4px var(--color-mint-alpha-25);
+}
+
+input,
+textarea,
+select {
+  caret-color: var(--color-text) !important;
+}
+
+button,
+a,
+input,
+label,
+select,
+textarea {
+  touch-action: manipulation;
+}
+
+/* ─── Search field with icon + clear button ─── */
+.search-field {
+  position: relative;
+  display: flex;
+  align-items: center;
+
+  &__icon {
+    position: absolute;
+    left: 12px;
+    color: var(--color-text-secondary);
+    pointer-events: none;
+  }
+
+  &__input {
+    width: 100%;
+    @include mixins.form-control-base(10px 36px 10px 36px);
+
+    &::placeholder {
+      color: var(--color-text-secondary);
+      opacity: 0.6;
+    }
+  }
+
+  &__clear {
+    position: absolute;
+    right: 4px;
+    width: 28px;
+    height: 28px;
+    border: none;
+    background: none;
+    color: var(--color-text-secondary);
+    font-size: 18px;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-xs);
+    cursor: pointer;
+    transition:
+      background var(--transition-fast),
+      color var(--transition-fast);
+
+    &:hover {
+      background: var(--color-empty);
+      color: var(--color-text);
+    }
+  }
+}
+
+/* ─── Global form base ─── */
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+
+  &__field {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  &__label {
+    font-size: var(--font-sm);
+    font-weight: 600;
+    color: var(--color-text);
+  }
+
+  &__input,
+  &__select,
+  &__textarea {
+    @include mixins.form-control-base;
+  }
+
+  &__textarea {
+    resize: vertical;
+
+    &--auto {
+      resize: none;
+      overflow: hidden;
+      min-height: 64px;
+    }
+  }
+
+  &__error {
+    font-size: var(--font-sm);
+    color: var(--color-danger);
+    padding: 4px 0;
+  }
+
+  &__required {
+    color: var(--color-danger);
+    font-weight: 400;
+  }
+
+  &__submit {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: var(--radius-sm);
+    background: var(--color-mint);
+    color: var(--on-primary);
+    font-size: var(--font-base);
+    font-weight: 600;
+    transition:
+      background var(--transition-fast),
+      transform var(--transition-fast);
+
+    &:hover:not(:disabled) {
+      background: var(--color-mint-hover);
+    }
+
+    &:active:not(:disabled) {
+      transform: scale(var(--press-scale-md));
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+  }
+}
+
+/* ─── Page layout base ─── */
+.page-layout {
+  max-width: 480px;
+  margin: 0 auto;
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  @media (min-width: 600px) {
+    max-width: 540px;
+  }
+}
+
+/* ─── Global spinner ─── */
+.spinner {
+  width: 28px;
+  height: 28px;
+  border: 3px solid var(--color-border);
+  border-top-color: var(--color-mint);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+
+  &--sm {
+    width: 20px;
+    height: 20px;
+    border-width: 2px;
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ─── Shared tabs (segment control) ─── */
+.tabs {
+  display: flex;
+  gap: 0;
+  background: var(--color-surface-muted);
+  border-radius: var(--radius-sm);
+  padding: 3px;
+
+  &__item {
+    flex: 1;
+    padding: 8px 0;
+    border: none;
+    border-radius: var(--radius-xs);
+    background: transparent;
+    font-size: var(--font-sm);
+    font-weight: 600;
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    transition:
+      background var(--transition-fast),
+      color var(--transition-fast),
+      box-shadow var(--transition-fast);
+    -webkit-tap-highlight-color: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+
+    &:hover:not(&--active) {
+      color: var(--color-text);
+    }
+
+    &--active {
+      background: var(--color-surface);
+      color: var(--color-text);
+      box-shadow: var(--shadow-tab);
+    }
+  }
+
+  &__count {
+    font-size: var(--font-xs);
+    font-weight: 700;
+    opacity: 0.6;
+  }
+}
+
+/* ─── Shared empty state ─── */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 48px 24px;
+  background: var(--color-surface);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
+  text-align: center;
+
+  &__icon {
+    color: var(--color-border);
+  }
+
+  &__text {
+    font-size: var(--font-md);
+    color: var(--color-text-secondary);
+    margin: 0;
+  }
+
+  &__action {
+    padding: 10px 20px;
+    border: none;
+    border-radius: var(--radius-sm);
+    background: var(--color-mint);
+    color: var(--on-primary);
+    font-size: var(--font-md);
+    font-weight: 600;
+    cursor: pointer;
+    transition:
+      background var(--transition-fast),
+      transform var(--transition-fast);
+
+    &:hover {
+      background: var(--color-mint-hover);
+    }
+
+    &:active {
+      transform: scale(var(--press-scale-md));
+    }
+  }
+
+  &__secondary {
+    padding: 8px 16px;
+    border: none;
+    border-radius: var(--radius-sm);
+    background: var(--color-empty);
+    color: var(--color-mint);
+    font-size: var(--font-sm);
+    font-weight: 600;
+    cursor: pointer;
+    transition: background var(--transition-fast);
+
+    &:hover {
+      background: var(--color-border);
+    }
+  }
+}
+
+/* ─── Shared selected-dish (forms) ─── */
+.selected-dish {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  background: var(--color-empty);
+  border-radius: var(--radius-sm);
+  border: 1.5px solid var(--color-mint);
+
+  &__name {
+    flex: 1;
+    font-size: var(--font-base);
+    font-weight: 500;
+  }
+
+  &__clear,
+  &__edit {
+    width: 24px;
+    height: 24px;
+    border: none;
+    background: none;
+    color: var(--color-text-secondary);
+    border-radius: var(--radius-xs);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition:
+      color var(--transition-fast),
+      background var(--transition-fast);
+  }
+
+  &__clear {
+    font-size: 18px;
+
+    &:hover {
+      background: var(--color-border);
+      color: var(--color-danger);
+    }
+  }
+
+  &__edit {
+    &:hover {
+      color: var(--color-mint);
+    }
+  }
+
+  &__replace {
+    flex-shrink: 0;
+    border: none;
+    background: none;
+    font-size: var(--font-sm);
+    font-weight: 500;
+    color: var(--color-text-secondary);
+    padding: 2px 4px;
+    border-radius: var(--radius-xs);
+    cursor: pointer;
+    transition:
+      color var(--transition-fast),
+      background var(--transition-fast);
+
+    &:hover {
+      color: var(--color-danger);
+      background: var(--color-danger-pale);
+    }
+  }
+}
+
+/* ─── Shared ingredient search (forms) ─── */
+.ingredient-search {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  &__list {
+    list-style: none;
+    max-height: 200px;
+    overflow-y: auto;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+  }
+
+  &__item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 12px;
+    cursor: pointer;
+    font-size: var(--font-sm);
+    transition: background var(--transition-fast);
+    -webkit-tap-highlight-color: transparent;
+
+    &:hover,
+    &:active {
+      background: var(--color-empty);
+    }
+
+    & + & {
+      border-top: 1px solid var(--color-border);
+    }
+  }
+
+  &__name {
+    font-size: var(--font-md);
+    color: var(--color-text);
+  }
+
+  &__unit {
+    font-size: var(--font-xs);
+    color: var(--color-text-secondary);
+  }
+}

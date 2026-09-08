@@ -1,17 +1,24 @@
 <template>
   <span class="ownership-badge" :class="isOwn ? 'ownership-badge--own' : 'ownership-badge--shared'">
-    {{ isOwn ? (short ? '👤 Личное' : '👤 Личный рецепт') : (short ? '🌐 Общее' : '🌐 Общий рецепт') }}
+    {{
+      isOwn ? (short ? "👤 Личное" : "👤 Личный рецепт") : short ? "🌐 Общее" : "🌐 Общий рецепт"
+    }}
   </span>
 </template>
 
-<script setup>
-defineProps({
-  isOwn: { type: Boolean, required: true },
-  short: { type: Boolean, default: false },
-})
+<script lang="ts" setup>
+withDefaults(
+  defineProps<{
+    isOwn: boolean
+    short?: boolean
+  }>(),
+  {
+    short: false,
+  }
+)
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .ownership-badge {
   display: inline-flex;
   align-items: center;
@@ -22,15 +29,14 @@ defineProps({
   white-space: nowrap;
   flex-shrink: 0;
   width: fit-content;
-}
 
-.ownership-badge--own {
-  background: var(--color-mint-alpha-12);
-  color: var(--color-mint);
-}
-
-.ownership-badge--shared {
-  background: var(--color-shared-bg);
-  color: var(--color-shared);
+  &--own {
+    background: var(--color-mint-alpha-12);
+    color: var(--color-mint);
+  }
+  &--shared {
+    background: var(--color-shared-bg);
+    color: var(--color-shared);
+  }
 }
 </style>

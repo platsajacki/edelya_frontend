@@ -2,7 +2,7 @@
   <div class="page-layout detail-page">
     <!-- Header -->
     <div class="detail-header">
-      <button class="detail-header__back" @click="goBack" aria-label="Назад">
+      <button class="detail-header__back" aria-label="Назад" @click="goBack">
         <IconChevronLeft />
       </button>
       <div class="detail-header__info">
@@ -10,14 +10,29 @@
         <span class="detail-header__dates">{{ dateRange }}</span>
       </div>
       <div class="detail-header__actions">
-        <button class="detail-header__btn" @click="showEditForm = true" aria-label="Редактировать" title="Редактировать">
-          <IconPencil width="18" height="18" />
+        <button
+          class="detail-header__btn"
+          aria-label="Редактировать"
+          title="Редактировать"
+          @click="showEditForm = true"
+        >
+          <IconPencil :width="20" :height="20" />
         </button>
-        <button class="detail-header__btn" @click="confirmRecalculate" aria-label="Пересчитать" title="Пересчитать">
-          <IconRefresh />
+        <button
+          class="detail-header__btn"
+          aria-label="Пересчитать"
+          title="Пересчитать"
+          @click="confirmRecalculate"
+        >
+          <IconRefresh :width="20" :height="20" />
         </button>
-        <button class="detail-header__btn detail-header__btn--danger" @click="confirmDeleteList" aria-label="Удалить" title="Удалить">
-          <IconTrash />
+        <button
+          class="detail-header__btn detail-header__btn--danger"
+          aria-label="Удалить"
+          title="Удалить"
+          @click="confirmDeleteList"
+        >
+          <IconTrash :width="20" :height="20" />
         </button>
       </div>
     </div>
@@ -36,7 +51,6 @@
           <span v-if="tab.count != null" class="tabs__count">{{ tab.count }}</span>
         </button>
       </div>
-
     </div>
 
     <!-- Loading items -->
@@ -74,7 +88,7 @@
     </div>
 
     <!-- FAB: add item -->
-    <FabButton @click="showAddItem = true" aria-label="Добавить позицию">
+    <FabButton aria-label="Добавить позицию" @click="showAddItem = true">
       <IconPlus />
     </FabButton>
 
@@ -101,10 +115,19 @@
             <h3 class="confirm-panel__title">{{ confirmDialog.title }}</h3>
             <p class="confirm-panel__text">{{ confirmDialog.text }}</p>
             <div class="confirm-panel__actions">
-              <button class="confirm-panel__btn confirm-panel__btn--cancel" @click="confirmDialog = null">Отмена</button>
+              <button
+                class="confirm-panel__btn confirm-panel__btn--cancel"
+                @click="confirmDialog = null"
+              >
+                Отмена
+              </button>
               <button
                 class="confirm-panel__btn"
-                :class="confirmDialog.danger ? 'confirm-panel__btn--danger' : 'confirm-panel__btn--primary'"
+                :class="
+                  confirmDialog.danger
+                    ? 'confirm-panel__btn--danger'
+                    : 'confirm-panel__btn--primary'
+                "
                 :disabled="confirmBusy"
                 @click="confirmDialog.action"
               >
@@ -121,7 +144,7 @@
   </div>
 </template>
 
-<script setup>
+<script lang="ts" setup>
 import { ref, computed, onMounted, watch } from "vue"
 import { useRoute, useRouter } from "vue-router"
 import { useShoppingStore } from "../store/shopping"
@@ -148,7 +171,7 @@ const showAddItem = ref(false)
 const confirmDialog = ref(null)
 const confirmBusy = ref(false)
 
-const listId = computed(() => route.params.id)
+const listId = computed(() => route.params.id as string)
 
 const dateRange = computed(() => {
   if (!store.currentList) return ""
@@ -179,7 +202,8 @@ const filteredGroups = computed(() => {
 })
 
 const emptyText = computed(() => {
-  if (store.items.length === 0) return "В этом списке пока нет позиций. Проверьте, что на эти дни есть готовки. Добавьте вручную или выполните пересчёт."
+  if (store.items.length === 0)
+    return "В этом списке пока нет позиций. Проверьте, что на эти дни есть готовки. Добавьте вручную или выполните пересчёт."
   if (activeFilter.value === "checked") return "Нет купленных позиций"
   if (activeFilter.value === "unchecked") return "Все позиции уже куплены!"
   return "Нет позиций"
@@ -287,97 +311,98 @@ async function doDeleteList() {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .detail-page {
-  padding: 12px 16px calc(var(--nav-height) + 72px);
+  padding: var(--page-padding-top) 16px 72px;
+
+  @media (min-width: 600px) {
+    padding: var(--page-padding-top-lg) 24px 72px;
+  }
 }
 
-/* ---- Header ---- */
 .detail-header {
   display: flex;
   align-items: center;
   gap: 8px;
+
+  &__back {
+    flex-shrink: 0;
+    width: 36px;
+    height: 36px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    background: var(--color-bg);
+    color: var(--color-text);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background var(--transition-fast);
+    -webkit-tap-highlight-color: transparent;
+
+    &:active {
+      background: var(--color-empty);
+    }
+  }
+
+  &__info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__title {
+    font-size: var(--font-lg);
+    font-weight: 700;
+    color: var(--color-text);
+    margin: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__dates {
+    font-size: var(--font-xs);
+    color: var(--color-text-secondary);
+  }
+
+  &__actions {
+    display: flex;
+    gap: 4px;
+    flex-shrink: 0;
+  }
+
+  &__btn {
+    width: 36px;
+    height: 36px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    background: var(--color-bg);
+    color: var(--color-text-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition:
+      background var(--transition-fast),
+      color var(--transition-fast);
+    -webkit-tap-highlight-color: transparent;
+
+    &:active {
+      background: var(--color-empty);
+    }
+
+    &--danger {
+      color: var(--color-danger);
+    }
+  }
 }
 
-.detail-header__back {
-  flex-shrink: 0;
-  width: 36px;
-  height: 36px;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  background: var(--color-bg);
-  color: var(--color-text);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: background var(--transition-fast);
-  -webkit-tap-highlight-color: transparent;
-}
-
-.detail-header__back:active {
-  background: var(--color-empty);
-}
-
-.detail-header__info {
-  flex: 1;
-  min-width: 0;
-}
-
-.detail-header__title {
-  font-size: var(--font-lg);
-  font-weight: 700;
-  color: var(--color-text);
-  margin: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.detail-header__dates {
-  font-size: var(--font-xs);
-  color: var(--color-text-secondary);
-}
-
-.detail-header__actions {
-  display: flex;
-  gap: 4px;
-  flex-shrink: 0;
-}
-
-.detail-header__btn {
-  width: 34px;
-  height: 34px;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  background: var(--color-bg);
-  color: var(--color-text-secondary);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: background var(--transition-fast), color var(--transition-fast);
-  -webkit-tap-highlight-color: transparent;
-}
-
-.detail-header__btn:active {
-  background: var(--color-empty);
-}
-
-.detail-header__btn--danger {
-  color: var(--color-danger);
-}
-
-/* ---- Filters ---- */
 .detail-filters {
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
 
-
-
-/* ---- Loading ---- */
 .detail-loading {
   display: flex;
   align-items: center;
@@ -385,8 +410,6 @@ async function doDeleteList() {
   padding: 40px 0;
 }
 
-
-/* ---- Groups ---- */
 .detail-groups {
   display: flex;
   flex-direction: column;
@@ -397,29 +420,28 @@ async function doDeleteList() {
   display: flex;
   flex-direction: column;
   gap: 2px;
+
+  &__header {
+    font-size: var(--font-sm);
+    font-weight: 700;
+    color: var(--color-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    padding: 6px 12px 4px;
+  }
+
+  &__items {
+    background: var(--color-surface);
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--color-border);
+    overflow: hidden;
+
+    > :deep(.item-row + .item-row) {
+      border-top: 1px solid var(--color-border);
+    }
+  }
 }
 
-.detail-group__header {
-  font-size: var(--font-sm);
-  font-weight: 700;
-  color: var(--color-text-secondary);
-  text-transform: uppercase;
-  letter-spacing: 0.3px;
-  padding: 6px 12px 4px;
-}
-
-.detail-group__items {
-  background: var(--color-surface);
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--color-border);
-  overflow: hidden;
-}
-
-.detail-group__items > :deep(.item-row + .item-row) {
-  border-top: 1px solid var(--color-border);
-}
-
-/* ---- Confirm dialog ---- */
 .confirm-overlay {
   position: fixed;
   inset: 0;
@@ -440,68 +462,68 @@ async function doDeleteList() {
   padding: 24px 20px 20px;
   width: 100%;
   max-width: 340px;
-}
 
-.confirm-panel__title {
-  font-size: var(--font-lg);
-  font-weight: 700;
-  color: var(--color-text);
-  margin: 0 0 8px;
-}
+  &__title {
+    font-size: var(--font-lg);
+    font-weight: 700;
+    color: var(--color-text);
+    margin: 0 0 8px;
+  }
 
-.confirm-panel__text {
-  font-size: var(--font-sm);
-  color: var(--color-text-secondary);
-  margin: 0 0 20px;
-  line-height: 1.5;
-}
+  &__text {
+    font-size: var(--font-sm);
+    color: var(--color-text-secondary);
+    margin: 0 0 20px;
+    line-height: 1.5;
+  }
 
-.confirm-panel__actions {
-  display: flex;
-  gap: 8px;
-  justify-content: flex-end;
-}
+  &__actions {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+  }
 
-.confirm-panel__btn {
-  padding: 10px 18px;
-  border: none;
-  border-radius: var(--radius-sm);
-  font-size: var(--font-sm);
-  font-weight: 600;
-  cursor: pointer;
-  transition: background var(--transition-fast);
-}
+  &__btn {
+    padding: var(--btn-padding-md);
+    border: none;
+    border-radius: var(--radius-sm);
+    font-size: var(--font-sm);
+    font-weight: 600;
+    cursor: pointer;
+    transition: background var(--transition-fast);
 
-.confirm-panel__btn--cancel {
-  background: var(--color-empty);
-  color: var(--color-text);
-}
+    &:disabled {
+      opacity: 0.5;
+      pointer-events: none;
+    }
 
-.confirm-panel__btn--cancel:hover {
-  background: var(--color-border);
-}
+    &--cancel {
+      background: var(--color-empty);
+      color: var(--color-text);
 
-.confirm-panel__btn--primary {
-  background: var(--color-mint);
-  color: var(--on-primary);
-}
+      &:hover {
+        background: var(--color-border);
+      }
+    }
 
-.confirm-panel__btn--primary:hover {
-  background: var(--color-mint-hover);
-}
+    &--primary {
+      background: var(--color-mint);
+      color: var(--on-primary);
 
-.confirm-panel__btn--danger {
-  background: var(--color-danger);
-  color: var(--on-primary);
-}
+      &:hover {
+        background: var(--color-mint-hover);
+      }
+    }
 
-.confirm-panel__btn--danger:hover {
-  background: var(--color-danger-dark);
-}
+    &--danger {
+      background: var(--color-danger);
+      color: var(--on-primary);
 
-.confirm-panel__btn:disabled {
-  opacity: 0.5;
-  pointer-events: none;
+      &:hover {
+        background: var(--color-danger-dark);
+      }
+    }
+  }
 }
 
 .modal-enter-active,
@@ -512,11 +534,5 @@ async function doDeleteList() {
 .modal-enter-from,
 .modal-leave-to {
   opacity: 0;
-}
-
-@media (min-width: 600px) {
-  .detail-page {
-    padding: 16px 24px 88px;
-  }
 }
 </style>

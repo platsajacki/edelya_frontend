@@ -6,12 +6,22 @@
   </Transition>
 </template>
 
-<script setup>
-defineProps({ message: { type: String, default: '' } })
-defineEmits(['dismiss'])
+<script lang="ts" setup>
+withDefaults(
+  defineProps<{
+    message?: string
+  }>(),
+  {
+    message: "",
+  }
+)
+
+defineEmits<{
+  (e: "dismiss"): void
+}>()
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .toast {
   position: fixed;
   bottom: 80px;
@@ -31,7 +41,9 @@ defineEmits(['dismiss'])
 
 .toast-enter-active,
 .toast-leave-active {
-  transition: opacity 0.25s ease, transform 0.25s ease;
+  transition:
+    opacity 0.25s ease,
+    transform 0.25s ease;
 }
 
 .toast-enter-from,

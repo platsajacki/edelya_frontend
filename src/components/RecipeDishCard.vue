@@ -1,94 +1,106 @@
 <template>
   <button class="dish-card" type="button" @click="$emit('tap', dish)">
-    <div class="dish-card__main">
-      <span class="dish-card__name">{{ dish.name }}</span>
-      <span class="dish-card__meta">
-        <span v-if="dish.category?.name" class="dish-card__category">{{ dish.category.name }}</span>
-        <span class="dish-card__ingredients">
-          {{ ingredientCount }} {{ ingredientWord }}
-        </span>
+    <span class="dish-card__name">{{ dish.name }}</span>
+    <span v-if="dish.category?.name" class="dish-card__category">{{ dish.category.name }}</span>
+    <div v-if="visibleIngredients.length" class="dish-card__ingredients">
+      <span v-for="di in visibleIngredients" :key="di.id" class="dish-card__ingredient-chip">
+        {{ di.ingredient.name }}
+      </span>
+      <span v-if="extraIngredientsCount > 0" class="dish-card__ingredients-more">
+        +{{ extraIngredientsCount }}
       </span>
     </div>
   </button>
 </template>
 
-<script setup>
+<script lang="ts" setup>
 import { computed } from "vue"
+import type { DTODish } from "@/types/dish"
 
-const props = defineProps({
-  dish: { type: Object, required: true },
-})
+const props = defineProps<{
+  dish: DTODish
+}>()
 
-defineEmits(["tap"])
+defineEmits<{
+  (e: "tap", dish: DTODish): void
+}>()
 
-const ingredientCount = computed(() => props.dish.dish_ingredients?.length ?? 0)
+const MAX_VISIBLE_INGREDIENTS = 3
 
-const ingredientWord = computed(() => {
-  const n = ingredientCount.value
-  const mod10 = n % 10
-  const mod100 = n % 100
-  if (mod100 >= 11 && mod100 <= 14) return "ингредиентов"
-  if (mod10 === 1) return "ингредиент"
-  if (mod10 >= 2 && mod10 <= 4) return "ингредиента"
-  return "ингредиентов"
-})
+const visibleIngredients = computed(
+  () => props.dish.dish_ingredients?.slice(0, MAX_VISIBLE_INGREDIENTS) ?? []
+)
+
+const extraIngredientsCount = computed(() =>
+  Math.max((props.dish.dish_ingredients?.length ?? 0) - MAX_VISIBLE_INGREDIENTS, 0)
+)
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .dish-card {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
   width: 100%;
-  padding: 14px 14px;
+  padding: 16px;
   background: var(--color-surface);
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-md);
   text-align: left;
   cursor: pointer;
-  transition: background var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast), transform var(--transition-fast);
+  transition:
+    background var(--transition-fast),
+    box-shadow var(--transition-fast),
+    border-color var(--transition-fast),
+    transform var(--transition-fast);
   -webkit-tap-highlight-color: transparent;
-}
 
-.dish-card:hover {
-  box-shadow: var(--shadow-card);
-  border-color: var(--color-mint-alpha-10);
-}
+  &:hover {
+    box-shadow: var(--shadow-card);
+    border-color: var(--color-mint-alpha-10);
+  }
 
-.dish-card:active {
-  transform: scale(var(--press-scale-sm));
-}
+  &:active {
+    transform: scale(var(--press-scale-sm));
+  }
 
-.dish-card__main {
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-  min-width: 0;
-}
+  &__name {
+    width: 100%;
+    font-size: var(--font-md);
+    font-weight: 700;
+    color: var(--color-text);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
 
-.dish-card__name {
-  font-size: var(--font-base);
-  font-weight: 600;
-  color: var(--color-text);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
+  &__category {
+    font-size: var(--font-sm);
+    color: var(--color-text-secondary);
+  }
 
-.dish-card__meta {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: var(--font-xs);
-  color: var(--color-text-secondary);
-}
+  &__ingredients {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    margin-top: 2px;
+  }
 
-.dish-card__category {
-  font-weight: 500;
-}
+  &__ingredient-chip {
+    padding: 5px 12px;
+    border-radius: var(--radius-lg);
+    background: var(--color-mint-alpha-10);
+    font-size: var(--font-xs);
+    font-weight: 500;
+    color: var(--color-text);
+  }
 
-.dish-card__ingredients {
-  opacity: 0.7;
+  &__ingredients-more {
+    font-size: var(--font-xs);
+    font-weight: 500;
+    color: var(--color-text-secondary);
+  }
 }
 </style>

@@ -1,0 +1,46 @@
+@mixin form-control-base($padding: 10px 12px) {
+  padding: $padding;
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-md);
+  font-family: inherit;
+  background: var(--color-surface);
+  color: var(--color-text);
+  outline: none;
+  transition:
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast);
+
+  &:focus {
+    border-color: var(--color-mint-alpha-25);
+    box-shadow: 0 0 0 3px var(--color-mint-alpha-10);
+  }
+}
+
+@mixin expand-transition($max-height: 2000px) {
+  .expand-enter-active {
+    transition:
+      opacity var(--transition-normal),
+      max-height 0.35s ease;
+    overflow: hidden;
+  }
+
+  .expand-leave-active {
+    transition:
+      opacity var(--transition-fast),
+      max-height 0.25s ease;
+    overflow: hidden;
+  }
+
+  .expand-enter-from,
+  .expand-leave-to {
+    opacity: 0;
+    max-height: 0;
+  }
+
+  .expand-enter-to,
+  .expand-leave-from {
+    opacity: 1;
+    max-height: #{$max-height};
+  }
+}

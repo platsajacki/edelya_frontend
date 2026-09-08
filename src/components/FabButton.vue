@@ -4,10 +4,9 @@
   </button>
 </template>
 
-<script setup>
-</script>
+<script lang="ts" setup></script>
 
-<style scoped>
+<style lang="scss" scoped>
 .fab {
   position: fixed;
   bottom: calc(var(--nav-height) + 10px);
@@ -23,15 +22,16 @@
   align-items: center;
   justify-content: center;
   z-index: var(--z-fab);
-  transition: background var(--transition-fast), transform var(--transition-fast);
+  transition:
+    background var(--transition-fast),
+    transform var(--transition-fast);
   -webkit-tap-highlight-color: transparent;
-}
 
-.fab:hover {
-  background: var(--color-mint-hover);
-}
-
-.fab:active {
-  transform: scale(var(--press-scale-lg));
+  &:hover {
+    background: var(--color-mint-hover);
+  }
+  &:active {
+    transform: scale(var(--press-scale-lg));
+  }
 }
 </style>

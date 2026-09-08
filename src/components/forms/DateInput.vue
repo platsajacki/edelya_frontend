@@ -26,16 +26,21 @@
   </div>
 </template>
 
-<script setup>
+<script lang="ts" setup>
 import { ref, computed } from "vue"
 import IconCalendar from "../icons/IconCalendar.vue"
 
-const props = defineProps({
-  modelValue: { type: String, default: "" },
-  required: { type: Boolean, default: false },
-})
+const props = withDefaults(
+  defineProps<{
+    modelValue?: string
+    required?: boolean
+  }>(),
+  { modelValue: "", required: false }
+)
 
-const emit = defineEmits(["update:modelValue"])
+const emit = defineEmits<{
+  (e: "update:modelValue", value: string): void
+}>()
 
 const displayValue = computed(() => {
   if (!props.modelValue) return ""
@@ -44,10 +49,10 @@ const displayValue = computed(() => {
   return `${d.padStart(2, "0")}.${m.padStart(2, "0")}.${y}`
 })
 
-function onTextInput(e) {
-  let v = e.target.value.replace(/[^\d.]/g, "")
+function onTextInput(e: Event) {
+  const input = e.target as HTMLInputElement
+  let v = input.value.replace(/[^\d.]/g, "")
 
-  // Auto-insert dots after DD and MM
   const digits = v.replace(/\./g, "")
   if (digits.length >= 4) {
     v = digits.slice(0, 2) + "." + digits.slice(2, 4) + "." + digits.slice(4, 8)
@@ -55,7 +60,7 @@ function onTextInput(e) {
     v = digits.slice(0, 2) + "." + digits.slice(2)
   }
 
-  e.target.value = v
+  input.value = v
 
   const match = v.match(/^(\d{2})\.(\d{2})\.(\d{4})$/)
   if (match) {
@@ -64,74 +69,62 @@ function onTextInput(e) {
   }
 }
 
-function onBlur(e) {
-  // Restore formatted value on blur
-  e.target.value = displayValue.value
+function onBlur(e: FocusEvent) {
+  ;(e.target as HTMLInputElement).value = displayValue.value
 }
 
-const pickerRef = ref(null)
+const pickerRef = ref<HTMLInputElement | null>(null)
 
-function onPickerInput(e) {
-  emit("update:modelValue", e.target.value)
+function onPickerInput(e: Event) {
+  emit("update:modelValue", (e.target as HTMLInputElement).value)
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
+@use "../../styles/mixins" as mixins;
+
 .date-input {
   position: relative;
-}
 
-.date-input__text {
-  width: 100%;
-  padding: 10px 36px 10px 12px;
-  border: 1.5px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  font-size: var(--font-md);
-  font-family: inherit;
-  background: var(--color-surface);
-  color: var(--color-text);
-  outline: none;
-  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
-  box-sizing: border-box;
-}
+  &__text {
+    width: 100%;
+    box-sizing: border-box;
+    @include mixins.form-control-base(10px 36px 10px 12px);
+  }
 
-.date-input__text:focus {
-  border-color: var(--color-mint-alpha-25);
-  box-shadow: 0 0 0 3px var(--color-mint-alpha-10);
-}
+  &__btn {
+    position: absolute;
+    right: 4px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    border: none;
+    background: none;
+    cursor: pointer;
+    color: var(--color-text-secondary);
+    overflow: hidden;
 
-.date-input__btn {
-  position: absolute;
-  right: 4px;
-  top: 50%;
-  transform: translateY(-50%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  padding: 0;
-  border: none;
-  background: none;
-  cursor: pointer;
-  color: var(--color-text-secondary);
-  overflow: hidden;
-}
+    svg {
+      width: 22px;
+      height: 22px;
+      pointer-events: none;
+    }
+  }
 
-.date-input__btn svg {
-  width: 18px;
-  height: 18px;
-  pointer-events: none;
-}
-
-.date-input__picker {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  opacity: 0;
-  border: none;
-  padding: 0;
-  cursor: pointer;
+  &__picker {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+  }
 }
 </style>

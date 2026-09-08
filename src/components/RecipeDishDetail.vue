@@ -18,11 +18,11 @@
         <span class="detail__label">Состав</span>
         <ul class="detail__ingredients">
           <li v-for="di in dish.dish_ingredients" :key="di.id" class="detail__ingredient">
-            <span class="detail__ingredient-name">{{ di.ingredient?.name ?? di.name }}</span>
+            <span class="detail__ingredient-name">{{ di.ingredient.name }}</span>
             <span class="detail__ingredient-right">
               <span v-if="di.is_optional" class="detail__ingredient-optional">опц.</span>
               <span class="detail__ingredient-amount">
-                {{ formatShoppingAmount(di.amount, di.ingredient?.base_unit ?? di.base_unit).display }}
+                {{ formatShoppingAmount(di.amount, di.ingredient.base_unit).display }}
               </span>
             </span>
           </li>
@@ -36,14 +36,12 @@
     <template #footer>
       <div class="detail__actions">
         <button class="detail__btn detail__btn--edit" @click="handleDishEdit">
-          {{ isOwn ? 'Редактировать рецепт' : 'Создать личную копию' }}
+          {{ isOwn ? "Редактировать рецепт" : "Создать личную копию" }}
         </button>
         <button v-if="isOwn" class="detail__btn detail__btn--delete" @click="confirming = true">
           Удалить
         </button>
-        <button class="detail__btn detail__btn--cancel" @click="open = false">
-          Закрыть
-        </button>
+        <button class="detail__btn detail__btn--cancel" @click="open = false">Закрыть</button>
       </div>
     </template>
   </ModalWrapper>
@@ -52,33 +50,19 @@
   <ModalWrapper v-model="confirming" title="Подтверждение" :z-index="1050">
     <p class="detail__confirm-text">Удалить блюдо «{{ dish.name }}»?</p>
     <div class="detail__confirm-actions">
-      <button class="detail__btn detail__btn--delete" @click="confirmDelete">
-        Удалить
-      </button>
-      <button class="detail__btn detail__btn--cancel" @click="confirming = false">
-        Отмена
-      </button>
+      <button class="detail__btn detail__btn--delete" @click="confirmDelete">Удалить</button>
+      <button class="detail__btn detail__btn--cancel" @click="confirming = false">Отмена</button>
     </div>
   </ModalWrapper>
 
   <!-- Edit DishForm (own dishes) -->
-  <DishForm
-    v-model="showDishForm"
-    :z-index="1020"
-    :edit-dish="dish"
-    @updated="onDishUpdated"
-  />
+  <DishForm v-model="showDishForm" :z-index="1020" :edit-dish="dish" @updated="onDishUpdated" />
 
   <!-- Clone DishForm -->
-  <DishForm
-    v-model="showCloneForm"
-    :z-index="1020"
-    :clone-dish="dish"
-    @created="onCloneCreated"
-  />
+  <DishForm v-model="showCloneForm" :z-index="1020" :clone-dish="dish" @created="onCloneCreated" />
 </template>
 
-<script setup>
+<script lang="ts" setup>
 import { ref, computed, watch } from "vue"
 import ModalWrapper from "./forms/ModalWrapper.vue"
 import DishForm from "./forms/DishForm.vue"
@@ -86,46 +70,61 @@ import OwnershipBadge from "./OwnershipBadge.vue"
 import { fetchDish } from "../services/dishService"
 import { formatShoppingAmount } from "../utils/formatShoppingAmount"
 import { isDishOwn } from "../utils/dishOwnership"
+import type { DTODish } from "@/types/dish"
 
-const props = defineProps({
-  modelValue: { type: Boolean, required: true },
-  dish: { type: Object, default: () => ({}) },
-})
+const props = defineProps<{
+  modelValue: boolean
+  dish: DTODish | null
+}>()
 
-const emit = defineEmits(["update:modelValue", "deleted", "updated"])
+const emit = defineEmits<{
+  (e: "update:modelValue", value: boolean): void
+  (e: "deleted", id: string): void
+  (e: "updated"): void
+}>()
 
 const open = ref(props.modelValue)
-watch(() => props.modelValue, (v) => { open.value = v })
-watch(open, (v) => { emit("update:modelValue", v) })
+watch(
+  () => props.modelValue,
+  (v) => {
+    open.value = v
+  }
+)
+watch(open, (v) => {
+  emit("update:modelValue", v)
+})
 
 const confirming = ref(false)
 const showDishForm = ref(false)
 const showCloneForm = ref(false)
 const loadingFull = ref(false)
-const fullDish = ref(null)
+const fullDish = ref<DTODish | null>(null)
 
 const isOwn = computed(() => isDishOwn(dish.value))
 
 const dish = computed(() => fullDish.value || props.dish)
 
 // When opening, fetch full dish data if ingredients are missing
-watch(() => props.modelValue, async (v) => {
-  if (v) {
-    confirming.value = false
-    fullDish.value = null
+watch(
+  () => props.modelValue,
+  async (v) => {
+    if (v) {
+      confirming.value = false
+      fullDish.value = null
 
-    if (!props.dish.dish_ingredients?.length && props.dish.id) {
-      loadingFull.value = true
-      try {
-        fullDish.value = await fetchDish(props.dish.id)
-      } catch {
-        // Use partial data
-      } finally {
-        loadingFull.value = false
+      if (!props.dish.dish_ingredients?.length && props.dish.id) {
+        loadingFull.value = true
+        try {
+          fullDish.value = await fetchDish(props.dish.id)
+        } catch {
+          // Use partial data
+        } finally {
+          loadingFull.value = false
+        }
       }
     }
   }
-})
+)
 
 function handleDishEdit() {
   if (isOwn.value) {
@@ -141,7 +140,7 @@ function confirmDelete() {
   emit("deleted", dish.value.id)
 }
 
-function onDishUpdated(updatedDish) {
+function onDishUpdated(updatedDish: DTODish | null) {
   showDishForm.value = false
   if (updatedDish) fullDish.value = updatedDish
   emit("updated")
@@ -155,14 +154,16 @@ function onCloneCreated() {
 </script>
 
 <style>
-@import '../styles/detail-sheet.css';
+@import "../styles/detail-sheet.scss";
 </style>
 
-<style scoped>
-.detail__loading {
-  text-align: center;
-  font-size: var(--font-sm);
-  color: var(--color-text-secondary);
-  padding: 12px 0;
+<style lang="scss" scoped>
+.detail {
+  &__loading {
+    text-align: center;
+    font-size: var(--font-sm);
+    color: var(--color-text-secondary);
+    padding: 12px 0;
+  }
 }
 </style>

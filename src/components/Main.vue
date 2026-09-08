@@ -3,27 +3,31 @@
     <WeekNav
       :label="planning.weekLabel"
       :disabled="planning.loading"
-      @prev="planning.prevWeek"
-      @next="planning.nextWeek"
+      :is-current-week="planning.isCurrentWeek"
+      @prev="goPrevWeek"
+      @next="goNextWeek"
+      @today="goToToday"
       @create-shopping-week="handleCreateShoppingWeek"
     />
 
-    <WeekGrid
-      :week-data="planning.weekData"
-      :class="{ 'planner__grid--loading': planning.loading }"
-      @add-cooking="openCookingForm"
-      @add-meal="openMealForm"
-      @tap-cooking="openCookingDetail"
-      @tap-meal="openMealDetail"
-      @drag-end="onDragEnd"
-      @create-shopping-day="handleCreateShoppingDay"
-    />
+    <div class="planner__grid-wrap" :class="{ 'planner__grid-wrap--loading': planning.loading }">
+      <Transition :name="weekTransitionName">
+        <WeekGrid
+          :key="planning.weekData.start_week"
+          :week-data="planning.weekData"
+          @add-cooking="openCookingForm"
+          @add-meal="openMealForm"
+          @tap-cooking="openCookingDetail"
+          @tap-meal="openMealDetail"
+          @drag-end="onDragEnd"
+          @create-shopping-day="handleCreateShoppingDay"
+        />
+      </Transition>
+    </div>
 
     <div v-if="planning.loadError" class="planner__error">
       <span>Не удалось загрузить неделю</span>
-      <button class="planner__error-retry" @click="planning.loadWeek()">
-        Повторить
-      </button>
+      <button class="planner__error-retry" @click="planning.loadWeek()">Повторить</button>
     </div>
 
     <!-- Create / Edit forms -->
@@ -66,16 +70,25 @@
       :date-to="pendingShoppingPayload?.date_to ?? ''"
       :loading="shoppingCreating"
       :no-items="shoppingNoItems"
-      @update:date-from="val => { if (pendingShoppingPayload) pendingShoppingPayload.date_from = val }"
-      @update:date-to="val => { if (pendingShoppingPayload) pendingShoppingPayload.date_to = val }"
+      @update:date-from="
+        (val) => {
+          if (pendingShoppingPayload) pendingShoppingPayload.date_from = val
+        }
+      "
+      @update:date-to="
+        (val) => {
+          if (pendingShoppingPayload) pendingShoppingPayload.date_to = val
+        }
+      "
       @confirm="onConfirmShopping"
     />
   </div>
 </template>
 
-<script setup>
+<script lang="ts" setup>
 import { onMounted, ref, computed } from "vue"
 import { useRouter } from "vue-router"
+import type { WebAppUser } from "@twa-dev/types"
 import WeekNav from "./WeekNav.vue"
 import WeekGrid from "./WeekGrid.vue"
 import CookingEventForm from "./forms/CookingEventForm.vue"
@@ -88,22 +101,20 @@ import { fetchCookingEvent } from "../services/planningService"
 import { formatDateRuShort } from "../utils/formatDate"
 import { getTodayISO } from "../utils/weekDays"
 import Toast from "./Toast.vue"
+import type { DTOCookingEvent, DTOMealPlanItem } from "@/types/planning"
 
-defineProps({
-  user: {
-    type: Object,
-    required: true,
-  },
-})
+defineProps<{
+  user: WebAppUser
+}>()
 
 const planning = usePlanningStore()
 const shopping = useShoppingStore()
 const router = useRouter()
 
 // --- Shopping confirm ---
-const showShoppingConfirm    = ref(false)
-const shoppingCreating       = ref(false)
-const pendingShoppingPayload = ref(null)
+const showShoppingConfirm = ref(false)
+const shoppingCreating = ref(false)
+const pendingShoppingPayload = ref<{ date_from: string; date_to: string } | null>(null)
 
 const shoppingNoItems = computed(() => {
   if (!pendingShoppingPayload.value) return false
@@ -113,43 +124,52 @@ const shoppingNoItems = computed(() => {
 })
 
 const weekEndDate = computed(() => {
-  const start = new Date(planning.weekData.start_week + 'T00:00:00')
+  const start = new Date(planning.weekData.start_week + "T00:00:00")
   start.setDate(start.getDate() + 6)
-  return `${start.getFullYear()}-${String(start.getMonth() + 1).padStart(2, '0')}-${String(start.getDate()).padStart(2, '0')}`
+  return `${start.getFullYear()}-${String(start.getMonth() + 1).padStart(2, "0")}-${String(start.getDate()).padStart(2, "0")}`
 })
 
-function hasCookingInRange(dateFrom, dateTo) {
+function hasCookingInRange(dateFrom: string, dateTo: string): boolean {
   const sources = [planning.weekData, planning.nextWeekData].filter(Boolean)
-  return sources.some(data =>
-    data.cooking_events.some(e => e.cooking_date >= dateFrom && e.cooking_date <= dateTo)
+  return sources.some((data) =>
+    data.cooking_events.some((e) => e.cooking_date >= dateFrom && e.cooking_date <= dateTo)
   )
 }
 
-function handleCreateShoppingDay({ rawDate }) {
+function handleCreateShoppingDay({ rawDate }: { rawDate: string }) {
   pendingShoppingPayload.value = {
     date_from: rawDate,
-    date_to:   rawDate,
+    date_to: rawDate,
   }
   showShoppingConfirm.value = true
 }
 
-function handleCreateShoppingWeek({ dateFrom, dateTo } = {}) {
+function handleCreateShoppingWeek({
+  dateFrom,
+  dateTo,
+}: { dateFrom?: string; dateTo?: string } = {}) {
   const today = getTodayISO()
-  const from = dateFrom || (today >= planning.weekData.start_week && today <= weekEndDate.value ? today : planning.weekData.start_week)
+  const from =
+    dateFrom ||
+    (today >= planning.weekData.start_week && today <= weekEndDate.value
+      ? today
+      : planning.weekData.start_week)
   const to = dateTo || weekEndDate.value
   pendingShoppingPayload.value = {
     date_from: from,
-    date_to:   to,
+    date_to: to,
   }
   showShoppingConfirm.value = true
 }
 
-async function onConfirmShopping(name) {
+async function onConfirmShopping(name: string) {
   if (!pendingShoppingPayload.value) return
   const { date_from, date_to } = pendingShoppingPayload.value
-  const resolvedName = name || ((!date_to || date_from === date_to)
-    ? `Продукты на ${formatDateRuShort(date_from)}`
-    : `Продукты на неделю ${formatDateRuShort(date_from)}–${formatDateRuShort(date_to)}`)
+  const resolvedName =
+    name ||
+    (!date_to || date_from === date_to
+      ? `Продукты на ${formatDateRuShort(date_from)}`
+      : `Продукты на неделю ${formatDateRuShort(date_from)}–${formatDateRuShort(date_to)}`)
   shoppingCreating.value = true
   try {
     const list = await shopping.createList({ name: resolvedName, date_from, date_to })
@@ -163,19 +183,19 @@ async function onConfirmShopping(name) {
 // --- Create flow ---
 const showCookingForm = ref(false)
 const showMealForm = ref(false)
-const editCookingItem = ref(null)
-const editMealItem = ref(null)
+const editCookingItem = ref<DTOCookingEvent | null>(null)
+const editMealItem = ref<DTOMealPlanItem | null>(null)
 
 const initialCookingDate = ref("")
 const initialMealDate = ref("")
 
-function openCookingForm(date) {
+function openCookingForm(date: string) {
   editCookingItem.value = null
   initialCookingDate.value = date || ""
   showCookingForm.value = true
 }
 
-function openMealForm(date) {
+function openMealForm(date: string) {
   editMealItem.value = null
   initialMealDate.value = date || ""
   showMealForm.value = true
@@ -184,43 +204,62 @@ function openMealForm(date) {
 // --- Detail flow ---
 const showCookingDetail = ref(false)
 const showMealDetail = ref(false)
-const detailItem = ref(null)
+const detailItem = ref<DTOCookingEvent | DTOMealPlanItem | null>(null)
 
-function openCookingDetail(item) {
+function openCookingDetail(item: DTOCookingEvent) {
   detailItem.value = item
   showCookingDetail.value = true
 }
 
-function openMealDetail(item) {
+function openMealDetail(item: DTOMealPlanItem) {
   detailItem.value = item
   showMealDetail.value = true
 }
 
-async function onViewCookingFromMeal(cookingEventId) {
-    showMealDetail.value = false
-    let event = planning.weekData.cooking_events.find((e) => e.id === cookingEventId)
-    if (!event) {
-      try {
-        event = await fetchCookingEvent(cookingEventId)
-      } catch {
-        planning.showToast("Не удалось загрузить готовку")
-        return
-      }
+async function onViewCookingFromMeal(cookingEventId: string) {
+  showMealDetail.value = false
+  let event = planning.weekData.cooking_events.find((e) => e.id === cookingEventId)
+  if (!event) {
+    try {
+      event = await fetchCookingEvent(cookingEventId)
+    } catch {
+      planning.showToast("Не удалось загрузить готовку")
+      return
     }
-    detailItem.value = event
-    showCookingDetail.value = true
+  }
+  detailItem.value = event
+  showCookingDetail.value = true
+}
+
+// --- Week navigation direction ---
+const weekTransitionName = ref<"slide-forward" | "slide-back">("slide-forward")
+
+function goPrevWeek() {
+  weekTransitionName.value = "slide-back"
+  planning.prevWeek()
+}
+
+function goNextWeek() {
+  weekTransitionName.value = "slide-forward"
+  planning.nextWeek()
+}
+
+function goToToday() {
+  weekTransitionName.value =
+    getTodayISO() > planning.weekData.end_week ? "slide-forward" : "slide-back"
+  planning.goToToday()
 }
 
 // --- Edit from detail ---
 function onEditCooking() {
-  const item = detailItem.value
+  const item = detailItem.value as DTOCookingEvent
   showCookingDetail.value = false
   editCookingItem.value = item
   showCookingForm.value = true
 }
 
 function onEditMeal() {
-  const item = detailItem.value
+  const item = detailItem.value as DTOMealPlanItem
   showMealDetail.value = false
   editMealItem.value = item
   showMealForm.value = true
@@ -247,7 +286,7 @@ async function onDeleteMeal() {
   }
 }
 
-function onDragEnd(data) {
+function onDragEnd(data: Parameters<typeof planning.handleDragEnd>[0]) {
   planning.handleDragEnd(data)
 }
 
@@ -256,44 +295,46 @@ onMounted(() => {
 })
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .planner {
-  padding: 12px 16px var(--nav-height);
+  padding: var(--page-padding-top) 16px 16px;
   position: relative;
-}
 
-.planner__grid--loading {
-  opacity: 0.5;
-  transition: opacity var(--transition-normal);
-  pointer-events: none;
-}
+  @media (min-width: 600px) {
+    padding: var(--page-padding-top-lg) 24px 24px;
+  }
 
-.planner__error {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  padding: 14px 16px;
-  background: var(--color-danger-pale);
-  border: 1px solid var(--color-danger-soft);
-  border-radius: var(--radius-sm);
-  font-size: var(--font-body);
-  color: var(--color-danger-dark);
-}
+  &__grid-wrap {
+    position: relative;
 
-.planner__error-retry {
-  padding: 6px 16px;
-  border: none;
-  border-radius: var(--radius-sm);
-  background: var(--color-danger);
-  color: var(--on-primary);
-  font-size: var(--font-sm);
-  font-weight: 600;
-}
+    &--loading {
+      opacity: 0.75;
+      transition: opacity var(--transition-normal);
+      pointer-events: none;
+    }
+  }
 
-@media (min-width: 600px) {
-  .planner {
-    padding: 16px 24px 88px;
+  &__error {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 14px 16px;
+    background: var(--color-danger-pale);
+    border: 1px solid var(--color-danger-soft);
+    border-radius: var(--radius-sm);
+    font-size: var(--font-body);
+    color: var(--color-danger-dark);
+
+    &-retry {
+      padding: var(--btn-padding-sm);
+      border: none;
+      border-radius: var(--radius-sm);
+      background: var(--color-danger);
+      color: var(--on-primary);
+      font-size: var(--font-sm);
+      font-weight: 600;
+    }
   }
 }
 </style>

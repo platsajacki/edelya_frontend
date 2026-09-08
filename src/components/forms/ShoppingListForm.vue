@@ -1,9 +1,21 @@
 <template>
-  <ModalWrapper v-model="open" :title="isEdit ? 'Редактировать список' : 'Новый список покупок'" :z-index="zIndex">
+  <ModalWrapper
+    v-model="open"
+    :title="isEdit ? 'Редактировать список' : 'Новый список покупок'"
+    :z-index="zIndex"
+  >
     <form id="shopping-list-form" class="form" @submit.prevent="submit">
       <label class="form__field">
         <span class="form__label">Название <span class="form__required">*</span></span>
-        <input v-model="name" type="text" class="form__input" required placeholder="Например: Продукты на неделю" @input="onNameInput" />
+        <input
+          v-model="name"
+          v-autofocus.select
+          type="text"
+          class="form__input"
+          required
+          placeholder="Например: Продукты на неделю"
+          @input="onNameInput"
+        />
       </label>
 
       <label class="form__field">
@@ -17,36 +29,47 @@
       </label>
 
       <div v-if="isEdit && datesChanged" class="form__warning">
-        <IconWarning width="14" height="14" />
+        <IconWarning :width="14" :height="14" />
         При сохранении список покупок будет пересчитан на основе готовок за новый период.
       </div>
 
       <div v-if="error" ref="errorRef" class="form__error">{{ error }}</div>
-
     </form>
 
     <template #footer>
       <button type="submit" form="shopping-list-form" class="form__submit" :disabled="saving">
-        {{ saving ? "Сохранение..." : (isEdit ? "Сохранить" : "Создать") }}
+        {{ saving ? "Сохранение..." : isEdit ? "Сохранить" : "Создать" }}
       </button>
     </template>
   </ModalWrapper>
 </template>
 
-<script setup>
+<script lang="ts" setup>
 import { ref, computed, watch, nextTick } from "vue"
 import ModalWrapper from "./ModalWrapper.vue"
 import DateInput from "./DateInput.vue"
 import { useShoppingStore } from "../../store/shopping"
 import IconWarning from "../icons/IconWarning.vue"
+import { AutoFocusDirective as vAutofocus } from "@/directives/autofocus"
+import type { DTOShoppingList } from "@/types/shopping"
 
-const props = defineProps({
-  modelValue: { type: Boolean, required: true },
-  zIndex: { type: Number, default: 1010 },
-  editList: { type: Object, default: null },
-})
+const props = withDefaults(
+  defineProps<{
+    modelValue: boolean
+    zIndex?: number
+    editList?: DTOShoppingList | null
+  }>(),
+  {
+    zIndex: 1010,
+    editList: null,
+  }
+)
 
-const emit = defineEmits(["update:modelValue", "created", "updated"])
+const emit = defineEmits<{
+  (e: "update:modelValue", value: boolean): void
+  (e: "created", list: DTOShoppingList): void
+  (e: "updated", list: DTOShoppingList): void
+}>()
 
 const isEdit = computed(() => !!props.editList)
 
@@ -56,17 +79,24 @@ const datesChanged = computed(() => {
 })
 
 const open = ref(props.modelValue)
-watch(() => props.modelValue, (v) => { open.value = v })
-watch(open, (v) => { emit("update:modelValue", v) })
+watch(
+  () => props.modelValue,
+  (v) => {
+    open.value = v
+  }
+)
+watch(open, (v) => {
+  emit("update:modelValue", v)
+})
 
 const name = ref("")
 const dateFrom = ref("")
 const dateTo = ref("")
 const saving = ref(false)
 const error = ref("")
-const errorRef = ref(null)
+const errorRef = ref<HTMLElement | null>(null)
 watch(error, (val) => {
-  if (val) nextTick(() => errorRef.value?.scrollIntoView({ behavior: 'smooth', block: 'nearest' }))
+  if (val) nextTick(() => errorRef.value?.scrollIntoView({ behavior: "smooth", block: "nearest" }))
 })
 const nameManuallyEdited = ref(false)
 
@@ -78,33 +108,36 @@ function todayISO() {
   return `${y}-${m}-${day}`
 }
 
-function formatDateShort(iso) {
+function formatDateShort(iso: string) {
   if (!iso) return ""
   const [, m, d] = iso.split("-")
   return `${d}.${m}`
 }
 
-function generateName(from, to) {
+function generateName(from: string, to: string) {
   if (from && to) return `Список покупок ${formatDateShort(from)}–${formatDateShort(to)}`
   if (from) return `Список покупок с ${formatDateShort(from)}`
   return ""
 }
 
-watch(() => props.modelValue, (v) => {
-  if (v) {
-    error.value = ""
-    nameManuallyEdited.value = false
-    if (props.editList) {
-      name.value = props.editList.name || ""
-      dateFrom.value = props.editList.date_from || ""
-      dateTo.value = props.editList.date_to || ""
-    } else {
-      dateFrom.value = todayISO()
-      dateTo.value = ""
-      name.value = generateName(dateFrom.value, dateTo.value)
+watch(
+  () => props.modelValue,
+  (v) => {
+    if (v) {
+      error.value = ""
+      nameManuallyEdited.value = false
+      if (props.editList) {
+        name.value = props.editList.name || ""
+        dateFrom.value = props.editList.date_from || ""
+        dateTo.value = props.editList.date_to || ""
+      } else {
+        dateFrom.value = todayISO()
+        dateTo.value = ""
+        name.value = generateName(dateFrom.value, dateTo.value)
+      }
     }
   }
-})
+)
 
 watch([dateFrom, dateTo], ([from, to]) => {
   if (!isEdit.value && !nameManuallyEdited.value) {
@@ -125,8 +158,11 @@ function validate() {
 }
 
 async function submit() {
-  error.value = validate()
-  if (error.value) return
+  const validationError = validate()
+  if (validationError) {
+    error.value = validationError
+    return
+  }
   saving.value = true
   try {
     const payload = {
@@ -136,7 +172,7 @@ async function submit() {
     }
     const store = useShoppingStore()
     if (isEdit.value) {
-      const data = await store.updateList(props.editList.id, payload)
+      const data = await store.updateList(props.editList!.id, payload)
       emit("updated", data)
     } else {
       const data = await store.createList(payload)
@@ -144,30 +180,32 @@ async function submit() {
     }
     open.value = false
   } catch (err) {
-    error.value = err.message || "Не удалось сохранить список"
+    error.value = err instanceof Error ? err.message : "Не удалось сохранить список"
   } finally {
     saving.value = false
   }
 }
 </script>
 
-<style scoped>
-.form__warning {
-  display: flex;
-  align-items: flex-start;
-  gap: 7px;
-  font-size: var(--font-sm);
-  color: var(--color-warning);
-  background: var(--color-warning-bg);
-  border: 1px solid var(--color-warning-border);
-  border-radius: var(--radius-sm);
-  padding: 9px 12px;
-  line-height: 1.45;
-}
+<style lang="scss" scoped>
+.form {
+  &__warning {
+    display: flex;
+    align-items: flex-start;
+    gap: 7px;
+    font-size: var(--font-sm);
+    color: var(--color-warning);
+    background: var(--color-warning-bg);
+    border: 1px solid var(--color-warning-border);
+    border-radius: var(--radius-sm);
+    padding: 9px 12px;
+    line-height: 1.45;
 
-.form__warning svg {
-  flex-shrink: 0;
-  margin-top: 1px;
-  color: var(--color-warning-icon);
+    svg {
+      flex-shrink: 0;
+      margin-top: 1px;
+      color: var(--color-warning-icon);
+    }
+  }
 }
 </style>

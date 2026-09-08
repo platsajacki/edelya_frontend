@@ -8,8 +8,8 @@
         :title="sortAsc ? 'Переключить: сначала новые' : 'Переключить: сначала старые'"
         @click="sortAsc = !sortAsc"
       >
-        <IconSort :ascending="sortAsc" />
-        {{ sortAsc ? 'Сначала новые' : 'Сначала старые' }}
+        <IconSort />
+        {{ sortAsc ? "Сначала новые" : "Сначала старые" }}
       </button>
     </div>
 
@@ -26,8 +26,8 @@
       <button
         v-if="searchQuery"
         class="search-field__clear"
-        @click="clearSearch"
         aria-label="Очистить"
+        @click="clearSearch"
       >
         &times;
       </button>
@@ -46,40 +46,30 @@
 
     <!-- Empty state: no lists at all -->
     <div v-else-if="!store.lists.length" class="empty-state">
-      <IconShoppingBag class="empty-state__icon" width="48" height="48" />
+      <IconShoppingBag class="empty-state__icon" :width="52" :height="52" />
       <p class="empty-state__text">Нет списков покупок</p>
-      <button class="empty-state__action" @click="showForm = true">
-        + Создать список
-      </button>
+      <button class="empty-state__action" @click="showForm = true">+ Создать список</button>
     </div>
 
     <!-- Lists -->
     <div v-else class="shopping-list">
-      <ShoppingListCard
-        v-for="list in sortedLists"
-        :key="list.id"
-        :list="list"
-        @tap="openList"
-      />
+      <ShoppingListCard v-for="list in sortedLists" :key="list.id" :list="list" @tap="openList" />
     </div>
 
     <!-- FAB -->
-    <FabButton @click="showForm = true" aria-label="Создать список">
+    <FabButton aria-label="Создать список" @click="showForm = true">
       <IconPlus />
     </FabButton>
 
     <!-- Create form -->
-    <ShoppingListForm
-      v-model="showForm"
-      @created="onListCreated"
-    />
+    <ShoppingListForm v-model="showForm" @created="onListCreated" />
 
     <!-- Toast -->
     <Toast :message="store.toast" @dismiss="store.toast = null" />
   </div>
 </template>
 
-<script setup>
+<script lang="ts" setup>
 import { ref, computed, onMounted, onUnmounted } from "vue"
 import { useRouter } from "vue-router"
 
@@ -140,45 +130,50 @@ function onListCreated(list) {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .shopping-page {
-  padding: 12px 16px calc(var(--nav-height) + 72px);
+  padding: var(--page-padding-top) 16px 72px;
+
+  @media (min-width: 600px) {
+    padding: var(--page-padding-top-lg) 24px 72px;
+  }
 }
 
 .shopping-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
+
+  &__sort {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    background: none;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    padding: 5px 10px;
+    font-size: var(--font-xs);
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    transition:
+      border-color var(--transition-fast),
+      color var(--transition-fast);
+    -webkit-tap-highlight-color: transparent;
+
+    &:active {
+      color: var(--color-mint);
+      border-color: var(--color-mint);
+    }
+  }
+
+  &__title {
+    font-size: var(--font-lg);
+    font-weight: 700;
+    color: var(--color-text);
+    margin: 0;
+  }
 }
 
-.shopping-header__sort {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  background: none;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  padding: 5px 10px;
-  font-size: var(--font-xs);
-  color: var(--color-text-secondary);
-  cursor: pointer;
-  transition: border-color var(--transition-fast), color var(--transition-fast);
-  -webkit-tap-highlight-color: transparent;
-}
-
-.shopping-header__sort:active {
-  color: var(--color-mint);
-  border-color: var(--color-mint);
-}
-
-.shopping-header__title {
-  font-size: var(--font-lg);
-  font-weight: 700;
-  color: var(--color-text);
-  margin: 0;
-}
-
-/* Loading */
 .shopping-loading {
   display: flex;
   align-items: center;
@@ -186,16 +181,9 @@ function onListCreated(list) {
   padding: 40px 0;
 }
 
-/* List */
 .shopping-list {
   display: flex;
   flex-direction: column;
   gap: 8px;
-}
-
-@media (min-width: 600px) {
-  .shopping-page {
-    padding: 16px 24px 88px;
-  }
 }
 </style>

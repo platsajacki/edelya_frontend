@@ -1,0 +1,34 @@
+import { createRouter, createWebHistory } from "vue-router"
+import { useAuthStore } from "../store/auth"
+import HomePage from "../pages/HomePage.vue"
+import ShoppingPage from "../pages/ShoppingPage.vue"
+import ShoppingListDetailPage from "../pages/ShoppingListDetailPage.vue"
+import RecipesPage from "../pages/RecipesPage.vue"
+import CabinetPage from "../pages/CabinetPage.vue"
+import TermsPage from "../pages/TermsPage.vue"
+import PrivacyPage from "../pages/PrivacyPage.vue"
+
+const routes = [
+  { path: "/", component: HomePage },
+  { path: "/shopping", component: ShoppingPage },
+  { path: "/shopping/:id", component: ShoppingListDetailPage, meta: { requiresAuth: true } },
+  { path: "/recipes", component: RecipesPage },
+  { path: "/cabinet", component: CabinetPage },
+  { path: "/terms", component: TermsPage },
+  { path: "/privacy", component: PrivacyPage },
+]
+
+export const router = createRouter({
+  history: createWebHistory(),
+  routes,
+})
+
+router.beforeEach((to) => {
+  if (to.meta.requiresAuth && !useAuthStore().user) {
+    return "/"
+  }
+})
+
+if (import.meta.env.VITE_DEBUG === "1") {
+  router.addRoute({ path: "/dev/icons", component: () => import("@/pages/DevIconsPage.vue") })
+}

@@ -8,25 +8,29 @@
   </button>
 </template>
 
-<script setup>
+<script lang="ts" setup>
 import { computed } from "vue"
 import { formatYMDtoDDMMYYYY } from "../utils/formatDate"
 import IconChevronRight from "./icons/IconChevronRight.vue"
+import type { DTOShoppingList } from "@/types/shopping"
 
-const props = defineProps({
-  list: { type: Object, required: true },
-})
+const props = defineProps<{
+  list: DTOShoppingList
+}>()
 
-defineEmits(["tap"])
+defineEmits<{
+  (e: "tap", list: DTOShoppingList): void
+}>()
 
 const dateRange = computed(() => {
   const from = formatYMDtoDDMMYYYY(props.list.date_from)
+  if (props.list.date_from === props.list.date_to) return from
   const to = formatYMDtoDDMMYYYY(props.list.date_to)
   return `${from} – ${to}`
 })
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .shopping-card {
   display: flex;
   align-items: center;
@@ -36,46 +40,50 @@ const dateRange = computed(() => {
   padding: 14px 14px;
   background: var(--color-surface);
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-md);
   text-align: left;
   cursor: pointer;
-  transition: background var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast), transform var(--transition-fast);
+  transition:
+    background var(--transition-fast),
+    box-shadow var(--transition-fast),
+    border-color var(--transition-fast),
+    transform var(--transition-fast);
   -webkit-tap-highlight-color: transparent;
-}
 
-.shopping-card:hover {
-  box-shadow: var(--shadow-card);
-  border-color: var(--color-mint-alpha-10);
-}
+  &:hover {
+    box-shadow: var(--shadow-card);
+    border-color: var(--color-mint-alpha-10);
+  }
 
-.shopping-card:active {
-  transform: scale(var(--press-scale-sm));
-}
+  &:active {
+    transform: scale(var(--press-scale-sm));
+  }
 
-.shopping-card__main {
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-  min-width: 0;
-}
+  &__main {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
+  }
 
-.shopping-card__name {
-  font-size: var(--font-base);
-  font-weight: 600;
-  color: var(--color-text);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
+  &__name {
+    font-size: var(--font-base);
+    font-weight: 600;
+    color: var(--color-text);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
 
-.shopping-card__dates {
-  font-size: var(--font-xs);
-  color: var(--color-text-secondary);
-}
+  &__dates {
+    font-size: var(--font-xs);
+    color: var(--color-text-secondary);
+  }
 
-.shopping-card__chevron {
-  flex-shrink: 0;
-  color: var(--color-text-secondary);
-  opacity: 0.5;
+  &__chevron {
+    flex-shrink: 0;
+    color: var(--color-text-secondary);
+    opacity: 0.5;
+  }
 }
 </style>
