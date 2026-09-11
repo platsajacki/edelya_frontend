@@ -1,5 +1,13 @@
 @use "./styles/mixins" as mixins;
 
+@font-face {
+  font-family: "Onest";
+  src: url("./assets/fonts/onest/Onest-VariableFont_wght.ttf") format("truetype");
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+}
+
 :root {
   /* ─── Colors: backgrounds & surfaces ─── */
   --color-bg: #f8f7f3;
@@ -146,7 +154,8 @@ input[type="search"] {
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif;
+  font-family: "Onest", -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto,
+    sans-serif;
   background: var(--color-bg);
   color: var(--color-text);
   -webkit-font-smoothing: antialiased;
@@ -168,6 +177,7 @@ button {
 input,
 textarea,
 select {
+  font-family: inherit;
   caret-color: var(--color-text) !important;
 }
 

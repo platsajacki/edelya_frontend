@@ -1,5 +1,8 @@
 <template>
-  <div v-if="loading" class="app-loading">
+  <LandingShell v-if="!miniApp">
+    <RouterView />
+  </LandingShell>
+  <div v-else-if="loading" class="app-loading">
     <div class="spinner" />
   </div>
   <ConsentScreen v-else-if="auth.requiresConsent" />
@@ -16,19 +19,25 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted } from "vue"
+import { defineAsyncComponent, ref, onMounted } from "vue"
 import { useRouter } from "vue-router"
 import { useAuthStore } from "./store/auth"
 import { useSubscriptionStore } from "./store/subscription"
+import { isMiniApp } from "./dom/isMiniApp"
 import BottomNav from "./components/BottomNav.vue"
 import ConsentScreen from "./components/ConsentScreen.vue"
+
+const LandingShell = defineAsyncComponent(() => import("./components/landing/LandingShell.vue"))
 
 const auth = useAuthStore()
 const subscription = useSubscriptionStore()
 const router = useRouter()
+const miniApp = isMiniApp()
 const loading = ref(true)
 
 onMounted(async () => {
+  if (!miniApp) return
+
   const tg = window.Telegram?.WebApp
 
   try {
