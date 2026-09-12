@@ -1,5 +1,5 @@
 <template>
-  <ModalWrapper v-model="open" :title="modalTitle" :z-index="zIndex">
+  <ModalWrapper v-model="open" :title="modalTitle" :z-index="zIndex" keep-focused-field-visible>
     <form id="ai-dish-form" class="form" @submit.prevent="submit">
       <template v-if="step === 'input'">
         <div class="ai-draft__intro">

@@ -14,7 +14,7 @@
               <IconClose />
             </button>
           </div>
-          <div class="modal-body">
+          <div ref="bodyRef" class="modal-body">
             <slot />
           </div>
           <div v-if="$slots.footer" class="modal-footer">
@@ -27,7 +27,7 @@
 </template>
 
 <script lang="ts" setup>
-import { watch, onUnmounted } from "vue"
+import { ref, watch, onUnmounted } from "vue"
 import IconClose from "@/components/icons/IconClose.vue"
 import { useModalBackButton } from "@/composables/useModalBackButton"
 
@@ -36,10 +36,12 @@ const props = withDefaults(
     modelValue: boolean
     title?: string
     zIndex?: number
+    keepFocusedFieldVisible?: boolean
   }>(),
   {
     title: "",
     zIndex: 1000,
+    keepFocusedFieldVisible: false,
   }
 )
 
@@ -47,16 +49,23 @@ const emit = defineEmits<{
   (e: "update:modelValue", value: boolean): void
 }>()
 
+const bodyRef = ref<HTMLElement | null>(null)
+let focusFrame = 0
+
 function close() {
   emit("update:modelValue", false)
 }
 
 function onFocusIn(e: FocusEvent) {
-  const el = e.target as HTMLElement
-  if (el.tagName !== "INPUT" && el.tagName !== "TEXTAREA" && el.tagName !== "SELECT") return
+  scrollToField(e.target as HTMLElement)
+}
 
-  requestAnimationFrame(() => {
-    window.scrollTo(0, 0)
+function scrollToField(el: Element | null) {
+  if (!el?.matches("input, textarea, select") || !bodyRef.value?.contains(el)) return
+  cancelAnimationFrame(focusFrame)
+  focusFrame = requestAnimationFrame(() => {
+    if (!props.modelValue || !el.isConnected) return
+    if (!props.keepFocusedFieldVisible) window.scrollTo(0, 0)
 
     const scrollParent = el.closest(".modal-body")
     if (!scrollParent) return
@@ -64,13 +73,39 @@ function onFocusIn(e: FocusEvent) {
     const parentRect = scrollParent.getBoundingClientRect()
     const elBottom = elRect.bottom - parentRect.top
     const elTop = elRect.top - parentRect.top
-    if (elBottom > scrollParent.clientHeight - 8) {
-      scrollParent.scrollTop += elBottom - scrollParent.clientHeight + 16
-    } else if (elTop < 0) {
-      scrollParent.scrollTop += elTop - 8
-    }
+    const delta =
+      elBottom > scrollParent.clientHeight - 8
+        ? elBottom - scrollParent.clientHeight + 16
+        : elTop < 0
+          ? elTop - 8
+          : 0
+    const smooth =
+      props.keepFocusedFieldVisible &&
+      !window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    if (delta) scrollParent.scrollBy({ top: delta, behavior: smooth ? "smooth" : "instant" })
   })
 }
+
+watch(
+  () => props.modelValue && props.keepFocusedFieldVisible,
+  (enabled, _, onCleanup) => {
+    if (!enabled) return
+    const tg = window.Telegram?.WebApp
+    const viewport = window.visualViewport
+    const reveal = () => scrollToField(document.activeElement)
+    const onViewportChanged = ({ isStateStable }: { isStateStable: boolean }) => {
+      if (isStateStable) reveal()
+    }
+    tg?.onEvent("viewportChanged", onViewportChanged)
+    viewport?.addEventListener("resize", reveal)
+    onCleanup(() => {
+      tg?.offEvent("viewportChanged", onViewportChanged)
+      viewport?.removeEventListener("resize", reveal)
+      cancelAnimationFrame(focusFrame)
+    })
+  },
+  { immediate: true }
+)
 
 let savedOverflow = ""
 
@@ -87,6 +122,7 @@ watch(
 )
 
 onUnmounted(() => {
+  cancelAnimationFrame(focusFrame)
   document.body.style.overflow = savedOverflow
 })
 
