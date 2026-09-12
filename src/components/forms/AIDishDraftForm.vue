@@ -25,6 +25,7 @@
           <textarea
             ref="sourceTextRef"
             v-model="sourceText"
+            v-keyboard-avoid
             class="form__textarea ai-draft__source"
             rows="8"
             :maxlength="MAX_SOURCE_LENGTH"
@@ -136,7 +137,7 @@
 
         <label class="form__field">
           <span class="form__label">Название <span class="form__required">*</span></span>
-          <input v-model="payload.name" type="text" class="form__input" required />
+          <input v-model="payload.name" v-keyboard-avoid type="text" class="form__input" required />
         </label>
 
         <label class="form__field">
@@ -153,6 +154,7 @@
           <span class="form__label">Рецепт <span class="form__required">*</span></span>
           <textarea
             v-model="payload.recipe"
+            v-keyboard-avoid
             class="form__textarea ai-draft__recipe"
             rows="5"
             required
@@ -195,7 +197,7 @@
               >
                 <label v-if="ingredientDraft.new" class="form__field">
                   <span class="form__label">Название</span>
-                  <input v-model="ingredientDraft.name" type="text" class="form__input" />
+                  <input v-model="ingredientDraft.name" v-keyboard-avoid type="text" class="form__input" />
                 </label>
 
                 <button
@@ -222,6 +224,7 @@
                     <input
                       v-model="inlineReplaceQuery"
                       v-autofocus.select
+                      v-keyboard-avoid
                       type="search"
                       class="form__input"
                       placeholder="Поиск ингредиента..."
@@ -269,6 +272,7 @@
                   ref="amountInputRef"
                   v-model="ingredientDraft.amount"
                   v-autofocus.select
+                  v-keyboard-avoid
                   type="text"
                   inputmode="decimal"
                   autocomplete="off"
@@ -387,6 +391,7 @@
               <input
                 v-model="ingredientSearchQuery"
                 v-autofocus
+                v-keyboard-avoid
                 type="search"
                 class="form__input"
                 placeholder="Поиск ингредиента..."
@@ -467,6 +472,7 @@
 
 <script lang="ts" setup>
 import { AutoFocusDirective as vAutofocus } from "@/directives/autofocus"
+import { KeyboardAvoidDirective as vKeyboardAvoid } from "@/directives/keyboardAvoid"
 import { computed, nextTick, onUnmounted, ref, watch } from "vue"
 import ModalWrapper from "./ModalWrapper.vue"
 import IngredientForm from "./IngredientForm.vue"
