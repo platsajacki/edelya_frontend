@@ -24,7 +24,7 @@ defineEmits<{
 <style lang="scss" scoped>
 .toast {
   position: fixed;
-  bottom: 80px;
+  bottom: calc(var(--nav-height) + 20px);
   left: 50%;
   transform: translateX(-50%);
   padding: 12px 20px;
