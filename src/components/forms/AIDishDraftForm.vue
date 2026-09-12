@@ -25,7 +25,6 @@
           <textarea
             ref="sourceTextRef"
             v-model="sourceText"
-            v-autofocus
             class="form__textarea ai-draft__source"
             rows="8"
             :maxlength="MAX_SOURCE_LENGTH"
