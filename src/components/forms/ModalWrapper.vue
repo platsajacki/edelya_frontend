@@ -27,7 +27,7 @@
 </template>
 
 <script lang="ts" setup>
-import { watch, onUnmounted } from "vue"
+import { watch, onMounted, onUnmounted } from "vue"
 import IconClose from "@/components/icons/IconClose.vue"
 import { useModalBackButton } from "@/composables/useModalBackButton"
 
@@ -51,26 +51,43 @@ function close() {
   emit("update:modelValue", false)
 }
 
+function isField(el: Element | null): el is HTMLElement {
+  return !!el && ["INPUT", "TEXTAREA", "SELECT"].includes(el.tagName)
+}
+
+function scrollFieldIntoView() {
+  const el = document.activeElement
+  if (!isField(el)) return
+
+  const scrollParent = el.closest(".modal-body")
+  if (!scrollParent) return
+  const elRect = el.getBoundingClientRect()
+  const parentRect = scrollParent.getBoundingClientRect()
+  const elBottom = elRect.bottom - parentRect.top
+  const elTop = elRect.top - parentRect.top
+  if (elBottom > scrollParent.clientHeight - 8) {
+    scrollParent.scrollTop += elBottom - scrollParent.clientHeight + 16
+  } else if (elTop < 0) {
+    scrollParent.scrollTop += elTop - 8
+  }
+}
+
 function onFocusIn(e: FocusEvent) {
-  const el = e.target as HTMLElement
-  if (el.tagName !== "INPUT" && el.tagName !== "TEXTAREA" && el.tagName !== "SELECT") return
+  if (!isField(e.target as Element)) return
 
   requestAnimationFrame(() => {
     window.scrollTo(0, 0)
-
-    const scrollParent = el.closest(".modal-body")
-    if (!scrollParent) return
-    const elRect = el.getBoundingClientRect()
-    const parentRect = scrollParent.getBoundingClientRect()
-    const elBottom = elRect.bottom - parentRect.top
-    const elTop = elRect.top - parentRect.top
-    if (elBottom > scrollParent.clientHeight - 8) {
-      scrollParent.scrollTop += elBottom - scrollParent.clientHeight + 16
-    } else if (elTop < 0) {
-      scrollParent.scrollTop += elTop - 8
-    }
+    scrollFieldIntoView()
   })
 }
+
+function onViewportResize() {
+  if (!props.modelValue) return
+  requestAnimationFrame(scrollFieldIntoView)
+}
+
+onMounted(() => window.visualViewport?.addEventListener("resize", onViewportResize))
+onUnmounted(() => window.visualViewport?.removeEventListener("resize", onViewportResize))
 
 let savedOverflow = ""
 
@@ -103,7 +120,7 @@ useModalBackButton(() => props.modelValue, close)
   display: flex;
   align-items: flex-end;
   justify-content: center;
-  padding: var(--sheet-inset-top) 0 0;
+  padding: var(--sheet-inset-top) 0 var(--keyboard-inset);
   overflow-y: auto;
   overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
@@ -111,7 +128,7 @@ useModalBackButton(() => props.modelValue, close)
 
   @media (min-width: 600px) {
     align-items: center;
-    padding: var(--sheet-inset-top) 16px 16px;
+    padding: var(--sheet-inset-top) 16px calc(16px + var(--keyboard-inset));
   }
 }
 

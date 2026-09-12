@@ -393,6 +393,7 @@ onUnmounted(() => {
   align-items: flex-end;
   justify-content: center;
   padding-top: var(--sheet-inset-top);
+  padding-bottom: var(--keyboard-inset);
 }
 
 .picker-panel {
