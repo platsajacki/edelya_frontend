@@ -103,12 +103,12 @@
         v-if="showPreview"
         class="picker-overlay"
         :style="{ zIndex: zIndex + 20 }"
-        @click.self="showPreview = false"
+        @click.self="closePreview"
       >
         <div class="picker-panel picker-panel--preview">
           <div class="picker-header">
             <h3 class="picker-title">{{ previewDish?.name }}</h3>
-            <button class="picker-close" aria-label="Закрыть" @click="showPreview = false">
+            <button class="picker-close" aria-label="Закрыть" @click="closePreview">
               &times;
             </button>
           </div>
@@ -168,6 +168,7 @@ import { formatShoppingAmount } from "../utils/formatShoppingAmount"
 import OwnershipBadge from "./OwnershipBadge.vue"
 import CategoryChips from "./CategoryChips.vue"
 import IconSearch from "./icons/IconSearch.vue"
+import { useModalBackButton } from "@/composables/useModalBackButton"
 import type { DTODish, DTODishCategory } from "@/types/dish"
 
 const PAGE_SIZE = 20
@@ -308,6 +309,13 @@ function close() {
   emit("update:modelValue", false)
 }
 
+function closePreview() {
+  showPreview.value = false
+}
+
+useModalBackButton(() => props.modelValue, close)
+useModalBackButton(() => showPreview.value, closePreview)
+
 // Body scroll lock
 watch(
   () => props.modelValue,
@@ -329,6 +337,7 @@ watch(
       setupObserver()
     } else {
       document.body.style.overflow = savedOverflow
+      closePreview()
       destroyObserver()
     }
   }
@@ -383,6 +392,7 @@ onUnmounted(() => {
   display: flex;
   align-items: flex-end;
   justify-content: center;
+  padding-top: var(--sheet-inset-top);
 }
 
 .picker-panel {
@@ -391,14 +401,14 @@ onUnmounted(() => {
   box-shadow: var(--shadow-elevated);
   width: 100%;
   max-width: 420px;
-  height: calc(100dvh - 32px);
+  height: 100%;
   display: flex;
   flex-direction: column;
   overflow: hidden;
 
   &--preview {
     height: auto;
-    max-height: calc(100dvh - 32px);
+    max-height: 100%;
   }
 }
 
@@ -528,6 +538,7 @@ onUnmounted(() => {
   flex: 1;
   overflow-y: auto;
   overscroll-behavior: contain;
+  padding-bottom: var(--safe-area-bottom);
 }
 
 .picker-list {
@@ -620,7 +631,7 @@ onUnmounted(() => {
 }
 
 .picker-preview-footer {
-  padding: 12px 16px 16px;
+  padding: 12px 16px calc(16px + var(--safe-area-bottom));
   border-top: 1px solid var(--color-border);
   flex-shrink: 0;
 }

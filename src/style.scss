@@ -80,6 +80,7 @@
   );
   --page-padding-top: calc(12px + var(--page-safe-area-top));
   --page-padding-top-lg: calc(16px + var(--page-safe-area-top));
+  --sheet-inset-top: calc(32px + var(--page-safe-area-top));
   --overlay-bg: rgba(30, 20, 45, 0.48);
   --color-surface-glass: rgba(255, 255, 255, 0.92);
 

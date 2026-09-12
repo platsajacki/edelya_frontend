@@ -2,7 +2,12 @@
   <Teleport to="body">
     <Transition name="modal">
       <div v-if="modelValue" class="modal-overlay" :style="{ zIndex }" @click.self="close">
-        <div class="modal-panel" @mousedown.stop @focusin="onFocusIn">
+        <div
+          class="modal-panel"
+          :class="{ 'modal-panel--no-footer': !$slots.footer }"
+          @mousedown.stop
+          @focusin="onFocusIn"
+        >
           <div class="modal-header">
             <h3 class="modal-title">{{ title }}</h3>
             <button class="modal-close" aria-label="Закрыть" @click="close">
@@ -98,7 +103,7 @@ useModalBackButton(() => props.modelValue, close)
   display: flex;
   align-items: flex-end;
   justify-content: center;
-  padding: 0;
+  padding: var(--sheet-inset-top) 0 0;
   overflow-y: auto;
   overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
@@ -106,7 +111,7 @@ useModalBackButton(() => props.modelValue, close)
 
   @media (min-width: 600px) {
     align-items: center;
-    padding: 16px;
+    padding: var(--sheet-inset-top) 16px 16px;
   }
 }
 
@@ -116,7 +121,7 @@ useModalBackButton(() => props.modelValue, close)
   box-shadow: var(--shadow-elevated);
   width: 100%;
   max-width: 420px;
-  max-height: calc(100dvh - 32px - var(--page-safe-area-top));
+  max-height: 100%;
   margin-top: auto;
   display: flex;
   flex-direction: column;
@@ -168,6 +173,10 @@ useModalBackButton(() => props.modelValue, close)
   overflow-y: auto;
   flex: 1;
   overscroll-behavior: contain;
+
+  .modal-panel--no-footer & {
+    padding-bottom: calc(16px + var(--safe-area-bottom));
+  }
 }
 
 .modal-footer {

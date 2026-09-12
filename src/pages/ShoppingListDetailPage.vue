@@ -451,7 +451,7 @@ async function doDeleteList() {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 16px;
+  padding: var(--sheet-inset-top) 16px calc(16px + var(--safe-area-bottom));
   z-index: var(--z-confirm);
 }
 
