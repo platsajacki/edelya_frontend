@@ -1,93 +1,101 @@
 <template>
-  <div class="item-row" :class="{ 'item-row--checked': item.is_checked }">
-    <!-- Circle check -->
-    <button
-      class="item-row__check"
-      :class="{ 'item-row__check--on': item.is_checked }"
-      type="button"
-      :disabled="toggling"
-      :aria-pressed="item.is_checked"
-      :aria-label="`Куплено: ${itemName}`"
-      @click="$emit('toggle-checked', item)"
-    >
-      <IconCheck v-if="item.is_checked" />
-    </button>
+  <div
+    class="item-row"
+    :class="{ 'item-row--checked': item.is_checked, 'item-row--editing': editing }"
+  >
+    <div class="item-row__main">
+      <!-- Circle check -->
+      <button
+        class="item-row__check"
+        :class="{ 'item-row__check--on': item.is_checked }"
+        type="button"
+        :disabled="toggling"
+        :aria-pressed="item.is_checked"
+        :aria-label="`Куплено: ${itemName}`"
+        @click="$emit('toggle-checked', item)"
+      >
+        <IconCheck v-if="item.is_checked" />
+      </button>
 
-    <!-- Name + sub-line -->
-    <div class="item-row__info">
-      <div class="item-row__name-row">
-        <span class="item-row__name">{{ itemName }}</span>
-        <span
-          v-if="item.is_manual"
-          class="item-row__manual-badge"
-          title="Добавлено вручную"
-          role="img"
-          aria-label="Добавлено вручную"
-          >✏️</span
+      <!-- Name + sub-line -->
+      <div class="item-row__info">
+        <div class="item-row__name-row">
+          <span class="item-row__name">{{ itemName }}</span>
+          <span
+            v-if="item.is_manual"
+            class="item-row__manual-badge"
+            title="Добавлено вручную"
+            role="img"
+            aria-label="Добавлено вручную"
+            >✏️</span
+          >
+        </div>
+        <span v-if="isToTaste" class="item-row__taste">по вкусу</span>
+      </div>
+    </div>
+
+    <div class="item-row__controls">
+      <!-- Pill stepper (unchecked, not to_taste) -->
+      <div v-if="showControls" class="item-row__stepper">
+        <button
+          class="item-row__step-btn"
+          type="button"
+          :disabled="!canDecrease"
+          aria-label="Уменьшить"
+          @click="$emit('adjust', item, -step)"
         >
+          −
+        </button>
+
+        <div v-if="editing" class="item-row__step-center item-row__step-center--editing">
+          <span class="item-row__step-label" aria-hidden="true">{{ formatted.display }}</span>
+          <input
+            v-model="editValue"
+            v-autofocus.select
+            v-keyboard-avoid
+            type="text"
+            inputmode="decimal"
+            autocomplete="off"
+            class="item-row__step-input"
+            :aria-label="`Количество: ${itemName}`"
+            @keydown.enter.prevent="commitEdit"
+            @keydown.escape.prevent="cancelEdit"
+            @blur="commitEdit"
+          />
+        </div>
+        <button
+          v-else
+          type="button"
+          class="item-row__step-center item-row__step-center--button"
+          :aria-label="`Изменить количество: ${formatted.display}`"
+          @click="startEdit"
+        >
+          <span class="item-row__step-label">{{ formatted.display }}</span>
+        </button>
+
+        <button
+          class="item-row__step-btn"
+          type="button"
+          aria-label="Увеличить"
+          @click="$emit('adjust', item, step)"
+        >
+          +
+        </button>
       </div>
-      <span v-if="isToTaste" class="item-row__taste">по вкусу</span>
-    </div>
 
-    <!-- Pill stepper (unchecked, not to_taste) -->
-    <div v-if="showControls" class="item-row__stepper">
-      <button
-        class="item-row__step-btn"
-        type="button"
-        :disabled="!canDecrease"
-        aria-label="Уменьшить"
-        @click="$emit('adjust', item, -step)"
-      >
-        −
-      </button>
+      <!-- Static amount when checked or no controls -->
+      <span v-else-if="!isToTaste" class="item-row__amount-done">{{ formatted.display }}</span>
 
-      <div v-if="editing" class="item-row__step-center">
-        <input
-          v-model="editValue"
-          v-autofocus.select
-          v-keyboard-avoid
-          type="text"
-          inputmode="decimal"
-          autocomplete="off"
-          class="item-row__step-input"
-          :aria-label="`Количество: ${itemName}`"
-          @keydown.enter.prevent="commitEdit"
-          @keydown.escape.prevent="cancelEdit"
-          @blur="commitEdit"
-        />
-      </div>
+      <!-- Delete -->
       <button
-        v-else
+        class="item-row__delete"
         type="button"
-        class="item-row__step-center item-row__step-center--button"
-        :aria-label="`Изменить количество: ${formatted.display}`"
-        @click="startEdit"
+        :aria-label="`Удалить: ${itemName}`"
+        @click="$emit('delete', item)"
       >
-        <span class="item-row__step-label">{{ formatted.display }}</span>
-      </button>
-
-      <button
-        class="item-row__step-btn"
-        type="button"
-        aria-label="Увеличить"
-        @click="$emit('adjust', item, step)"
-      >
-        +
+        <IconClose :width="16" :height="16" />
       </button>
     </div>
-
-    <!-- Static amount when checked or no controls -->
-    <span v-else-if="!isToTaste" class="item-row__amount-done">{{ formatted.display }}</span>
-
-    <!-- Delete -->
-    <button
-      class="item-row__delete"
-      type="button"
-      :aria-label="`Удалить: ${itemName}`"
-      @click="$emit('delete', item)"
-    >
-      <IconClose :width="16" :height="16" />
-    </button>
   </div>
 </template>
 
@@ -166,6 +174,10 @@ function cancelEdit() {
   transition: opacity var(--transition-normal);
   -webkit-tap-highlight-color: transparent;
 
+  &--editing {
+    flex-wrap: wrap;
+  }
+
   &--checked {
     opacity: 0.5;
 
@@ -173,6 +185,22 @@ function cancelEdit() {
       text-decoration: line-through;
       color: var(--color-text-secondary);
     }
+  }
+
+  &__main {
+    flex: 1 1 auto;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  &__controls {
+    flex-shrink: 0;
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 8px;
   }
 
   &__check {
@@ -284,6 +312,7 @@ function cancelEdit() {
   }
 
   &__step-center {
+    position: relative;
     min-width: 58px;
     height: 100%;
     border-left: 1px solid var(--color-border);
@@ -302,6 +331,10 @@ function cancelEdit() {
       color: inherit;
       outline-offset: -2px;
     }
+
+    &--editing .item-row__step-label {
+      visibility: hidden;
+    }
   }
 
   &__step-label {
@@ -315,7 +348,10 @@ function cancelEdit() {
   }
 
   &__step-input {
+    position: absolute;
+    inset: 0;
     width: 100%;
+    height: 100%;
     border: none;
     outline: none;
     background: transparent;
@@ -325,7 +361,7 @@ function cancelEdit() {
     color: var(--color-text);
     text-align: center;
     font-family: inherit;
-    padding: 0;
+    padding: 0 4px;
     caret-color: var(--color-mint);
   }
 
