@@ -15,6 +15,7 @@
             <input
               ref="searchInputEl"
               v-model="query"
+              v-keyboard-avoid
               type="search"
               class="picker-search__input"
               placeholder="Поиск рецепта..."
@@ -161,6 +162,7 @@
 </template>
 
 <script lang="ts" setup>
+import { KeyboardAvoidDirective as vKeyboardAvoid } from "@/directives/keyboardAvoid"
 import { ref, watch, onUnmounted } from "vue"
 import { fetchDishes, fetchDish, fetchDishCategories } from "../services/dishService"
 import { isDishOwn } from "../utils/dishOwnership"

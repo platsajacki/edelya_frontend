@@ -66,6 +66,7 @@
                 ref="amountInput"
                 v-model="amount"
                 v-autofocus
+                v-keyboard-avoid
                 type="text"
                 inputmode="decimal"
                 autocomplete="off"
@@ -123,6 +124,7 @@
 
 <script lang="ts" setup>
 import { AutoFocusDirective as vAutofocus } from "@/directives/autofocus"
+import { KeyboardAvoidDirective as vKeyboardAvoid } from "@/directives/keyboardAvoid"
 import { ref, watch, nextTick } from "vue"
 import ModalWrapper from "./ModalWrapper.vue"
 import IngredientForm from "./IngredientForm.vue"

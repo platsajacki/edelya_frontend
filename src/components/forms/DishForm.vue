@@ -58,6 +58,7 @@
                 ref="amountInputRef"
                 v-model="pendingAmount"
                 v-autofocus.select
+                v-keyboard-avoid
                 type="text"
                 inputmode="decimal"
                 autocomplete="off"
@@ -127,6 +128,7 @@
               ref="amountInputRef"
               v-model="pendingAmount"
               v-autofocus.select
+              v-keyboard-avoid
               type="text"
               inputmode="decimal"
               autocomplete="off"
@@ -159,6 +161,7 @@
           <div class="search-field">
             <input
               v-model="ingredientQuery"
+              v-keyboard-avoid
               type="search"
               class="form__input"
               placeholder="Поиск ингредиента..."
@@ -225,6 +228,7 @@
 
 <script lang="ts" setup>
 import { AutoFocusDirective as vAutofocus } from "@/directives/autofocus"
+import { KeyboardAvoidDirective as vKeyboardAvoid } from "@/directives/keyboardAvoid"
 import { ref, computed, watch, nextTick } from "vue"
 import ModalWrapper from "./ModalWrapper.vue"
 import IngredientForm from "./IngredientForm.vue"

@@ -43,7 +43,7 @@
 
       <label class="form__field">
         <span class="form__label">Комментарий</span>
-        <textarea v-model="notes" class="form__textarea" rows="2" />
+        <textarea v-model="notes" v-keyboard-avoid class="form__textarea" rows="2" />
       </label>
 
       <div v-if="error" ref="errorRef" class="form__error">{{ error }}</div>
@@ -97,6 +97,7 @@
 </template>
 
 <script lang="ts" setup>
+import { KeyboardAvoidDirective as vKeyboardAvoid } from "@/directives/keyboardAvoid"
 import { ref, computed, watch, nextTick } from "vue"
 import ModalWrapper from "./ModalWrapper.vue"
 import DishSearch from "./DishSearch.vue"

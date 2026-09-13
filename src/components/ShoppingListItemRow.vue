@@ -40,6 +40,7 @@
           v-if="editing"
           v-model="editValue"
           v-autofocus.select
+          v-keyboard-avoid
           type="text"
           inputmode="decimal"
           autocomplete="off"
@@ -78,6 +79,7 @@
 
 <script lang="ts" setup>
 import { AutoFocusDirective as vAutofocus } from "@/directives/autofocus"
+import { KeyboardAvoidDirective as vKeyboardAvoid } from "@/directives/keyboardAvoid"
 import { computed, ref } from "vue"
 import IconCheck from "./icons/IconCheck.vue"
 import IconClose from "./icons/IconClose.vue"
