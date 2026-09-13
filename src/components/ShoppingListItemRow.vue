@@ -343,28 +343,26 @@ function cancelEdit() {
     height: 26px;
     border: none;
     background: transparent;
-    color: var(--color-danger);
+    color: var(--color-text-secondary);
     display: flex;
     align-items: center;
     justify-content: center;
-    opacity: 0.6;
     cursor: pointer;
     border-radius: 50%;
     transition:
-      opacity var(--transition-fast),
       background var(--transition-fast),
       color var(--transition-fast);
     -webkit-tap-highlight-color: transparent;
 
     @media (hover: hover) {
       &:hover {
-        opacity: 1;
+        color: var(--color-danger);
         background: var(--color-danger-pale);
       }
     }
 
     &:active {
-      opacity: 1;
+      color: var(--color-danger);
       background: var(--color-danger-pale);
     }
   }

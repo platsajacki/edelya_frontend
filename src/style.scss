@@ -37,8 +37,8 @@
   --color-cook-bg-strong: rgba(138, 170, 37, 0.22);
 
   /* ─── Colors: shared / manual ─── */
-  --color-shared: #6b7280;
-  --color-shared-bg: rgba(107, 114, 128, 0.1);
+  --color-shared: var(--color-text-secondary);
+  --color-shared-bg: #efefee;
   --color-shared-accent: #9ca3af;
   --color-manual-meal: #6b8fbf;
   --color-manual-meal-bg: rgba(107, 143, 191, 0.12);
@@ -53,11 +53,11 @@
   /* ─── Colors: success ─── */
   --color-success: #3d8c3d;
   --color-success-dark: #317031;
-  --color-success-bg: rgba(61, 140, 61, 0.1);
+  --color-success-bg: #ecf4ec;
 
   /* ─── Colors: info ─── */
-  --color-info: #2563eb;
-  --color-info-bg: rgba(37, 99, 235, 0.1);
+  --color-info: #1d4ed8;
+  --color-info-bg: #e9effd;
 
   /* ─── Colors: focus ─── */
   --color-focus: var(--color-mint);
@@ -423,7 +423,6 @@ textarea {
   &__count {
     font-size: var(--font-xs);
     font-weight: 700;
-    opacity: 0.6;
   }
 }
 

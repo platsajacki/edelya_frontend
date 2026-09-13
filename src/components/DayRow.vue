@@ -191,7 +191,7 @@ useSortable(eatRef, makeSortableOptions("meals"))
     border-color var(--transition-normal);
 
   &--muted {
-    opacity: 0.75;
+    opacity: 0.85;
   }
 
   &--today {

@@ -1436,24 +1436,16 @@ onUnmounted(() => {
     align-items: center;
     gap: 10px;
     font-size: var(--font-sm);
-    transition:
-      opacity var(--transition-fast),
-      color var(--transition-fast);
+    transition: color var(--transition-fast);
 
-    &--pending {
-      opacity: 0.35;
+    &--pending,
+    &--done {
       color: var(--color-text-secondary);
     }
 
     &--loading {
-      opacity: 1;
       color: var(--color-text);
       font-weight: 600;
-    }
-
-    &--done {
-      opacity: 0.55;
-      color: var(--color-text-secondary);
     }
 
     &-icon {
