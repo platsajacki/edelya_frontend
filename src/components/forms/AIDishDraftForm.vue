@@ -447,7 +447,7 @@
       <div v-if="step === 'dish_created'" class="detail__actions">
         <button
           type="button"
-          class="detail__btn detail__btn--edit"
+          class="detail__btn detail__btn--primary"
           :disabled="!createdDishId || openingCreatedDish"
           @click="openCreatedDish"
         >

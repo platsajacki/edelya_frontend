@@ -10,17 +10,19 @@
         <span class="form__label">Блюдо <span class="form__required">*</span></span>
         <div v-if="selectedDish" class="selected-dish">
           <span class="selected-dish__name">{{ selectedDish.name }}</span>
-          <button
-            type="button"
-            class="selected-dish__edit"
-            :title="isDishOwn(selectedDish) ? 'Редактировать рецепт' : 'Создать личную копию'"
-            @click="onEditDishClick"
-          >
-            <IconPencil :width="16" :height="16" />
-          </button>
-          <button type="button" class="selected-dish__replace" @click="selectedDish = null">
-            Заменить
-          </button>
+          <template v-if="!fixedDish">
+            <button
+              type="button"
+              class="selected-dish__edit"
+              :title="isDishOwn(selectedDish) ? 'Редактировать рецепт' : 'Создать личную копию'"
+              @click="onEditDishClick"
+            >
+              <IconPencil :width="16" :height="16" />
+            </button>
+            <button type="button" class="selected-dish__replace" @click="selectedDish = null">
+              Заменить
+            </button>
+          </template>
         </div>
         <DishSearch
           v-else
@@ -117,12 +119,14 @@ const props = withDefaults(
     modelValue: boolean
     editItem?: DTOCookingEvent | null
     initialDate?: string
+    fixedDish?: DTODish | null
   }>(),
-  { editItem: null, initialDate: "" }
+  { editItem: null, initialDate: "", fixedDish: null }
 )
 
 const emit = defineEmits<{
   (e: "update:modelValue", value: boolean): void
+  (e: "created", cookingDate: string): void
 }>()
 
 const planning = usePlanningStore()
@@ -169,7 +173,7 @@ watch(
       notes.value = props.editItem.notes || ""
       error.value = ""
     } else if (v) {
-      selectedDish.value = null
+      selectedDish.value = props.fixedDish ?? null
       cookingDate.value = props.initialDate || ""
       eatDates.value = []
       notes.value = ""
@@ -261,6 +265,7 @@ async function submit() {
       await planning.editCookingEvent(props.editItem!.id, payload)
     } else {
       await planning.addCookingEvent(payload)
+      emit("created", payload.cooking_date)
     }
     open.value = false
   } catch (err) {

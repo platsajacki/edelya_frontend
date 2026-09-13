@@ -85,7 +85,7 @@
 
     <template #footer>
       <div class="detail__actions">
-        <button class="detail__btn detail__btn--edit" @click="$emit('edit')">
+        <button class="detail__btn detail__btn--primary" @click="$emit('edit')">
           {{ type === "cooking" ? "Редактировать готовку" : "Редактировать" }}
         </button>
         <button class="detail__btn detail__btn--delete" @click="confirming = true">Удалить</button>

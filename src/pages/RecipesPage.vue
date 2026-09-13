@@ -191,6 +191,7 @@
       :dish="detailDish"
       @deleted="onDishDeleted"
       @updated="onDishUpdated"
+      @cooking-created="onCookingCreated"
     />
 
     <!-- Create dish form -->
@@ -226,6 +227,7 @@ import IconSort from "../components/icons/IconSort.vue"
 import IconPlus from "../components/icons/IconPlus.vue"
 import FabButton from "../components/FabButton.vue"
 import Toast from "../components/Toast.vue"
+import { formatDateRuShort } from "../utils/formatDate"
 
 defineOptions({ name: "RecipesPage" })
 
@@ -314,6 +316,10 @@ function onDishDeleted(id) {
 
 function onDishUpdated() {
   store.onDishUpdated()
+}
+
+function onCookingCreated(cookingDate: string) {
+  store.showToast(`Готовка на ${formatDateRuShort(cookingDate)} добавлена`)
 }
 
 // --- Create ---

@@ -35,12 +35,17 @@
 
     <template #footer>
       <div class="detail__actions">
-        <button class="detail__btn detail__btn--edit" @click="handleDishEdit">
-          {{ isOwn ? "Редактировать рецепт" : "Создать личную копию" }}
+        <button class="detail__btn detail__btn--primary" @click="openCookingForm">
+          Запланировать готовку
         </button>
-        <button v-if="isOwn" class="detail__btn detail__btn--delete" @click="confirming = true">
-          Удалить
-        </button>
+        <div class="detail__actions-row">
+          <button v-if="isOwn" class="detail__btn detail__btn--delete" @click="confirming = true">
+            Удалить
+          </button>
+          <button class="detail__btn detail__btn--secondary" @click="handleDishEdit">
+            {{ isOwn ? "Редактировать" : "Создать личную копию" }}
+          </button>
+        </div>
         <button class="detail__btn detail__btn--cancel" @click="open = false">Закрыть</button>
       </div>
     </template>
@@ -60,16 +65,25 @@
 
   <!-- Clone DishForm -->
   <DishForm v-model="showCloneForm" :z-index="1020" :clone-dish="dish" @created="onCloneCreated" />
+
+  <CookingEventForm
+    v-model="showCookingForm"
+    :fixed-dish="dish"
+    :initial-date="cookingInitialDate"
+    @created="onCookingCreated"
+  />
 </template>
 
 <script lang="ts" setup>
 import { ref, computed, watch } from "vue"
 import ModalWrapper from "./forms/ModalWrapper.vue"
 import DishForm from "./forms/DishForm.vue"
+import CookingEventForm from "./forms/CookingEventForm.vue"
 import OwnershipBadge from "./OwnershipBadge.vue"
 import { fetchDish } from "../services/dishService"
 import { formatShoppingAmount } from "../utils/formatShoppingAmount"
 import { isDishOwn } from "../utils/dishOwnership"
+import { getTodayISO } from "../utils/weekDays"
 import type { DTODish } from "@/types/dish"
 
 const props = defineProps<{
@@ -81,6 +95,7 @@ const emit = defineEmits<{
   (e: "update:modelValue", value: boolean): void
   (e: "deleted", id: string): void
   (e: "updated"): void
+  (e: "cooking-created", cookingDate: string): void
 }>()
 
 const open = ref(props.modelValue)
@@ -97,6 +112,8 @@ watch(open, (v) => {
 const confirming = ref(false)
 const showDishForm = ref(false)
 const showCloneForm = ref(false)
+const showCookingForm = ref(false)
+const cookingInitialDate = ref("")
 const loadingFull = ref(false)
 const fullDish = ref<DTODish | null>(null)
 
@@ -125,6 +142,16 @@ watch(
     }
   }
 )
+
+function openCookingForm() {
+  cookingInitialDate.value = getTodayISO()
+  showCookingForm.value = true
+}
+
+function onCookingCreated(cookingDate: string) {
+  open.value = false
+  emit("cooking-created", cookingDate)
+}
 
 function handleDishEdit() {
   if (isOwn.value) {

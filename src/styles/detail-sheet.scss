@@ -134,6 +134,16 @@
     gap: 8px;
   }
 
+  &__actions-row {
+    display: flex;
+    gap: 8px;
+
+    .detail__btn {
+      flex: 1;
+      min-width: 0;
+    }
+  }
+
   &__btn {
     width: 100%;
     padding: 12px;
@@ -146,12 +156,25 @@
       opacity var(--transition-fast),
       transform var(--transition-fast);
 
-    &--edit {
+    &--primary {
       background: var(--color-mint);
       color: var(--on-primary);
 
       &:hover {
         background: var(--color-mint-hover);
+      }
+
+      &:active {
+        transform: scale(var(--press-scale-md));
+      }
+    }
+
+    &--secondary {
+      background: var(--color-mint-alpha-12);
+      color: var(--color-mint);
+
+      &:hover {
+        background: var(--color-mint-alpha-16);
       }
 
       &:active {
