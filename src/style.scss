@@ -11,7 +11,6 @@
 :root {
   /* ─── Colors: backgrounds & surfaces ─── */
   --color-bg: #f8f7f3;
-  --color-bg-secondary: #efede8;
   --color-surface: #ffffff;
   --color-surface-muted: #eeeae5;
   --color-text: #252520;
@@ -30,11 +29,9 @@
   --color-eat: #6f9737;
   --color-eat-dark: #4e6a27;
   --color-eat-bg: rgba(111, 151, 55, 0.12);
-  --color-eat-bg-strong: rgba(111, 151, 55, 0.22);
   --color-cook: #8aaa25;
   --color-cook-dark: #5a6f18;
   --color-cook-bg: rgba(138, 170, 37, 0.14);
-  --color-cook-bg-strong: rgba(138, 170, 37, 0.22);
 
   /* ─── Colors: shared / manual ─── */
   --color-shared: var(--color-text-secondary);
@@ -95,7 +92,6 @@
   --shadow-elevated: 0 8px 30px rgba(0, 0, 0, 0.1);
   --shadow-tab: 0 1px 3px rgba(0, 0, 0, 0.08);
   --shadow-drag: 0 8px 25px rgba(0, 0, 0, 0.15);
-  --shadow-side: -4px 0 16px rgba(0, 0, 0, 0.1);
 
   /* ─── Radii ─── */
   --radius-xs: 8px;

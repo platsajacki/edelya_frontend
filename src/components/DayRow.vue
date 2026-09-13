@@ -352,7 +352,7 @@ useSortable(eatRef, makeSortableOptions("meals"))
 body.is-dragging-cooking .day-row__cook,
 body.is-dragging-meals .day-row__eat {
   .day-row__drop-zone {
-    outline-color: var(--color-border);
+    outline-color: var(--color-border-strong);
   }
 
   .day-row__items {

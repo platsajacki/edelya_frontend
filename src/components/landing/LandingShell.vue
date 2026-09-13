@@ -117,7 +117,7 @@ const mainEl = ref<HTMLElement | null>(null)
   }
 
   &__name {
-    color: var(--color-mint-hover);
+    color: var(--color-mint);
     font-size: var(--font-md);
     font-weight: 600;
     padding-top: 20%;

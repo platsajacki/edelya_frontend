@@ -38,9 +38,10 @@ const planning = usePlanningStore()
 const isPending = computed(() => planning.savingItemIds.includes(props.item.id))
 
 function hexToRgba(hex: string, alpha: number): string {
-  const r = parseInt(hex.slice(1, 3), 16)
-  const g = parseInt(hex.slice(3, 5), 16)
-  const b = parseInt(hex.slice(5, 7), 16)
+  const digits = hex.length === 4 ? [...hex.slice(1)].map((d) => d + d).join("") : hex.slice(1)
+  const r = parseInt(digits.slice(0, 2), 16)
+  const g = parseInt(digits.slice(2, 4), 16)
+  const b = parseInt(digits.slice(4, 6), 16)
   return `rgba(${r}, ${g}, ${b}, ${alpha})`
 }
 
