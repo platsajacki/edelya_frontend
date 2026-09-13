@@ -6,6 +6,7 @@
         :key="day.iso"
         type="button"
         class="multi-day-picker__chip"
+        :aria-pressed="modelValue.includes(day.iso)"
         @click="toggle(day.iso)"
       >
         <DayBadge :day="day.weekday" :date="day.label" :active="modelValue.includes(day.iso)" />
@@ -85,8 +86,10 @@ function toggle(iso: string) {
     cursor: pointer;
     transition: transform var(--transition-fast);
 
-    &:hover:not(:disabled) {
-      transform: scale(1.05);
+    @media (hover: hover) {
+      &:hover:not(:disabled) {
+        transform: scale(1.05);
+      }
     }
   }
 }

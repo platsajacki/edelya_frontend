@@ -2,14 +2,14 @@
   <button class="dish-card" type="button" @click="$emit('tap', dish)">
     <span class="dish-card__name">{{ dish.name }}</span>
     <span v-if="dish.category?.name" class="dish-card__category">{{ dish.category.name }}</span>
-    <div v-if="visibleIngredients.length" class="dish-card__ingredients">
+    <span v-if="visibleIngredients.length" class="dish-card__ingredients">
       <span v-for="di in visibleIngredients" :key="di.id" class="dish-card__ingredient-chip">
         {{ di.ingredient.name }}
       </span>
       <span v-if="extraIngredientsCount > 0" class="dish-card__ingredients-more">
         +{{ extraIngredientsCount }}
       </span>
-    </div>
+    </span>
   </button>
 </template>
 
@@ -56,9 +56,11 @@ const extraIngredientsCount = computed(() =>
     transform var(--transition-fast);
   -webkit-tap-highlight-color: transparent;
 
-  &:hover {
-    box-shadow: var(--shadow-card);
-    border-color: var(--color-mint-alpha-10);
+  @media (hover: hover) {
+    &:hover {
+      box-shadow: var(--shadow-card);
+      border-color: var(--color-mint-alpha-10);
+    }
   }
 
   &:active {

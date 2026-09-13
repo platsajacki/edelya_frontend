@@ -5,11 +5,14 @@
         <div
           class="modal-panel"
           :class="{ 'modal-panel--no-footer': !$slots.footer }"
+          role="dialog"
+          aria-modal="true"
+          :aria-labelledby="titleId"
           @mousedown.stop
           @focusin="onFocusIn"
         >
           <div class="modal-header">
-            <h3 class="modal-title">{{ title }}</h3>
+            <h2 :id="titleId" class="modal-title">{{ title }}</h2>
             <button class="modal-close" aria-label="Закрыть" @click="close">
               <IconClose />
             </button>
@@ -27,7 +30,7 @@
 </template>
 
 <script lang="ts" setup>
-import { watch, onUnmounted } from "vue"
+import { watch, onUnmounted, useId } from "vue"
 import IconClose from "@/components/icons/IconClose.vue"
 import { useModalBackButton } from "@/composables/useModalBackButton"
 
@@ -46,6 +49,8 @@ const props = withDefaults(
 const emit = defineEmits<{
   (e: "update:modelValue", value: boolean): void
 }>()
+
+const titleId = useId()
 
 function close() {
   emit("update:modelValue", false)
@@ -163,8 +168,10 @@ useModalBackButton(() => props.modelValue, close)
   border-radius: var(--radius-xs);
   transition: background var(--transition-fast);
 
-  &:hover {
-    background: var(--color-empty);
+  @media (hover: hover) {
+    &:hover {
+      background: var(--color-empty);
+    }
   }
 }
 

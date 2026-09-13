@@ -34,6 +34,7 @@ import LandingTelegramLink from "./LandingTelegramLink.vue"
     font-weight: 600;
     letter-spacing: -0.025em;
     line-height: 1.25;
+    text-wrap: balance;
   }
 
   &__text {

@@ -1,5 +1,6 @@
 <template>
   <div class="page-layout planner">
+    <h1 class="visually-hidden">Планировщик недели</h1>
     <WeekNav
       :label="planning.weekLabel"
       :disabled="planning.loading"
@@ -25,7 +26,7 @@
       </Transition>
     </div>
 
-    <div v-if="planning.loadError" class="planner__error">
+    <div v-if="planning.loadError" class="planner__error" role="alert">
       <span>Не удалось загрузить неделю</span>
       <button class="planner__error-retry" @click="planning.loadWeek()">Повторить</button>
     </div>

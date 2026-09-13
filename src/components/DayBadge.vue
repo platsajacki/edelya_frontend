@@ -1,8 +1,8 @@
 <template>
-  <div class="day-badge" :class="{ 'day-badge--active': active }">
+  <span class="day-badge" :class="{ 'day-badge--active': active }">
     <span class="day-badge__day">{{ day }}</span>
     <span class="day-badge__date">{{ date }}</span>
-  </div>
+  </span>
 </template>
 
 <script setup lang="ts">

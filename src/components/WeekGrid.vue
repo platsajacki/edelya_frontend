@@ -5,6 +5,7 @@
       v-if="pastDays.length"
       type="button"
       class="week-grid__past-toggle"
+      :aria-expanded="showPast"
       @click="showPast = !showPast"
     >
       <IconChevronRight
@@ -68,6 +69,7 @@
         type="button"
         class="week-grid__next-toggle"
         :disabled="planning.loadingNextWeek"
+        :aria-label="planning.loadingNextWeek ? 'Загрузка следующей недели…' : undefined"
         @click="loadNext"
       >
         <span v-if="planning.loadingNextWeek" class="week-grid__next-spinner"

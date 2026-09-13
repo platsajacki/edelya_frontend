@@ -48,14 +48,14 @@
         >
           {{
             loading
-              ? (subscriptionCard.actionLoadingText ?? "Загрузка...")
+              ? (subscriptionCard.actionLoadingText ?? "Загрузка…")
               : subscriptionCard.actionText
           }}
         </button>
-        <p v-if="actionError" class="cabinet__error">{{ actionError }}</p>
+        <p v-if="actionError" class="cabinet__error" role="alert">{{ actionError }}</p>
       </template>
       <template v-else>
-        <p class="cabinet__card-text">Загрузка...</p>
+        <p class="cabinet__card-text">Загрузка…</p>
       </template>
     </section>
 
@@ -77,7 +77,7 @@
       <h2 class="cabinet__section-title cabinet__payment-title">Способ оплаты</h2>
       <template v-if="sub.paymentMethod">
         <div class="cabinet__payment-info">
-          <div class="cabinet__payment-brand">{{ cardBrandAbbr }}</div>
+          <div class="cabinet__payment-brand" aria-hidden="true">{{ cardBrandAbbr }}</div>
           <div class="cabinet__payment-details">
             <span class="cabinet__payment-card">
               {{
@@ -114,7 +114,7 @@
               :disabled="paymentLoading"
               @click="handleDeletePaymentMethod"
             >
-              {{ paymentLoading ? "Загрузка..." : "Да, удалить" }}
+              {{ paymentLoading ? "Загрузка…" : "Да, удалить" }}
             </button>
             <button
               class="cabinet__btn cabinet__btn--cancel-dismiss"
@@ -132,10 +132,10 @@
           Карта не привязана. Для автоматического списания необходимо привязать карту.
         </p>
         <button class="cabinet__btn" :disabled="paymentLoading" @click="handleBindPaymentMethod">
-          {{ paymentLoading ? "Загрузка..." : "Привязать карту" }}
+          {{ paymentLoading ? "Загрузка…" : "Привязать карту" }}
         </button>
       </template>
-      <p v-if="paymentError" class="cabinet__error">{{ paymentError }}</p>
+      <p v-if="paymentError" class="cabinet__error" role="alert">{{ paymentError }}</p>
     </section>
 
     <!-- Tariffs -->
@@ -200,7 +200,7 @@
               :disabled="resumeLoading"
               @click="resumeTariff"
             >
-              {{ resumeLoading ? "Загрузка..." : "Возобновить подписку" }}
+              {{ resumeLoading ? "Загрузка…" : "Возобновить подписку" }}
             </button>
           </template>
           <template v-else-if="sub.subscription?.status === 'expired'">
@@ -221,7 +221,7 @@
                 :disabled="cancelLoading"
                 @click="cancelTariff"
               >
-                {{ cancelLoading ? "Загрузка..." : "Да, отменить" }}
+                {{ cancelLoading ? "Загрузка…" : "Да, отменить" }}
               </button>
               <button
                 class="cabinet__btn cabinet__btn--cancel-dismiss"
@@ -260,6 +260,7 @@ import { useRouter, useRoute } from "vue-router"
 import { useAuthStore } from "../store/auth"
 import { useSubscriptionStore } from "../store/subscription"
 import { getTariffChangeScenario } from "../utils/tariffScenario"
+import { formatRubles } from "../utils/formatRubles"
 import IconWarning from "../components/icons/IconWarning.vue"
 import IconCheck from "../components/icons/IconCheck.vue"
 import ConfirmTariffSheet from "../components/ConfirmTariffSheet.vue"
@@ -350,7 +351,7 @@ const BILLING_PERIOD_NOTE = {
 }
 
 function tariffPriceValue(tariff) {
-  return `${Number(tariff.price)} ₽`
+  return formatRubles(tariff.price)
 }
 
 function tariffPricePeriod(tariff) {
@@ -925,7 +926,7 @@ async function handleDeletePaymentMethod() {
 
     &--success {
       background: var(--color-success-bg);
-      color: var(--color-success);
+      color: var(--color-success-dark);
     }
 
     &--warning {
@@ -1047,7 +1048,7 @@ async function handleDeletePaymentMethod() {
 
   &__error {
     font-size: var(--font-sm);
-    color: var(--color-danger);
+    color: var(--color-danger-dark);
   }
 
   &__recurring-notice {

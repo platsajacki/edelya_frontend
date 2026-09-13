@@ -4,7 +4,9 @@
       <h1 class="legal-page__title">{{ title }}</h1>
     </header>
     <div class="legal-page__body">
-      <div v-if="loading" class="legal-page__loading"><div class="spinner" /></div>
+      <div v-if="loading" class="legal-page__loading">
+        <div class="spinner" role="status" aria-label="Загрузка" />
+      </div>
       <p v-else-if="failed" class="legal-page__error">
         Не удалось загрузить документ. Обновите страницу или попробуйте позже.
       </p>

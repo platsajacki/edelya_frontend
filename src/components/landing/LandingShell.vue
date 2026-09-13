@@ -1,5 +1,8 @@
 <template>
   <div class="landing-shell">
+    <a href="#main" class="landing-skip-link" @click.prevent="mainEl?.focus()">
+      Перейти к содержимому
+    </a>
     <header class="landing-header">
       <div class="l-container landing-header__inner">
         <RouterLink to="/" class="landing-brand" aria-label="Еделя — на главную">
@@ -10,7 +13,7 @@
       </div>
     </header>
 
-    <main class="landing-shell__main">
+    <main id="main" ref="mainEl" class="landing-shell__main" tabindex="-1">
       <slot />
     </main>
 
@@ -43,8 +46,11 @@
 </template>
 
 <script lang="ts" setup>
+import { ref } from "vue"
 import LandingLogo from "./LandingLogo.vue"
 import LandingTelegramLink from "./LandingTelegramLink.vue"
+
+const mainEl = ref<HTMLElement | null>(null)
 </script>
 
 <style lang="scss">
@@ -60,6 +66,29 @@ import LandingTelegramLink from "./LandingTelegramLink.vue"
 
   &__main {
     flex: 1;
+
+    &:focus-visible {
+      outline: none;
+    }
+  }
+}
+
+.landing-skip-link {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 1;
+  padding: 8px 16px;
+  border-radius: var(--radius-sm);
+  background: var(--color-mint);
+  color: var(--on-primary);
+  font-size: var(--font-body);
+  font-weight: 600;
+  text-decoration: none;
+  transform: translateY(calc(-100% - 16px));
+
+  &:focus-visible {
+    transform: none;
   }
 }
 
@@ -140,8 +169,10 @@ import LandingTelegramLink from "./LandingTelegramLink.vue"
     text-decoration: none;
     transition: color var(--transition-normal);
 
-    &:hover {
-      color: var(--color-text);
+    @media (hover: hover) {
+      &:hover {
+        color: var(--color-text);
+      }
     }
   }
 }

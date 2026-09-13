@@ -5,13 +5,14 @@
       <div class="detail__section">
         <div class="detail__dish-header">
           <div class="detail__dish-title-row">
-            <h4 class="detail__dish-name">{{ dish?.name }}</h4>
+            <h3 class="detail__dish-name">{{ dish?.name }}</h3>
             <OwnershipBadge :is-own="isOwn" />
           </div>
           <button
             type="button"
             class="detail__dish-edit"
-            :title="isOwn ? 'Редактировать рецепт' : 'Создать личную копию'"
+            :title="dishEditLabel"
+            :aria-label="dishEditLabel"
             @click="handleDishEdit"
           >
             <IconPencil />
@@ -179,6 +180,9 @@ const mealItem = computed(() =>
 const dish = computed(() => props.item?.dish ?? null)
 
 const isOwn = computed(() => isDishOwn(dish.value))
+const dishEditLabel = computed(() =>
+  isOwn.value ? "Редактировать рецепт" : "Создать личную копию"
+)
 
 watch(
   () => props.modelValue,
@@ -276,9 +280,11 @@ async function onCloneCreated(newDish: DTODish) {
       color var(--transition-fast),
       text-decoration-thickness var(--transition-fast);
 
-    &:hover {
-      color: var(--color-mint-hover);
-      text-decoration-thickness: 2px;
+    @media (hover: hover) {
+      &:hover {
+        color: var(--color-mint-hover);
+        text-decoration-thickness: 2px;
+      }
     }
   }
 

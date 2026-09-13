@@ -3,7 +3,7 @@
     <RouterView />
   </LandingShell>
   <div v-else-if="loading" class="app-loading">
-    <div class="spinner" />
+    <div class="spinner" role="status" aria-label="Загрузка" />
   </div>
   <ConsentScreen v-else-if="auth.requiresConsent" />
   <div v-else class="app-shell">

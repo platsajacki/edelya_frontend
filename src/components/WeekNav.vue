@@ -1,6 +1,11 @@
 <template>
   <nav class="week-nav">
-    <button class="week-nav__btn" :disabled="disabled" @click="$emit('prev')">
+    <button
+      class="week-nav__btn"
+      :disabled="disabled"
+      aria-label="Предыдущая неделя"
+      @click="$emit('prev')"
+    >
       <IconChevronLeft />
     </button>
     <Transition name="pop">
@@ -22,12 +27,18 @@
         type="button"
         class="week-nav__shopping-btn"
         title="Список покупок на неделю"
+        aria-label="Список покупок на неделю"
         @click="$emit('create-shopping-week')"
       >
         <IconBasket :width="20" :height="20" />
       </button>
     </div>
-    <button class="week-nav__btn" :disabled="disabled" @click="$emit('next')">
+    <button
+      class="week-nav__btn"
+      :disabled="disabled"
+      aria-label="Следующая неделя"
+      @click="$emit('next')"
+    >
       <IconChevronRight />
     </button>
   </nav>
@@ -159,9 +170,11 @@ defineEmits<{
       background var(--transition-fast);
     -webkit-tap-highlight-color: transparent;
 
-    &:hover {
-      color: var(--color-mint);
-      background: var(--color-mint-alpha-10);
+    @media (hover: hover) {
+      &:hover {
+        color: var(--color-mint);
+        background: var(--color-mint-alpha-10);
+      }
     }
 
     &:active {

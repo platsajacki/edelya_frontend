@@ -67,8 +67,10 @@ function isActive(to: string): boolean {
     -webkit-tap-highlight-color: transparent;
     min-width: 0;
 
-    &:hover:not(&--active) .bottom-nav__tab-inner {
-      background: var(--color-empty);
+    @media (hover: hover) {
+      &:hover:not(&--active) .bottom-nav__tab-inner {
+        background: var(--color-empty);
+      }
     }
 
     &--active {

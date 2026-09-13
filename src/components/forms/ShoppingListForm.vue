@@ -28,17 +28,17 @@
         <DateInput v-model="dateTo" />
       </label>
 
-      <div v-if="isEdit && datesChanged" class="form__warning">
+      <div v-if="isEdit && datesChanged" class="form__warning" role="status">
         <IconWarning :width="14" :height="14" />
         При сохранении список покупок будет пересчитан на основе готовок за новый период.
       </div>
 
-      <div v-if="error" ref="errorRef" class="form__error">{{ error }}</div>
+      <div v-if="error" ref="errorRef" class="form__error" role="alert">{{ error }}</div>
     </form>
 
     <template #footer>
       <button type="submit" form="shopping-list-form" class="form__submit" :disabled="saving">
-        {{ saving ? "Сохранение..." : isEdit ? "Сохранить" : "Создать" }}
+        {{ saving ? "Сохранение…" : isEdit ? "Сохранить" : "Создать" }}
       </button>
     </template>
   </ModalWrapper>
@@ -51,6 +51,7 @@ import DateInput from "./DateInput.vue"
 import { useShoppingStore } from "../../store/shopping"
 import IconWarning from "../icons/IconWarning.vue"
 import { AutoFocusDirective as vAutofocus } from "@/directives/autofocus"
+import { getScrollBehavior } from "@/dom/prefersReducedMotion"
 import type { DTOShoppingList } from "@/types/shopping"
 
 const props = withDefaults(
@@ -96,7 +97,10 @@ const saving = ref(false)
 const error = ref("")
 const errorRef = ref<HTMLElement | null>(null)
 watch(error, (val) => {
-  if (val) nextTick(() => errorRef.value?.scrollIntoView({ behavior: "smooth", block: "nearest" }))
+  if (val)
+    nextTick(() =>
+      errorRef.value?.scrollIntoView({ behavior: getScrollBehavior(), block: "nearest" })
+    )
 })
 const nameManuallyEdited = ref(false)
 

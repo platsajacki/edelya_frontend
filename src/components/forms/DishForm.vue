@@ -77,7 +77,7 @@
               <input v-model="pendingOptional" type="checkbox" />
               Опционально
             </label>
-            <div v-if="amountError" class="form__error">{{ amountError }}</div>
+            <div v-if="amountError" class="form__error" role="alert">{{ amountError }}</div>
             <div class="ingredient-amount__actions">
               <button type="button" class="btn btn--sm" @click="confirmIngredient">
                 Сохранить
@@ -102,6 +102,7 @@
               type="button"
               class="ingredient-row__edit"
               title="Редактировать"
+              :aria-label="`Редактировать: ${ing.ingredientName}`"
               @click="startEditIngredient(idx)"
             >
               <IconPencil :width="16" :height="16" />
@@ -110,6 +111,7 @@
               type="button"
               class="ingredient-row__remove"
               title="Удалить"
+              :aria-label="`Удалить: ${ing.ingredientName}`"
               @click="removeIngredient(idx)"
             >
               <IconClose />
@@ -147,7 +149,7 @@
             <input v-model="pendingOptional" type="checkbox" />
             Опционально
           </label>
-          <div v-if="amountError" class="form__error">{{ amountError }}</div>
+          <div v-if="amountError" class="form__error" role="alert">{{ amountError }}</div>
           <div class="ingredient-amount__actions">
             <button type="button" class="btn btn--sm" @click="confirmIngredient">Добавить</button>
             <button type="button" class="btn btn--sm btn--ghost" @click="cancelIngredient">
@@ -164,7 +166,8 @@
               v-keyboard-avoid
               type="search"
               class="form__input"
-              placeholder="Поиск ингредиента..."
+              placeholder="Поиск ингредиента…"
+              aria-label="Поиск ингредиента"
               @input="searchIngredients"
             />
             <button
@@ -178,16 +181,17 @@
             </button>
           </div>
           <ul v-if="ingredientResults.length" class="ingredient-search__list">
-            <li
-              v-for="ing in ingredientResults"
-              :key="ing.id"
-              class="ingredient-search__item"
-              @click="selectIngredient(ing)"
-            >
-              {{ ing.name }}
-              <span class="ingredient-search__unit">{{
-                UNIT_LABELS[ing.base_unit] || ing.base_unit
-              }}</span>
+            <li v-for="ing in ingredientResults" :key="ing.id" class="ingredient-search__item">
+              <button
+                type="button"
+                class="ingredient-search__option"
+                @click="selectIngredient(ing)"
+              >
+                {{ ing.name }}
+                <span class="ingredient-search__unit">{{
+                  UNIT_LABELS[ing.base_unit] || ing.base_unit
+                }}</span>
+              </button>
             </li>
           </ul>
           <button type="button" class="dish-search__create" @click="openIngredientForm">
@@ -196,7 +200,7 @@
         </div>
       </div>
 
-      <div v-if="error" ref="errorRef" class="form__error">{{ error }}</div>
+      <div v-if="error" ref="errorRef" class="form__error" role="alert">{{ error }}</div>
 
       <div v-if="duplicateActions" class="form__duplicate-actions">
         <button
@@ -205,7 +209,7 @@
           :disabled="loadingExisting"
           @click="useExistingDish"
         >
-          {{ loadingExisting ? "Поиск..." : "Использовать существующее" }}
+          {{ loadingExisting ? "Поиск…" : "Использовать существующее" }}
         </button>
         <span class="form__duplicate-hint">или переименуйте выше</span>
       </div>
@@ -220,7 +224,7 @@
 
     <template #footer>
       <button type="submit" form="dish-form" class="form__submit" :disabled="saving">
-        {{ saving ? "Сохранение..." : isEdit ? "Сохранить" : "Создать блюдо" }}
+        {{ saving ? "Сохранение…" : isEdit ? "Сохранить" : "Создать блюдо" }}
       </button>
     </template>
   </ModalWrapper>
@@ -240,6 +244,7 @@ import { fetchIngredients } from "@/services/ingredientService.ts"
 import { formatAmount } from "@/utils/formatAmount.ts"
 import { formatShoppingAmount } from "@/utils/formatShoppingAmount.ts"
 import { UNIT_LABELS } from "@/utils/unitLabels.ts"
+import { getScrollBehavior } from "@/dom/prefersReducedMotion"
 import type { DTOBaseUnit, DTODish, DTODishCategory } from "@/types/dish"
 import type { DTOIngredient } from "@/types/shopping"
 
@@ -299,7 +304,10 @@ const error = ref("")
 const duplicateActions = ref(false)
 const loadingExisting = ref(false)
 watch(error, (val) => {
-  if (val) nextTick(() => errorRef.value?.scrollIntoView({ behavior: "smooth", block: "nearest" }))
+  if (val)
+    nextTick(() =>
+      errorRef.value?.scrollIntoView({ behavior: getScrollBehavior(), block: "nearest" })
+    )
 })
 
 const ingredientQuery = ref("")
@@ -600,8 +608,10 @@ async function useExistingDish() {
       background var(--transition-fast),
       opacity var(--transition-fast);
 
-    &:hover {
-      background: var(--color-mint-hover);
+    @media (hover: hover) {
+      &:hover {
+        background: var(--color-mint-hover);
+      }
     }
     &:disabled {
       opacity: 0.6;
@@ -667,8 +677,8 @@ async function useExistingDish() {
   &__edit,
   &__remove {
     flex-shrink: 0;
-    width: 22px;
-    height: 22px;
+    width: 24px;
+    height: 24px;
     border: none;
     background: none;
     color: var(--color-text-secondary);
@@ -676,7 +686,7 @@ async function useExistingDish() {
     display: flex;
     align-items: center;
     justify-content: center;
-    opacity: 0.4;
+    opacity: 0.75;
     transition:
       opacity var(--transition-fast),
       color var(--transition-fast),
@@ -685,24 +695,30 @@ async function useExistingDish() {
   }
 
   &__edit {
-    &:hover {
+    @media (hover: hover) {
+      &:hover {
+        opacity: 1;
+        color: var(--color-mint);
+        background: var(--color-mint-alpha-10);
+      }
+    }
+  }
+
+  @media (hover: hover) {
+    &:hover &__edit {
       opacity: 1;
       color: var(--color-mint);
       background: var(--color-mint-alpha-10);
     }
   }
 
-  &:hover &__edit {
-    opacity: 1;
-    color: var(--color-mint);
-    background: var(--color-mint-alpha-10);
-  }
-
   &__remove {
-    &:hover {
-      opacity: 1;
-      color: var(--color-danger);
-      background: var(--color-danger-pale);
+    @media (hover: hover) {
+      &:hover {
+        opacity: 1;
+        color: var(--color-danger);
+        background: var(--color-danger-pale);
+      }
     }
   }
 }
@@ -779,8 +795,10 @@ async function useExistingDish() {
     background: var(--color-mint);
     color: var(--on-primary);
 
-    &:hover {
-      background: var(--color-mint-hover);
+    @media (hover: hover) {
+      &:hover {
+        background: var(--color-mint-hover);
+      }
     }
   }
 
@@ -788,8 +806,10 @@ async function useExistingDish() {
     background: transparent;
     color: var(--color-text-secondary);
 
-    &:hover {
-      background: var(--color-empty);
+    @media (hover: hover) {
+      &:hover {
+        background: var(--color-empty);
+      }
     }
   }
 }
@@ -808,10 +828,12 @@ async function useExistingDish() {
       background var(--transition-fast),
       border-color var(--transition-fast);
 
-    &:hover {
-      background: var(--color-empty);
-      border-color: var(--color-mint);
-      color: var(--color-mint);
+    @media (hover: hover) {
+      &:hover {
+        background: var(--color-empty);
+        border-color: var(--color-mint);
+        color: var(--color-mint);
+      }
     }
   }
 }

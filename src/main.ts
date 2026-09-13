@@ -15,7 +15,7 @@ const miniApp = isMiniApp()
 if (!miniApp) {
   document
     .querySelector("meta[name=viewport]")
-    ?.setAttribute("content", "width=device-width, initial-scale=1, viewport-fit=cover")
+    ?.setAttribute("content", "width=device-width, initial-scale=1")
 }
 
 async function mountApp(): Promise<void> {

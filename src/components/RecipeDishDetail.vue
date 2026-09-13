@@ -5,7 +5,7 @@
       <div class="detail__section">
         <div class="detail__dish-header">
           <div class="detail__dish-title-row">
-            <h4 class="detail__dish-name">{{ dish.name }}</h4>
+            <h3 class="detail__dish-name">{{ dish.name }}</h3>
             <OwnershipBadge :is-own="isOwn" />
           </div>
         </div>
@@ -30,7 +30,9 @@
       </div>
 
       <!-- Loading state for full dish data -->
-      <div v-if="loadingFull" class="detail__loading"><div class="spinner spinner--sm" /></div>
+      <div v-if="loadingFull" class="detail__loading">
+        <div class="spinner spinner--sm" role="status" aria-label="Загрузка" />
+      </div>
     </div>
 
     <template #footer>

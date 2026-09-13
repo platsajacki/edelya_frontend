@@ -5,14 +5,14 @@
     @update:model-value="$emit('update:modelValue', $event)"
   >
     <div class="confirm__dates">
-      <div class="confirm__date-field">
-        <label class="confirm__label">С</label>
+      <label class="confirm__date-field">
+        <span class="confirm__label">С</span>
         <DateInput :model-value="dateFrom" @update:model-value="$emit('update:dateFrom', $event)" />
-      </div>
-      <div class="confirm__date-field">
-        <label class="confirm__label">По</label>
+      </label>
+      <label class="confirm__date-field">
+        <span class="confirm__label">По</span>
         <DateInput :model-value="dateTo" @update:model-value="$emit('update:dateTo', $event)" />
-      </div>
+      </label>
     </div>
 
     <div v-if="noItems" class="confirm__empty">
@@ -55,6 +55,7 @@
             type="button"
             class="confirm__btn confirm__btn--create"
             :disabled="loading || !dateFrom || !dateTo || !editableName.trim()"
+            :aria-label="loading ? 'Создание…' : undefined"
             @click="$emit('confirm', editableName.trim())"
           >
             <span v-if="loading" class="spinner spinner--sm" />

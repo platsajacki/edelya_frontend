@@ -4,6 +4,7 @@
       type="button"
       class="category-chips__chip"
       :class="{ 'category-chips__chip--active': modelValue === null }"
+      :aria-pressed="modelValue === null"
       @click="$emit('update:modelValue', null)"
     >
       Все
@@ -14,6 +15,7 @@
       type="button"
       class="category-chips__chip"
       :class="{ 'category-chips__chip--active': modelValue === cat.id }"
+      :aria-pressed="modelValue === cat.id"
       @click="$emit('update:modelValue', cat.id)"
     >
       {{ cat.name }}
@@ -61,13 +63,16 @@ defineEmits<{
     color: var(--color-text-secondary);
     white-space: nowrap;
     cursor: pointer;
+    outline-offset: -2px;
     transition:
       background var(--transition-fast),
       border-color var(--transition-fast),
       color var(--transition-fast);
 
-    &:hover {
-      border-color: var(--color-mint);
+    @media (hover: hover) {
+      &:hover {
+        border-color: var(--color-mint);
+      }
     }
 
     &--active {

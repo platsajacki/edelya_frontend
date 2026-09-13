@@ -12,7 +12,7 @@
       @input="onTextInput"
       @blur="onBlur"
     />
-    <button type="button" class="date-input__btn" aria-label="Выбрать дату">
+    <span class="date-input__btn">
       <IconCalendar />
       <input
         ref="pickerRef"
@@ -20,9 +20,10 @@
         type="date"
         class="date-input__picker"
         tabindex="-1"
+        aria-label="Выбрать дату"
         @input="onPickerInput"
       />
-    </button>
+    </span>
   </div>
 </template>
 

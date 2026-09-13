@@ -85,9 +85,11 @@ const cardStyle = computed(() => {
     background: var(--color-manual-meal-bg);
   }
 
-  &:hover {
-    box-shadow: var(--shadow-card);
-    border-color: var(--color-mint-alpha-10);
+  @media (hover: hover) {
+    &:hover {
+      box-shadow: var(--shadow-card);
+      border-color: var(--color-mint-alpha-10);
+    }
   }
 
   &--ghost {

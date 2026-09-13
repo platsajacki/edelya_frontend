@@ -1,9 +1,9 @@
 <template>
   <button class="shopping-card" type="button" @click="$emit('tap', list)">
-    <div class="shopping-card__main">
+    <span class="shopping-card__main">
       <span class="shopping-card__name">{{ list.name }}</span>
       <span class="shopping-card__dates">{{ dateRange }}</span>
-    </div>
+    </span>
     <IconChevronRight class="shopping-card__chevron" />
   </button>
 </template>
@@ -50,9 +50,11 @@ const dateRange = computed(() => {
     transform var(--transition-fast);
   -webkit-tap-highlight-color: transparent;
 
-  &:hover {
-    box-shadow: var(--shadow-card);
-    border-color: var(--color-mint-alpha-10);
+  @media (hover: hover) {
+    &:hover {
+      box-shadow: var(--shadow-card);
+      border-color: var(--color-mint-alpha-10);
+    }
   }
 
   &:active {

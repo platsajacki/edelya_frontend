@@ -20,7 +20,8 @@
         v-model="searchQuery"
         type="search"
         class="search-field__input"
-        placeholder="Поиск списка..."
+        placeholder="Поиск списка…"
+        aria-label="Поиск списка"
         @input="onSearchInput"
       />
       <button
@@ -35,7 +36,7 @@
 
     <!-- Loading -->
     <div v-if="store.loading" class="shopping-loading">
-      <div class="spinner" />
+      <div class="spinner" role="status" aria-label="Загрузка" />
     </div>
 
     <!-- Empty state: search found nothing -->

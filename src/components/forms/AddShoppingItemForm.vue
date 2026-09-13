@@ -11,7 +11,8 @@
             v-autofocus
             type="search"
             class="search-field__input"
-            placeholder="Поиск ингредиента..."
+            placeholder="Поиск ингредиента…"
+            aria-label="Поиск ингредиента"
             @input="onSearch"
           />
           <button
@@ -25,17 +26,14 @@
           </button>
         </div>
         <div v-if="searching" class="add-item-form__status">
-          <div class="spinner spinner--sm" />
+          <div class="spinner spinner--sm" role="status" aria-label="Загрузка" />
         </div>
         <ul v-if="results.length" class="ingredient-search__list">
-          <li
-            v-for="ing in results"
-            :key="ing.id"
-            class="ingredient-search__item"
-            @click="selectIngredient(ing)"
-          >
-            <span class="ingredient-search__name">{{ ing.name }}</span>
-            <span class="ingredient-search__unit">{{ unitLabel(ing.base_unit) }}</span>
+          <li v-for="ing in results" :key="ing.id" class="ingredient-search__item">
+            <button type="button" class="ingredient-search__option" @click="selectIngredient(ing)">
+              <span class="ingredient-search__name">{{ ing.name }}</span>
+              <span class="ingredient-search__unit">{{ unitLabel(ing.base_unit) }}</span>
+            </button>
           </li>
         </ul>
         <div v-else-if="searched && !searching" class="add-item-form__status">
@@ -78,10 +76,10 @@
             </div>
           </label>
 
-          <div v-if="error" ref="errorRef" class="form__error">{{ error }}</div>
+          <div v-if="error" ref="errorRef" class="form__error" role="alert">{{ error }}</div>
 
           <button type="button" class="form__submit" :disabled="saving" @click="submit">
-            {{ saving ? "Добавление..." : "Добавить" }}
+            {{ saving ? "Добавление…" : "Добавить" }}
           </button>
         </template>
 
@@ -106,7 +104,7 @@
               Нет
             </button>
             <button type="button" class="form__submit" :disabled="saving" @click="confirmAdd">
-              {{ saving ? "Добавление..." : "Да, добавить" }}
+              {{ saving ? "Добавление…" : "Да, добавить" }}
             </button>
           </div>
         </div>
@@ -132,6 +130,7 @@ import IconSearch from "../icons/IconSearch.vue"
 import { fetchIngredients } from "@/services/ingredientService.ts"
 import { getUnitLabel } from "@/utils/unitSteps.ts"
 import { useShoppingStore } from "@/store/shopping.ts"
+import { getScrollBehavior } from "@/dom/prefersReducedMotion"
 import type { DTOIngredient, DTOShoppingListItem } from "@/types/shopping"
 import type { DTOBaseUnit } from "@/types/dish"
 
@@ -175,7 +174,10 @@ const saving = ref(false)
 const error = ref("")
 const errorRef = ref<HTMLElement | null>(null)
 watch(error, (val) => {
-  if (val) nextTick(() => errorRef.value?.scrollIntoView({ behavior: "smooth", block: "nearest" }))
+  if (val)
+    nextTick(() =>
+      errorRef.value?.scrollIntoView({ behavior: getScrollBehavior(), block: "nearest" })
+    )
 })
 const showIngredientForm = ref(false)
 const ingredientFormInitialName = ref("")
@@ -354,10 +356,12 @@ async function confirmAdd() {
       background var(--transition-fast),
       border-color var(--transition-fast);
 
-    &:hover {
-      background: var(--color-empty);
-      border-color: var(--color-mint);
-      color: var(--color-mint);
+    @media (hover: hover) {
+      &:hover {
+        background: var(--color-empty);
+        border-color: var(--color-mint);
+        color: var(--color-mint);
+      }
     }
   }
 }
@@ -443,8 +447,10 @@ async function confirmAdd() {
     width: 100%;
     transition: background var(--transition-fast);
 
-    &:hover {
-      background: var(--color-empty);
+    @media (hover: hover) {
+      &:hover {
+        background: var(--color-empty);
+      }
     }
   }
 }
@@ -468,7 +474,7 @@ async function confirmAdd() {
 
   &__error {
     font-size: var(--font-sm);
-    color: var(--color-danger);
+    color: var(--color-danger-dark);
     padding: 4px 0;
   }
 
@@ -483,8 +489,10 @@ async function confirmAdd() {
     transition: background var(--transition-fast);
     width: 100%;
 
-    &:hover:not(:disabled) {
-      background: var(--color-mint-hover);
+    @media (hover: hover) {
+      &:hover:not(:disabled) {
+        background: var(--color-mint-hover);
+      }
     }
 
     &:disabled {

@@ -1,9 +1,11 @@
 <template>
-  <Transition name="toast">
-    <div v-if="message" class="toast" @click="$emit('dismiss')">
-      {{ message }}
-    </div>
-  </Transition>
+  <div class="toast-region" role="status" aria-live="polite">
+    <Transition name="toast">
+      <div v-if="message" class="toast" @click="$emit('dismiss')">
+        {{ message }}
+      </div>
+    </Transition>
+  </div>
 </template>
 
 <script lang="ts" setup>
@@ -22,11 +24,17 @@ defineEmits<{
 </script>
 
 <style lang="scss" scoped>
-.toast {
+.toast-region {
   position: fixed;
   bottom: calc(var(--nav-height) + 20px);
   left: 50%;
   transform: translateX(-50%);
+  z-index: var(--z-toast);
+  max-width: calc(100vw - 32px);
+  pointer-events: none;
+}
+
+.toast {
   padding: 12px 20px;
   background: var(--color-text);
   color: var(--color-surface);
@@ -34,9 +42,8 @@ defineEmits<{
   font-size: var(--font-sm);
   box-shadow: var(--shadow-elevated);
   cursor: pointer;
-  z-index: var(--z-toast);
-  max-width: calc(100vw - 32px);
   text-align: center;
+  pointer-events: auto;
 }
 
 .toast-enter-active,
@@ -49,6 +56,6 @@ defineEmits<{
 .toast-enter-from,
 .toast-leave-to {
   opacity: 0;
-  transform: translateX(-50%) translateY(12px);
+  transform: translateY(12px);
 }
 </style>

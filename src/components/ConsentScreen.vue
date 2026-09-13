@@ -20,9 +20,14 @@
         </label>
       </div>
 
-      <p v-if="error" class="consent__error">{{ error }}</p>
+      <p v-if="error" class="consent__error" role="alert">{{ error }}</p>
 
-      <button class="consent__btn" :disabled="!termsAccepted || loading" @click="submit">
+      <button
+        class="consent__btn"
+        :disabled="!termsAccepted || loading"
+        :aria-label="loading ? 'Сохранение…' : undefined"
+        @click="submit"
+      >
         <span v-if="loading" class="spinner spinner--sm" />
         <span v-else>Продолжить</span>
       </button>
@@ -119,15 +124,17 @@ async function submit() {
     color: var(--color-mint);
     text-decoration: underline;
 
-    &:hover {
-      opacity: 0.8;
+    @media (hover: hover) {
+      &:hover {
+        opacity: 0.8;
+      }
     }
   }
 
   &__error {
     margin: 0;
     font-size: var(--font-sm);
-    color: var(--color-danger);
+    color: var(--color-danger-dark);
   }
 
   &__btn {
@@ -150,8 +157,10 @@ async function submit() {
       opacity: 0.45;
       cursor: not-allowed;
     }
-    &:not(:disabled):hover {
-      opacity: 0.85;
+    @media (hover: hover) {
+      &:not(:disabled):hover {
+        opacity: 0.85;
+      }
     }
   }
 }

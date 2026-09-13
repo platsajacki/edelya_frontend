@@ -53,9 +53,11 @@
       background var(--transition-fast),
       color var(--transition-fast);
 
-    &:hover {
-      background: var(--color-empty);
-      color: var(--color-mint);
+    @media (hover: hover) {
+      &:hover {
+        background: var(--color-empty);
+        color: var(--color-mint);
+      }
     }
   }
 
@@ -106,6 +108,7 @@
 
   &__ingredient-amount {
     font-size: var(--font-sm);
+    font-variant-numeric: tabular-nums;
     color: var(--color-text-secondary);
     white-space: nowrap;
   }
@@ -160,8 +163,10 @@
       background: var(--color-mint);
       color: var(--on-primary);
 
-      &:hover {
-        background: var(--color-mint-hover);
+      @media (hover: hover) {
+        &:hover {
+          background: var(--color-mint-hover);
+        }
       }
 
       &:active {
@@ -173,8 +178,10 @@
       background: var(--color-mint-alpha-12);
       color: var(--color-mint);
 
-      &:hover {
-        background: var(--color-mint-alpha-16);
+      @media (hover: hover) {
+        &:hover {
+          background: var(--color-mint-alpha-16);
+        }
       }
 
       &:active {
@@ -186,8 +193,10 @@
       background: var(--color-danger-pale);
       color: var(--color-danger-dark);
 
-      &:hover {
-        background: var(--color-danger-bg);
+      @media (hover: hover) {
+        &:hover {
+          background: var(--color-danger-bg);
+        }
       }
 
       &:active {
@@ -199,8 +208,10 @@
       background: var(--color-empty);
       color: var(--color-text-secondary);
 
-      &:hover {
-        background: var(--color-border);
+      @media (hover: hover) {
+        &:hover {
+          background: var(--color-border);
+        }
       }
     }
   }

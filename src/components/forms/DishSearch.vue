@@ -6,7 +6,8 @@
         v-model="query"
         type="search"
         class="dish-search__input"
-        placeholder="Поиск рецепта..."
+        placeholder="Поиск рецепта…"
+        aria-label="Поиск рецепта"
         @input="onInput"
       />
       <button
@@ -20,20 +21,19 @@
       </button>
     </div>
 
-    <div v-if="loading" class="dish-search__status"><div class="spinner spinner--sm" /></div>
+    <div v-if="loading" class="dish-search__status">
+      <div class="spinner spinner--sm" role="status" aria-label="Загрузка" />
+    </div>
 
     <ul v-if="results.length" class="dish-search__list">
-      <li
-        v-for="dish in results"
-        :key="dish.id"
-        class="dish-search__item"
-        @click="$emit('select', dish)"
-      >
-        <div class="dish-search__info">
-          <span class="dish-search__name">{{ dish.name }}</span>
-          <span class="dish-search__category">{{ dish.category?.name }}</span>
-        </div>
-        <OwnershipBadge :is-own="isDishOwn(dish)" short />
+      <li v-for="dish in results" :key="dish.id" class="dish-search__item">
+        <button type="button" class="dish-search__option" @click="$emit('select', dish)">
+          <span class="dish-search__info">
+            <span class="dish-search__name">{{ dish.name }}</span>
+            <span class="dish-search__category">{{ dish.category?.name }}</span>
+          </span>
+          <OwnershipBadge :is-own="isDishOwn(dish)" short />
+        </button>
       </li>
     </ul>
 
@@ -140,21 +140,30 @@ function clearQuery() {
     border-radius: var(--radius-sm);
   }
 
-  &__item {
+  &__item + &__item {
+    border-top: 1px solid var(--color-border);
+  }
+
+  &__option {
     display: flex;
     justify-content: space-between;
     align-items: center;
     gap: 8px;
+    width: 100%;
     padding: 10px 12px;
+    border: 0;
+    background: none;
+    font: inherit;
+    color: inherit;
+    text-align: start;
     cursor: pointer;
     transition: background var(--transition-fast);
+    outline-offset: -2px;
 
-    &:hover {
-      background: var(--color-empty);
-    }
-
-    & + & {
-      border-top: 1px solid var(--color-border);
+    @media (hover: hover) {
+      &:hover {
+        background: var(--color-empty);
+      }
     }
   }
 
@@ -202,9 +211,11 @@ function clearQuery() {
       border-color var(--transition-fast);
     white-space: nowrap;
 
-    &:hover {
-      background: var(--color-mint-alpha-25);
-      border-color: var(--color-mint);
+    @media (hover: hover) {
+      &:hover {
+        background: var(--color-mint-alpha-25);
+        border-color: var(--color-mint);
+      }
     }
   }
 
@@ -226,10 +237,12 @@ function clearQuery() {
   }
 
   &__create {
-    &:hover {
-      background: var(--color-empty);
-      border-color: var(--color-mint);
-      color: var(--color-mint);
+    @media (hover: hover) {
+      &:hover {
+        background: var(--color-empty);
+        border-color: var(--color-mint);
+        color: var(--color-mint);
+      }
     }
   }
 
@@ -240,9 +253,11 @@ function clearQuery() {
     color: var(--color-mint);
     font-weight: 600;
 
-    &:hover {
-      background: var(--color-mint-alpha-25);
-      border-color: var(--color-mint);
+    @media (hover: hover) {
+      &:hover {
+        background: var(--color-mint-alpha-25);
+        border-color: var(--color-mint);
+      }
     }
   }
 }

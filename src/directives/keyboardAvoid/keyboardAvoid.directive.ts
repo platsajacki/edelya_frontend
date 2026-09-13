@@ -1,4 +1,5 @@
 import type { Directive } from "vue"
+import { getScrollBehavior } from "@/dom/prefersReducedMotion"
 
 const SCROLL_PADDING = 16
 
@@ -39,7 +40,7 @@ const scrollFieldIntoView = (field: HTMLElement) => {
 
   if (delta === 0) return
 
-  findScrollParent(field).scrollBy({ top: delta, behavior: "smooth" })
+  findScrollParent(field).scrollBy({ top: delta, behavior: getScrollBehavior() })
 }
 
 const cleanups = new WeakMap<HTMLElement, VoidFunction>()

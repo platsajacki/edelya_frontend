@@ -16,7 +16,7 @@
           <h3 class="landing-pricing__name">{{ tariff.name }}</h3>
           <p class="l-small landing-pricing__subtitle">{{ tariff.subtitle }}</p>
           <p class="landing-pricing__price">
-            {{ tariff.price }} ₽<span class="landing-pricing__period"> / мес</span>
+            {{ formatRubles(tariff.price) }}<span class="landing-pricing__period"> / мес</span>
           </p>
           <ul class="landing-pricing__features">
             <li
@@ -45,6 +45,8 @@
 </template>
 
 <script lang="ts" setup>
+import { formatRubles } from "@/utils/formatRubles"
+
 interface TariffFeature {
   label: string
   children?: string[]

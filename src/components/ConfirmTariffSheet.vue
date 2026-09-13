@@ -9,7 +9,7 @@
       >
         <IconWarning class="tariff-confirm__proration-icon" />
         <span
-          >Будет списано <strong>{{ scenario.proration }} ₽</strong></span
+          >Будет списано <strong>{{ formatRubles(scenario.proration) }}</strong></span
         >
       </div>
     </div>
@@ -32,6 +32,7 @@
           type="button"
           class="tariff-confirm__btn tariff-confirm__btn--confirm"
           :disabled="loading"
+          :aria-label="loading ? 'Подтверждение…' : undefined"
           @click="$emit('confirm')"
         >
           <span v-if="loading" class="spinner spinner--sm" />
@@ -45,6 +46,7 @@
 <script lang="ts" setup>
 import ModalWrapper from "./forms/ModalWrapper.vue"
 import IconWarning from "./icons/IconWarning.vue"
+import { formatRubles } from "@/utils/formatRubles"
 import type { TariffScenario } from "@/utils/tariffScenario"
 
 const props = withDefaults(
@@ -132,8 +134,10 @@ function onClose() {
       background: var(--color-empty);
       color: var(--color-text-secondary);
 
-      &:hover:not(:disabled) {
-        opacity: 0.75;
+      @media (hover: hover) {
+        &:hover:not(:disabled) {
+          opacity: 0.75;
+        }
       }
     }
 
@@ -141,8 +145,10 @@ function onClose() {
       background: var(--color-mint);
       color: var(--on-primary);
 
-      &:hover:not(:disabled) {
-        background: var(--color-mint-hover);
+      @media (hover: hover) {
+        &:hover:not(:disabled) {
+          background: var(--color-mint-hover);
+        }
       }
     }
   }

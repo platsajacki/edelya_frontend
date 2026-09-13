@@ -12,6 +12,10 @@ function stripTrailingZeros(num: number): string {
   return s
 }
 
+function formatDecimal(num: number): string {
+  return stripTrailingZeros(num).replace(".", ",")
+}
+
 export function formatShoppingAmount(
   amount: number | string,
   baseUnit: string
@@ -25,12 +29,12 @@ export function formatShoppingAmount(
   for (const rule of CONVERSION_RULES) {
     if (baseUnit === rule.from && num >= rule.threshold) {
       const converted = num / rule.divisor
-      const formatted = stripTrailingZeros(converted)
+      const formatted = formatDecimal(converted)
       return { display: `${formatted} ${rule.to}`, number: formatted, unit: rule.to }
     }
   }
 
-  const formatted = stripTrailingZeros(num)
+  const formatted = formatDecimal(num)
   const label = getUnitLabel(baseUnit)
   return { display: `${formatted} ${label}`, number: formatted, unit: label }
 }

@@ -14,7 +14,8 @@
             <button
               type="button"
               class="selected-dish__edit"
-              :title="isDishOwn(selectedDish) ? 'Редактировать рецепт' : 'Создать личную копию'"
+              :title="editDishLabel"
+              :aria-label="editDishLabel"
               @click="onEditDishClick"
             >
               <IconPencil :width="16" :height="16" />
@@ -48,7 +49,7 @@
         <textarea v-model="notes" v-keyboard-avoid class="form__textarea" rows="2" />
       </label>
 
-      <div v-if="error" ref="errorRef" class="form__error">{{ error }}</div>
+      <div v-if="error" ref="errorRef" class="form__error" role="alert">{{ error }}</div>
     </form>
 
     <DishForm
@@ -86,13 +87,8 @@
     <AIDishDraftForm v-model="showAIForm" :z-index="1030" @created="onDishCreated" />
 
     <template #footer>
-      <button
-        type="submit"
-        form="cooking-event-form"
-        class="form__submit"
-        :disabled="saving || !selectedDish"
-      >
-        {{ saving ? "Сохранение..." : isEdit ? "Сохранить" : "Создать готовку" }}
+      <button type="submit" form="cooking-event-form" class="form__submit" :disabled="saving">
+        {{ saving ? "Сохранение…" : isEdit ? "Сохранить" : "Создать готовку" }}
       </button>
     </template>
   </ModalWrapper>
@@ -111,6 +107,7 @@ import { usePlanningStore } from "../../store/planning"
 import { useSubscriptionStore } from "../../store/subscription"
 import IconPencil from "../icons/IconPencil.vue"
 import { isDishOwn } from "../../utils/dishOwnership"
+import { getScrollBehavior } from "@/dom/prefersReducedMotion"
 import type { DTODish } from "@/types/dish"
 import type { DTOCookingEvent } from "@/types/planning"
 
@@ -146,6 +143,9 @@ watch(open, (v) => {
 })
 
 const selectedDish = ref<DTODish | null>(null)
+const editDishLabel = computed(() =>
+  isDishOwn(selectedDish.value) ? "Редактировать рецепт" : "Создать личную копию"
+)
 const cookingDate = ref("")
 const eatDates = ref<string[]>([])
 const notes = ref("")
@@ -153,7 +153,10 @@ const saving = ref(false)
 const error = ref("")
 const errorRef = ref<HTMLElement | null>(null)
 watch(error, (val) => {
-  if (val) nextTick(() => errorRef.value?.scrollIntoView({ behavior: "smooth", block: "nearest" }))
+  if (val)
+    nextTick(() =>
+      errorRef.value?.scrollIntoView({ behavior: getScrollBehavior(), block: "nearest" })
+    )
 })
 const showDishForm = ref(false)
 const editDish = ref<DTODish | null>(null)
@@ -305,8 +308,10 @@ async function submit() {
     cursor: pointer;
     transition: background var(--transition-fast);
 
-    &:hover {
-      background: var(--color-border);
+    @media (hover: hover) {
+      &:hover {
+        background: var(--color-border);
+      }
     }
   }
 }

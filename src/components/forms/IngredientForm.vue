@@ -26,12 +26,12 @@
         </select>
       </label>
 
-      <div v-if="error" ref="errorRef" class="form__error">{{ error }}</div>
+      <div v-if="error" ref="errorRef" class="form__error" role="alert">{{ error }}</div>
     </form>
 
     <template #footer>
       <button type="submit" form="ingredient-form" class="form__submit" :disabled="saving">
-        {{ saving ? "Сохранение..." : "Создать ингредиент" }}
+        {{ saving ? "Сохранение…" : "Создать ингредиент" }}
       </button>
     </template>
   </ModalWrapper>
@@ -42,6 +42,7 @@ import { ref, watch, nextTick } from "vue"
 import ModalWrapper from "./ModalWrapper.vue"
 import { createIngredient, fetchIngredientCategories } from "../../services/ingredientService"
 import { AutoFocusDirective as vAutofocus } from "@/directives/autofocus"
+import { getScrollBehavior } from "@/dom/prefersReducedMotion"
 import type { DTOIngredient, DTOIngredientCategory } from "@/types/shopping"
 
 const UNITS = [
@@ -99,7 +100,10 @@ const saving = ref(false)
 const error = ref("")
 const errorRef = ref<HTMLElement | null>(null)
 watch(error, (val) => {
-  if (val) nextTick(() => errorRef.value?.scrollIntoView({ behavior: "smooth", block: "nearest" }))
+  if (val)
+    nextTick(() =>
+      errorRef.value?.scrollIntoView({ behavior: getScrollBehavior(), block: "nearest" })
+    )
 })
 
 watch(

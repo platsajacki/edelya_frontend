@@ -72,7 +72,7 @@ import IconCalendar from "@/components/icons/IconCalendar.vue"
       background: var(--color-cook-bg);
 
       .landing-planner__card-title {
-        color: var(--color-cook);
+        color: var(--color-cook-dark);
       }
     }
 
@@ -80,7 +80,7 @@ import IconCalendar from "@/components/icons/IconCalendar.vue"
       background: var(--color-eat-bg);
 
       .landing-planner__card-title {
-        color: var(--color-eat);
+        color: var(--color-eat-dark);
       }
     }
   }

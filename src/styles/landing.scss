@@ -1,6 +1,6 @@
 @font-face {
   font-family: "Onest Landing";
-  src: url("../assets/fonts/onest/Onest-VariableFont_wght.ttf") format("truetype");
+  src: url("../assets/fonts/onest/Onest-VariableFont_wght.woff2") format("woff2");
   font-style: normal;
   font-weight: 100 900;
   // Keep the first rendered font on slow connections instead of shifting the page.
@@ -47,6 +47,7 @@
   font-weight: 600;
   letter-spacing: -0.025em;
   line-height: 1.25;
+  text-wrap: balance;
 }
 
 .l-eyebrow {
@@ -116,8 +117,10 @@
     background var(--transition-normal),
     transform var(--transition-fast);
 
-  &:hover {
-    background: var(--color-mint-hover);
+  @media (hover: hover) {
+    &:hover {
+      background: var(--color-mint-hover);
+    }
   }
 
   &:active {
@@ -135,8 +138,10 @@
   text-decoration: none;
   transition: color var(--transition-normal);
 
-  &:hover {
-    color: var(--color-mint-hover);
+  @media (hover: hover) {
+    &:hover {
+      color: var(--color-mint-hover);
+    }
   }
 }
 

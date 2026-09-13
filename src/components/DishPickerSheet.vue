@@ -2,10 +2,10 @@
   <Teleport to="body">
     <Transition name="modal">
       <div v-if="modelValue" class="picker-overlay" :style="{ zIndex }" @click.self="close">
-        <div class="picker-panel">
+        <div class="picker-panel" role="dialog" aria-modal="true" :aria-labelledby="titleId">
           <!-- Header -->
           <div class="picker-header">
-            <h3 class="picker-title">Выбрать блюдо</h3>
+            <h2 :id="titleId" class="picker-title">Выбрать блюдо</h2>
             <button class="picker-close" aria-label="Закрыть" @click="close">&times;</button>
           </div>
 
@@ -18,7 +18,8 @@
               v-keyboard-avoid
               type="search"
               class="picker-search__input"
-              placeholder="Поиск рецепта..."
+              placeholder="Поиск рецепта…"
+              aria-label="Поиск рецепта"
               @input="onQueryInput"
             />
             <button
@@ -38,6 +39,7 @@
               :key="tab.value"
               class="picker-tabs__item"
               :class="{ 'picker-tabs__item--active': ownership === tab.value }"
+              :aria-pressed="ownership === tab.value"
               @click="switchTab(tab.value)"
             >
               {{ tab.label }}
@@ -55,7 +57,7 @@
           <!-- List -->
           <div ref="listEl" class="picker-body">
             <div v-if="initialLoading && !dishes.length" class="picker-status">
-              <div class="spinner" />
+              <div class="spinner" role="status" aria-label="Загрузка" />
             </div>
 
             <div
@@ -71,25 +73,27 @@
             </div>
 
             <ul v-else class="picker-list">
-              <li
-                v-for="dish in dishes"
-                :key="dish.id"
-                class="picker-item"
-                @click="openPreview(dish)"
-              >
-                <div class="picker-item__info">
-                  <span class="picker-item__name">{{ dish.name }}</span>
-                  <span v-if="dish.category?.name" class="picker-item__category">{{
-                    dish.category.name
-                  }}</span>
-                </div>
-                <OwnershipBadge :is-own="isDishOwn(dish)" short />
+              <li v-for="dish in dishes" :key="dish.id" class="picker-item">
+                <button type="button" class="picker-item__option" @click="openPreview(dish)">
+                  <span class="picker-item__info">
+                    <span class="picker-item__name">{{ dish.name }}</span>
+                    <span v-if="dish.category?.name" class="picker-item__category">{{
+                      dish.category.name
+                    }}</span>
+                  </span>
+                  <OwnershipBadge :is-own="isDishOwn(dish)" short />
+                </button>
               </li>
             </ul>
 
             <!-- Infinite scroll sentinel -->
             <div ref="sentinelEl" class="picker-sentinel">
-              <div v-if="loadingMore" class="spinner spinner--sm" />
+              <div
+                v-if="loadingMore"
+                class="spinner spinner--sm"
+                role="status"
+                aria-label="Загрузка"
+              />
             </div>
           </div>
         </div>
@@ -106,16 +110,23 @@
         :style="{ zIndex: zIndex + 20 }"
         @click.self="closePreview"
       >
-        <div class="picker-panel picker-panel--preview">
+        <div
+          class="picker-panel picker-panel--preview"
+          role="dialog"
+          aria-modal="true"
+          :aria-labelledby="previewTitleId"
+        >
           <div class="picker-header">
-            <h3 class="picker-title">{{ previewDish?.name }}</h3>
+            <h2 :id="previewTitleId" class="picker-title">{{ previewDish?.name }}</h2>
             <button class="picker-close" aria-label="Закрыть" @click="closePreview">
               &times;
             </button>
           </div>
 
           <div class="picker-body picker-preview-body">
-            <div v-if="previewLoading" class="picker-status"><div class="spinner" /></div>
+            <div v-if="previewLoading" class="picker-status">
+              <div class="spinner" role="status" aria-label="Загрузка" />
+            </div>
             <template v-else-if="previewDish">
               <div class="preview-section">
                 <p v-if="previewDish.category?.name" class="preview-meta">
@@ -163,7 +174,7 @@
 
 <script lang="ts" setup>
 import { KeyboardAvoidDirective as vKeyboardAvoid } from "@/directives/keyboardAvoid"
-import { ref, watch, onUnmounted } from "vue"
+import { ref, watch, onUnmounted, useId } from "vue"
 import { fetchDishes, fetchDish, fetchDishCategories } from "../services/dishService"
 import { isDishOwn } from "../utils/dishOwnership"
 import { formatShoppingAmount } from "../utils/formatShoppingAmount"
@@ -194,6 +205,9 @@ const emit = defineEmits<{
   (e: "update:modelValue", value: boolean): void
   (e: "select", dish: DTODish): void
 }>()
+
+const titleId = useId()
+const previewTitleId = useId()
 
 // --- State ---
 const query = ref("")
@@ -444,8 +458,10 @@ onUnmounted(() => {
   transition: background var(--transition-fast);
   cursor: pointer;
 
-  &:hover {
-    background: var(--color-empty);
+  @media (hover: hover) {
+    &:hover {
+      background: var(--color-empty);
+    }
   }
 }
 
@@ -480,7 +496,7 @@ onUnmounted(() => {
       box-shadow var(--transition-fast);
 
     &:focus {
-      border-color: var(--color-mint-alpha-25);
+      border-color: var(--color-mint);
       box-shadow: 0 0 0 3px var(--color-mint-alpha-10);
     }
   }
@@ -516,6 +532,7 @@ onUnmounted(() => {
     color: var(--color-text-secondary);
     cursor: pointer;
     border-bottom: 2px solid transparent;
+    outline-offset: -2px;
     transition:
       color var(--transition-fast),
       border-color var(--transition-fast);
@@ -550,21 +567,32 @@ onUnmounted(() => {
 }
 
 .picker-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 13px 16px;
-  cursor: pointer;
   border-bottom: 1px solid var(--color-border);
-  transition: background var(--transition-fast);
-  -webkit-tap-highlight-color: transparent;
 
   &:last-child {
     border-bottom: none;
   }
-  &:active {
-    background: var(--color-empty);
+
+  &__option {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    width: 100%;
+    padding: 13px 16px;
+    border: 0;
+    background: none;
+    font: inherit;
+    color: inherit;
+    text-align: start;
+    cursor: pointer;
+    transition: background var(--transition-fast);
+    -webkit-tap-highlight-color: transparent;
+    outline-offset: -2px;
+
+    &:active {
+      background: var(--color-empty);
+    }
   }
 
   &__info {
@@ -650,8 +678,10 @@ onUnmounted(() => {
   cursor: pointer;
   transition: background var(--transition-fast);
 
-  &:hover {
-    background: var(--color-mint-hover);
+  @media (hover: hover) {
+    &:hover {
+      background: var(--color-mint-hover);
+    }
   }
 }
 

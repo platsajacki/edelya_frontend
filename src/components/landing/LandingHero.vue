@@ -19,7 +19,7 @@
           </div>
         </div>
       </div>
-      <PhoneShot :screen="screens.planner" />
+      <PhoneShot :screen="screens.planner" priority />
     </div>
   </section>
 </template>
@@ -49,6 +49,7 @@ import { screens } from "./screens"
     font-weight: 400;
     letter-spacing: -0.025em;
     line-height: 1.15;
+    text-wrap: balance;
   }
 
   &__description {

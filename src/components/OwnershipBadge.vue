@@ -1,8 +1,7 @@
 <template>
   <span class="ownership-badge" :class="isOwn ? 'ownership-badge--own' : 'ownership-badge--shared'">
-    {{
-      isOwn ? (short ? "👤 Личное" : "👤 Личный рецепт") : short ? "🌐 Общее" : "🌐 Общий рецепт"
-    }}
+    <span aria-hidden="true">{{ isOwn ? "👤" : "🌐" }}</span>
+    {{ isOwn ? (short ? "Личное" : "Личный рецепт") : short ? "Общее" : "Общий рецепт" }}
   </span>
 </template>
 
@@ -22,6 +21,7 @@ withDefaults(
 .ownership-badge {
   display: inline-flex;
   align-items: center;
+  gap: 0.25em;
   font-size: var(--font-xs);
   font-weight: 600;
   padding: 2px 8px;

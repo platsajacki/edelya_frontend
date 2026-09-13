@@ -12,6 +12,19 @@ function handleBackButtonClick() {
   topClose?.()
 }
 
+function handleEscapeKey(e: KeyboardEvent) {
+  if (e.key !== "Escape" || e.isComposing || e.defaultPrevented) return
+  handleBackButtonClick()
+}
+
+function syncEscapeKey() {
+  if (modalStack.length > 0) {
+    document.addEventListener("keydown", handleEscapeKey)
+  } else {
+    document.removeEventListener("keydown", handleEscapeKey)
+  }
+}
+
 function syncVisibility() {
   const backButton = getBackButton()
   if (!backButton) return
@@ -42,6 +55,7 @@ export function useModalBackButton(isOpen: () => boolean, close: VoidFunction) {
         removeFromStack(close)
       }
       syncVisibility()
+      syncEscapeKey()
     },
     { immediate: true }
   )
@@ -49,5 +63,6 @@ export function useModalBackButton(isOpen: () => boolean, close: VoidFunction) {
   onUnmounted(() => {
     removeFromStack(close)
     syncVisibility()
+    syncEscapeKey()
   })
 }

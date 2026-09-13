@@ -6,7 +6,8 @@
       :class="{ 'item-row__check--on': item.is_checked }"
       type="button"
       :disabled="toggling"
-      aria-label="Отметить как купленное"
+      :aria-pressed="item.is_checked"
+      :aria-label="`Куплено: ${itemName}`"
       @click="$emit('toggle-checked', item)"
     >
       <IconCheck v-if="item.is_checked" />
@@ -15,8 +16,13 @@
     <!-- Name + sub-line -->
     <div class="item-row__info">
       <div class="item-row__name-row">
-        <span class="item-row__name">{{ item.ingredient?.name ?? "—" }}</span>
-        <span v-if="item.is_manual" class="item-row__manual-badge" title="Добавлено вручную"
+        <span class="item-row__name">{{ itemName }}</span>
+        <span
+          v-if="item.is_manual"
+          class="item-row__manual-badge"
+          title="Добавлено вручную"
+          role="img"
+          aria-label="Добавлено вручную"
           >✏️</span
         >
       </div>
@@ -35,9 +41,8 @@
         −
       </button>
 
-      <div class="item-row__step-center" @click="startEdit">
+      <div v-if="editing" class="item-row__step-center">
         <input
-          v-if="editing"
           v-model="editValue"
           v-autofocus.select
           v-keyboard-avoid
@@ -45,12 +50,21 @@
           inputmode="decimal"
           autocomplete="off"
           class="item-row__step-input"
+          :aria-label="`Количество: ${itemName}`"
           @keydown.enter.prevent="commitEdit"
           @keydown.escape.prevent="cancelEdit"
           @blur="commitEdit"
         />
-        <span v-else class="item-row__step-label">{{ formatted.display }}</span>
       </div>
+      <button
+        v-else
+        type="button"
+        class="item-row__step-center item-row__step-center--button"
+        :aria-label="`Изменить количество: ${formatted.display}`"
+        @click="startEdit"
+      >
+        <span class="item-row__step-label">{{ formatted.display }}</span>
+      </button>
 
       <button
         class="item-row__step-btn"
@@ -69,7 +83,7 @@
     <button
       class="item-row__delete"
       type="button"
-      aria-label="Удалить"
+      :aria-label="`Удалить: ${itemName}`"
       @click="$emit('delete', item)"
     >
       <IconClose :width="16" :height="16" />
@@ -101,6 +115,7 @@ const toggling = ref(false)
 const editing = ref(false)
 const editValue = ref("")
 
+const itemName = computed(() => props.item.ingredient?.name ?? "—")
 const baseUnit = computed(() => props.item.ingredient?.base_unit ?? "piece")
 const step = computed(() => getUnitStep(baseUnit.value))
 const isToTaste = computed(() => baseUnit.value === "to_taste")
@@ -234,6 +249,11 @@ function cancelEdit() {
     border-radius: var(--radius-pill);
     overflow: hidden;
     background: var(--color-surface);
+    transition: border-color var(--transition-fast);
+
+    &:has(:focus-visible) {
+      border-color: var(--color-mint);
+    }
   }
 
   &__step-btn {
@@ -251,6 +271,7 @@ function cancelEdit() {
     cursor: pointer;
     flex-shrink: 0;
     -webkit-tap-highlight-color: transparent;
+    outline-offset: -2px;
     transition: background var(--transition-fast);
 
     &:active {
@@ -272,11 +293,21 @@ function cancelEdit() {
     justify-content: center;
     padding: 0 4px;
     cursor: text;
+
+    &--button {
+      border-top: 0;
+      border-bottom: 0;
+      background: none;
+      font: inherit;
+      color: inherit;
+      outline-offset: -2px;
+    }
   }
 
   &__step-label {
     font-size: var(--font-2xs);
     font-weight: 600;
+    font-variant-numeric: tabular-nums;
     color: var(--color-text);
     white-space: nowrap;
     text-align: center;
@@ -290,6 +321,7 @@ function cancelEdit() {
     background: transparent;
     font-size: var(--font-2xs);
     font-weight: 600;
+    font-variant-numeric: tabular-nums;
     color: var(--color-text);
     text-align: center;
     font-family: inherit;
@@ -300,6 +332,7 @@ function cancelEdit() {
   &__amount-done {
     flex-shrink: 0;
     font-size: var(--font-2xs);
+    font-variant-numeric: tabular-nums;
     color: var(--color-text-secondary);
     white-space: nowrap;
   }
@@ -323,8 +356,14 @@ function cancelEdit() {
       color var(--transition-fast);
     -webkit-tap-highlight-color: transparent;
 
-    &:active,
-    &:hover {
+    @media (hover: hover) {
+      &:hover {
+        opacity: 1;
+        background: var(--color-danger-pale);
+      }
+    }
+
+    &:active {
       opacity: 1;
       background: var(--color-danger-pale);
     }

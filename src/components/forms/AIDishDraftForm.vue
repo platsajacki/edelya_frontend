@@ -29,7 +29,7 @@
             class="form__textarea ai-draft__source"
             rows="8"
             :maxlength="MAX_SOURCE_LENGTH"
-            placeholder="Готовый рецепт: Борщ. Ингредиенты: свёкла 300 г, капуста 200 г... Приготовление: нарезать овощи, сварить бульон...
+            placeholder="Готовый рецепт: Борщ. Ингредиенты: свёкла 300 г, капуста 200 г… Приготовление: нарезать овощи, сварить бульон…
 
 Продукты: есть картофель, яйца, сыр и сметана. Что приготовить?
 
@@ -51,7 +51,11 @@
               <span v-if="fakeStepStates[idx] === 'done'" class="ai-draft__step-check">
                 <IconCheck />
               </span>
-              <span v-else-if="fakeStepStates[idx] === 'loading'" class="spinner spinner--sm" />
+              <span
+                v-else-if="fakeStepStates[idx] === 'loading'"
+                class="spinner spinner--sm"
+                aria-hidden="true"
+              />
               <span v-else class="ai-draft__step-dot" />
             </span>
             <span class="ai-draft__step-label">{{ label }}</span>
@@ -79,7 +83,7 @@
 
         <div class="detail__section">
           <div class="detail__dish-header">
-            <h4 class="detail__dish-name">{{ readonlyPayload.name || "Без названия" }}</h4>
+            <h3 class="detail__dish-name">{{ readonlyPayload.name || "Без названия" }}</h3>
           </div>
           <p v-if="readonlyCategoryName" class="detail__meta">{{ readonlyCategoryName }}</p>
           <p v-if="readonlyPayload.recipe" class="detail__recipe">{{ readonlyPayload.recipe }}</p>
@@ -108,6 +112,7 @@
           <button
             type="button"
             class="ai-draft__source-toggle"
+            :aria-expanded="sourceExpanded"
             @click="sourceExpanded = !sourceExpanded"
           >
             {{ sourceToggleLabel }}
@@ -128,6 +133,7 @@
           <button
             type="button"
             class="ai-draft__source-toggle"
+            :aria-expanded="sourceExpanded"
             @click="sourceExpanded = !sourceExpanded"
           >
             {{ sourceToggleLabel }}
@@ -227,7 +233,8 @@
                       v-keyboard-avoid
                       type="search"
                       class="form__input"
-                      placeholder="Поиск ингредиента..."
+                      placeholder="Поиск ингредиента…"
+                      aria-label="Поиск ингредиента"
                       @input="searchInlineReplace"
                     />
                     <button
@@ -246,19 +253,24 @@
                     </button>
                   </div>
                   <div v-if="inlineReplaceLoading" class="ingredient-search__status">
-                    <div class="spinner spinner--sm" />
+                    <div class="spinner spinner--sm" role="status" aria-label="Загрузка" />
                   </div>
                   <ul v-else-if="inlineReplaceResults.length" class="ingredient-search__list">
                     <li
                       v-for="result in inlineReplaceResults"
                       :key="result.id"
                       class="ingredient-search__item"
-                      @click="selectInlineReplaceIngredient(result)"
                     >
-                      {{ result.name }}
-                      <span class="ingredient-search__unit">{{
-                        UNIT_LABELS[result.base_unit] || result.base_unit
-                      }}</span>
+                      <button
+                        type="button"
+                        class="ingredient-search__option"
+                        @click="selectInlineReplaceIngredient(result)"
+                      >
+                        {{ result.name }}
+                        <span class="ingredient-search__unit">{{
+                          UNIT_LABELS[result.base_unit] || result.base_unit
+                        }}</span>
+                      </button>
                     </li>
                   </ul>
                   <div v-else-if="inlineReplaceQuery.trim()" class="ingredient-search__status">
@@ -347,6 +359,7 @@
                   type="button"
                   class="ingredient-row__edit"
                   title="Редактировать"
+                  :aria-label="`Редактировать: ${ingredientLabel(ingredient)}`"
                   @click="startIngredientEdit(idx)"
                 >
                   <IconPencil :width="16" :height="16" />
@@ -355,6 +368,7 @@
                   type="button"
                   class="ingredient-row__remove"
                   title="Удалить"
+                  :aria-label="`Удалить: ${ingredientLabel(ingredient)}`"
                   @click="removeIngredient(idx)"
                 >
                   <IconClose />
@@ -381,6 +395,7 @@
           <button
             type="button"
             class="ingredient-add__toggle"
+            :aria-expanded="addIngredientExpanded"
             @click="addIngredientExpanded = !addIngredientExpanded"
           >
             {{ addIngredientExpanded ? "− Свернуть" : "+ Добавить ингредиент" }}
@@ -394,7 +409,8 @@
                 v-keyboard-avoid
                 type="search"
                 class="form__input"
-                placeholder="Поиск ингредиента..."
+                placeholder="Поиск ингредиента…"
+                aria-label="Поиск ингредиента"
                 @input="searchIngredients"
               />
               <button
@@ -408,19 +424,24 @@
               </button>
             </div>
             <div v-if="ingredientSearchLoading" class="ingredient-search__status">
-              <div class="spinner spinner--sm" />
+              <div class="spinner spinner--sm" role="status" aria-label="Загрузка" />
             </div>
             <ul v-else-if="ingredientSearchResults.length" class="ingredient-search__list">
               <li
                 v-for="result in ingredientSearchResults"
                 :key="result.id"
                 class="ingredient-search__item"
-                @click="selectExistingIngredient(result)"
               >
-                {{ result.name }}
-                <span class="ingredient-search__unit">{{
-                  UNIT_LABELS[result.base_unit] || result.base_unit
-                }}</span>
+                <button
+                  type="button"
+                  class="ingredient-search__option"
+                  @click="selectExistingIngredient(result)"
+                >
+                  {{ result.name }}
+                  <span class="ingredient-search__unit">{{
+                    UNIT_LABELS[result.base_unit] || result.base_unit
+                  }}</span>
+                </button>
               </li>
             </ul>
             <div v-else-if="ingredientSearchQuery.trim()" class="ingredient-search__status">
@@ -433,7 +454,7 @@
         </div>
       </template>
 
-      <div v-if="error" ref="errorRef" class="form__error">{{ error }}</div>
+      <div v-if="error" ref="errorRef" class="form__error" role="alert">{{ error }}</div>
     </form>
 
     <IngredientForm
@@ -451,7 +472,7 @@
           :disabled="!createdDishId || openingCreatedDish"
           @click="openCreatedDish"
         >
-          {{ openingCreatedDish ? "Открываю..." : "Открыть блюдо" }}
+          {{ openingCreatedDish ? "Открываю…" : "Открыть блюдо" }}
         </button>
         <button type="button" class="detail__btn detail__btn--cancel" @click="open = false">
           Закрыть
@@ -489,6 +510,7 @@ import {
 } from "@/services/ingredientService.ts"
 import { formatShoppingAmount } from "@/utils/formatShoppingAmount.ts"
 import { UNIT_LABELS } from "@/utils/unitLabels.ts"
+import { getScrollBehavior } from "@/dom/prefersReducedMotion"
 import type { DTOAIDraft, DTOBaseUnit, DTODish, DTODishCategory } from "@/types/dish"
 import type { DTOIngredient, DTOIngredientCategory } from "@/types/shopping"
 import IconCheck from "@/components/icons/IconCheck.vue"
@@ -623,9 +645,9 @@ const sourceToggleLabel = computed(() =>
 )
 const submitLabel = computed(() => {
   if (step.value === "input" && subscription.isAIRecipeLimitExceeded) return "Лимит исчерпан"
-  if (saving.value && step.value === "parsed") return "Создание..."
-  if (saving.value) return "Отправка..."
-  if (polling.value || step.value === "processing") return "Подготовка блюда..."
+  if (saving.value && step.value === "parsed") return "Создание…"
+  if (saving.value) return "Отправка…"
+  if (polling.value || step.value === "processing") return "Подготовка блюда…"
   if (step.value === "parsed") return "Создать блюдо"
   return "Подготовить блюдо"
 })
@@ -676,7 +698,9 @@ watch(
 
 watch(error, (value) => {
   if (value) {
-    nextTick(() => errorRef.value?.scrollIntoView({ behavior: "smooth", block: "nearest" }))
+    nextTick(() =>
+      errorRef.value?.scrollIntoView({ behavior: getScrollBehavior(), block: "nearest" })
+    )
   }
 })
 
@@ -1344,8 +1368,10 @@ onUnmounted(() => {
     font-size: var(--font-sm);
     font-weight: 600;
 
-    &:hover {
-      color: var(--color-mint-hover);
+    @media (hover: hover) {
+      &:hover {
+        color: var(--color-mint-hover);
+      }
     }
   }
 
@@ -1548,8 +1574,8 @@ onUnmounted(() => {
   &__edit,
   &__remove {
     flex-shrink: 0;
-    width: 22px;
-    height: 22px;
+    width: 24px;
+    height: 24px;
     border: none;
     border-radius: var(--radius-xs);
     background: none;
@@ -1557,7 +1583,7 @@ onUnmounted(() => {
     display: flex;
     align-items: center;
     justify-content: center;
-    opacity: 0.4;
+    opacity: 0.75;
     padding: 0;
     transition:
       opacity var(--transition-fast),
@@ -1566,24 +1592,30 @@ onUnmounted(() => {
   }
 
   &__edit {
-    &:hover {
+    @media (hover: hover) {
+      &:hover {
+        opacity: 1;
+        color: var(--color-mint);
+        background: var(--color-mint-alpha-10);
+      }
+    }
+  }
+
+  @media (hover: hover) {
+    &:hover &__edit {
       opacity: 1;
       color: var(--color-mint);
       background: var(--color-mint-alpha-10);
     }
   }
 
-  &:hover &__edit {
-    opacity: 1;
-    color: var(--color-mint);
-    background: var(--color-mint-alpha-10);
-  }
-
   &__remove {
-    &:hover {
-      opacity: 1;
-      background: var(--color-danger-pale);
-      color: var(--color-danger);
+    @media (hover: hover) {
+      &:hover {
+        opacity: 1;
+        background: var(--color-danger-pale);
+        color: var(--color-danger);
+      }
     }
   }
 
@@ -1613,8 +1645,10 @@ onUnmounted(() => {
     cursor: pointer;
     transition: background var(--transition-fast);
 
-    &:hover {
-      background: var(--color-mint-alpha-25);
+    @media (hover: hover) {
+      &:hover {
+        background: var(--color-mint-alpha-25);
+      }
     }
   }
 }
@@ -1676,9 +1710,11 @@ onUnmounted(() => {
       background var(--transition-fast),
       border-color var(--transition-fast);
 
-    &:hover {
-      background: var(--color-mint-alpha-25);
-      border-color: var(--color-mint);
+    @media (hover: hover) {
+      &:hover {
+        background: var(--color-mint-alpha-25);
+        border-color: var(--color-mint);
+      }
     }
   }
 
@@ -1691,8 +1727,10 @@ onUnmounted(() => {
     cursor: pointer;
     padding: 2px 0;
 
-    &:hover {
-      color: var(--color-text);
+    @media (hover: hover) {
+      &:hover {
+        color: var(--color-text);
+      }
     }
   }
 
@@ -1763,21 +1801,9 @@ onUnmounted(() => {
     border-radius: var(--radius-sm);
   }
 
-  &__item {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+  &__option {
     gap: 8px;
     padding: 9px 10px;
-    font-size: var(--font-sm);
-    cursor: pointer;
-
-    & + & {
-      border-top: 1px solid var(--color-border);
-    }
-    &:hover {
-      background: var(--color-empty);
-    }
   }
 
   &__unit,
@@ -1804,8 +1830,10 @@ onUnmounted(() => {
     background: var(--color-mint);
     color: var(--on-primary);
 
-    &:hover {
-      background: var(--color-mint-hover);
+    @media (hover: hover) {
+      &:hover {
+        background: var(--color-mint-hover);
+      }
     }
   }
 
@@ -1813,8 +1841,10 @@ onUnmounted(() => {
     background: transparent;
     color: var(--color-text-secondary);
 
-    &:hover {
-      background: var(--color-empty);
+    @media (hover: hover) {
+      &:hover {
+        background: var(--color-empty);
+      }
     }
   }
 }
@@ -1833,10 +1863,12 @@ onUnmounted(() => {
       background var(--transition-fast),
       border-color var(--transition-fast);
 
-    &:hover {
-      background: var(--color-empty);
-      border-color: var(--color-mint);
-      color: var(--color-mint);
+    @media (hover: hover) {
+      &:hover {
+        background: var(--color-empty);
+        border-color: var(--color-mint);
+        color: var(--color-mint);
+      }
     }
   }
 }
@@ -1857,10 +1889,12 @@ onUnmounted(() => {
       border-color var(--transition-fast),
       color var(--transition-fast);
 
-    &:hover {
-      background: var(--color-empty);
-      border-color: var(--color-mint);
-      color: var(--color-mint);
+    @media (hover: hover) {
+      &:hover {
+        background: var(--color-empty);
+        border-color: var(--color-mint);
+        color: var(--color-mint);
+      }
     }
   }
 }

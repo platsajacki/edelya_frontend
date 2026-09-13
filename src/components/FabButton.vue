@@ -27,8 +27,10 @@
     transform var(--transition-fast);
   -webkit-tap-highlight-color: transparent;
 
-  &:hover {
-    background: var(--color-mint-hover);
+  @media (hover: hover) {
+    &:hover {
+      background: var(--color-mint-hover);
+    }
   }
   &:active {
     transform: scale(var(--press-scale-lg));

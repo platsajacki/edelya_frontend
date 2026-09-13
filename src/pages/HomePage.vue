@@ -83,8 +83,10 @@ function reload() {
     border-radius: var(--radius-md);
     transition: background var(--transition-fast);
 
-    &:hover {
-      background: var(--color-mint-hover);
+    @media (hover: hover) {
+      &:hover {
+        background: var(--color-mint-hover);
+      }
     }
   }
 
@@ -107,8 +109,10 @@ function reload() {
     text-decoration: underline;
     text-underline-offset: 2px;
 
-    &:hover {
-      color: var(--color-text);
+    @media (hover: hover) {
+      &:hover {
+        color: var(--color-text);
+      }
     }
   }
 }

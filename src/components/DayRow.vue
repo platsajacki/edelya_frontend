@@ -9,7 +9,8 @@
         v-if="cookingEvents.length > 0"
         type="button"
         class="day-row__shopping-btn"
-        :title="`Список покупок на ${day} ${date.slice(0, 2)}`"
+        :title="shoppingLabel"
+        :aria-label="shoppingLabel"
         @click.stop="$emit('create-shopping-day', { rawDate, dayLabel: day })"
       >
         <IconBasket :width="22" :height="22" />
@@ -77,6 +78,7 @@ import IconPot from "./icons/IconPot.vue"
 import IconFork from "./icons/IconFork.vue"
 import { useSortable } from "../composables/useSortable"
 import { getTodayISO } from "../utils/weekDays"
+import { prefersReducedMotion } from "../dom/prefersReducedMotion"
 import type { DTOMealPlanItem, DTOCookingEvent } from "@/types/planning"
 
 const props = withDefaults(
@@ -96,6 +98,7 @@ const props = withDefaults(
 )
 
 const isToday = computed(() => props.rawDate === getTodayISO())
+const shoppingLabel = computed(() => `Список покупок на ${props.day} ${props.date.slice(0, 2)}`)
 
 const emit = defineEmits<{
   (e: "tap-cooking", event: DTOCookingEvent): void
@@ -126,7 +129,7 @@ function makeSortableOptions(type: "cooking" | "meals") {
     ghostClass: "meal-card--ghost",
     chosenClass: "meal-card--chosen",
     dragClass: "meal-card--drag",
-    animation: 150,
+    animation: prefersReducedMotion() ? 0 : 150,
     delay: 150,
     delayOnTouchOnly: true,
     touchStartThreshold: 8,
@@ -235,8 +238,10 @@ useSortable(eatRef, makeSortableOptions("meals"))
       background var(--transition-fast);
     -webkit-tap-highlight-color: transparent;
 
-    &:hover {
-      background: var(--color-mint-alpha-25);
+    @media (hover: hover) {
+      &:hover {
+        background: var(--color-mint-alpha-25);
+      }
     }
 
     &:active {
@@ -318,13 +323,17 @@ useSortable(eatRef, makeSortableOptions("meals"))
       border-color var(--transition-fast);
     color: var(--color-text-secondary);
 
-    &--cook:hover {
-      color: var(--color-mint);
-      border-color: var(--color-mint-alpha-25);
+    @media (hover: hover) {
+      &--cook:hover {
+        color: var(--color-mint);
+        border-color: var(--color-mint-alpha-25);
+      }
     }
-    &--eat:hover {
-      color: var(--color-mint);
-      border-color: var(--color-mint-alpha-25);
+    @media (hover: hover) {
+      &--eat:hover {
+        color: var(--color-mint);
+        border-color: var(--color-mint-alpha-25);
+      }
     }
   }
 

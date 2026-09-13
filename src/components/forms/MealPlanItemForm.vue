@@ -14,12 +14,18 @@
             <button
               type="button"
               class="selected-dish__edit"
-              :title="isDishOwn(selectedDish) ? 'Редактировать блюдо' : 'Создать копию'"
+              :title="editDishLabel"
+              :aria-label="editDishLabel"
               @click="onEditDishClick"
             >
               <IconPencil :width="18" :height="18" />
             </button>
-            <button type="button" class="selected-dish__clear" @click="selectedDish = null">
+            <button
+              type="button"
+              class="selected-dish__clear"
+              aria-label="Убрать блюдо"
+              @click="selectedDish = null"
+            >
               <IconClose :width="18" :height="18" />
             </button>
           </template>
@@ -42,7 +48,7 @@
         <MultiDayPicker v-model="eatDates" :start-date="initialDate" />
       </div>
 
-      <div v-if="error" ref="errorRef" class="form__error">{{ error }}</div>
+      <div v-if="error" ref="errorRef" class="form__error" role="alert">{{ error }}</div>
     </form>
 
     <DishForm
@@ -62,13 +68,8 @@
     />
 
     <template #footer>
-      <button
-        type="submit"
-        form="meal-plan-form"
-        class="form__submit"
-        :disabled="saving || !selectedDish"
-      >
-        {{ saving ? "Сохранение..." : isEdit ? "Сохранить" : "Добавить" }}
+      <button type="submit" form="meal-plan-form" class="form__submit" :disabled="saving">
+        {{ saving ? "Сохранение…" : isEdit ? "Сохранить" : "Добавить" }}
       </button>
     </template>
   </ModalWrapper>
@@ -84,6 +85,7 @@ import MultiDayPicker from "./MultiDayPicker.vue"
 import { usePlanningStore } from "../../store/planning"
 import IconPencil from "../icons/IconPencil.vue"
 import { isDishOwn } from "../../utils/dishOwnership"
+import { getScrollBehavior } from "@/dom/prefersReducedMotion"
 import type { DTOMealPlanItem } from "@/types/planning"
 import type { DTODish } from "@/types/dish"
 import IconClose from "@/components/icons/IconClose.vue"
@@ -121,13 +123,19 @@ watch(open, (v) => {
 })
 
 const selectedDish = ref<DTODish | null>(null)
+const editDishLabel = computed(() =>
+  isDishOwn(selectedDish.value) ? "Редактировать блюдо" : "Создать копию"
+)
 const mealDate = ref("")
 const eatDates = ref<string[]>([])
 const saving = ref(false)
 const error = ref("")
 const errorRef = ref<HTMLElement | null>(null)
 watch(error, (val) => {
-  if (val) nextTick(() => errorRef.value?.scrollIntoView({ behavior: "smooth", block: "nearest" }))
+  if (val)
+    nextTick(() =>
+      errorRef.value?.scrollIntoView({ behavior: getScrollBehavior(), block: "nearest" })
+    )
 })
 const showDishForm = ref(false)
 const editDish = ref<DTODish | null>(null)
@@ -254,8 +262,10 @@ async function submit() {
     cursor: pointer;
     transition: background var(--transition-fast);
 
-    &:hover {
-      background: var(--color-border);
+    @media (hover: hover) {
+      &:hover {
+        background: var(--color-border);
+      }
     }
   }
 

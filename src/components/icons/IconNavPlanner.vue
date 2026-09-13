@@ -1,5 +1,6 @@
 <template>
   <svg
+    aria-hidden="true"
     :width="width"
     :height="height"
     viewBox="0 0 27 24"

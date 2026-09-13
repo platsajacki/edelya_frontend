@@ -1,4 +1,5 @@
 import { calcProration } from "./calcProration"
+import { formatRubles } from "./formatRubles"
 
 type ScenarioType = "card_binding" | "schedule" | "payment" | "downgrade" | "upgrade"
 
@@ -35,7 +36,7 @@ const BILLING_PERIOD_LABEL: Record<string, string> = {
 
 function formatPrice(tariff: Tariff): string {
   const period = BILLING_PERIOD_LABEL[tariff.billing_period] ?? tariff.billing_period
-  return `${Number(tariff.price)} ₽/${period}`
+  return `${formatRubles(tariff.price)}/${period}`
 }
 
 function formatDate(iso: string): string {
@@ -124,7 +125,7 @@ export function getTariffChangeScenario(
     const proration = calcProration(subscription, newTariff)
     const proratedText =
       proration > 0
-        ? `С вашей карты спишется пропорциональная сумма за оставшиеся дни текущего периода: ${proration} ₽.`
+        ? `С вашей карты спишется пропорциональная сумма за оставшиеся дни текущего периода: ${formatRubles(proration)}.`
         : `Пропорциональное списание не требуется.`
     return {
       type: "upgrade",

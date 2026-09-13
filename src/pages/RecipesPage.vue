@@ -8,6 +8,7 @@
           v-if="!store.isAIDraftsTab"
           class="recipes-header__action-btn"
           aria-label="Сортировка"
+          :aria-expanded="showSortMenu"
           @click="showSortMenu = !showSortMenu"
         >
           <IconSort />
@@ -26,6 +27,7 @@
           :key="opt.value"
           class="sort-dropdown__item"
           :class="{ 'sort-dropdown__item--active': store.filters.sorting === opt.value }"
+          :aria-pressed="store.filters.sorting === opt.value"
           @click="applySorting(opt.value)"
         >
           {{ opt.label }}
@@ -41,6 +43,7 @@
         type="search"
         class="search-field__input"
         :placeholder="searchPlaceholder"
+        :aria-label="searchLabel"
         @input="onSearchInput"
       />
       <button
@@ -60,6 +63,7 @@
         :key="tab.value"
         class="tabs__item"
         :class="{ 'tabs__item--active': store.filters.ownership === tab.value }"
+        :aria-pressed="store.filters.ownership === tab.value"
         @click="switchTab(tab.value)"
       >
         {{ tab.label }}
@@ -75,7 +79,7 @@
         @click="removeChip(chip.key)"
       >
         {{ chip.label }}
-        <span class="recipes-chip__x">&times;</span>
+        <span class="recipes-chip__x" aria-hidden="true">&times;</span>
       </button>
     </div>
 
@@ -94,7 +98,7 @@
 
     <!-- Initial loading -->
     <div v-if="store.initialLoading && !activeItemsCount" class="recipes-loading">
-      <div class="spinner" />
+      <div class="spinner" role="status" aria-label="Загрузка" />
     </div>
 
     <!-- Initial error -->
@@ -130,7 +134,7 @@
     <!-- AI drafts list -->
     <div v-else-if="store.isAIDraftsTab" class="recipes-list">
       <div v-if="store.refreshing || store.initialLoading" class="recipes-refreshing">
-        <div class="spinner spinner--sm" />
+        <div class="spinner spinner--sm" role="status" aria-label="Загрузка" />
       </div>
 
       <button
@@ -155,7 +159,12 @@
       </div>
 
       <div ref="sentinelRef" class="recipes-sentinel">
-        <div v-if="store.loadingMore" class="spinner spinner--sm" />
+        <div
+          v-if="store.loadingMore"
+          class="spinner spinner--sm"
+          role="status"
+          aria-label="Загрузка"
+        />
       </div>
     </div>
 
@@ -163,7 +172,7 @@
     <div v-else class="recipes-list">
       <!-- Refreshing indicator -->
       <div v-if="store.refreshing || store.initialLoading" class="recipes-refreshing">
-        <div class="spinner spinner--sm" />
+        <div class="spinner spinner--sm" role="status" aria-label="Загрузка" />
       </div>
 
       <RecipeDishCard v-for="dish in store.dishes" :key="dish.id" :dish="dish" @tap="openDetail" />
@@ -176,7 +185,12 @@
 
       <!-- Infinite scroll sentinel -->
       <div ref="sentinelRef" class="recipes-sentinel">
-        <div v-if="store.loadingMore" class="spinner spinner--sm" />
+        <div
+          v-if="store.loadingMore"
+          class="spinner spinner--sm"
+          role="status"
+          aria-label="Загрузка"
+        />
       </div>
     </div>
 
@@ -242,9 +256,8 @@ const tabs = computed(() => [
   ...(subscription.canCreateAIRecipes ? [{ value: "ai", label: "AI-запросы" }] : []),
 ])
 
-const searchPlaceholder = computed(() =>
-  store.isAIDraftsTab ? "Поиск AI-рецептов..." : "Поиск блюд..."
-)
+const searchLabel = computed(() => (store.isAIDraftsTab ? "Поиск AI-рецептов" : "Поиск блюд"))
+const searchPlaceholder = computed(() => `${searchLabel.value}…`)
 
 const activeItemsCount = computed(() =>
   store.isAIDraftsTab ? store.aiDrafts.length : store.dishes.length
@@ -544,6 +557,7 @@ onUnmounted(() => {
     cursor: pointer;
     transition: background var(--transition-fast);
     -webkit-tap-highlight-color: transparent;
+    outline-offset: -2px;
 
     &:active {
       background: var(--color-empty);
@@ -581,8 +595,10 @@ onUnmounted(() => {
   cursor: pointer;
   transition: background var(--transition-fast);
 
-  &:hover {
-    background: var(--color-border);
+  @media (hover: hover) {
+    &:hover {
+      background: var(--color-border);
+    }
   }
 
   &__x {
@@ -737,7 +753,7 @@ onUnmounted(() => {
 
     &--dish_created {
       background: var(--color-success-bg);
-      color: var(--color-success);
+      color: var(--color-success-dark);
     }
   }
 }

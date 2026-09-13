@@ -45,6 +45,7 @@
           :key="tab.value"
           class="tabs__item"
           :class="{ 'tabs__item--active': activeFilter === tab.value }"
+          :aria-pressed="activeFilter === tab.value"
           @click="activeFilter = tab.value"
         >
           {{ tab.label }}
@@ -55,12 +56,12 @@
 
     <!-- Loading items -->
     <div v-if="store.loadingItems" class="detail-loading">
-      <div class="spinner" />
+      <div class="spinner" role="status" aria-label="Загрузка" />
     </div>
 
     <!-- Loading list -->
     <div v-else-if="store.loading" class="detail-loading">
-      <div class="spinner" />
+      <div class="spinner" role="status" aria-label="Загрузка" />
     </div>
 
     <!-- Empty state -->
@@ -110,14 +111,20 @@
     <!-- Confirmation overlay -->
     <Teleport to="body">
       <Transition name="modal">
-        <div v-if="confirmDialog" class="confirm-overlay" @click.self="confirmDialog = null">
-          <div class="confirm-panel">
-            <h3 class="confirm-panel__title">{{ confirmDialog.title }}</h3>
-            <p class="confirm-panel__text">{{ confirmDialog.text }}</p>
+        <div v-if="confirmDialog" class="confirm-overlay" @click.self="closeConfirmDialog">
+          <div
+            class="confirm-panel"
+            role="alertdialog"
+            aria-modal="true"
+            :aria-labelledby="confirmTitleId"
+            :aria-describedby="confirmTextId"
+          >
+            <h2 :id="confirmTitleId" class="confirm-panel__title">{{ confirmDialog.title }}</h2>
+            <p :id="confirmTextId" class="confirm-panel__text">{{ confirmDialog.text }}</p>
             <div class="confirm-panel__actions">
               <button
                 class="confirm-panel__btn confirm-panel__btn--cancel"
-                @click="confirmDialog = null"
+                @click="closeConfirmDialog"
               >
                 Отмена
               </button>
@@ -131,7 +138,7 @@
                 :disabled="confirmBusy"
                 @click="confirmDialog.action"
               >
-                {{ confirmBusy ? "..." : confirmDialog.confirmLabel }}
+                {{ confirmBusy ? confirmDialog.busyLabel : confirmDialog.confirmLabel }}
               </button>
             </div>
           </div>
@@ -145,9 +152,10 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, onMounted, watch } from "vue"
+import { ref, computed, onMounted, watch, useId } from "vue"
 import { useRoute, useRouter } from "vue-router"
 import { useShoppingStore } from "../store/shopping"
+import { useModalBackButton } from "../composables/useModalBackButton"
 import { formatYMDtoDDMMYYYY } from "../utils/formatDate"
 import ShoppingListItemRow from "../components/ShoppingListItemRow.vue"
 import ShoppingListForm from "../components/forms/ShoppingListForm.vue"
@@ -170,6 +178,14 @@ const showEditForm = ref(false)
 const showAddItem = ref(false)
 const confirmDialog = ref(null)
 const confirmBusy = ref(false)
+const confirmTitleId = useId()
+const confirmTextId = useId()
+
+function closeConfirmDialog() {
+  confirmDialog.value = null
+}
+
+useModalBackButton(() => confirmDialog.value !== null, closeConfirmDialog)
 
 const listId = computed(() => route.params.id as string)
 
@@ -242,6 +258,7 @@ function onDeleteItem(item) {
     title: "Удалить позицию?",
     text: `«${item.ingredient?.name ?? "Позиция"}» будет удалена из списка.`,
     confirmLabel: "Удалить",
+    busyLabel: "Удаление…",
     danger: true,
     action: async () => {
       confirmBusy.value = true
@@ -270,6 +287,7 @@ function confirmRecalculate() {
     title: "Пересчитать список?",
     text: "При пересчёте позиции, рассчитанные по готовкам за выбранный период, будут обновлены. Если вручную добавленная позиция также присутствует в расчёте, её количество будет заменено на рассчитанное и флаг «Добавлено вручную» снимется. Ручные позиции, отсутствующие в расчёте, останутся без изменений.",
     confirmLabel: "Пересчитать",
+    busyLabel: "Пересчёт…",
     danger: false,
     action: doRecalculate,
   }
@@ -292,6 +310,7 @@ function confirmDeleteList() {
     title: "Удалить список?",
     text: `Список «${store.currentList?.name ?? ""}» и все его позиции будут удалены.`,
     confirmLabel: "Удалить",
+    busyLabel: "Удаление…",
     danger: true,
     action: doDeleteList,
   }
@@ -501,8 +520,10 @@ async function doDeleteList() {
       background: var(--color-empty);
       color: var(--color-text);
 
-      &:hover {
-        background: var(--color-border);
+      @media (hover: hover) {
+        &:hover {
+          background: var(--color-border);
+        }
       }
     }
 
@@ -510,8 +531,10 @@ async function doDeleteList() {
       background: var(--color-mint);
       color: var(--on-primary);
 
-      &:hover {
-        background: var(--color-mint-hover);
+      @media (hover: hover) {
+        &:hover {
+          background: var(--color-mint-hover);
+        }
       }
     }
 
@@ -519,8 +542,10 @@ async function doDeleteList() {
       background: var(--color-danger);
       color: var(--on-primary);
 
-      &:hover {
-        background: var(--color-danger-dark);
+      @media (hover: hover) {
+        &:hover {
+          background: var(--color-danger-dark);
+        }
       }
     }
   }
