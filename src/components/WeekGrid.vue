@@ -286,7 +286,7 @@ async function loadNext() {
   &__section-badge {
     font-size: var(--font-xs);
     font-weight: 600;
-    color: var(--color-mint);
+    color: var(--color-mint-dark);
     text-transform: uppercase;
     letter-spacing: 0.05em;
     white-space: nowrap;

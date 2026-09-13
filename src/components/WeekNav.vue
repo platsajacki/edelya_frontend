@@ -172,7 +172,7 @@ defineEmits<{
 
     @media (hover: hover) {
       &:hover {
-        color: var(--color-mint);
+        color: var(--color-mint-dark);
         background: var(--color-mint-alpha-10);
       }
     }

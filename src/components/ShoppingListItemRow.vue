@@ -180,7 +180,7 @@ function cancelEdit() {
     width: 32px;
     height: 32px;
     border-radius: 50%;
-    border: 1.8px solid var(--color-border);
+    border: 1.8px solid var(--color-border-strong);
     background: transparent;
     display: flex;
     align-items: center;

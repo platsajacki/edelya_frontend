@@ -982,7 +982,7 @@ async function handleDeletePaymentMethod() {
     }
 
     &--tariff-secondary {
-      color: var(--color-mint);
+      color: var(--color-mint-dark);
       background: var(--color-mint-alpha-06);
       border: 1.5px solid var(--color-mint-alpha-25);
       font-size: var(--font-sm);
@@ -1135,7 +1135,7 @@ async function handleDeletePaymentMethod() {
 
     &--current {
       background: var(--color-mint-alpha-10);
-      color: var(--color-mint);
+      color: var(--color-mint-dark);
     }
 
     &--pending {
@@ -1196,7 +1196,7 @@ async function handleDeletePaymentMethod() {
 
   &__tariff-check {
     flex-shrink: 0;
-    color: var(--color-mint);
+    color: var(--color-mint-dark);
   }
 
   &__tariff-features {
@@ -1211,7 +1211,7 @@ async function handleDeletePaymentMethod() {
       font-size: var(--font-xs);
       padding: 2px 10px;
       background: var(--color-mint-alpha-10);
-      color: var(--color-mint);
+      color: var(--color-mint-dark);
       border-radius: var(--radius-pill);
       font-weight: 600;
     }

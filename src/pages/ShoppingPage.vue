@@ -162,7 +162,7 @@ function onListCreated(list) {
     -webkit-tap-highlight-color: transparent;
 
     &:active {
-      color: var(--color-mint);
+      color: var(--color-mint-dark);
       border-color: var(--color-mint);
     }
   }

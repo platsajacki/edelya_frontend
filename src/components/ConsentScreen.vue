@@ -121,7 +121,7 @@ async function submit() {
   }
 
   &__link {
-    color: var(--color-mint);
+    color: var(--color-mint-dark);
     text-decoration: underline;
 
     @media (hover: hover) {

@@ -111,7 +111,7 @@ import IconCalendar from "@/components/icons/IconCalendar.vue"
 
   &__note-icon {
     height: 1lh;
-    color: var(--color-mint);
+    color: var(--color-mint-dark);
   }
 }
 

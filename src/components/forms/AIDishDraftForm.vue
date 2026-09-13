@@ -1364,13 +1364,13 @@ onUnmounted(() => {
     padding: 0;
     border: none;
     background: transparent;
-    color: var(--color-mint);
+    color: var(--color-mint-dark);
     font-size: var(--font-sm);
     font-weight: 600;
 
     @media (hover: hover) {
       &:hover {
-        color: var(--color-mint-hover);
+        color: var(--color-text);
       }
     }
   }
@@ -1512,7 +1512,7 @@ onUnmounted(() => {
 
     &--new {
       background: var(--color-mint-alpha-10);
-      color: var(--color-mint);
+      color: var(--color-mint-dark);
     }
 
     &--broken {
@@ -1565,7 +1565,7 @@ onUnmounted(() => {
     padding: 1px 5px;
     border-radius: var(--radius-xs);
     background: var(--color-mint-alpha-12);
-    color: var(--color-mint);
+    color: var(--color-mint-dark);
     font-size: var(--font-xs);
     font-weight: 500;
     white-space: nowrap;
@@ -1595,7 +1595,7 @@ onUnmounted(() => {
     @media (hover: hover) {
       &:hover {
         opacity: 1;
-        color: var(--color-mint);
+        color: var(--color-mint-dark);
         background: var(--color-mint-alpha-10);
       }
     }
@@ -1604,7 +1604,7 @@ onUnmounted(() => {
   @media (hover: hover) {
     &:hover &__edit {
       opacity: 1;
-      color: var(--color-mint);
+      color: var(--color-mint-dark);
       background: var(--color-mint-alpha-10);
     }
   }
@@ -1639,7 +1639,7 @@ onUnmounted(() => {
     border: 1px solid var(--color-mint-alpha-25);
     border-radius: var(--radius-xs);
     background: var(--color-mint-alpha-10);
-    color: var(--color-mint);
+    color: var(--color-mint-dark);
     font-size: var(--font-xs);
     font-weight: 600;
     cursor: pointer;
@@ -1677,7 +1677,7 @@ onUnmounted(() => {
 
     &--new {
       background: var(--color-mint-alpha-10);
-      color: var(--color-mint);
+      color: var(--color-mint-dark);
     }
     &--found {
       background: var(--color-info-bg);
@@ -1702,7 +1702,7 @@ onUnmounted(() => {
     border: 1.5px solid var(--color-mint-alpha-25);
     border-radius: var(--radius-xs);
     background: var(--color-mint-alpha-10);
-    color: var(--color-mint);
+    color: var(--color-mint-dark);
     font-size: var(--font-xs);
     font-weight: 600;
     cursor: pointer;
@@ -1867,7 +1867,7 @@ onUnmounted(() => {
       &:hover {
         background: var(--color-empty);
         border-color: var(--color-mint);
-        color: var(--color-mint);
+        color: var(--color-mint-dark);
       }
     }
   }
@@ -1893,7 +1893,7 @@ onUnmounted(() => {
       &:hover {
         background: var(--color-empty);
         border-color: var(--color-mint);
-        color: var(--color-mint);
+        color: var(--color-mint-dark);
       }
     }
   }

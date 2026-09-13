@@ -51,7 +51,7 @@ import IconSparkles from "@/components/icons/IconSparkles.vue"
   }
 
   &__icon {
-    color: var(--color-mint);
+    color: var(--color-mint-dark);
   }
 
   &__title {

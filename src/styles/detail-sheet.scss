@@ -56,7 +56,7 @@
     @media (hover: hover) {
       &:hover {
         background: var(--color-empty);
-        color: var(--color-mint);
+        color: var(--color-mint-dark);
       }
     }
   }
@@ -122,7 +122,7 @@
 
   &__ingredient-optional {
     font-size: var(--font-xs);
-    color: var(--color-mint);
+    color: var(--color-mint-dark);
     background: var(--color-mint-alpha-12);
     border-radius: var(--radius-xs);
     padding: 1px 5px;
@@ -176,7 +176,7 @@
 
     &--secondary {
       background: var(--color-mint-alpha-12);
-      color: var(--color-mint);
+      color: var(--color-mint-dark);
 
       @media (hover: hover) {
         &:hover {

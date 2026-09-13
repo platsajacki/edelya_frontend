@@ -538,7 +538,7 @@ onUnmounted(() => {
       border-color var(--transition-fast);
 
     &--active {
-      color: var(--color-mint);
+      color: var(--color-mint-dark);
       border-bottom-color: var(--color-mint);
     }
   }

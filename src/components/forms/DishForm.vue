@@ -666,7 +666,7 @@ async function useExistingDish() {
 
   &__opt-label {
     font-size: var(--font-xs);
-    color: var(--color-mint);
+    color: var(--color-mint-dark);
     background: var(--color-mint-alpha-12);
     border-radius: var(--radius-xs);
     padding: 1px 5px;
@@ -698,7 +698,7 @@ async function useExistingDish() {
     @media (hover: hover) {
       &:hover {
         opacity: 1;
-        color: var(--color-mint);
+        color: var(--color-mint-dark);
         background: var(--color-mint-alpha-10);
       }
     }
@@ -707,7 +707,7 @@ async function useExistingDish() {
   @media (hover: hover) {
     &:hover &__edit {
       opacity: 1;
-      color: var(--color-mint);
+      color: var(--color-mint-dark);
       background: var(--color-mint-alpha-10);
     }
   }
@@ -832,7 +832,7 @@ async function useExistingDish() {
       &:hover {
         background: var(--color-empty);
         border-color: var(--color-mint);
-        color: var(--color-mint);
+        color: var(--color-mint-dark);
       }
     }
   }

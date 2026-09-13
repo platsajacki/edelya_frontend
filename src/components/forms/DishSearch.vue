@@ -204,7 +204,7 @@ function clearQuery() {
     background: var(--color-mint-alpha-10);
     font-size: var(--font-sm);
     font-weight: 600;
-    color: var(--color-mint);
+    color: var(--color-mint-dark);
     cursor: pointer;
     transition:
       background var(--transition-fast),
@@ -241,7 +241,7 @@ function clearQuery() {
       &:hover {
         background: var(--color-empty);
         border-color: var(--color-mint);
-        color: var(--color-mint);
+        color: var(--color-mint-dark);
       }
     }
   }
@@ -250,7 +250,7 @@ function clearQuery() {
     border-style: solid;
     border-color: var(--color-mint-alpha-25);
     background: var(--color-mint-alpha-10);
-    color: var(--color-mint);
+    color: var(--color-mint-dark);
     font-weight: 600;
 
     @media (hover: hover) {

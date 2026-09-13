@@ -217,7 +217,7 @@ useSortable(eatRef, makeSortableOptions("meals"))
   &__today-text {
     font-size: var(--font-base);
     font-weight: 600;
-    color: var(--color-mint);
+    color: var(--color-mint-dark);
   }
 
   &__shopping-btn {
@@ -230,7 +230,7 @@ useSortable(eatRef, makeSortableOptions("meals"))
     border: none;
     background: var(--color-mint-alpha-10);
     border-radius: var(--radius-sm);
-    color: var(--color-mint);
+    color: var(--color-mint-dark);
     cursor: pointer;
     flex-shrink: 0;
     transition:
@@ -325,13 +325,13 @@ useSortable(eatRef, makeSortableOptions("meals"))
 
     @media (hover: hover) {
       &--cook:hover {
-        color: var(--color-mint);
+        color: var(--color-mint-dark);
         border-color: var(--color-mint-alpha-25);
       }
     }
     @media (hover: hover) {
       &--eat:hover {
-        color: var(--color-mint);
+        color: var(--color-mint-dark);
         border-color: var(--color-mint-alpha-25);
       }
     }

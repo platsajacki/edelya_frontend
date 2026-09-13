@@ -360,7 +360,7 @@ async function confirmAdd() {
       &:hover {
         background: var(--color-empty);
         border-color: var(--color-mint);
-        color: var(--color-mint);
+        color: var(--color-mint-dark);
       }
     }
   }
@@ -393,7 +393,7 @@ async function confirmAdd() {
   &__change {
     background: none;
     border: none;
-    color: var(--color-mint);
+    color: var(--color-mint-dark);
     font-size: var(--font-sm);
     font-weight: 500;
     cursor: pointer;

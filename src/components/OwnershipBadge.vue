@@ -32,7 +32,7 @@ withDefaults(
 
   &--own {
     background: var(--color-mint-alpha-12);
-    color: var(--color-mint);
+    color: var(--color-mint-dark);
   }
   &--shared {
     background: var(--color-shared-bg);

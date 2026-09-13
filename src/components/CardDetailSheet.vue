@@ -271,7 +271,7 @@ async function onCloneCreated(newDish: DTODish) {
     background: none;
     font-size: var(--font-sm);
     font-weight: 600;
-    color: var(--color-mint);
+    color: var(--color-mint-dark);
     cursor: pointer;
     padding: 0;
     text-decoration: underline;
@@ -282,7 +282,7 @@ async function onCloneCreated(newDish: DTODish) {
 
     @media (hover: hover) {
       &:hover {
-        color: var(--color-mint-hover);
+        color: var(--color-text);
         text-decoration-thickness: 2px;
       }
     }

@@ -516,7 +516,7 @@ onUnmounted(() => {
 
     &--active {
       border-color: var(--color-mint);
-      color: var(--color-mint);
+      color: var(--color-mint-dark);
     }
   }
 
@@ -564,7 +564,7 @@ onUnmounted(() => {
     }
 
     &--active {
-      color: var(--color-mint);
+      color: var(--color-mint-dark);
       font-weight: 600;
       background: var(--color-mint-alpha-08);
     }
@@ -637,7 +637,7 @@ onUnmounted(() => {
     border: 1px solid var(--color-mint);
     border-radius: var(--radius-sm);
     background: none;
-    color: var(--color-mint);
+    color: var(--color-mint-dark);
     font-size: var(--font-sm);
     font-weight: 600;
     cursor: pointer;
@@ -672,7 +672,7 @@ onUnmounted(() => {
     border: 1px solid var(--color-mint);
     border-radius: var(--radius-sm);
     background: none;
-    color: var(--color-mint);
+    color: var(--color-mint-dark);
     font-size: var(--font-sm);
     font-weight: 600;
     cursor: pointer;
@@ -738,7 +738,7 @@ onUnmounted(() => {
 
     &--processing {
       background: var(--color-mint-alpha-10);
-      color: var(--color-mint);
+      color: var(--color-mint-dark);
     }
 
     &--parsed {

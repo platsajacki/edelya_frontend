@@ -128,7 +128,7 @@ onMounted(async () => {
     }
 
     :deep(a) {
-      color: var(--color-mint);
+      color: var(--color-mint-dark);
       text-decoration: underline;
     }
 

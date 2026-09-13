@@ -74,7 +74,7 @@ function isActive(to: string): boolean {
     }
 
     &--active {
-      color: var(--color-mint);
+      color: var(--color-mint-dark);
 
       .bottom-nav__tab-inner {
         background: var(--color-mint-alpha-10);

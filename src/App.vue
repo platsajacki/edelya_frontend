@@ -24,6 +24,7 @@ import { useRouter } from "vue-router"
 import { useAuthStore } from "./store/auth"
 import { useSubscriptionStore } from "./store/subscription"
 import { isMiniApp } from "./dom/isMiniApp"
+import { applyTelegramColors } from "./dom/applyTelegramColors"
 import BottomNav from "./components/BottomNav.vue"
 import ConsentScreen from "./components/ConsentScreen.vue"
 
@@ -42,6 +43,7 @@ onMounted(async () => {
 
   try {
     tg?.ready()
+    if (tg) applyTelegramColors(tg)
     tg?.expand()
     tg?.requestFullscreen?.()
   } catch (e) {

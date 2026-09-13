@@ -39,7 +39,7 @@ withDefaults(
   &__day {
     font-weight: 700;
     font-size: var(--font-xs);
-    color: var(--color-mint);
+    color: var(--color-mint-dark);
     text-transform: uppercase;
     letter-spacing: 0.06em;
 
@@ -51,7 +51,7 @@ withDefaults(
   &__date {
     font-weight: 700;
     font-size: var(--font-md);
-    color: var(--color-mint);
+    color: var(--color-mint-dark);
 
     .day-badge--active & {
       color: var(--on-primary);

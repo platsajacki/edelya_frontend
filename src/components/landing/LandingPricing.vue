@@ -190,7 +190,7 @@ const tariffs: Tariff[] = [
     padding: 4px 12px;
     border-radius: var(--radius-pill);
     background: var(--color-mint-alpha-10);
-    color: var(--color-mint);
+    color: var(--color-mint-dark);
     font-size: var(--font-xs);
     font-weight: 600;
     text-transform: uppercase;
