@@ -49,7 +49,7 @@ const cardStyle = computed(() => {
   if (!props.item.color) return {}
   return {
     "--card-accent": props.item.color,
-    "--card-bg": hexToRgba(props.item.color, 0.2),
+    "--card-bg": hexToRgba(props.item.color, 0.25),
   }
 })
 </script>
