@@ -1,122 +1,47 @@
-import type { Directive } from "vue"
-import { prefersReducedMotion } from "@/dom/prefersReducedMotion"
+import type { ObjectDirective } from "vue"
+import { keepFieldVisible } from "./keepFieldVisible"
 
-const SCROLL_PADDING = 16
-const FOLLOW_TIME_CONSTANT_MS = 50
-const FRAME_MS = 1000 / 60
+const roots = new WeakMap<HTMLElement, VoidFunction>()
+const FIELD_SELECTOR = "input, textarea, select, [contenteditable='true']"
 
-const findScrollParent = (el: HTMLElement): Element => {
-  let node = el.parentElement
-
+function findOwner(field: HTMLElement): HTMLElement | null {
+  let node: HTMLElement | null = field
   while (node) {
-    const overflowY = getComputedStyle(node).overflowY
-
-    if ((overflowY === "auto" || overflowY === "scroll") && node.scrollHeight > node.clientHeight) {
-      return node
-    }
-
+    if (roots.has(node)) return node
     node = node.parentElement
   }
-
-  return document.scrollingElement ?? document.documentElement
+  return null
 }
 
-const getVisibleRange = () => {
-  const viewport = window.visualViewport
+function mounted(root: HTMLElement): void {
+  let stop: VoidFunction | undefined
 
-  return viewport
-    ? { top: viewport.offsetTop, bottom: viewport.offsetTop + viewport.height }
-    : { top: 0, bottom: window.innerHeight }
-}
-
-const getOverflowDelta = (field: HTMLElement) => {
-  const { top, bottom } = getVisibleRange()
-  const rect = field.getBoundingClientRect()
-
-  return rect.bottom > bottom - SCROLL_PADDING
-    ? rect.bottom - bottom + SCROLL_PADDING
-    : rect.top < top + SCROLL_PADDING
-      ? rect.top - top - SCROLL_PADDING
-      : 0
-}
-
-const createFieldFollower = (field: HTMLElement) => {
-  let frame = 0
-  let lastTime = 0
-
-  const step = (time: number) => {
-    const delta = getOverflowDelta(field)
-
-    if (Math.abs(delta) < 1) {
-      frame = 0
-      return
-    }
-
-    const elapsed = lastTime ? time - lastTime : FRAME_MS
-    lastTime = time
-
-    const progress = prefersReducedMotion() ? 1 : 1 - Math.exp(-elapsed / FOLLOW_TIME_CONSTANT_MS)
-    const distance = Math.sign(delta) * Math.max(1, Math.round(Math.abs(delta) * progress))
-    const scrollParent = findScrollParent(field)
-    const scrollTopBefore = scrollParent.scrollTop
-
-    scrollParent.scrollBy({ top: distance, behavior: "instant" })
-
-    if (scrollParent.scrollTop === scrollTopBefore) {
-      frame = 0
-      return
-    }
-
-    frame = requestAnimationFrame(step)
-  }
-
-  const start = () => {
-    if (frame) return
-
-    lastTime = 0
-    frame = requestAnimationFrame(step)
-  }
-
-  const stop = () => {
-    cancelAnimationFrame(frame)
-    frame = 0
-  }
-
-  return { start, stop }
-}
-
-const cleanups = new WeakMap<HTMLElement, VoidFunction>()
-
-const mounted = (el: HTMLElement) => {
-  const field = (el.querySelector("input,textarea") as HTMLElement | null) ?? el
-  const viewport = window.visualViewport
-  const follower = createFieldFollower(field)
-
-  const handleFocus = () => {
-    follower.start()
-    viewport?.addEventListener("resize", follower.start)
-  }
   const handleBlur = () => {
-    follower.stop()
-    viewport?.removeEventListener("resize", follower.start)
+    stop?.()
+    stop = undefined
+  }
+  const handleFocus = () => {
+    const field = document.activeElement
+    if (!(field instanceof HTMLElement) || !field.matches(FIELD_SELECTOR)) return
+    if (findOwner(field) !== root) return
+    handleBlur()
+    stop = keepFieldVisible(field)
   }
 
-  field.addEventListener("focus", handleFocus)
-  field.addEventListener("blur", handleBlur)
-
-  cleanups.set(el, () => {
-    field.removeEventListener("focus", handleFocus)
-    field.removeEventListener("blur", handleBlur)
+  roots.set(root, () => {
     handleBlur()
+    root.removeEventListener("focusin", handleFocus)
+    root.removeEventListener("focusout", handleBlur)
   })
+  root.addEventListener("focusin", handleFocus)
+  root.addEventListener("focusout", handleBlur)
+  handleFocus()
 }
 
-const unmounted = (el: HTMLElement) => {
-  cleanups.get(el)?.()
-  cleanups.delete(el)
-}
-
-export const KeyboardAvoidDirective: Directive<HTMLElement> = {
+export const KeyboardAvoidDirective: ObjectDirective<HTMLElement> = {
   mounted,
-  unmounted,
+  unmounted(root) {
+    roots.get(root)?.()
+    roots.delete(root)
+  },
 }

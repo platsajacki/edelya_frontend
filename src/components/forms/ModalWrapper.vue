@@ -1,7 +1,12 @@
 <template>
   <Teleport to="body">
     <Transition name="modal">
-      <div v-if="modelValue" class="modal-overlay" :style="{ zIndex }" @click.self="close">
+      <div
+        v-if="modelValue"
+        class="modal-overlay"
+        :style="{ zIndex, ...viewportStyle }"
+        @click.self="close"
+      >
         <div
           class="modal-panel"
           :class="{ 'modal-panel--no-footer': !$slots.footer }"
@@ -9,7 +14,6 @@
           aria-modal="true"
           :aria-labelledby="titleId"
           @mousedown.stop
-          @focusin="onFocusIn"
         >
           <div class="modal-header">
             <h2 :id="titleId" class="modal-title">{{ title }}</h2>
@@ -17,7 +21,7 @@
               <IconClose />
             </button>
           </div>
-          <div class="modal-body">
+          <div v-keyboard-avoid class="modal-body">
             <slot />
           </div>
           <div v-if="$slots.footer" class="modal-footer">
@@ -33,6 +37,8 @@
 import { watch, onUnmounted, useId } from "vue"
 import IconClose from "@/components/icons/IconClose.vue"
 import { useModalBackButton } from "@/composables/useModalBackButton"
+import { useVisibleViewport } from "@/composables/useVisibleViewport"
+import { KeyboardAvoidDirective as vKeyboardAvoid } from "@/directives/keyboardAvoid"
 
 const props = withDefaults(
   defineProps<{
@@ -51,30 +57,10 @@ const emit = defineEmits<{
 }>()
 
 const titleId = useId()
+const viewportStyle = useVisibleViewport(() => props.modelValue)
 
 function close() {
   emit("update:modelValue", false)
-}
-
-function onFocusIn(e: FocusEvent) {
-  const el = e.target as HTMLElement
-  if (el.tagName !== "INPUT" && el.tagName !== "TEXTAREA" && el.tagName !== "SELECT") return
-
-  requestAnimationFrame(() => {
-    window.scrollTo(0, 0)
-
-    const scrollParent = el.closest(".modal-body")
-    if (!scrollParent) return
-    const elRect = el.getBoundingClientRect()
-    const parentRect = scrollParent.getBoundingClientRect()
-    const elBottom = elRect.bottom - parentRect.top
-    const elTop = elRect.top - parentRect.top
-    if (elBottom > scrollParent.clientHeight - 8) {
-      scrollParent.scrollTop += elBottom - scrollParent.clientHeight + 16
-    } else if (elTop < 0) {
-      scrollParent.scrollTop += elTop - 8
-    }
-  })
 }
 
 let savedOverflow = ""
@@ -101,7 +87,8 @@ useModalBackButton(() => props.modelValue, close)
 <style lang="scss" scoped>
 .modal-overlay {
   position: fixed;
-  inset: 0;
+  left: 0;
+  right: 0;
   background: var(--overlay-bg);
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
@@ -179,6 +166,7 @@ useModalBackButton(() => props.modelValue, close)
   padding: 16px 20px;
   overflow-y: auto;
   flex: 1;
+  min-height: 0;
   overscroll-behavior: contain;
 
   .modal-panel--no-footer & {
