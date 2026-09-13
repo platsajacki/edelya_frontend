@@ -1,7 +1,7 @@
 <template>
   <section class="l-section l-section--surface">
     <div class="l-container l-split">
-      <PhoneShot :screen="screens.recipes" />
+      <PhoneShot :screen="screens.ai" />
       <div>
         <h2 class="l-title">Рецепты: свои, общие и разобранные нейросетью</h2>
         <ul class="landing-recipes__list">
@@ -21,7 +21,6 @@
             </p>
           </li>
         </ul>
-        <PhoneShot :screen="screens.ai" class="landing-recipes__phone-inline" />
       </div>
     </div>
   </section>
@@ -62,17 +61,6 @@ import IconSparkles from "@/components/icons/IconSparkles.vue"
 
   &__text {
     grid-column: 2;
-  }
-
-  &__phone-inline {
-    display: none;
-  }
-}
-
-@media (max-width: 1023px) {
-  .landing-recipes__phone-inline {
-    display: block;
-    margin-top: 40px;
   }
 }
 </style>

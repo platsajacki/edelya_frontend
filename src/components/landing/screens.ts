@@ -1,7 +1,9 @@
-import plannerSrc from "@/assets/landing/screen-planner.jpg"
-import weekPosterSrc from "@/assets/landing/screen-week-poster.jpg"
+import plannerSrc from "@/assets/landing/screen-planner.webp"
+import weekPosterSrc from "@/assets/landing/screen-week-poster.webp"
 import weekVideoSrc from "@/assets/landing/screen-week-web.mp4"
-import shoppingDetailPosterSrc from "@/assets/landing/screen-shopping-detail-poster.jpg"
+import aiPosterSrc from "@/assets/landing/screen-ai-poster.webp"
+import aiVideoSrc from "@/assets/landing/screen-ai-web.mp4"
+import shoppingDetailPosterSrc from "@/assets/landing/screen-shopping-detail-poster.webp"
 import shoppingDetailVideoSrc from "@/assets/landing/screen-shopping-detail-web.mp4"
 
 export interface LandingScreen {
@@ -14,7 +16,7 @@ export interface LandingScreen {
 export const screens = {
   planner: {
     caption: "Главный экран — планировщик недели",
-    file: "screen-planner.jpg",
+    file: "screen-planner.webp",
     src: plannerSrc,
   },
   week: {
@@ -29,6 +31,10 @@ export const screens = {
     src: shoppingDetailPosterSrc,
     video: shoppingDetailVideoSrc,
   },
-  recipes: { caption: "Список рецептов", file: "screen-recipes.gif", src: "", },
-  ai: { caption: "AI-черновик рецепта", file: "screen-ai.gif", src: "", },
+  ai: {
+    caption: "AI-черновик рецепта",
+    file: "screen-ai-web.mp4",
+    src: aiPosterSrc,
+    video: aiVideoSrc,
+  },
 } satisfies Record<string, LandingScreen>
