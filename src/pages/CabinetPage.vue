@@ -799,7 +799,11 @@ const RESUME_ERROR_MESSAGES = {
 async function resumeTariff() {
   resumeLoading.value = true
   try {
-    await sub.resumeSubscription()
+    const result = await sub.resumeSubscription()
+    if ("confirmation_url" in result) {
+      window.location.href = result.confirmation_url
+      return
+    }
     showToast("Подписка возобновлена")
   } catch (err) {
     const message =

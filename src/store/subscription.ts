@@ -176,9 +176,9 @@ export const useSubscriptionStore = defineStore("subscription", {
     },
 
     async resumeSubscription() {
-      const sub = await apiResumeSubscription()
-      this.subscription = sub
-      return sub
+      const result = await apiResumeSubscription()
+      if (!("confirmation_url" in result)) this.subscription = result
+      return result
     },
 
     async retryPayment() {

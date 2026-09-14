@@ -88,8 +88,10 @@ export function cancelSubscription(): Promise<DTOSubscription> {
   return api<DTOSubscription>("/api/v1/subscriptions/cancel/", { method: "POST" })
 }
 
-export function resumeSubscription(): Promise<DTOSubscription> {
-  return api<DTOSubscription>("/api/v1/subscriptions/resume/", { method: "POST" })
+export function resumeSubscription(): Promise<DTOSubscription | DTOBindPaymentMethodResult> {
+  return api<DTOSubscription | DTOBindPaymentMethodResult>("/api/v1/subscriptions/resume/", {
+    method: "POST",
+  })
 }
 
 export async function retryPayment(): Promise<DTORetryPaymentResult> {
