@@ -2,9 +2,53 @@
 <html lang="ru">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/edelya.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content" />
+    <link rel="icon" href="/favicon.ico" sizes="32x32" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link
+      rel="preload"
+      href="/src/assets/fonts/onest/Onest-VariableFont_wght.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content"
+    />
     <title>Еделя</title>
+    <meta
+      name="description"
+      content="Планируйте, что готовите и что едите на неделю. Список покупок собирается сам из ингредиентов всех готовок. Мини-приложение в Telegram, без регистрации."
+    />
+    <meta name="theme-color" content="#f8f7f3" />
+    <meta name="color-scheme" content="only light" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Еделя" />
+    <meta property="og:title" content="Еделя — планировщик питания и покупок" />
+    <meta
+      property="og:description"
+      content="Планируйте, что готовите и что едите на неделю. Список покупок собирается сам из ингредиентов всех готовок."
+    />
+    <meta property="og:locale" content="ru_RU" />
+    <meta property="og:image" content="${VITE_SITE_URL}/og-banner.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta
+      property="og:image:alt"
+      content="Еделя — план готовок на неделю и список покупок в Telegram"
+    />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Еделя — планировщик питания и покупок" />
+    <meta
+      name="twitter:description"
+      content="Планируйте, что готовите и что едите на неделю. Список покупок собирается сам из ингредиентов всех готовок."
+    />
+    <meta name="twitter:image" content="${VITE_SITE_URL}/og-banner.png" />
+    <meta
+      name="twitter:image:alt"
+      content="Еделя — план готовок на неделю и список покупок в Telegram"
+    />
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
   </head>
   <body>

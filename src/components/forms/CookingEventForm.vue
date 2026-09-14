@@ -1,15 +1,29 @@
 <template>
-  <ModalWrapper v-model="open" :title="isEdit ? 'Редактировать готовку' : 'Новая готовка'" :z-index="1000">
+  <ModalWrapper
+    v-model="open"
+    :title="isEdit ? 'Редактировать готовку' : 'Новая готовка'"
+    :z-index="1000"
+  >
     <form id="cooking-event-form" class="form" @submit.prevent="submit">
       <!-- Dish selection -->
       <div class="form__field">
         <span class="form__label">Блюдо <span class="form__required">*</span></span>
         <div v-if="selectedDish" class="selected-dish">
           <span class="selected-dish__name">{{ selectedDish.name }}</span>
-          <button type="button" class="selected-dish__edit" :title="isDishOwn(selectedDish) ? 'Редактировать рецепт' : 'Создать личную копию'" @click="onEditDishClick">
-            <IconPencil width="14" height="14" />
-          </button>
-          <button type="button" class="selected-dish__replace" @click="selectedDish = null">Заменить</button>
+          <template v-if="!fixedDish">
+            <button
+              type="button"
+              class="selected-dish__edit"
+              :title="editDishLabel"
+              :aria-label="editDishLabel"
+              @click="onEditDishClick"
+            >
+              <IconPencil :width="16" :height="16" />
+            </button>
+            <button type="button" class="selected-dish__replace" @click="selectedDish = null">
+              Заменить
+            </button>
+          </template>
         </div>
         <DishSearch
           v-else
@@ -32,11 +46,10 @@
 
       <label class="form__field">
         <span class="form__label">Комментарий</span>
-        <textarea v-model="notes" class="form__textarea" rows="2" />
+        <textarea v-model="notes" v-keyboard-avoid class="form__textarea" rows="2" />
       </label>
 
-      <div v-if="error" ref="errorRef" class="form__error">{{ error }}</div>
-
+      <div v-if="error" ref="errorRef" class="form__error" role="alert">{{ error }}</div>
     </form>
 
     <DishForm
@@ -51,13 +64,15 @@
     <!-- Clone confirmation for global dishes -->
     <ModalWrapper v-model="showCloneConfirm" title="Общее блюдо" :z-index="1020">
       <p class="clone-confirm__text">
-        Это общий рецепт, его нельзя редактировать.
-        Создать личную копию и использовать её в этой готовке?
+        Это общий рецепт, его нельзя редактировать. Создать личную копию и использовать её в этой
+        готовке?
       </p>
       <template #footer>
         <div class="clone-confirm__actions">
           <button class="form__submit" type="button" @click="startClone">Создать копию</button>
-          <button class="form__cancel" type="button" @click="showCloneConfirm = false">Отмена</button>
+          <button class="form__cancel" type="button" @click="showCloneConfirm = false">
+            Отмена
+          </button>
         </div>
       </template>
     </ModalWrapper>
@@ -69,21 +84,18 @@
       @created="onCloneCreated"
     />
 
-    <AIDishDraftForm
-      v-model="showAIForm"
-      :z-index="1030"
-      @created="onDishCreated"
-    />
+    <AIDishDraftForm v-model="showAIForm" :z-index="1030" @created="onDishCreated" />
 
     <template #footer>
-      <button type="submit" form="cooking-event-form" class="form__submit" :disabled="saving || !selectedDish">
-        {{ saving ? "Сохранение..." : (isEdit ? "Сохранить" : "Создать готовку") }}
+      <button type="submit" form="cooking-event-form" class="form__submit" :disabled="saving">
+        {{ saving ? "Сохранение…" : isEdit ? "Сохранить" : "Создать готовку" }}
       </button>
     </template>
   </ModalWrapper>
 </template>
 
-<script setup>
+<script lang="ts" setup>
+import { KeyboardAvoidDirective as vKeyboardAvoid } from "@/directives/keyboardAvoid"
 import { ref, computed, watch, nextTick } from "vue"
 import ModalWrapper from "./ModalWrapper.vue"
 import DishSearch from "./DishSearch.vue"
@@ -95,14 +107,24 @@ import { usePlanningStore } from "../../store/planning"
 import { useSubscriptionStore } from "../../store/subscription"
 import IconPencil from "../icons/IconPencil.vue"
 import { isDishOwn } from "../../utils/dishOwnership"
+import { getScrollBehavior } from "@/dom/prefersReducedMotion"
+import type { DTODish } from "@/types/dish"
+import type { DTOCookingEvent } from "@/types/planning"
 
-const props = defineProps({
-  modelValue: { type: Boolean, required: true },
-  editItem: { type: Object, default: null },
-  initialDate: { type: String, default: "" },
-})
+const props = withDefaults(
+  defineProps<{
+    modelValue: boolean
+    editItem?: DTOCookingEvent | null
+    initialDate?: string
+    fixedDish?: DTODish | null
+  }>(),
+  { editItem: null, initialDate: "", fixedDish: null }
+)
 
-const emit = defineEmits(["update:modelValue"])
+const emit = defineEmits<{
+  (e: "update:modelValue", value: boolean): void
+  (e: "created", cookingDate: string): void
+}>()
 
 const planning = usePlanningStore()
 const subscription = useSubscriptionStore()
@@ -110,42 +132,58 @@ const subscription = useSubscriptionStore()
 const isEdit = computed(() => !!props.editItem)
 
 const open = ref(props.modelValue)
-watch(() => props.modelValue, (v) => { open.value = v })
-watch(open, (v) => { emit("update:modelValue", v) })
+watch(
+  () => props.modelValue,
+  (v) => {
+    open.value = v
+  }
+)
+watch(open, (v) => {
+  emit("update:modelValue", v)
+})
 
-const selectedDish = ref(null)
+const selectedDish = ref<DTODish | null>(null)
+const editDishLabel = computed(() =>
+  isDishOwn(selectedDish.value) ? "Редактировать рецепт" : "Создать личную копию"
+)
 const cookingDate = ref("")
-const eatDates = ref([])
+const eatDates = ref<string[]>([])
 const notes = ref("")
 const saving = ref(false)
 const error = ref("")
-const errorRef = ref(null)
+const errorRef = ref<HTMLElement | null>(null)
 watch(error, (val) => {
-  if (val) nextTick(() => errorRef.value?.scrollIntoView({ behavior: 'smooth', block: 'nearest' }))
+  if (val)
+    nextTick(() =>
+      errorRef.value?.scrollIntoView({ behavior: getScrollBehavior(), block: "nearest" })
+    )
 })
 const showDishForm = ref(false)
-const editDish = ref(null)
+const editDish = ref<DTODish | null>(null)
 const initialDishName = ref("")
 const showCloneConfirm = ref(false)
 const showCloneForm = ref(false)
 const showAIForm = ref(false)
-const dishToClone = ref(null)
+const dishToClone = ref<DTODish | null>(null)
 
-watch(() => props.modelValue, (v) => {
-  if (v && props.editItem) {
-    selectedDish.value = props.editItem.dish
-    cookingDate.value = props.editItem.cooking_date
-    eatDates.value = (props.editItem.meal_plan_items || []).map((m) => m.date)
-    notes.value = props.editItem.notes || ""
-    error.value = ""
-  } else if (v) {
-    selectedDish.value = null
-    cookingDate.value = props.initialDate || ""
-    eatDates.value = []
-    notes.value = ""
-    error.value = ""
+watch(
+  () => props.modelValue,
+  (v) => {
+    if (v && props.editItem) {
+      selectedDish.value = props.editItem.dish
+      cookingDate.value = props.editItem.cooking_date
+      eatDates.value = (props.editItem.meal_plan_items || []).map((m) => m.date)
+      notes.value = props.editItem.notes || ""
+      error.value = ""
+    } else if (v) {
+      selectedDish.value = props.fixedDish ?? null
+      cookingDate.value = props.initialDate || ""
+      eatDates.value = []
+      notes.value = ""
+      error.value = ""
+    }
   }
-})
+)
 
 watch(cookingDate, (newVal, oldVal) => {
   if (!oldVal || !newVal) return
@@ -162,17 +200,17 @@ watch(cookingDate, (newVal, oldVal) => {
     .filter((iso) => iso >= newVal)
 })
 
-function onDishSelect(dish) {
+function onDishSelect(dish: DTODish) {
   selectedDish.value = dish
   error.value = ""
 }
 
-function onDishCreated(dish) {
+function onDishCreated(dish: DTODish) {
   selectedDish.value = dish
   error.value = ""
 }
 
-function onDishUpdated(dish) {
+function onDishUpdated(dish: DTODish) {
   selectedDish.value = dish
   error.value = ""
 }
@@ -192,13 +230,13 @@ function startClone() {
   showCloneForm.value = true
 }
 
-function onCloneCreated(dish) {
+function onCloneCreated(dish: DTODish) {
   selectedDish.value = dish
   showCloneForm.value = false
   error.value = ""
 }
 
-function onCreateDish(searchQuery) {
+function onCreateDish(searchQuery: string) {
   editDish.value = null
   initialDishName.value = searchQuery || ""
   showDishForm.value = true
@@ -208,7 +246,7 @@ function onCreateAIDish() {
   showAIForm.value = true
 }
 
-function validate() {
+function validate(): string | null {
   if (!selectedDish.value) return "Выберите блюдо."
   if (!cookingDate.value) return "Укажите дату готовки."
   if (!eatDates.value.length) return "Выберите хотя бы один день еды."
@@ -216,58 +254,65 @@ function validate() {
 }
 
 async function submit() {
-  error.value = validate()
+  error.value = validate() ?? ""
   if (error.value) return
   saving.value = true
   try {
     const payload = {
-      dish: selectedDish.value.id,
+      dish: selectedDish.value!.id as unknown as DTODish,
       cooking_date: cookingDate.value,
       eat_dates: [...eatDates.value].sort(),
       notes: notes.value.trim() || undefined,
     }
     if (isEdit.value) {
-      await planning.editCookingEvent(props.editItem.id, payload)
+      await planning.editCookingEvent(props.editItem!.id, payload)
     } else {
       await planning.addCookingEvent(payload)
+      emit("created", payload.cooking_date)
     }
     open.value = false
   } catch (err) {
-    error.value = err.message || "Не удалось сохранить готовку"
+    error.value = (err instanceof Error ? err.message : "") || "Не удалось сохранить готовку"
   } finally {
     saving.value = false
   }
 }
 </script>
 
-<style scoped>
-.clone-confirm__text {
-  font-size: var(--font-sm);
-  color: var(--color-text);
-  line-height: 1.5;
-  margin: 0;
+<style lang="scss" scoped>
+.clone-confirm {
+  &__text {
+    font-size: var(--font-sm);
+    color: var(--color-text);
+    line-height: 1.5;
+    margin: 0;
+  }
+
+  &__actions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
 }
 
-.clone-confirm__actions {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
+.form {
+  &__cancel {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-size: var(--font-base);
+    font-weight: 600;
+    background: var(--color-empty);
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    transition: background var(--transition-fast);
 
-.form__cancel {
-  width: 100%;
-  padding: 12px;
-  border: none;
-  border-radius: var(--radius-sm);
-  font-size: var(--font-base);
-  font-weight: 600;
-  background: var(--color-empty);
-  color: var(--color-text-secondary);
-  cursor: pointer;
-  transition: background var(--transition-fast);
-}
-
-.form__cancel:hover {
-  background: var(--color-border);
+    @media (hover: hover) {
+      &:hover {
+        background: var(--color-border);
+      }
+    }
+  }
 }
 </style>
