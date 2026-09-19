@@ -240,6 +240,8 @@ import IconPencil from "../icons/IconPencil.vue"
 import IconClose from "../icons/IconClose.vue"
 import { createDish, updateDish, fetchDishCategories, fetchDishes } from "@/services/dishService.ts"
 import { isDishOwn } from "@/utils/dishOwnership.ts"
+import { analytics } from "@/services/analytics"
+import { AnalyticsEvent } from "@/constants/analyticsEvents"
 import { fetchIngredients } from "@/services/ingredientService.ts"
 import { formatAmount } from "@/utils/formatAmount.ts"
 import { formatShoppingAmount } from "@/utils/formatShoppingAmount.ts"
@@ -534,6 +536,7 @@ async function submit() {
       emit("updated", dish)
     } else {
       const dish = await createDish(payload as Partial<DTODish>)
+      analytics.track(AnalyticsEvent.APP_DISH_CREATE)
       emit("created", dish)
     }
     open.value = false

@@ -3,7 +3,12 @@
     <div class="l-container l-container--narrow">
       <h2 class="l-title">Частые вопросы</h2>
       <div class="landing-faq">
-        <details v-for="item in items" :key="item.question" class="landing-faq__item">
+        <details
+          v-for="item in items"
+          :key="item.question"
+          class="landing-faq__item"
+          @toggle="trackOpen($event, item.question)"
+        >
           <summary class="landing-faq__question">
             <span class="l-icon-text">{{ item.question }}</span>
             <IconChevronDown :width="20" :height="20" class="landing-faq__chevron" />
@@ -17,6 +22,13 @@
 
 <script lang="ts" setup>
 import IconChevronDown from "@/components/icons/IconChevronDown.vue"
+import { analytics } from "@/services/analytics"
+import { AnalyticsEvent } from "@/constants/analyticsEvents"
+
+function trackOpen(event: Event, question: string) {
+  if (!(event.target as HTMLDetailsElement).open) return
+  analytics.track(AnalyticsEvent.LANDING_FAQ_OPEN, { question })
+}
 
 const items = [
   {

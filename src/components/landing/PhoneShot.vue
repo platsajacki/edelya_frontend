@@ -51,9 +51,11 @@ import { ref, onMounted, onUnmounted } from "vue"
 import IconPause from "@/components/icons/IconPause.vue"
 import IconPlay from "@/components/icons/IconPlay.vue"
 import { prefersReducedMotion } from "@/dom/prefersReducedMotion"
+import { analytics } from "@/services/analytics"
+import { AnalyticsEvent } from "@/constants/analyticsEvents"
 import type { LandingScreen } from "./screens"
 
-withDefaults(
+const props = withDefaults(
   defineProps<{
     screen: LandingScreen
     small?: boolean
@@ -77,6 +79,7 @@ function togglePlayback() {
   if (video.paused) {
     pausedByUser = false
     video.play().catch(() => {})
+    analytics.track(AnalyticsEvent.LANDING_VIDEO_PLAY, { screen: props.screen.file })
   } else {
     pausedByUser = true
     video.pause()

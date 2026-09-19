@@ -53,6 +53,12 @@
   </head>
   <body>
     <script src="/config.js"></script>
+    <script>
+      window.dataLayer = window.dataLayer || []
+      function gtag() {
+        dataLayer.push(arguments)
+      }
+    </script>
     <div id="app"></div>
     <script type="module" src="/src/main.js"></script>
   </body>

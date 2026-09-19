@@ -21,6 +21,8 @@ import type {
   DTOAIRecipeUsage,
   DTOSubscriptionDictionary,
 } from "@/types/subscription"
+import { analytics } from "../services/analytics"
+import { AnalyticsEvent } from "../constants/analyticsEvents"
 
 const DICTIONARY_CACHE_KEY = "subscription_dictionary_cache"
 const DICTIONARY_CACHE_TTL_MS = 24 * 60 * 60 * 1000
@@ -145,6 +147,7 @@ export const useSubscriptionStore = defineStore("subscription", {
     async startTrial() {
       const sub = await apiStartTrial()
       this.subscription = sub
+      analytics.track(AnalyticsEvent.APP_TRIAL_START)
       return sub
     },
 
@@ -152,6 +155,10 @@ export const useSubscriptionStore = defineStore("subscription", {
       const result = await apiSelectTariff(tariffId)
       if (result.action === "success") {
         this.subscription = result.subscription
+      }
+      const appliedTariff = result.subscription?.tariff
+      if (result.action === "success" && appliedTariff?.id === tariffId) {
+        analytics.trackTariff(AnalyticsEvent.APP_PURCHASE, appliedTariff)
       }
       return result
     },
@@ -172,19 +179,28 @@ export const useSubscriptionStore = defineStore("subscription", {
     async cancelSubscription() {
       const sub = await apiCancelSubscription()
       this.subscription = sub
+      analytics.track(AnalyticsEvent.APP_SUBSCRIPTION_CANCEL)
       return sub
     },
 
     async resumeSubscription() {
       const result = await apiResumeSubscription()
-      if (!("confirmation_url" in result)) this.subscription = result
+      if (!("confirmation_url" in result)) {
+        this.subscription = result
+        analytics.track(AnalyticsEvent.APP_SUBSCRIPTION_RESUME)
+      }
       return result
     },
 
     async retryPayment() {
+      analytics.track(AnalyticsEvent.APP_PAYMENT_RETRY)
       const result = await apiRetryPayment()
       if (result.subscription) this.subscription = result.subscription
-      if (result.action === "success") this.clear()
+      if (result.action === "success") {
+        this.clear()
+        if (result.subscription)
+          analytics.trackTariff(AnalyticsEvent.APP_PURCHASE, result.subscription.tariff)
+      }
       return result
     },
   },

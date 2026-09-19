@@ -12,7 +12,7 @@
           всех готовок в один список.
         </p>
         <div class="landing-hero__actions">
-          <LandingTelegramLink class="l-button" />
+          <LandingTelegramLink class="l-button" placement="hero" />
           <div class="landing-hero__notes">
             <span class="l-small">Без регистрации и паролей</span>
             <span class="l-small">Пробный период 14 дней</span>

@@ -1,4 +1,6 @@
 import { defineStore } from "pinia"
+import { analytics } from "../services/analytics"
+import { AnalyticsEvent } from "../constants/analyticsEvents"
 import {
   fetchShoppingLists,
   fetchShoppingList,
@@ -149,6 +151,7 @@ export const useShoppingStore = defineStore("shopping", {
     async createList(payload: Partial<DTOShoppingList>): Promise<DTOShoppingList> {
       const data = await createShoppingList(payload)
       this.lists.unshift(data)
+      analytics.track(AnalyticsEvent.APP_SHOPPING_LIST_CREATE)
       this.showToast("Список создан")
       return data
     },
@@ -171,6 +174,7 @@ export const useShoppingStore = defineStore("shopping", {
 
     async recalculateList(id: string) {
       await recalculateShoppingList(id)
+      analytics.track(AnalyticsEvent.APP_SHOPPING_LIST_RECALC)
       await this.loadItems(id)
       this.showToast("Список пересчитан")
     },

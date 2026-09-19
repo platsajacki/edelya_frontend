@@ -1,0 +1,25 @@
+export const AnalyticsEvent = {
+  LANDING_CTA_CLICK: "landing_cta_click",
+  LANDING_SECTION_VIEW: "landing_section_view",
+  LANDING_VIDEO_PLAY: "landing_video_play",
+  LANDING_FAQ_OPEN: "landing_faq_open",
+  APP_OPEN: "app_open",
+  APP_LOGIN: "app_login",
+  APP_SIGN_UP: "app_sign_up",
+  APP_COOKING_ADD: "app_cooking_add",
+  APP_MEAL_ADD: "app_meal_add",
+  APP_DISH_CREATE: "app_dish_create",
+  APP_AI_DRAFT_CREATE: "app_ai_draft_create",
+  APP_AI_DRAFT_SAVE: "app_ai_draft_save",
+  APP_AI_LIMIT_REACHED: "app_ai_limit_reached",
+  APP_SHOPPING_LIST_CREATE: "app_shopping_list_create",
+  APP_SHOPPING_LIST_RECALC: "app_shopping_list_recalc",
+  APP_TRIAL_START: "app_trial_start",
+  APP_CHECKOUT_BEGIN: "app_checkout_begin",
+  APP_PURCHASE: "app_purchase",
+  APP_PAYMENT_RETRY: "app_payment_retry",
+  APP_SUBSCRIPTION_CANCEL: "app_subscription_cancel",
+  APP_SUBSCRIPTION_RESUME: "app_subscription_resume",
+} as const
+
+export type AnalyticsEventName = (typeof AnalyticsEvent)[keyof typeof AnalyticsEvent]

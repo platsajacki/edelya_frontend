@@ -9,7 +9,7 @@
           <LandingLogo :width="28" :height="25" class="landing-brand__mark" />
           <span class="landing-brand__name l-icon-text">деля</span>
         </RouterLink>
-        <LandingTelegramLink class="l-link" />
+        <LandingTelegramLink class="l-link" placement="header" />
       </div>
     </header>
 
@@ -38,7 +38,7 @@
           <RouterLink to="/privacy" class="landing-footer__link">
             Политика конфиденциальности
           </RouterLink>
-          <LandingTelegramLink class="l-link" />
+          <LandingTelegramLink class="l-link" placement="footer" />
         </nav>
       </div>
     </footer>

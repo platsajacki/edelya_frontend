@@ -242,6 +242,8 @@ import IconPlus from "../components/icons/IconPlus.vue"
 import FabButton from "../components/FabButton.vue"
 import Toast from "../components/Toast.vue"
 import { formatDateRuShort } from "../utils/formatDate"
+import { analytics } from "../services/analytics"
+import { AnalyticsEvent } from "../constants/analyticsEvents"
 
 defineOptions({ name: "RecipesPage" })
 
@@ -343,6 +345,7 @@ const selectedAIDraft = ref(null)
 function openAICreate() {
   if (subscription.isAIRecipeLimitExceeded) {
     store.showToast(AI_LIMIT_EXCEEDED_MESSAGE)
+    analytics.track(AnalyticsEvent.APP_AI_LIMIT_REACHED)
     return
   }
   selectedAIDraft.value = null

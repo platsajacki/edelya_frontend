@@ -27,6 +27,8 @@ import { isMiniApp } from "./dom/isMiniApp"
 import { applyTelegramColors } from "./dom/applyTelegramColors"
 import BottomNav from "./components/BottomNav.vue"
 import ConsentScreen from "./components/ConsentScreen.vue"
+import { analytics } from "./services/analytics"
+import { AnalyticsEvent } from "./constants/analyticsEvents"
 
 const LandingShell = defineAsyncComponent(() => import("./components/landing/LandingShell.vue"))
 
@@ -40,6 +42,7 @@ onMounted(async () => {
   if (!miniApp) return
 
   const tg = window.Telegram?.WebApp
+  analytics.track(AnalyticsEvent.APP_OPEN, { source: tg?.initDataUnsafe?.start_param ?? "direct" })
 
   try {
     tg?.ready()

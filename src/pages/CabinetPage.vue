@@ -261,6 +261,8 @@ import { useAuthStore } from "../store/auth"
 import { useSubscriptionStore } from "../store/subscription"
 import { getTariffChangeScenario } from "../utils/tariffScenario"
 import { formatRubles } from "../utils/formatRubles"
+import { analytics } from "../services/analytics"
+import { AnalyticsEvent } from "../constants/analyticsEvents"
 import IconWarning from "../components/icons/IconWarning.vue"
 import IconCheck from "../components/icons/IconCheck.vue"
 import ConfirmTariffSheet from "../components/ConfirmTariffSheet.vue"
@@ -717,6 +719,7 @@ function selectTariff(tariff) {
   if (!scenario) return
   confirmSheetTariff.value = tariff
   showConfirmSheet.value = true
+  analytics.trackTariff(AnalyticsEvent.APP_CHECKOUT_BEGIN, tariff)
 }
 
 function closeConfirmSheet() {

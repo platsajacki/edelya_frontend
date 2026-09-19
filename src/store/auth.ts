@@ -2,6 +2,8 @@ import { defineStore } from "pinia"
 import type { WebAppUser } from "@twa-dev/types"
 import { login, telegramLogin, telegramLoginWithConsent } from "../services/authService"
 import { clearTokens, getAccess, getRefreshExp, saveTokens } from "../storage/tokenStorage"
+import { analytics } from "../services/analytics"
+import { AnalyticsEvent } from "../constants/analyticsEvents"
 
 export const useAuthStore = defineStore("auth", {
   state: (): { user: WebAppUser | null; requiresConsent: boolean; consentFields: string[] } => ({
@@ -50,6 +52,7 @@ export const useAuthStore = defineStore("auth", {
       if (result.ok) {
         saveTokens(result.tokens)
         this.user = tg.initDataUnsafe?.user ?? null
+        analytics.track(AnalyticsEvent.APP_LOGIN)
       } else {
         this.requiresConsent = true
         this.consentFields = result.consents
@@ -64,6 +67,7 @@ export const useAuthStore = defineStore("auth", {
       this.user = tg.initDataUnsafe?.user ?? null
       this.requiresConsent = false
       this.consentFields = []
+      analytics.track(AnalyticsEvent.APP_SIGN_UP, { marketing })
     },
 
     logout() {

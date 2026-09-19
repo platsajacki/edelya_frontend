@@ -6,7 +6,7 @@
       <p class="l-body landing-cta__text">
         Откройте Еделю в Telegram и спланируйте ближайшую неделю.
       </p>
-      <LandingTelegramLink class="l-button landing-cta__button" />
+      <LandingTelegramLink class="l-button landing-cta__button" placement="cta" />
     </div>
   </section>
 </template>

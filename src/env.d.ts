@@ -13,7 +13,10 @@ declare global {
     __APP_CONFIG__?: {
       apiUrl?: string
       telegramBot?: string
+      gaId?: string
     }
     Telegram?: Telegram
+    dataLayer?: unknown[]
+    gtag?: (...args: unknown[]) => void
   }
 }

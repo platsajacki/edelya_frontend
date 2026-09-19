@@ -2,7 +2,7 @@
 set -e
 
 # Подставляем env-переменные из окружения пода в config.js
-envsubst '${VITE_API} ${VITE_TELEGRAM_BOT}' \
+envsubst '${VITE_API} ${VITE_TELEGRAM_BOT} ${VITE_GA_ID}' \
   < /usr/share/nginx/html/config.js.template \
   > /usr/share/nginx/html/config.js
 

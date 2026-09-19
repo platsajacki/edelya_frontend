@@ -501,6 +501,8 @@ import AIRecipeUsageBadge from "../AIRecipeUsageBadge.vue"
 import IconPencil from "../icons/IconPencil.vue"
 import IconClose from "../icons/IconClose.vue"
 import { useSubscriptionStore } from "@/store/subscription.ts"
+import { analytics } from "@/services/analytics"
+import { AnalyticsEvent } from "@/constants/analyticsEvents"
 import { createAIDraft, createDishFromAIDraft, fetchAIDraft } from "@/services/aiDraftService.ts"
 import { fetchDish, fetchDishCategories } from "@/services/dishService.ts"
 import {
@@ -1157,6 +1159,7 @@ async function submit() {
   if (step.value === "input") {
     if (subscription.isAIRecipeLimitExceeded) {
       error.value = "Лимит AI-рецептов на текущий период исчерпан."
+      analytics.track(AnalyticsEvent.APP_AI_LIMIT_REACHED)
       return
     }
     error.value = validateSourceText() ?? ""
@@ -1165,6 +1168,7 @@ async function submit() {
     try {
       const data = await createAIDraft({ source_text: sourceText.value.trim() })
       draft.value = data
+      analytics.track(AnalyticsEvent.APP_AI_DRAFT_CREATE)
       emit("draft-created", data)
       startFakeProgress()
       schedulePoll(data.id)
@@ -1185,6 +1189,7 @@ async function submit() {
     const confirmedPayload = buildPayload()
     const dish = await createDishFromAIDraft(draft.value!.id, confirmedPayload)
     createdDish.value = dish
+    analytics.track(AnalyticsEvent.APP_AI_DRAFT_SAVE)
     const updatedDraft: DTOAIDraft = {
       ...draft.value!,
       status: "dish_created",

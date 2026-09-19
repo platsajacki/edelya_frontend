@@ -10,6 +10,8 @@ import {
   batchUpdateMealPositions,
 } from "../services/planningService"
 import { recalcPositions } from "../utils/recalcPositions"
+import { analytics } from "../services/analytics"
+import { AnalyticsEvent } from "../constants/analyticsEvents"
 import type {
   DTOWeekDishes,
   DTOMealPlanItem,
@@ -175,6 +177,7 @@ export const usePlanningStore = defineStore("planning", {
     async addCookingEvent(payload: Partial<DTOCookingEvent>) {
       try {
         await createCookingEvent(payload)
+        analytics.track(AnalyticsEvent.APP_COOKING_ADD)
         this.showToast("Готовка создана")
         await this._refreshAfterMutation()
       } catch (err) {
@@ -186,6 +189,7 @@ export const usePlanningStore = defineStore("planning", {
     async addMealPlanItem(payload: CreateMealPlanItemPayload) {
       try {
         await createMealPlanItem(payload)
+        analytics.track(AnalyticsEvent.APP_MEAL_ADD)
         this.showToast("Приём пищи добавлен")
         await this._refreshAfterMutation()
       } catch (err) {
