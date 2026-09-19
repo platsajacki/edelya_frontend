@@ -2,16 +2,10 @@ import { defineStore } from "pinia"
 import { fetchDishes, fetchDishCategories, deleteDish } from "../services/dishService"
 import { fetchAIDraft, fetchAIDrafts } from "../services/aiDraftService"
 import type { DTODish, DTODishCategory, DTOAIDraft } from "@/types/dish"
+import { sortLabel } from "../utils/sortOptions"
 
 const DEFAULT_SORTING = "-created_at"
 const AI_DRAFT_POLL_WINDOW_MS = 2 * 60 * 60 * 1000
-
-export const SORT_OPTIONS = [
-  { value: "-created_at", label: "Сначала новые" },
-  { value: "created_at", label: "Сначала старые" },
-  { value: "name", label: "По имени А–Я" },
-  { value: "-name", label: "По имени Я–А" },
-]
 
 export const useRecipesStore = defineStore("recipes", {
   state: () => ({
@@ -73,7 +67,7 @@ export const useRecipesStore = defineStore("recipes", {
     },
 
     sortLabel(state): string {
-      return SORT_OPTIONS.find((o) => o.value === state.filters.sorting)?.label ?? ""
+      return sortLabel(state.filters.sorting)
     },
   },
 

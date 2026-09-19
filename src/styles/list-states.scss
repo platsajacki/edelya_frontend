@@ -1,0 +1,75 @@
+/* ─── Shared paginated list states ───────────────────────── */
+/* Used by RecipesPage.vue and IngredientsView.vue            */
+
+.list-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 40px 0;
+  font-size: var(--font-sm);
+  color: var(--color-text-secondary);
+}
+
+.list-retry {
+  padding: var(--btn-padding-sm);
+  border: 1px solid var(--color-mint);
+  border-radius: var(--radius-sm);
+  background: none;
+  color: var(--color-mint-dark);
+  font-size: var(--font-sm);
+  font-weight: 600;
+  cursor: pointer;
+  transition: background var(--transition-fast);
+
+  &:active {
+    background: var(--color-mint-alpha-08);
+  }
+}
+
+.list-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 40px 0;
+  text-align: center;
+
+  &__text {
+    font-size: var(--font-sm);
+    color: var(--color-text-secondary);
+    margin: 0;
+  }
+}
+
+.list-refreshing {
+  display: flex;
+  justify-content: center;
+  padding: 4px 0;
+}
+
+.list-load-more-error {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 10px 0;
+
+  &__text {
+    font-size: var(--font-xs);
+    color: var(--color-text-secondary);
+  }
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.list-sentinel {
+  display: flex;
+  justify-content: center;
+  padding: 12px 0;
+  min-height: 1px;
+}
