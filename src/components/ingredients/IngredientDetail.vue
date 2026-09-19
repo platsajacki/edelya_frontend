@@ -22,7 +22,7 @@
           <button v-if="isOwn" class="detail__btn detail__btn--delete" @click="notAvailable">
             Удалить
           </button>
-          <button class="detail__btn detail__btn--secondary" @click="notAvailable">
+          <button class="detail__btn detail__btn--secondary" @click="handleEdit">
             {{ isOwn ? "Редактировать" : "Создать личную копию" }}
           </button>
         </div>
@@ -30,11 +30,18 @@
       </div>
     </template>
   </ModalWrapper>
+
+  <IngredientForm
+    v-model="showCloneForm"
+    :clone-ingredient="ingredient"
+    @created="onCloneCreated"
+  />
 </template>
 
 <script lang="ts" setup>
-import { computed } from "vue"
+import { computed, ref } from "vue"
 import ModalWrapper from "../forms/ModalWrapper.vue"
+import IngredientForm from "../forms/IngredientForm.vue"
 import OwnershipBadge from "../OwnershipBadge.vue"
 import { useIngredientsStore } from "../../store/ingredients"
 import { isDishOwn } from "../../utils/dishOwnership"
@@ -51,8 +58,24 @@ const store = useIngredientsStore()
 
 const isOwn = computed(() => isDishOwn(props.ingredient))
 
+const showCloneForm = ref(false)
+
 function notAvailable() {
   store.showToast("Скоро будет доступно")
+}
+
+function handleEdit() {
+  if (isOwn.value) {
+    notAvailable()
+    return
+  }
+  showCloneForm.value = true
+}
+
+function onCloneCreated() {
+  showCloneForm.value = false
+  open.value = false
+  store.onCopyCreated()
 }
 </script>
 

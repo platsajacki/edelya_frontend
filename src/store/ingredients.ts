@@ -136,6 +136,11 @@ export const useIngredientsStore = defineStore("ingredients", {
       void this.load()
     },
 
+    onCopyCreated() {
+      this.showToast("Личная копия создана")
+      void this.refresh()
+    },
+
     showToast(message: string) {
       this.toast = message
       setTimeout(() => {

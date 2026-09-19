@@ -1,6 +1,14 @@
 <template>
-  <ModalWrapper v-model="open" title="Новый ингредиент" :z-index="zIndex">
+  <ModalWrapper
+    v-model="open"
+    :title="isClone ? 'Создать личную копию' : 'Новый ингредиент'"
+    :z-index="zIndex"
+  >
     <form id="ingredient-form" class="form" @submit.prevent="submit">
+      <div v-if="isClone" class="form__notice">
+        Это личная копия общего ингредиента — вы можете изменить её под себя.
+      </div>
+
       <label class="form__field">
         <span class="form__label">Название <span class="form__required">*</span></span>
         <input v-model="name" v-autofocus.select type="text" class="form__input" required />
@@ -38,7 +46,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, watch, nextTick } from "vue"
+import { ref, computed, watch, nextTick } from "vue"
 import ModalWrapper from "./ModalWrapper.vue"
 import { createIngredient, fetchIngredientCategories } from "../../services/ingredientService"
 import { AutoFocusDirective as vAutofocus } from "@/directives/autofocus"
@@ -51,10 +59,12 @@ const props = withDefaults(
     modelValue: boolean
     zIndex?: number
     initialName?: string
+    cloneIngredient?: DTOIngredient | null
   }>(),
   {
     zIndex: 1020,
     initialName: "",
+    cloneIngredient: null,
   }
 )
 
@@ -73,6 +83,8 @@ watch(
 watch(open, (v) => {
   emit("update:modelValue", v)
 })
+
+const isClone = computed(() => !!props.cloneIngredient)
 
 const name = ref("")
 const categoryId = ref("")
@@ -93,9 +105,9 @@ watch(
   async (v) => {
     if (v) {
       error.value = ""
-      name.value = props.initialName || ""
-      categoryId.value = ""
-      baseUnit.value = ""
+      name.value = props.cloneIngredient?.name || props.initialName || ""
+      categoryId.value = props.cloneIngredient?.category.id || ""
+      baseUnit.value = props.cloneIngredient?.base_unit || ""
       try {
         const data = await fetchIngredientCategories()
         categories.value = data.results ?? []

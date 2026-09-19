@@ -6,7 +6,7 @@
   >
     <form id="dish-form" class="form" @submit.prevent="submit">
       <!-- Clone notice -->
-      <div v-if="isClone" class="dish-form__clone-notice">
+      <div v-if="isClone" class="form__notice">
         Это личная копия общего блюда — вы можете изменить её под себя.
       </div>
 
@@ -574,18 +574,6 @@ async function useExistingDish() {
 </script>
 
 <style lang="scss" scoped>
-.dish-form {
-  &__clone-notice {
-    padding: 10px 12px;
-    background: var(--color-mint-alpha-08);
-    border: 1px solid var(--color-mint-alpha-25);
-    border-radius: var(--radius-sm);
-    font-size: var(--font-sm);
-    color: var(--color-text-secondary);
-    line-height: 1.45;
-  }
-}
-
 .form {
   &__duplicate-actions {
     display: flex;

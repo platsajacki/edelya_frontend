@@ -314,6 +314,16 @@ textarea {
     font-weight: 400;
   }
 
+  &__notice {
+    padding: 10px 12px;
+    background: var(--color-mint-alpha-08);
+    border: 1px solid var(--color-mint-alpha-25);
+    border-radius: var(--radius-sm);
+    font-size: var(--font-sm);
+    color: var(--color-text-secondary);
+    line-height: 1.45;
+  }
+
   &__submit {
     width: 100%;
     padding: 12px;
