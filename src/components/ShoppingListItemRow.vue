@@ -29,72 +29,75 @@
       <span v-if="isToTaste" class="item-row__taste">по вкусу</span>
     </div>
 
-    <!-- Pill stepper (unchecked, not to_taste) -->
-    <div v-if="showControls" class="item-row__stepper">
-      <button
-        class="item-row__step-btn"
-        type="button"
-        :disabled="!canDecrease"
-        aria-label="Уменьшить"
-        @click="$emit('adjust', item, -step)"
-      >
-        −
-      </button>
+    <div ref="controls" class="item-row__controls">
+      <!-- Pill stepper (unchecked, not to_taste) -->
+      <div v-if="showControls" class="item-row__stepper">
+        <button
+          class="item-row__step-btn"
+          type="button"
+          :disabled="!canDecrease"
+          aria-label="Уменьшить"
+          @click="$emit('adjust', item, -step)"
+        >
+          −
+        </button>
 
-      <div v-if="editing" class="item-row__step-center">
-        <input
-          v-model="editValue"
-          v-autofocus.select
-          v-keyboard-avoid
-          type="text"
-          inputmode="decimal"
-          autocomplete="off"
-          class="item-row__step-input"
-          :aria-label="`Количество: ${itemName}`"
-          @keydown.enter.prevent="commitEdit"
-          @keydown.escape.prevent="cancelEdit"
-          @blur="commitEdit"
-        />
+        <div v-if="editing" class="item-row__step-center">
+          <input
+            v-model="editValue"
+            v-autofocus.select
+            v-keyboard-avoid
+            type="text"
+            inputmode="decimal"
+            autocomplete="off"
+            class="item-row__step-input"
+            :aria-label="`Количество: ${itemName}`"
+            @keydown.enter.prevent="commitEdit"
+            @keydown.escape.prevent="cancelEdit"
+            @blur="commitEdit"
+          />
+        </div>
+        <button
+          v-else
+          type="button"
+          class="item-row__step-center item-row__step-center--button"
+          :aria-label="`Изменить количество: ${formatted.display}`"
+          @click="startEdit"
+        >
+          <span class="item-row__step-label">{{ formatted.display }}</span>
+        </button>
+
+        <button
+          class="item-row__step-btn"
+          type="button"
+          aria-label="Увеличить"
+          @click="$emit('adjust', item, step)"
+        >
+          +
+        </button>
       </div>
-      <button
-        v-else
-        type="button"
-        class="item-row__step-center item-row__step-center--button"
-        :aria-label="`Изменить количество: ${formatted.display}`"
-        @click="startEdit"
-      >
-        <span class="item-row__step-label">{{ formatted.display }}</span>
-      </button>
 
+      <!-- Static amount when checked or no controls -->
+      <span v-else-if="!isToTaste" class="item-row__amount-done">{{ formatted.display }}</span>
+
+      <!-- Delete -->
       <button
-        class="item-row__step-btn"
+        class="item-row__delete"
         type="button"
-        aria-label="Увеличить"
-        @click="$emit('adjust', item, step)"
+        :aria-label="`Удалить: ${itemName}`"
+        @click="$emit('delete', item)"
       >
-        +
+        <IconClose :width="16" :height="16" />
       </button>
     </div>
-
-    <!-- Static amount when checked or no controls -->
-    <span v-else-if="!isToTaste" class="item-row__amount-done">{{ formatted.display }}</span>
-
-    <!-- Delete -->
-    <button
-      class="item-row__delete"
-      type="button"
-      :aria-label="`Удалить: ${itemName}`"
-      @click="$emit('delete', item)"
-    >
-      <IconClose :width="16" :height="16" />
-    </button>
   </div>
 </template>
 
 <script lang="ts" setup>
 import { AutoFocusDirective as vAutofocus } from "@/directives/autofocus"
 import { KeyboardAvoidDirective as vKeyboardAvoid } from "@/directives/keyboardAvoid"
-import { computed, ref } from "vue"
+import { useFlipOnUpdate } from "@/composables/useFlipOnUpdate"
+import { computed, ref, useTemplateRef } from "vue"
 import IconCheck from "./icons/IconCheck.vue"
 import IconClose from "./icons/IconClose.vue"
 import { formatShoppingAmount } from "../utils/formatShoppingAmount"
@@ -114,6 +117,7 @@ const emit = defineEmits<{
 const toggling = ref(false)
 const editing = ref(false)
 const editValue = ref("")
+useFlipOnUpdate(useTemplateRef<HTMLElement>("controls"))
 
 const itemName = computed(() => props.item.ingredient?.name ?? "—")
 const baseUnit = computed(() => props.item.ingredient?.base_unit ?? "piece")
@@ -160,6 +164,7 @@ function cancelEdit() {
 <style lang="scss" scoped>
 .item-row {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 8px;
   padding: 10px 12px;
@@ -206,7 +211,7 @@ function cancelEdit() {
   }
 
   &__info {
-    flex: 1;
+    flex: 1 1 6rem;
     min-width: 0;
     display: flex;
     flex-direction: column;
@@ -240,8 +245,15 @@ function cancelEdit() {
     font-style: italic;
   }
 
-  &__stepper {
+  &__controls {
     flex-shrink: 0;
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  &__stepper {
     display: flex;
     align-items: center;
     height: 34px;
@@ -257,7 +269,7 @@ function cancelEdit() {
   }
 
   &__step-btn {
-    min-width: 44px;
+    min-width: 40px;
     height: 100%;
     border: none;
     background: transparent;
@@ -284,7 +296,7 @@ function cancelEdit() {
   }
 
   &__step-center {
-    min-width: 58px;
+    min-width: 56px;
     height: 100%;
     border-left: 1px solid var(--color-border);
     border-right: 1px solid var(--color-border);
@@ -315,7 +327,9 @@ function cancelEdit() {
   }
 
   &__step-input {
-    width: 100%;
+    flex: 1;
+    width: 0;
+    min-width: 0;
     border: none;
     outline: none;
     background: transparent;
@@ -330,7 +344,6 @@ function cancelEdit() {
   }
 
   &__amount-done {
-    flex-shrink: 0;
     font-size: var(--font-2xs);
     font-variant-numeric: tabular-nums;
     color: var(--color-text-secondary);
@@ -338,7 +351,6 @@ function cancelEdit() {
   }
 
   &__delete {
-    flex-shrink: 0;
     width: 26px;
     height: 26px;
     border: none;
