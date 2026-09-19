@@ -1,35 +1,9 @@
-export type DTOBaseUnit =
-  | "milligram"
-  | "gram"
-  | "kilogram"
-  | "milliliter"
-  | "liter"
-  | "piece"
-  | "slice"
-  | "teaspoon"
-  | "tablespoon"
-  | "glass"
-  | "cup"
-  | "bunch"
-  | "can"
-  | "pinch"
-  | "clove"
-  | "to_taste"
+import type { DTOIngredient } from "@/types/ingredient"
 
 export interface DTODishCategory {
   id: number
   name: string
   is_active?: boolean
-  created_at: string
-  updated_at: string
-}
-
-export interface DTOIngredient {
-  id: string
-  name: string
-  base_unit: DTOBaseUnit
-  is_active: boolean
-  category: string
   created_at: string
   updated_at: string
 }

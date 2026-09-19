@@ -513,8 +513,8 @@ import {
 import { formatShoppingAmount } from "@/utils/formatShoppingAmount.ts"
 import { UNIT_LABELS } from "@/utils/unitLabels.ts"
 import { getScrollBehavior } from "@/dom/prefersReducedMotion"
-import type { DTOAIDraft, DTOBaseUnit, DTODish, DTODishCategory } from "@/types/dish"
-import type { DTOIngredient, DTOIngredientCategory } from "@/types/shopping"
+import type { DTOAIDraft, DTODish, DTODishCategory } from "@/types/dish"
+import type { DTOBaseUnit, DTOIngredient, DTOIngredientCategory } from "@/types/ingredient"
 import IconCheck from "@/components/icons/IconCheck.vue"
 
 interface AIDraftPayloadIngredient {

@@ -247,8 +247,8 @@ import { formatAmount } from "@/utils/formatAmount.ts"
 import { formatShoppingAmount } from "@/utils/formatShoppingAmount.ts"
 import { UNIT_LABELS } from "@/utils/unitLabels.ts"
 import { getScrollBehavior } from "@/dom/prefersReducedMotion"
-import type { DTOBaseUnit, DTODish, DTODishCategory } from "@/types/dish"
-import type { DTOIngredient } from "@/types/shopping"
+import type { DTODish, DTODishCategory } from "@/types/dish"
+import type { DTOBaseUnit, DTOIngredient } from "@/types/ingredient"
 
 interface PendingIngredient {
   id: string

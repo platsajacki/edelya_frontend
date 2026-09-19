@@ -1,6 +1,6 @@
 import { api } from "../api/client"
 import type { DTOPaginatedResponse } from "@/types/common"
-import type { DTOIngredient, DTOIngredientCategory } from "@/types/shopping"
+import type { DTOIngredient, DTOIngredientCategory } from "@/types/ingredient"
 
 export function fetchIngredients(params: Record<string, unknown> = {}) {
   const query = new URLSearchParams(params as Record<string, string>).toString()

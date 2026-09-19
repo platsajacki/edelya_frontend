@@ -43,7 +43,7 @@ import ModalWrapper from "./ModalWrapper.vue"
 import { createIngredient, fetchIngredientCategories } from "../../services/ingredientService"
 import { AutoFocusDirective as vAutofocus } from "@/directives/autofocus"
 import { getScrollBehavior } from "@/dom/prefersReducedMotion"
-import type { DTOIngredient, DTOIngredientCategory } from "@/types/shopping"
+import type { DTOIngredient, DTOIngredientCategory } from "@/types/ingredient"
 
 const UNITS = [
   { value: "gram", label: "Грамм" },
