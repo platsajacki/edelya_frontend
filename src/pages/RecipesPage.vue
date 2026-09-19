@@ -525,7 +525,7 @@ onUnmounted(() => {
 </script>
 
 <style lang="scss" scoped>
-@import "../styles/list-states.scss";
+@use "../styles/list-states";
 
 .recipes-page {
   padding: var(--page-padding-top) 16px 72px;

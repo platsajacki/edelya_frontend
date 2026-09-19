@@ -44,25 +44,7 @@ import { createIngredient, fetchIngredientCategories } from "../../services/ingr
 import { AutoFocusDirective as vAutofocus } from "@/directives/autofocus"
 import { getScrollBehavior } from "@/dom/prefersReducedMotion"
 import type { DTOIngredient, DTOIngredientCategory } from "@/types/ingredient"
-
-const UNITS = [
-  { value: "gram", label: "Грамм" },
-  { value: "kilogram", label: "Килограмм" },
-  { value: "milligram", label: "Миллиграмм" },
-  { value: "liter", label: "Литр" },
-  { value: "milliliter", label: "Миллилитр" },
-  { value: "piece", label: "Штука" },
-  { value: "slice", label: "Ломтик" },
-  { value: "teaspoon", label: "Чайная ложка" },
-  { value: "tablespoon", label: "Столовая ложка" },
-  { value: "glass", label: "Стакан" },
-  { value: "cup", label: "Чашка" },
-  { value: "bunch", label: "Пучок" },
-  { value: "can", label: "Банка" },
-  { value: "pinch", label: "Щепотка" },
-  { value: "clove", label: "Зубчик" },
-  { value: "to_taste", label: "По вкусу" },
-]
+import { UNITS } from "../../utils/unitLabels"
 
 const props = withDefaults(
   defineProps<{

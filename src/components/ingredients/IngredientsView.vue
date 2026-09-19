@@ -60,7 +60,12 @@
         <div class="spinner spinner--sm" role="status" aria-label="Загрузка" />
       </div>
 
-      <IngredientCard v-for="item in store.items" :key="item.id" :ingredient="item" />
+      <IngredientCard
+        v-for="item in store.items"
+        :key="item.id"
+        :ingredient="item"
+        @tap="openDetail"
+      />
 
       <div v-if="store.loadMoreError" class="list-load-more-error">
         <span class="list-load-more-error__text">Не удалось загрузить. Проверьте интернет.</span>
@@ -77,6 +82,8 @@
       </div>
     </div>
 
+    <IngredientDetail v-if="detailIngredient" v-model="showDetail" :ingredient="detailIngredient" />
+
     <Toast :message="store.toast" @dismiss="store.toast = null" />
   </div>
 </template>
@@ -86,6 +93,8 @@ import { ref, computed, onMounted, onUnmounted, watch } from "vue"
 import { useIngredientsStore } from "../../store/ingredients"
 import CategoryChips from "../CategoryChips.vue"
 import IngredientCard from "./IngredientCard.vue"
+import IngredientDetail from "./IngredientDetail.vue"
+import type { DTOIngredient } from "@/types/ingredient"
 import IconSearch from "../icons/IconSearch.vue"
 import Toast from "../Toast.vue"
 
@@ -120,6 +129,14 @@ function resetAll() {
   store.resetFilters()
 }
 
+const showDetail = ref(false)
+const detailIngredient = ref<DTOIngredient | null>(null)
+
+function openDetail(ingredient: DTOIngredient) {
+  detailIngredient.value = ingredient
+  showDetail.value = true
+}
+
 const sentinelRef = ref<HTMLElement | null>(null)
 
 const observer = new IntersectionObserver(
@@ -151,7 +168,7 @@ onUnmounted(() => {
 </script>
 
 <style lang="scss" scoped>
-@import "../../styles/list-states.scss";
+@use "../../styles/list-states";
 
 .ingredients-view {
   display: contents;
