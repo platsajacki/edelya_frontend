@@ -28,6 +28,10 @@ export function updateIngredient(id: string, payload: Record<string, unknown>) {
   })
 }
 
+export function deleteIngredient(id: string) {
+  return api<null>(`/api/v1/ingredients/${id}/`, { method: "DELETE" })
+}
+
 export function fetchIngredientCategories() {
   return api<DTOPaginatedResponse<DTOIngredientCategory>>(`/api/v1/ingredient-categories/`)
 }

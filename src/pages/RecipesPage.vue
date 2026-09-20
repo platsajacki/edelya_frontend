@@ -45,7 +45,11 @@
       </button>
     </div>
 
-    <IngredientsView v-if="isIngredientsMode" />
+    <IngredientsView
+      v-if="isIngredientsMode"
+      @open-dish="openDishFromIngredient"
+      @create="showIngredientForm = true"
+    />
 
     <template v-else>
       <!-- Search -->
@@ -232,6 +236,13 @@
 
     <IngredientForm v-model="showIngredientForm" @created="ingredientsStore.onCreated()" />
 
+    <DishForm
+      v-model="showDishEditForm"
+      :edit-dish="dishToEdit"
+      :highlight-ingredient-id="highlightedIngredientId"
+      @updated="onDishUpdated"
+    />
+
     <AIDishDraftForm
       v-model="showAIForm"
       :draft-to-open="selectedAIDraft"
@@ -267,6 +278,7 @@ import IconPlus from "../components/icons/IconPlus.vue"
 import FabButton from "../components/FabButton.vue"
 import Toast from "../components/Toast.vue"
 import { formatDateRuShort } from "../utils/formatDate"
+import { fetchDish } from "../services/dishService"
 import { analytics } from "../services/analytics"
 import { AnalyticsEvent } from "../constants/analyticsEvents"
 
@@ -397,6 +409,19 @@ function onCookingCreated(cookingDate: string) {
 // --- Create ---
 const showCreateForm = ref(false)
 const showIngredientForm = ref(false)
+const showDishEditForm = ref(false)
+const dishToEdit = ref<DTODish | null>(null)
+const highlightedIngredientId = ref("")
+
+async function openDishFromIngredient(target: { dishId: string; ingredientId: string }) {
+  try {
+    dishToEdit.value = await fetchDish(target.dishId)
+    highlightedIngredientId.value = target.ingredientId
+    showDishEditForm.value = true
+  } catch {
+    store.showToast("Не удалось открыть блюдо")
+  }
+}
 const showAIForm = ref(false)
 const selectedAIDraft = ref(null)
 

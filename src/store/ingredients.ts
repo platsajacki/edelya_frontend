@@ -45,6 +45,10 @@ export const useIngredientsStore = defineStore("ingredients", {
       return state.filters.categoryId !== null || state.filters.search.trim() !== ""
     },
 
+    hasNonDefaultSort(state): boolean {
+      return state.filters.sorting !== DEFAULT_SORTING
+    },
+
     sortLabel(state): string {
       return sortLabel(state.filters.sorting)
     },
@@ -133,7 +137,13 @@ export const useIngredientsStore = defineStore("ingredients", {
     resetFilters() {
       this.filters.categoryId = null
       this.filters.search = ""
+      this.filters.sorting = DEFAULT_SORTING
       void this.load()
+    },
+
+    onDeleted(id: string) {
+      this.items = this.items.filter((item) => item.id !== id)
+      this.showToast("Ингредиент удалён")
     },
 
     onUpdated(ingredient: DTOIngredient) {

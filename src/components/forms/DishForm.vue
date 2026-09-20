@@ -91,7 +91,10 @@
           <div
             v-else
             class="ingredient-row"
-            :class="{ 'ingredient-row--optional': ing.is_optional }"
+            :class="{
+              'ingredient-row--optional': ing.is_optional,
+              'ingredient-row--highlighted': ing.ingredient === highlightIngredientId,
+            }"
           >
             <span class="ingredient-row__name">{{ ing.ingredientName }}</span>
             <span v-if="ing.is_optional" class="ingredient-row__opt-label">опц.</span>
@@ -272,8 +275,9 @@ const props = withDefaults(
     editDish?: DTODish | null
     cloneDish?: DTODish | null
     initialName?: string
+    highlightIngredientId?: string
   }>(),
-  { zIndex: 1010, editDish: null, cloneDish: null, initialName: "" }
+  { zIndex: 1010, editDish: null, cloneDish: null, initialName: "", highlightIngredientId: "" }
 )
 
 const emit = defineEmits<{
@@ -637,6 +641,14 @@ async function useExistingDish() {
   }
   &--optional {
     opacity: 0.75;
+  }
+
+  &--highlighted {
+    padding: 8px;
+    border-bottom: none;
+    border-radius: var(--radius-sm);
+    background: var(--color-warning-bg);
+    box-shadow: inset 0 0 0 1px var(--color-warning-border);
   }
 
   &__name {

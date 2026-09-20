@@ -50,7 +50,18 @@
 
     <div v-else-if="!store.items.length" class="empty-state">
       <p class="empty-state__text">{{ emptyText }}</p>
-      <button v-if="store.hasActiveFilters" class="empty-state__secondary" @click="resetAll">
+      <button
+        v-if="store.filters.ownership === 'own'"
+        class="empty-state__action"
+        @click="emit('create')"
+      >
+        Добавить первый ингредиент
+      </button>
+      <button
+        v-if="store.hasActiveFilters || store.hasNonDefaultSort"
+        class="empty-state__secondary"
+        @click="resetAll"
+      >
         Сбросить фильтры
       </button>
     </div>
@@ -82,7 +93,12 @@
       </div>
     </div>
 
-    <IngredientDetail v-if="detailIngredient" v-model="showDetail" :ingredient="detailIngredient" />
+    <IngredientDetail
+      v-if="detailIngredient"
+      v-model="showDetail"
+      :ingredient="detailIngredient"
+      @open-dish="(target) => emit('open-dish', target)"
+    />
 
     <Toast :message="store.toast" @dismiss="store.toast = null" />
   </div>
@@ -102,6 +118,11 @@ const TABS = [
   { value: "own", label: "Личные" },
   { value: "global", label: "Общие" },
 ] as const
+
+const emit = defineEmits<{
+  (e: "open-dish", target: { dishId: string; ingredientId: string }): void
+  (e: "create"): void
+}>()
 
 const store = useIngredientsStore()
 
