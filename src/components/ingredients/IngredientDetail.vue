@@ -36,10 +36,12 @@
     :clone-ingredient="ingredient"
     @created="onCloneCreated"
   />
+
+  <IngredientForm v-model="showEditForm" :edit-ingredient="ingredient" @updated="onUpdated" />
 </template>
 
 <script lang="ts" setup>
-import { computed, ref } from "vue"
+import { computed, ref, watch } from "vue"
 import ModalWrapper from "../forms/ModalWrapper.vue"
 import IngredientForm from "../forms/IngredientForm.vue"
 import OwnershipBadge from "../OwnershipBadge.vue"
@@ -56,9 +58,16 @@ const open = defineModel<boolean>({ required: true })
 
 const store = useIngredientsStore()
 
-const isOwn = computed(() => isDishOwn(props.ingredient))
+const edited = ref<DTOIngredient | null>(null)
+const ingredient = computed(() => edited.value ?? props.ingredient)
+const isOwn = computed(() => isDishOwn(ingredient.value))
 
 const showCloneForm = ref(false)
+const showEditForm = ref(false)
+
+watch(open, (value) => {
+  if (!value) edited.value = null
+})
 
 function notAvailable() {
   store.showToast("Скоро будет доступно")
@@ -66,10 +75,15 @@ function notAvailable() {
 
 function handleEdit() {
   if (isOwn.value) {
-    notAvailable()
+    showEditForm.value = true
     return
   }
   showCloneForm.value = true
+}
+
+function onUpdated(updated: DTOIngredient) {
+  edited.value = updated
+  store.onUpdated(updated)
 }
 
 function onCloneCreated() {

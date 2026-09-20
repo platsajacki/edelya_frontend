@@ -20,6 +20,14 @@ export function createIngredient(payload: Record<string, unknown>) {
   })
 }
 
+export function updateIngredient(id: string, payload: Record<string, unknown>) {
+  return api<DTOIngredient>(`/api/v1/ingredients/${id}/`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  })
+}
+
 export function fetchIngredientCategories() {
   return api<DTOPaginatedResponse<DTOIngredientCategory>>(`/api/v1/ingredient-categories/`)
 }

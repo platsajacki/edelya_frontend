@@ -136,6 +136,12 @@ export const useIngredientsStore = defineStore("ingredients", {
       void this.load()
     },
 
+    onUpdated(ingredient: DTOIngredient) {
+      const index = this.items.findIndex((item) => item.id === ingredient.id)
+      if (index !== -1) this.items[index] = ingredient
+      this.showToast("Ингредиент обновлён")
+    },
+
     onCreated() {
       this.showToast("Ингредиент добавлен")
       if (this.filters.ownership === "own") void this.refresh()

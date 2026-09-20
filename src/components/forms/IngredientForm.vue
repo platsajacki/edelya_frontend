@@ -1,9 +1,5 @@
 <template>
-  <ModalWrapper
-    v-model="open"
-    :title="isClone ? 'Создать личную копию' : 'Новый ингредиент'"
-    :z-index="zIndex"
-  >
+  <ModalWrapper v-model="open" :title="title" :z-index="zIndex">
     <form id="ingredient-form" class="form" @submit.prevent="submit">
       <div v-if="isClone" class="form__notice">
         Это личная копия общего ингредиента — вы можете изменить её под себя.
@@ -34,12 +30,17 @@
         </select>
       </label>
 
+      <div v-if="unitChanged" class="form__warning" role="status">
+        <IconWarning :width="14" :height="14" />
+        Единица измерения изменится во всех ваших рецептах и списках покупок.
+      </div>
+
       <div v-if="error" ref="errorRef" class="form__error" role="alert">{{ error }}</div>
     </form>
 
     <template #footer>
       <button type="submit" form="ingredient-form" class="form__submit" :disabled="saving">
-        {{ saving ? "Сохранение…" : "Создать ингредиент" }}
+        {{ saving ? "Сохранение…" : isEdit ? "Сохранить" : "Создать ингредиент" }}
       </button>
     </template>
   </ModalWrapper>
@@ -48,7 +49,12 @@
 <script lang="ts" setup>
 import { ref, computed, watch, nextTick } from "vue"
 import ModalWrapper from "./ModalWrapper.vue"
-import { createIngredient, fetchIngredientCategories } from "../../services/ingredientService"
+import {
+  createIngredient,
+  updateIngredient,
+  fetchIngredientCategories,
+} from "../../services/ingredientService"
+import IconWarning from "../icons/IconWarning.vue"
 import { AutoFocusDirective as vAutofocus } from "@/directives/autofocus"
 import { getScrollBehavior } from "@/dom/prefersReducedMotion"
 import type { DTOIngredient, DTOIngredientCategory } from "@/types/ingredient"
@@ -60,17 +66,20 @@ const props = withDefaults(
     zIndex?: number
     initialName?: string
     cloneIngredient?: DTOIngredient | null
+    editIngredient?: DTOIngredient | null
   }>(),
   {
     zIndex: 1020,
     initialName: "",
     cloneIngredient: null,
+    editIngredient: null,
   }
 )
 
 const emit = defineEmits<{
   (e: "update:modelValue", value: boolean): void
   (e: "created", ingredient: DTOIngredient): void
+  (e: "updated", ingredient: DTOIngredient): void
 }>()
 
 const open = ref(props.modelValue)
@@ -85,6 +94,18 @@ watch(open, (v) => {
 })
 
 const isClone = computed(() => !!props.cloneIngredient)
+const isEdit = computed(() => !!props.editIngredient)
+const source = computed(() => props.editIngredient ?? props.cloneIngredient)
+
+const title = computed(() => {
+  if (isEdit.value) return "Редактировать ингредиент"
+  return isClone.value ? "Создать личную копию" : "Новый ингредиент"
+})
+
+const unitChanged = computed(() => {
+  if (!props.editIngredient || !baseUnit.value) return false
+  return baseUnit.value !== props.editIngredient.base_unit
+})
 
 const name = ref("")
 const categoryId = ref("")
@@ -105,9 +126,9 @@ watch(
   async (v) => {
     if (v) {
       error.value = ""
-      name.value = props.cloneIngredient?.name || props.initialName || ""
-      categoryId.value = props.cloneIngredient?.category.id || ""
-      baseUnit.value = props.cloneIngredient?.base_unit || ""
+      name.value = source.value?.name || props.initialName || ""
+      categoryId.value = source.value?.category.id || ""
+      baseUnit.value = source.value?.base_unit || ""
       try {
         const data = await fetchIngredientCategories()
         categories.value = data.results ?? []
@@ -125,6 +146,19 @@ function validate() {
   return null
 }
 
+async function save() {
+  const payload = {
+    name: name.value.trim(),
+    base_unit: baseUnit.value,
+    category: categoryId.value,
+  }
+  if (props.editIngredient) {
+    emit("updated", await updateIngredient(props.editIngredient.id, payload))
+    return
+  }
+  emit("created", await createIngredient(payload))
+}
+
 async function submit() {
   const validationError = validate()
   if (validationError) {
@@ -133,15 +167,10 @@ async function submit() {
   }
   saving.value = true
   try {
-    const ingredient = await createIngredient({
-      name: name.value.trim(),
-      base_unit: baseUnit.value,
-      category: categoryId.value,
-    })
-    emit("created", ingredient)
+    await save()
     open.value = false
   } catch (err) {
-    error.value = err instanceof Error ? err.message : "Не удалось создать ингредиент"
+    error.value = err instanceof Error ? err.message : "Не удалось сохранить ингредиент"
   } finally {
     saving.value = false
   }
