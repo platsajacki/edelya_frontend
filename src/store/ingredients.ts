@@ -136,6 +136,11 @@ export const useIngredientsStore = defineStore("ingredients", {
       void this.load()
     },
 
+    onCreated() {
+      this.showToast("Ингредиент добавлен")
+      if (this.filters.ownership === "own") void this.refresh()
+    },
+
     onCopyCreated() {
       this.showToast("Личная копия создана")
       void this.refresh()

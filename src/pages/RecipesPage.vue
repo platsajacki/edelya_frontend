@@ -211,12 +211,12 @@
           />
         </div>
       </div>
-
-      <!-- FAB: create new dish -->
-      <FabButton :aria-label="fabLabel" @click="onFabClick">
-        <IconPlus />
-      </FabButton>
     </template>
+
+    <!-- FAB: create new dish or ingredient -->
+    <FabButton :aria-label="fabLabel" @click="onFabClick">
+      <IconPlus />
+    </FabButton>
 
     <!-- Dish detail bottom-sheet -->
     <RecipeDishDetail
@@ -229,6 +229,8 @@
 
     <!-- Create dish form -->
     <DishForm v-model="showCreateForm" @created="onDishCreated" />
+
+    <IngredientForm v-model="showIngredientForm" @created="ingredientsStore.onCreated()" />
 
     <AIDishDraftForm
       v-model="showAIForm"
@@ -257,6 +259,7 @@ import RecipeDishCard from "../components/RecipeDishCard.vue"
 import CategoryChips from "../components/CategoryChips.vue"
 import RecipeDishDetail from "../components/RecipeDishDetail.vue"
 import DishForm from "../components/forms/DishForm.vue"
+import IngredientForm from "../components/forms/IngredientForm.vue"
 import AIDishDraftForm from "../components/forms/AIDishDraftForm.vue"
 import AIRecipeUsageBadge from "../components/AIRecipeUsageBadge.vue"
 import IconSearch from "../components/icons/IconSearch.vue"
@@ -321,7 +324,10 @@ const emptyText = computed(() => {
   return store.filters.ownership === "own" ? "У вас пока нет личных блюд" : "Общих блюд пока нет"
 })
 
-const fabLabel = computed(() => (store.isAIDraftsTab ? "Создать с ИИ" : "Создать блюдо"))
+const fabLabel = computed(() => {
+  if (isIngredientsMode.value) return "Создать ингредиент"
+  return store.isAIDraftsTab ? "Создать с ИИ" : "Создать блюдо"
+})
 
 function switchTab(value) {
   showSortMenu.value = false
@@ -390,6 +396,7 @@ function onCookingCreated(cookingDate: string) {
 
 // --- Create ---
 const showCreateForm = ref(false)
+const showIngredientForm = ref(false)
 const showAIForm = ref(false)
 const selectedAIDraft = ref(null)
 
@@ -409,6 +416,10 @@ function openAIDraft(draft) {
 }
 
 function onFabClick() {
+  if (isIngredientsMode.value) {
+    showIngredientForm.value = true
+    return
+  }
   if (store.isAIDraftsTab) {
     openAICreate()
     return
