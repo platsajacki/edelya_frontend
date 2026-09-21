@@ -51,9 +51,9 @@
 </template>
 
 <script lang="ts" setup>
-import { ref } from "vue"
 import DevState from "../DevState.vue"
 import DevButton from "../DevButton.vue"
+import { useDevOpened } from "../useDevOpened"
 import { fixtures } from "../fixtures"
 import ModalWrapper from "@/components/forms/ModalWrapper.vue"
 import ConfirmTariffSheet from "@/components/ConfirmTariffSheet.vue"
@@ -87,9 +87,5 @@ const shoppingStates = [
   { key: "shopping-empty", label: "нет готовок", ...week, noItems: true },
   { key: "shopping-loading", label: "loading", ...week, loading: true },
 ]
-const opened = ref<string | null>(null)
-
-function closeOn(value: boolean) {
-  if (!value) opened.value = null
-}
+const { opened, closeOn } = useDevOpened()
 </script>

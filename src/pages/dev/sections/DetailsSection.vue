@@ -46,27 +46,16 @@
 </template>
 
 <script lang="ts" setup>
-import { ref } from "vue"
 import DevState from "../DevState.vue"
 import DevButton from "../DevButton.vue"
+import { useDevOpened } from "../useDevOpened"
 import { dishes, fixtures, ingredients } from "../fixtures"
 import CardDetailSheet from "@/components/CardDetailSheet.vue"
 import RecipeDishDetail from "@/components/RecipeDishDetail.vue"
 import IngredientDetail from "@/components/ingredients/IngredientDetail.vue"
 
-const cooking = fixtures.cookingEvent(dishes.borsch, 0, {
-  notes: "Сварить побольше, чтобы хватило на два дня.",
-  meal_plan_items: [fixtures.mealItem(dishes.borsch, 0), fixtures.mealItem(dishes.borsch, 1)].map(
-    (item) => ({
-      ...item,
-      dish: item.dish.id,
-    })
-  ),
-})
-const meal = fixtures.mealItem(dishes.borsch, 1, { cooking_event: cooking.id })
-const opened = ref<string | null>(null)
-
-function closeOn(value: boolean) {
-  if (!value) opened.value = null
-}
+const borschCooking = fixtures.cookingWithMeals(dishes.borsch, 0, [0, 1])
+const cooking = { ...borschCooking.event, notes: "Сварить побольше, чтобы хватило на два дня." }
+const meal = borschCooking.meals[1]
+const { opened, closeOn } = useDevOpened()
 </script>

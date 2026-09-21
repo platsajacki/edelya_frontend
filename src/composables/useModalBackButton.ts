@@ -4,7 +4,9 @@ const modalStack: VoidFunction[] = []
 let listening = false
 
 function getBackButton() {
-  return window.Telegram?.WebApp?.BackButton ?? null
+  const tg = window.Telegram?.WebApp
+  if (!tg?.isVersionAtLeast("6.1")) return null
+  return tg.BackButton
 }
 
 function handleBackButtonClick() {

@@ -183,29 +183,17 @@
                   :class="
                     ingredientDraft.new
                       ? 'ingredient-amount__mode-badge--new'
-                      : ingredientDraft.ingredient
-                        ? 'ingredient-amount__mode-badge--found'
-                        : null
+                      : 'ingredient-amount__mode-badge--found'
                   "
                 >
-                  {{
-                    !ingredientDraft.new && !ingredientDraft.ingredient
-                      ? "Нужна привязка"
-                      : ingredientDraft.new
-                        ? "Новый"
-                        : "Найден"
-                  }}
+                  {{ ingredientDraft.new ? "Новый" : "Найден" }}
                 </span>
-                <span
-                  v-if="!ingredientDraft.new && ingredientDraft.ingredient"
-                  class="ingredient-amount__name"
-                  >{{ ingredientLabel(ingredientDraft) }}</span
-                >
+                <span v-if="!ingredientDraft.new" class="ingredient-amount__name">{{
+                  ingredientLabel(ingredientDraft)
+                }}</span>
               </div>
 
-              <template
-                v-if="ingredientDraft.new || !ingredientDraft.ingredient || inlineReplaceVisible"
-              >
+              <template v-if="ingredientDraft.new || inlineReplaceVisible">
                 <label v-if="ingredientDraft.new" class="form__field">
                   <span class="form__label">Название</span>
                   <input v-model="ingredientDraft.name" v-keyboard-avoid type="text" class="form__input" />
@@ -374,20 +362,14 @@
             </div>
 
             <template v-else>
-              <div
-                class="ingredient-row"
-                :class="{
-                  'ingredient-row--broken': !ingredient.new && !ingredient.ingredient,
-                }"
-              >
+              <div class="ingredient-row">
                 <span class="ingredient-row__name">{{ ingredientLabel(ingredient) }}</span>
                 <span class="ingredient-row__meta">
                   <span
-                    v-if="needsDecision(ingredient)"
-                    class="ai-ingredient__badge"
-                    :class="ingredient.new ? 'ai-ingredient__badge--new' : 'ai-ingredient__badge--broken'"
+                    v-if="ingredient.new"
+                    class="ai-ingredient__badge ai-ingredient__badge--new"
                   >
-                    {{ ingredient.new ? "создать" : "привязать" }}
+                    создать
                   </span>
                   <span v-if="categoryName(ingredient)" class="ingredient-row__category">
                     {{ categoryName(ingredient) }}
@@ -703,9 +685,7 @@ const submitDisabled = computed(
     (step.value === "input" && subscription.isAIRecipeLimitExceeded)
 )
 const canSubmit = computed(() => !["failed", "dish_created"].includes(step.value))
-const draftRowIsFound = computed(() =>
-  Boolean(ingredientDraft.value && !ingredientDraft.value.new && ingredientDraft.value.ingredient)
-)
+const draftRowIsFound = computed(() => Boolean(ingredientDraft.value && !ingredientDraft.value.new))
 
 const canEditDraftIngredient = computed(
   () => draftRowIsFound.value && Boolean(ingredientDraft.value?.owner)
@@ -1007,10 +987,6 @@ function getCategoryName(categoryId: string | number): string {
   return dishCategories.value.find((category) => category.id === id)?.name || ""
 }
 
-function needsDecision(ingredient: AIDraftPayloadIngredient): boolean {
-  return ingredient.new || !ingredient.ingredient
-}
-
 function categoryName(ingredient: { category?: string | number | null }): string {
   if (!ingredient.category) return ""
   const id = getCategoryId(ingredient.category)
@@ -1041,11 +1017,7 @@ function startIngredientEdit(index: number, isNewlyAdded = false) {
   editingIngredientIndex.value = index
   ingredientDraft.value = { ...ingredient }
   isNewlyAddedIngredient.value = isNewlyAdded
-  if (!ingredient.new && !ingredient.ingredient) {
-    nextTick(() => openInlineReplace(ingredientDraft.value as AIDraftPayloadIngredient))
-  } else {
-    nextTick(() => amountInputRef.value[0]?.focus())
-  }
+  nextTick(() => amountInputRef.value[0]?.focus())
 }
 
 function commitIngredientDraft() {
@@ -1308,7 +1280,6 @@ function validatePayload(): string | null {
   }
   for (const ingredient of payload.value.ingredients) {
     if (!ingredient.name?.trim()) return "Укажите название каждого ингредиента."
-    if (!ingredient.new && !ingredient.ingredient) return "Выберите существующий ингредиент."
     if (!ingredient.category) return "Выберите категорию для каждого ингредиента."
     if (!ingredient.base_unit) return "Выберите единицу измерения для каждого ингредиента."
     const amount = Number(String(ingredient.amount).replace(",", "."))
@@ -1709,12 +1680,6 @@ onUnmounted(() => {
       background: var(--color-mint-alpha-10);
       color: var(--color-mint-dark);
     }
-
-    &--broken {
-      background: var(--color-warning-bg);
-      color: var(--color-warning);
-      border: 1px solid var(--color-warning-border);
-    }
   }
 }
 
@@ -1733,14 +1698,6 @@ onUnmounted(() => {
 
   &:last-of-type {
     border-bottom: none;
-  }
-
-  &--broken {
-    background: var(--color-warning-bg);
-    border-radius: var(--radius-xs);
-    padding-left: 6px;
-    padding-right: 6px;
-    margin: 0 -6px;
   }
 
   &__name {
