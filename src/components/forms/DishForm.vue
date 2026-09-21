@@ -6,7 +6,7 @@
   >
     <form id="dish-form" class="form" @submit.prevent="submit">
       <!-- Clone notice -->
-      <div v-if="isClone" class="dish-form__clone-notice">
+      <div v-if="isClone" class="form__notice">
         Это личная копия общего блюда — вы можете изменить её под себя.
       </div>
 
@@ -91,7 +91,10 @@
           <div
             v-else
             class="ingredient-row"
-            :class="{ 'ingredient-row--optional': ing.is_optional }"
+            :class="{
+              'ingredient-row--optional': ing.is_optional,
+              'ingredient-row--highlighted': ing.ingredient === highlightIngredientId,
+            }"
           >
             <span class="ingredient-row__name">{{ ing.ingredientName }}</span>
             <span v-if="ing.is_optional" class="ingredient-row__opt-label">опц.</span>
@@ -218,7 +221,7 @@
     <IngredientForm
       v-model="showIngredientForm"
       :z-index="zIndex + 10"
-      :initial-name="ingredientFormInitialName"
+      :initial="{ name: ingredientFormInitialName }"
       @created="onIngredientCreated"
     />
 
@@ -247,8 +250,8 @@ import { formatAmount } from "@/utils/formatAmount.ts"
 import { formatShoppingAmount } from "@/utils/formatShoppingAmount.ts"
 import { UNIT_LABELS } from "@/utils/unitLabels.ts"
 import { getScrollBehavior } from "@/dom/prefersReducedMotion"
-import type { DTOBaseUnit, DTODish, DTODishCategory } from "@/types/dish"
-import type { DTOIngredient } from "@/types/shopping"
+import type { DTODish, DTODishCategory } from "@/types/dish"
+import type { DTOBaseUnit, DTOIngredient } from "@/types/ingredient"
 
 interface PendingIngredient {
   id: string
@@ -272,8 +275,9 @@ const props = withDefaults(
     editDish?: DTODish | null
     cloneDish?: DTODish | null
     initialName?: string
+    highlightIngredientId?: string
   }>(),
-  { zIndex: 1010, editDish: null, cloneDish: null, initialName: "" }
+  { zIndex: 1010, editDish: null, cloneDish: null, initialName: "", highlightIngredientId: "" }
 )
 
 const emit = defineEmits<{
@@ -574,18 +578,6 @@ async function useExistingDish() {
 </script>
 
 <style lang="scss" scoped>
-.dish-form {
-  &__clone-notice {
-    padding: 10px 12px;
-    background: var(--color-mint-alpha-08);
-    border: 1px solid var(--color-mint-alpha-25);
-    border-radius: var(--radius-sm);
-    font-size: var(--font-sm);
-    color: var(--color-text-secondary);
-    line-height: 1.45;
-  }
-}
-
 .form {
   &__duplicate-actions {
     display: flex;
@@ -649,6 +641,14 @@ async function useExistingDish() {
   }
   &--optional {
     opacity: 0.75;
+  }
+
+  &--highlighted {
+    padding: 8px;
+    border-bottom: none;
+    border-radius: var(--radius-sm);
+    background: var(--color-warning-bg);
+    box-shadow: inset 0 0 0 1px var(--color-warning-border);
   }
 
   &__name {

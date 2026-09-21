@@ -2,15 +2,11 @@
   <div class="page-layout shopping-page">
     <div class="shopping-header">
       <h1 class="shopping-header__title">Покупки</h1>
-      <button
-        class="shopping-header__sort"
-        type="button"
+      <SortButton
+        :label="sortAsc ? 'Сначала новые' : 'Сначала старые'"
         :title="sortAsc ? 'Переключить: сначала новые' : 'Переключить: сначала старые'"
         @click="sortAsc = !sortAsc"
-      >
-        <IconSort />
-        {{ sortAsc ? "Сначала новые" : "Сначала старые" }}
-      </button>
+      />
     </div>
 
     <!-- Search -->
@@ -79,7 +75,7 @@ defineOptions({ name: "ShoppingPage" })
 import { useShoppingStore } from "../store/shopping"
 import ShoppingListCard from "../components/ShoppingListCard.vue"
 import ShoppingListForm from "../components/forms/ShoppingListForm.vue"
-import IconSort from "../components/icons/IconSort.vue"
+import SortButton from "../components/SortButton.vue"
 import IconSearch from "../components/icons/IconSearch.vue"
 import IconShoppingBag from "../components/icons/IconShoppingBag.vue"
 import IconPlus from "../components/icons/IconPlus.vue"
@@ -144,28 +140,6 @@ function onListCreated(list) {
   display: flex;
   align-items: center;
   justify-content: space-between;
-
-  &__sort {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    background: none;
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-sm);
-    padding: 5px 10px;
-    font-size: var(--font-xs);
-    color: var(--color-text-secondary);
-    cursor: pointer;
-    transition:
-      border-color var(--transition-fast),
-      color var(--transition-fast);
-    -webkit-tap-highlight-color: transparent;
-
-    &:active {
-      color: var(--color-mint-dark);
-      border-color: var(--color-mint);
-    }
-  }
 
   &__title {
     font-size: var(--font-lg);

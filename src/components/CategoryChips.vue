@@ -23,13 +23,11 @@
   </div>
 </template>
 
-<script lang="ts" setup>
-import type { DTODishCategory } from "@/types/dish"
-
+<script lang="ts" setup generic="CategoryId extends string | number">
 withDefaults(
   defineProps<{
-    categories?: DTODishCategory[]
-    modelValue: number | null
+    categories?: { id: CategoryId; name: string }[]
+    modelValue: CategoryId | null
   }>(),
   {
     categories: () => [],
@@ -37,7 +35,7 @@ withDefaults(
 )
 
 defineEmits<{
-  (e: "update:modelValue", value: number | null): void
+  (e: "update:modelValue", value: CategoryId | null): void
 }>()
 </script>
 

@@ -114,7 +114,7 @@
     <IngredientForm
       v-model="showIngredientForm"
       :z-index="zIndex + 10"
-      :initial-name="ingredientFormInitialName"
+      :initial="{ name: ingredientFormInitialName }"
       @created="onIngredientCreated"
     />
   </ModalWrapper>
@@ -131,8 +131,8 @@ import { fetchIngredients } from "@/services/ingredientService.ts"
 import { getUnitLabel } from "@/utils/unitSteps.ts"
 import { useShoppingStore } from "@/store/shopping.ts"
 import { getScrollBehavior } from "@/dom/prefersReducedMotion"
-import type { DTOIngredient, DTOShoppingListItem } from "@/types/shopping"
-import type { DTOBaseUnit } from "@/types/dish"
+import type { DTOShoppingListItem } from "@/types/shopping"
+import type { DTOBaseUnit, DTOIngredient } from "@/types/ingredient"
 
 const props = withDefaults(
   defineProps<{

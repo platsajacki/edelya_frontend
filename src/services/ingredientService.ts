@@ -1,6 +1,6 @@
 import { api } from "../api/client"
 import type { DTOPaginatedResponse } from "@/types/common"
-import type { DTOIngredient, DTOIngredientCategory } from "@/types/shopping"
+import type { DTOIngredient, DTOIngredientCategory } from "@/types/ingredient"
 
 export function fetchIngredients(params: Record<string, unknown> = {}) {
   const query = new URLSearchParams(params as Record<string, string>).toString()
@@ -18,6 +18,18 @@ export function createIngredient(payload: Record<string, unknown>) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
   })
+}
+
+export function updateIngredient(id: string, payload: Record<string, unknown>) {
+  return api<DTOIngredient>(`/api/v1/ingredients/${id}/`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  })
+}
+
+export function deleteIngredient(id: string) {
+  return api<null>(`/api/v1/ingredients/${id}/`, { method: "DELETE" })
 }
 
 export function fetchIngredientCategories() {

@@ -50,6 +50,7 @@ const ERROR_MESSAGES: Record<string, string> = {
   "Dish must have at least one ingredient": "У рецепта должен быть хотя бы один ингредиент.",
   "An ingredient with this name already exists for this user.":
     "Ингредиент с таким названием уже существует.",
+  "Ingredient is used and cannot be deleted.": "Ингредиент используется, его нельзя удалить.",
   "Date when eating starts cannot be earlier than cooking date":
     "Дата начала еды не может быть раньше даты готовки.",
   "All eat dates must be on or after the cooking date.":
@@ -99,6 +100,7 @@ const ERROR_MESSAGES: Record<string, string> = {
   "AI recipe limit for the current subscription period has been exceeded.":
     "Лимит AI-рецептов на текущий период исчерпан.",
   "AI draft must be parsed before dish creation.": "AI-рецепт ещё не готов к созданию блюда.",
+  "AI draft can be edited only in the parsed status.": "Этот AI-рецепт уже нельзя изменить.",
   "Payload must contain name, recipe, category and ingredients.":
     "Проверьте название, рецепт, категорию и ингредиенты.",
   "Ingredients must be a non-empty list.": "Нужен хотя бы один ингредиент.",

@@ -1,22 +1,4 @@
-import type { DTOBaseUnit } from "@/types/dish.ts"
-
-export interface DTOIngredientCategory {
-  id: string
-  name: string
-  is_active?: boolean
-  created_at: string
-  updated_at: string
-}
-
-export interface DTOIngredient {
-  id: string
-  name: string
-  base_unit: DTOBaseUnit
-  is_active: boolean
-  category: DTOIngredientCategory
-  created_at: string
-  updated_at: string
-}
+import type { DTOIngredient } from "@/types/ingredient"
 
 export interface DTOShoppingList {
   id: string

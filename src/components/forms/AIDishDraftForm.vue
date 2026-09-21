@@ -97,7 +97,12 @@
               :key="idx"
               class="detail__ingredient"
             >
-              <span class="detail__ingredient-name">{{ ingredientLabel(ingredient) }}</span>
+              <span class="ai-draft__ingredient-main">
+                <span class="detail__ingredient-name">{{ ingredientLabel(ingredient) }}</span>
+                <span v-if="categoryName(ingredient)" class="ai-draft__ingredient-category">
+                  {{ categoryName(ingredient) }}
+                </span>
+              </span>
               <span class="detail__ingredient-right">
                 <span v-if="ingredient.is_optional" class="detail__ingredient-optional">опц.</span>
                 <span class="detail__ingredient-amount">
@@ -199,7 +204,7 @@
               </div>
 
               <template
-                v-if="ingredientDraft.new || (!ingredientDraft.new && !ingredientDraft.ingredient)"
+                v-if="ingredientDraft.new || !ingredientDraft.ingredient || inlineReplaceVisible"
               >
                 <label v-if="ingredientDraft.new" class="form__field">
                   <span class="form__label">Название</span>
@@ -279,6 +284,37 @@
                 </div>
               </template>
 
+              <template v-if="draftRowIsFound && !inlineReplaceVisible">
+                <button
+                  v-if="canEditDraftIngredient"
+                  type="button"
+                  class="ingredient-amount__link-btn"
+                  :disabled="loadingIngredient"
+                  @click="openDraftIngredientEdit"
+                >
+                  {{ loadingIngredient ? "Открываю…" : "Редактировать ингредиент" }}
+                </button>
+                <p v-if="canEditDraftIngredient" class="ingredient-amount__hint">
+                  Изменится во всех ваших рецептах
+                </p>
+                <template v-if="!canEditDraftIngredient">
+                  <button
+                    type="button"
+                    class="ingredient-amount__link-btn"
+                    @click="openInlineReplace(ingredientDraft)"
+                  >
+                    Привязать к другому
+                  </button>
+                  <button
+                    type="button"
+                    class="ingredient-amount__link-btn"
+                    @click="openDraftIngredientCreate"
+                  >
+                    + Создать свой
+                  </button>
+                </template>
+              </template>
+
               <div v-if="ingredientDraft.base_unit !== 'to_taste'" class="ingredient-amount__row">
                 <input
                   ref="amountInputRef"
@@ -307,6 +343,9 @@
               </div>
               <p v-else class="ingredient-amount__taste-hint">
                 Количество не указывается — добавится как «по вкусу»
+              </p>
+              <p v-if="unitChangedHint" class="ingredient-amount__hint">
+                Единица измерения изменилась — проверьте количество
               </p>
 
               <label v-if="ingredientDraft.new" class="form__field">
@@ -342,16 +381,19 @@
                 }"
               >
                 <span class="ingredient-row__name">{{ ingredientLabel(ingredient) }}</span>
-                <span
-                  class="ai-ingredient__badge"
-                  :class="{
-                    'ai-ingredient__badge--new': ingredient.new,
-                    'ai-ingredient__badge--broken': !ingredient.new && !ingredient.ingredient,
-                  }"
-                >
-                  {{ ingredient.new ? "создать" : !ingredient.ingredient ? "привязать" : "найден" }}
+                <span class="ingredient-row__meta">
+                  <span
+                    v-if="needsDecision(ingredient)"
+                    class="ai-ingredient__badge"
+                    :class="ingredient.new ? 'ai-ingredient__badge--new' : 'ai-ingredient__badge--broken'"
+                  >
+                    {{ ingredient.new ? "создать" : "привязать" }}
+                  </span>
+                  <span v-if="categoryName(ingredient)" class="ingredient-row__category">
+                    {{ categoryName(ingredient) }}
+                  </span>
+                  <span v-if="ingredient.is_optional" class="ingredient-row__opt-label">опц.</span>
                 </span>
-                <span v-if="ingredient.is_optional" class="ingredient-row__opt-label">опц.</span>
                 <span class="ingredient-row__amount">
                   {{ formatShoppingAmount(ingredient.amount, ingredient.base_unit).display }}
                 </span>
@@ -460,8 +502,11 @@
     <IngredientForm
       v-model="showIngredientForm"
       :z-index="zIndex + 10"
-      :initial-name="ingredientFormInitialName"
+      :mode="ingredientFormMode"
+      :ingredient="ingredientToEdit"
+      :initial="ingredientFormInitial"
       @created="onIngredientCreated"
+      @updated="onDraftIngredientUpdated"
     />
 
     <template #footer>
@@ -503,7 +548,12 @@ import IconClose from "../icons/IconClose.vue"
 import { useSubscriptionStore } from "@/store/subscription.ts"
 import { analytics } from "@/services/analytics"
 import { AnalyticsEvent } from "@/constants/analyticsEvents"
-import { createAIDraft, createDishFromAIDraft, fetchAIDraft } from "@/services/aiDraftService.ts"
+import {
+  createAIDraft,
+  createDishFromAIDraft,
+  fetchAIDraft,
+  updateAIDraftPayload,
+} from "@/services/aiDraftService.ts"
 import { fetchDish, fetchDishCategories } from "@/services/dishService.ts"
 import {
   fetchIngredientById,
@@ -513,8 +563,14 @@ import {
 import { formatShoppingAmount } from "@/utils/formatShoppingAmount.ts"
 import { UNIT_LABELS } from "@/utils/unitLabels.ts"
 import { getScrollBehavior } from "@/dom/prefersReducedMotion"
-import type { DTOAIDraft, DTOBaseUnit, DTODish, DTODishCategory } from "@/types/dish"
-import type { DTOIngredient, DTOIngredientCategory } from "@/types/shopping"
+import type { DTOAIDraft, DTODish, DTODishCategory } from "@/types/dish"
+import type {
+  DTOBaseUnit,
+  DTOIngredient,
+  DTOIngredientCategory,
+  IngredientFormInitial,
+  IngredientFormMode,
+} from "@/types/ingredient"
 import IconCheck from "@/components/icons/IconCheck.vue"
 
 interface AIDraftPayloadIngredient {
@@ -523,6 +579,7 @@ interface AIDraftPayloadIngredient {
   name: string
   category: string | number | null
   base_unit: DTOBaseUnit
+  owner: string | null
   amount: string | number
   is_optional: boolean
   new: boolean
@@ -598,9 +655,18 @@ const ingredientSearchQuery = ref("")
 const ingredientSearchResults = ref<DTOIngredient[]>([])
 const ingredientSearchLoading = ref(false)
 const showIngredientForm = ref(false)
-const ingredientFormInitialName = ref("")
+const ingredientFormMode = ref<IngredientFormMode>("create")
+const ingredientFormInitial = ref<IngredientFormInitial | null>(null)
+const ingredientToEdit = ref<DTOIngredient | null>(null)
+const loadingIngredient = ref(false)
+const unitChangedHint = ref(false)
 const amountInputRef = ref<HTMLInputElement[]>([])
 const suggestionsMap = ref<Record<string, DTOIngredient[]>>({})
+
+const PAYLOAD_SAVE_DELAY_MS = 800
+let payloadSaveTimer: ReturnType<typeof setTimeout> | undefined
+let payloadSaveChain: Promise<void> = Promise.resolve()
+let lastSavedPayload = ""
 
 const inlineReplaceVisible = ref(false)
 const inlineReplaceQuery = ref("")
@@ -637,6 +703,14 @@ const submitDisabled = computed(
     (step.value === "input" && subscription.isAIRecipeLimitExceeded)
 )
 const canSubmit = computed(() => !["failed", "dish_created"].includes(step.value))
+const draftRowIsFound = computed(() =>
+  Boolean(ingredientDraft.value && !ingredientDraft.value.new && ingredientDraft.value.ingredient)
+)
+
+const canEditDraftIngredient = computed(
+  () => draftRowIsFound.value && Boolean(ingredientDraft.value?.owner)
+)
+
 const readonlyPayload = computed(() => normalizePayload(draft.value?.payload))
 const readonlyCategoryName = computed(() => getCategoryName(readonlyPayload.value.category))
 const createdDishId = computed(() =>
@@ -681,10 +755,13 @@ watch(
 watch(open, (value) => {
   emit("update:modelValue", value)
   if (!value) {
+    flushPayloadSave()
     stopPolling()
     clearFakeTimer()
   }
 })
+
+watch(payload, schedulePayloadSave, { deep: true })
 
 watch(
   () => payload.value?.ingredients,
@@ -864,10 +941,45 @@ function setPayload(data: Record<string, unknown> | null) {
     ...ingredient,
     localId: `${ingredient.ingredient || ingredient.name || "ingredient"}-${index}`,
     amount: ingredient.amount ?? 1,
+    owner: ingredient.owner ?? null,
     suggested_ids: ingredient.suggested_ids ?? [],
   }))
   payload.value = nextPayload
+  rememberSavedPayload()
   loadSuggestions(nextPayload.ingredients)
+}
+
+function rememberSavedPayload() {
+  lastSavedPayload = JSON.stringify(buildPayload())
+}
+
+function schedulePayloadSave() {
+  clearTimeout(payloadSaveTimer)
+  payloadSaveTimer = setTimeout(flushPayloadSave, PAYLOAD_SAVE_DELAY_MS)
+}
+
+function cancelPayloadSave() {
+  clearTimeout(payloadSaveTimer)
+}
+
+function flushPayloadSave() {
+  cancelPayloadSave()
+  const draftId = draft.value?.id
+  if (!draftId || step.value !== "parsed" || !payload.value.ingredients.length) return
+  const body = buildPayload()
+  const serialized = JSON.stringify(body)
+  if (serialized === lastSavedPayload) return
+  lastSavedPayload = serialized
+  payloadSaveChain = payloadSaveChain.then(() => savePayload(draftId, body))
+}
+
+async function savePayload(draftId: string, body: Record<string, unknown>) {
+  try {
+    emit("draft-updated", await updateAIDraftPayload(draftId, body))
+  } catch (err) {
+    lastSavedPayload = ""
+    error.value = err instanceof Error ? err.message : "Не удалось сохранить изменения."
+  }
 }
 
 async function loadSuggestions(ingredients: AIDraftPayloadIngredient[]) {
@@ -895,6 +1007,16 @@ function getCategoryName(categoryId: string | number): string {
   return dishCategories.value.find((category) => category.id === id)?.name || ""
 }
 
+function needsDecision(ingredient: AIDraftPayloadIngredient): boolean {
+  return ingredient.new || !ingredient.ingredient
+}
+
+function categoryName(ingredient: { category?: string | number | null }): string {
+  if (!ingredient.category) return ""
+  const id = getCategoryId(ingredient.category)
+  return ingredientCategories.value.find((category) => category.id === id)?.name || ""
+}
+
 function ingredientLabel(ingredient: { name?: string }): string {
   return ingredient.name?.trim() || "Без названия"
 }
@@ -913,6 +1035,7 @@ function removeIngredient(index: number) {
 
 function startIngredientEdit(index: number, isNewlyAdded = false) {
   closeInlineReplace()
+  unitChangedHint.value = false
   const ingredient = payload.value.ingredients[index]
   if (!ingredient) return
   editingIngredientIndex.value = index
@@ -925,10 +1048,13 @@ function startIngredientEdit(index: number, isNewlyAdded = false) {
   }
 }
 
+function commitIngredientDraft() {
+  if (editingIngredientIndex.value === null || !ingredientDraft.value) return
+  payload.value.ingredients[editingIngredientIndex.value] = { ...ingredientDraft.value }
+}
+
 function finishIngredientEdit() {
-  if (editingIngredientIndex.value !== null && ingredientDraft.value) {
-    payload.value.ingredients[editingIngredientIndex.value] = ingredientDraft.value
-  }
+  commitIngredientDraft()
   editingIngredientIndex.value = null
   ingredientDraft.value = null
   isNewlyAddedIngredient.value = false
@@ -988,12 +1114,65 @@ function selectExistingIngredient(ingredient: DTOIngredient) {
   addExistingIngredient(ingredient)
 }
 
-function openIngredientForm() {
-  ingredientFormInitialName.value = ingredientSearchQuery.value.trim()
+function openIngredientFormAs(
+  mode: IngredientFormMode,
+  initial: IngredientFormInitial | null,
+  ingredient: DTOIngredient | null = null
+) {
+  ingredientFormMode.value = mode
+  ingredientFormInitial.value = initial
+  ingredientToEdit.value = ingredient
   showIngredientForm.value = true
 }
 
+function openIngredientForm() {
+  openIngredientFormAs("create", { name: ingredientSearchQuery.value.trim() })
+}
+
+function openDraftIngredientCreate() {
+  const row = ingredientDraft.value
+  if (!row) return
+  openIngredientFormAs("from-draft", {
+    name: row.name,
+    categoryId: row.category ? String(row.category) : "",
+    baseUnit: row.base_unit,
+  })
+}
+
+async function openDraftIngredientEdit() {
+  const ingredientId = ingredientDraft.value?.ingredient
+  if (!ingredientId) return
+  loadingIngredient.value = true
+  try {
+    openIngredientFormAs("edit", null, await fetchIngredientById(ingredientId))
+  } catch {
+    error.value = "Не удалось загрузить ингредиент."
+  } finally {
+    loadingIngredient.value = false
+  }
+}
+
+function onDraftIngredientUpdated(ingredient: DTOIngredient) {
+  const current = ingredientDraft.value
+  ingredientToEdit.value = null
+  if (!current) return
+  unitChangedHint.value = current.base_unit !== ingredient.base_unit
+  ingredientDraft.value = {
+    ...current,
+    name: ingredient.name,
+    category: getCategoryId(ingredient.category),
+    base_unit: ingredient.base_unit,
+    owner: ingredient.owner ?? null,
+  }
+  commitIngredientDraft()
+}
+
 function onIngredientCreated(ingredient: DTOIngredient) {
+  if (ingredientFormMode.value === "from-draft" && ingredientDraft.value) {
+    applyExistingIngredientToDraft(ingredient)
+    commitIngredientDraft()
+    return
+  }
   addExistingIngredient(ingredient)
 }
 
@@ -1009,6 +1188,7 @@ function addExistingIngredient(ingredient: DTOIngredient) {
     name: ingredient.name,
     category: getCategoryId(ingredient.category),
     base_unit: ingredient.base_unit,
+    owner: ingredient.owner ?? null,
     amount: ingredient.base_unit === "to_taste" ? 1 : "",
     is_optional: false,
     new: false,
@@ -1036,6 +1216,7 @@ function setExistingIngredient(index: number, ingredient: DTOIngredient) {
     name: ingredient.name,
     category: getCategoryId(ingredient.category),
     base_unit: ingredient.base_unit,
+    owner: ingredient.owner ?? null,
     amount: ingredient.base_unit === "to_taste" ? 1 : current.amount,
     new: false,
     suggested_ids: [],
@@ -1060,6 +1241,7 @@ function applyExistingIngredientToDraft(ingredient: DTOIngredient) {
     name: ingredient.name,
     category: getCategoryId(ingredient.category),
     base_unit: ingredient.base_unit,
+    owner: ingredient.owner ?? null,
     amount: ingredient.base_unit === "to_taste" ? 1 : current.amount,
     new: false,
     suggested_ids: [],
@@ -1146,6 +1328,7 @@ function buildPayload(): Record<string, unknown> {
       name: ingredient.name.trim(),
       category: ingredient.category,
       base_unit: ingredient.base_unit,
+      owner: ingredient.new ? null : (ingredient.owner ?? null),
       amount: Number(String(ingredient.amount).replace(",", ".")),
       is_optional: Boolean(ingredient.is_optional),
       new: Boolean(ingredient.new),
@@ -1184,8 +1367,10 @@ async function submit() {
   if (step.value !== "parsed") return
   error.value = validatePayload() ?? ""
   if (error.value) return
+  cancelPayloadSave()
   saving.value = true
   try {
+    await payloadSaveChain
     const confirmedPayload = buildPayload()
     const dish = await createDishFromAIDraft(draft.value!.id, confirmedPayload)
     createdDish.value = dish
@@ -1277,6 +1462,7 @@ async function openCreatedDish() {
 }
 
 onUnmounted(() => {
+  flushPayloadSave()
   stopPolling()
   clearFakeTimer()
   clearTimeout(ingredientSearchTimer ?? undefined)
@@ -1384,6 +1570,18 @@ onUnmounted(() => {
     display: flex;
     flex-direction: column;
     gap: 14px;
+  }
+
+  &__ingredient-main {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+  }
+
+  &__ingredient-category {
+    color: var(--color-text-secondary);
+    font-size: var(--font-xs);
   }
 
   &__recipe {
@@ -1521,9 +1719,14 @@ onUnmounted(() => {
 }
 
 .ingredient-row {
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto auto;
+  grid-template-areas:
+    "name amount edit remove"
+    "meta meta meta meta";
   align-items: center;
-  gap: 8px;
+  column-gap: 8px;
+  row-gap: 2px;
   padding: 8px 0;
   border-bottom: 1px solid var(--color-border);
   font-size: var(--font-sm);
@@ -1541,17 +1744,32 @@ onUnmounted(() => {
   }
 
   &__name {
-    flex: 1;
+    grid-area: name;
     min-width: 0;
-    overflow: hidden;
     color: var(--color-text);
     font-weight: 500;
+    overflow-wrap: anywhere;
+  }
+
+  &__meta {
+    grid-area: meta;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+  }
+
+  &__category {
+    min-width: 0;
+    overflow: hidden;
+    color: var(--color-text-secondary);
+    font-size: var(--font-xs);
     text-overflow: ellipsis;
     white-space: nowrap;
   }
 
   &__amount {
-    flex-shrink: 0;
+    grid-area: amount;
     color: var(--color-text-secondary);
     font-size: var(--font-sm);
     white-space: nowrap;
@@ -1570,7 +1788,6 @@ onUnmounted(() => {
 
   &__edit,
   &__remove {
-    flex-shrink: 0;
     width: 24px;
     height: 24px;
     border: none;
@@ -1589,6 +1806,8 @@ onUnmounted(() => {
   }
 
   &__edit {
+    grid-area: edit;
+
     @media (hover: hover) {
       &:hover {
         opacity: 1;
@@ -1607,6 +1826,8 @@ onUnmounted(() => {
   }
 
   &__remove {
+    grid-area: remove;
+
     @media (hover: hover) {
       &:hover {
         opacity: 1;
@@ -1752,6 +1973,12 @@ onUnmounted(() => {
     color: var(--color-text-secondary);
     font-size: var(--font-sm);
     font-style: italic;
+  }
+
+  &__hint {
+    margin: 0;
+    color: var(--color-text-secondary);
+    font-size: var(--font-xs);
   }
 
   &__optional {

@@ -1,20 +1,31 @@
 <template>
   <span class="ownership-badge" :class="isOwn ? 'ownership-badge--own' : 'ownership-badge--shared'">
     <span aria-hidden="true">{{ isOwn ? "👤" : "🌐" }}</span>
-    {{ isOwn ? (short ? "Личное" : "Личный рецепт") : short ? "Общее" : "Общий рецепт" }}
+    {{ label }}
   </span>
 </template>
 
 <script lang="ts" setup>
-withDefaults(
+import { computed } from "vue"
+
+const props = withDefaults(
   defineProps<{
     isOwn: boolean
     short?: boolean
+    ownLabel?: string
+    sharedLabel?: string
   }>(),
   {
     short: false,
+    ownLabel: undefined,
+    sharedLabel: undefined,
   }
 )
+
+const label = computed(() => {
+  if (props.isOwn) return props.ownLabel ?? (props.short ? "Личное" : "Личный рецепт")
+  return props.sharedLabel ?? (props.short ? "Общее" : "Общий рецепт")
+})
 </script>
 
 <style lang="scss" scoped>
