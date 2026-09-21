@@ -24,6 +24,14 @@ export interface DTOIngredientCategory {
   updated_at: string
 }
 
+export type IngredientFormMode = "create" | "edit" | "copy" | "from-draft"
+
+export interface IngredientFormInitial {
+  name?: string
+  categoryId?: string
+  baseUnit?: DTOBaseUnit
+}
+
 export interface DTOIngredientUsageRef {
   id: string
   name: string

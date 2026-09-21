@@ -114,7 +114,7 @@
     <IngredientForm
       v-model="showIngredientForm"
       :z-index="zIndex + 10"
-      :initial-name="ingredientFormInitialName"
+      :initial="{ name: ingredientFormInitialName }"
       @created="onIngredientCreated"
     />
   </ModalWrapper>

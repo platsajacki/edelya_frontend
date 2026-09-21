@@ -33,11 +33,17 @@
 
   <IngredientForm
     v-model="showCloneForm"
-    :clone-ingredient="ingredient"
+    mode="copy"
+    :ingredient="ingredient"
     @created="onCloneCreated"
   />
 
-  <IngredientForm v-model="showEditForm" :edit-ingredient="ingredient" @updated="onUpdated" />
+  <IngredientForm
+    v-model="showEditForm"
+    mode="edit"
+    :ingredient="ingredient"
+    @updated="onUpdated"
+  />
 
   <ModalWrapper v-model="confirming" title="Подтверждение" :z-index="1050">
     <p class="detail__confirm-text">Удалить ингредиент «{{ ingredient.name }}»?</p>

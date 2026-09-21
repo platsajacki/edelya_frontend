@@ -100,6 +100,7 @@ const ERROR_MESSAGES: Record<string, string> = {
   "AI recipe limit for the current subscription period has been exceeded.":
     "Лимит AI-рецептов на текущий период исчерпан.",
   "AI draft must be parsed before dish creation.": "AI-рецепт ещё не готов к созданию блюда.",
+  "AI draft can be edited only in the parsed status.": "Этот AI-рецепт уже нельзя изменить.",
   "Payload must contain name, recipe, category and ingredients.":
     "Проверьте название, рецепт, категорию и ингредиенты.",
   "Ingredients must be a non-empty list.": "Нужен хотя бы один ингредиент.",

@@ -21,6 +21,16 @@ export function fetchAIDraft(id: string): Promise<DTOAIDraft> {
   return api<DTOAIDraft>(`/api/v1/ai-drafts/${id}/`)
 }
 
+export function updateAIDraftPayload(
+  id: string,
+  payload: Record<string, unknown>
+): Promise<DTOAIDraft> {
+  return api<DTOAIDraft>(`/api/v1/ai-drafts/${id}/`, {
+    method: "PATCH",
+    body: JSON.stringify({ payload }),
+  })
+}
+
 export function createDishFromAIDraft(
   id: string,
   payload: Record<string, unknown>
