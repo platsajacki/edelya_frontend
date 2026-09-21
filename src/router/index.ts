@@ -57,4 +57,5 @@ router.afterEach((to) => {
 
 if (miniApp && import.meta.env.VITE_DEBUG === "1") {
   router.addRoute({ path: "/dev/icons", component: () => import("@/pages/DevIconsPage.vue") })
+  router.addRoute({ path: "/dev/ui", component: () => import("@/pages/DevUiPage.vue") })
 }
