@@ -35,6 +35,7 @@ import AIDraftSection from "./dev/sections/AIDraftSection.vue"
 import PickersSection from "./dev/sections/PickersSection.vue"
 import ScreensSection from "./dev/sections/ScreensSection.vue"
 import AppShellSection from "./dev/sections/AppShellSection.vue"
+import SubscriptionSection from "./dev/sections/SubscriptionSection.vue"
 import { useDevApi } from "./dev/mock/useDevApi"
 
 const sections = [
@@ -48,6 +49,7 @@ const sections = [
   { id: "forms", title: "Формы", component: FormsSection },
   { id: "ai-draft", title: "AI-рецепт", component: AIDraftSection },
   { id: "pickers", title: "Поиск блюд", component: PickersSection },
+  { id: "subscription", title: "Подписка", component: SubscriptionSection },
   { id: "screens", title: "Экраны", component: ScreensSection },
   { id: "app-shell", title: "Оболочка", component: AppShellSection },
 ]
