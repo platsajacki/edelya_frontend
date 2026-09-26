@@ -7,57 +7,19 @@
     </header>
 
     <!-- Subscription card -->
-    <section class="cabinet__card">
-      <template v-if="subscriptionCard">
-        <div class="cabinet__card-header">
-          <div class="cabinet__card-avatar">
-            <component :is="subscriptionCard.icon" :width="30" :height="30" />
-          </div>
-          <div class="cabinet__card-header-text">
-            <div class="cabinet__card-title-row">
-              <h2 class="cabinet__card-heading">{{ subscriptionCard.title }}</h2>
-              <span
-                v-if="cardBadge"
-                class="cabinet__card-status"
-                :class="`cabinet__card-status--${cardBadge.tone}`"
-              >
-                <IconCheck v-if="cardBadge.tone === 'success'" :width="18" :height="18" />
-                {{ cardBadge.text }}
-              </span>
-            </div>
-            <p class="cabinet__card-text">{{ subscriptionCard.description }}</p>
-          </div>
-        </div>
-
-        <AIRecipeUsageBadge
-          v-if="sub.canCreateAIRecipes"
-          class="cabinet__card-usage"
-          :usage="sub.aiRecipeUsage"
-          :limit="sub.aiRecipeLimit"
-        />
-
-        <p v-if="subscriptionCard.actionKind === 'trial'" class="cabinet__recurring-notice">
-          На время пробного периода все функции сервиса доступны бесплатно.<br />
-          Далее от 99 руб./месяц.
-        </p>
-        <button
-          v-if="subscriptionCard.actionText"
-          class="cabinet__btn"
-          :disabled="loading"
-          @click="handleAction"
-        >
-          {{
-            loading
-              ? (subscriptionCard.actionLoadingText ?? "Загрузка…")
-              : subscriptionCard.actionText
-          }}
-        </button>
-        <p v-if="actionError" class="cabinet__error" role="alert">{{ actionError }}</p>
-      </template>
-      <template v-else>
-        <p class="cabinet__card-text">Загрузка…</p>
-      </template>
-    </section>
+    <SubscriptionCard
+      :card="subscriptionCard"
+      :loading="loading"
+      :error="actionError"
+      @action="handleAction"
+    >
+      <AIRecipeUsageBadge
+        v-if="sub.canCreateAIRecipes"
+        class="cabinet__card-usage"
+        :usage="sub.aiRecipeUsage"
+        :limit="sub.aiRecipeLimit"
+      />
+    </SubscriptionCard>
 
     <!-- Tariff change confirmation sheet -->
     <ConfirmTariffSheet
@@ -265,6 +227,8 @@ import { analytics } from "../services/analytics"
 import { AnalyticsEvent } from "../constants/analyticsEvents"
 import IconWarning from "../components/icons/IconWarning.vue"
 import IconCheck from "../components/icons/IconCheck.vue"
+import SubscriptionCard from "../components/SubscriptionCard.vue"
+import { trialOfferCard } from "../utils/subscriptionCard"
 import ConfirmTariffSheet from "../components/ConfirmTariffSheet.vue"
 import Toast from "../components/Toast.vue"
 import AIRecipeUsageBadge from "../components/AIRecipeUsageBadge.vue"
@@ -379,16 +343,6 @@ const cardBrandAbbr = computed(() => {
   return CARD_BRAND_LABEL[type.toLowerCase()] ?? type.slice(0, 2).toUpperCase()
 })
 
-const cardBadge = computed(() => {
-  if (subscriptionCard.value?.iconClass === "cabinet__card-icon--ok") {
-    return { text: "Активен", tone: "success" }
-  }
-  if (subscriptionCard.value?.iconClass === "cabinet__card-icon--warning") {
-    return { text: "Внимание", tone: "warning" }
-  }
-  return null
-})
-
 function isCurrent(tariff) {
   return sub.subscription?.tariff?.id === tariff.id
 }
@@ -432,37 +386,13 @@ const showPaymentMethod = computed(() => {
 const subscriptionCard = computed(() => {
   // 402 redirect states
   if (sub.errorCode) {
-    if (sub.errorCode === "subscription_required") {
-      const days = sub.trialDays
-      return {
-        icon: IconWarning,
-        iconClass: "cabinet__card-icon--warning",
-        title: "Начните бесплатный период",
-        description: days
-          ? `У вас ещё нет подписки. Попробуйте бесплатно ${getWeekFromDays(days)}!`
-          : "У вас ещё нет подписки. Попробуйте бесплатно!",
-        actionText: "Начать бесплатно",
-        actionKind: "trial",
-      }
-    }
+    if (sub.errorCode === "subscription_required") return trialOfferCard(sub.trialDays)
     if (sub.errorCode === "subscription_expired") return expiredCard()
     return ERROR_CARDS[sub.errorCode] ?? null
   }
 
   // Direct visit states
-  if (!sub.hasSubscription) {
-    const days = sub.trialDays
-    return {
-      icon: IconWarning,
-      iconClass: "cabinet__card-icon--warning",
-      title: "Начните бесплатный период",
-      description: days
-        ? `У вас ещё нет подписки. Попробуйте бесплатно ${getWeekFromDays(days)}!`
-        : "У вас ещё нет подписки. Попробуйте бесплатно!",
-      actionText: "Начать бесплатно",
-      actionKind: "trial",
-    }
-  }
+  if (!sub.hasSubscription) return trialOfferCard(sub.trialDays)
 
   const s = sub.subscription
   if (s.status === "trial" && s.is_active && s.tariff?.is_trial_tariff) {
@@ -612,18 +542,6 @@ const ERROR_CARDS = {
   },
 }
 
-function getWeekFromDays(days) {
-  const weeks = Math.floor(days / 7)
-  const remainingDays = days % 7
-  if (weeks > 0 && remainingDays === 0) {
-    return `${weeks} ${weekWord(weeks)}`
-  }
-  if (weeks > 0) {
-    return `${weeks} ${weekWord(weeks)} и ${remainingDays} ${dayWord(remainingDays)}`
-  }
-  return `${days} ${dayWord(days)}`
-}
-
 function dayWord(n) {
   const abs = Math.abs(n) % 100
   const last = abs % 10
@@ -631,15 +549,6 @@ function dayWord(n) {
   if (last === 1) return "день"
   if (last >= 2 && last <= 4) return "дня"
   return "дней"
-}
-
-function weekWord(n) {
-  const abs = Math.abs(n) % 100
-  const last = abs % 10
-  if (abs >= 11 && abs <= 19) return "недель"
-  if (last === 1) return "неделя"
-  if (last >= 2 && last <= 4) return "недели"
-  return "недель"
 }
 
 function formatDate(iso) {
@@ -874,7 +783,6 @@ async function handleDeletePaymentMethod() {
     color: var(--color-text-secondary);
   }
 
-  /* Subscription card */
   &__card {
     display: flex;
     flex-direction: column;
@@ -888,70 +796,6 @@ async function handleDeletePaymentMethod() {
     border: 1px solid var(--color-mint-alpha-25);
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-card);
-  }
-
-  &__card-header {
-    display: flex;
-    align-items: flex-start;
-    gap: 12px;
-  }
-
-  &__card-avatar {
-    flex-shrink: 0;
-    width: 44px;
-    height: 44px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: var(--radius-sm);
-    background: var(--color-mint);
-    color: var(--on-primary);
-  }
-
-  &__card-header-text {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    min-width: 0;
-  }
-
-  &__card-title-row {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 8px;
-  }
-
-  &__card-status {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    padding: 3px 10px;
-    border-radius: var(--radius-pill);
-    font-size: var(--font-xs);
-    font-weight: 700;
-
-    &--success {
-      background: var(--color-success-bg);
-      color: var(--color-success-dark);
-    }
-
-    &--warning {
-      background: var(--color-warning-bg);
-      color: var(--color-warning);
-    }
-  }
-
-  &__card-heading {
-    font-size: var(--font-lg);
-    font-weight: 600;
-    color: var(--color-text);
-  }
-
-  &__card-text {
-    font-size: var(--font-base);
-    color: var(--color-text-secondary);
-    line-height: 1.5;
   }
 
   &__card-usage {
@@ -1056,14 +900,6 @@ async function handleDeletePaymentMethod() {
   &__error {
     font-size: var(--font-sm);
     color: var(--color-danger-dark);
-  }
-
-  &__recurring-notice {
-    margin: 0;
-    font-size: var(--font-xs, 12px);
-    color: var(--color-text-secondary);
-    line-height: 1.5;
-    text-align: center;
   }
 
   /* Tariffs section */
